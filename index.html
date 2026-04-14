@@ -368,6 +368,8 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 
     <!-- 회원가입 폼 -->
     <div class="login-form" id="form-signup">
+      <label class="lbl" for="signup-name">이름</label>
+      <input type="text" id="signup-name" autocomplete="name" placeholder="홍길동">
       <label class="lbl" for="signup-id">이메일 (회사 메일)</label>
       <input type="email" id="signup-id" autocomplete="username">
       <label class="lbl" for="signup-pw">비밀번호 (8자 이상)</label>
@@ -2300,19 +2302,26 @@ function switchAuthTab(mode){
 
 // ── 회원가입 ──────────────────────────────────────────────────
 async function doSignup(){
+  const name=$('signup-name').value.trim();
   const id=$('signup-id').value.trim();
   const pw=$('signup-pw').value;
   const pw2=$('signup-pw2').value;
   const btn=$('signup-btn'); const err=$('login-err');
   err.textContent='';
-  if(!id||!pw||!pw2){err.textContent='모든 항목을 입력하세요.';return;}
+  if(!name||!id||!pw||!pw2){err.textContent='모든 항목을 입력하세요.';return;}
+  if(name.length<2){err.textContent='이름은 2자 이상이어야 합니다.';return;}
   if(pw.length<8){err.textContent='비밀번호는 8자 이상이어야 합니다.';return;}
   if(pw!==pw2){err.textContent='비밀번호가 일치하지 않습니다.';return;}
   if(!sbClient){err.textContent='서버에 연결할 수 없습니다.';return;}
   btn.disabled=true; btn.textContent='가입 중...';
   try{
-    const {data,error}=await sbClient.auth.signUp({email:id,password:pw});
+    const {data,error}=await sbClient.auth.signUp({email:id,password:pw,options:{data:{name:name}}});
     if(error) throw error;
+    // 프로필 테이블에 이름 저장 (트리거가 있든 없든 안전하게)
+    const uid=data.user&&data.user.id;
+    if(uid){
+      try{ await sbClient.from('profiles').upsert({user_id:uid,email:id,name:name},{onConflict:'user_id'}); }catch(_){}
+    }
     // 바로 세션이 만들어지면 enterApp이 pending 화면을 띄워줌
     if(data.session){
       await enterApp();
@@ -2347,7 +2356,7 @@ async function loadAdminUsers(){
   if(all) all.innerHTML='';
   try{
     const {data:users,error}=await sbClient.from('profiles')
-      .select('user_id,email,status,is_admin,created_at,reviewed_at')
+      .select('user_id,email,name,status,is_admin,created_at,reviewed_at')
       .order('created_at',{ascending:false});
     if(error) throw error;
     const pending=users.filter(u=>u.status==='pending');
@@ -2358,8 +2367,8 @@ async function loadAdminUsers(){
       }else{
         pend.innerHTML=pending.map(u=>`
           <div class="admin-pending-card">
-            <div>
-              <div style="font-weight:600">${esc(u.email||'(이메일 없음)')}</div>
+            <div style="flex:1">
+              <div style="font-weight:600">${esc(u.name||'(이름 미입력)')} <span style="color:var(--t2);font-weight:400;font-size:11px">· ${esc(u.email||'')}</span></div>
               <div style="font-size:11px;color:var(--t2)">가입: ${esc(new Date(u.created_at).toLocaleString('ko-KR'))}</div>
             </div>
             <div style="display:flex;gap:6px">
@@ -2374,7 +2383,7 @@ async function loadAdminUsers(){
         const st=u.status==='approved'?'<span style="color:#16a34a">승인됨</span>':u.status==='rejected'?'<span style="color:#dc2626">거절됨</span>':esc(u.status);
         const adm=u.is_admin?' <span style="color:var(--bl);font-weight:600">[관리자]</span>':'';
         return `<div class="admin-user-row">
-          <div>${esc(u.email||'')}${adm}</div>
+          <div><b>${esc(u.name||'(이름없음)')}</b> <span style="color:var(--t2);font-size:11px">${esc(u.email||'')}</span>${adm}</div>
           <div style="display:flex;gap:8px;align-items:center">
             <span style="font-size:12px">${st}</span>
             ${u.status==='approved' && !u.is_admin?`<button class="btn sm" style="background:#dc2626;color:#fff" onclick="rejectUser('${esc(u.user_id)}')">접근 차단</button>`:''}
