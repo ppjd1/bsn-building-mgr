@@ -299,8 +299,9 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .login-box{background:var(--w);border:1px solid var(--ln);border-radius:12px;padding:32px 28px;width:320px;box-shadow:0 4px 24px rgba(0,0,0,.1);text-align:center}
 .login-box h2{font-size:16px;font-weight:700;margin-bottom:4px}
 .login-box small{font-size:10px;color:var(--t3);display:block;margin-bottom:18px;font-family:'IBM Plex Mono',monospace}
-.login-box input{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px}
+.login-box input{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box}
 .login-box input:focus{border-color:var(--bl)}
+.login-box .lbl{display:block;text-align:left;font-size:11px;font-weight:600;color:var(--t2);margin:0 0 4px 2px}
 .login-box button{width:100%;padding:8px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
 .login-box button:hover{background:#154e88}
 .login-err{color:var(--rd);font-size:11px;margin-top:6px;min-height:16px}
@@ -357,17 +358,22 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 
     <!-- 로그인 폼 -->
     <div class="login-form on" id="form-login">
-      <input type="email" id="login-id" placeholder="이메일" autofocus autocomplete="username">
-      <input type="password" id="login-pw" placeholder="비밀번호" autocomplete="current-password">
+      <label class="lbl" for="login-id">이메일</label>
+      <input type="email" id="login-id" autofocus autocomplete="username">
+      <label class="lbl" for="login-pw">비밀번호</label>
+      <input type="password" id="login-pw" autocomplete="current-password">
       <button onclick="doLogin()" id="login-btn">로그인</button>
       <div class="login-err" id="login-err"></div>
     </div>
 
     <!-- 회원가입 폼 -->
     <div class="login-form" id="form-signup">
-      <input type="email" id="signup-id" placeholder="이메일" autocomplete="username">
-      <input type="password" id="signup-pw" placeholder="비밀번호 (8자 이상)" autocomplete="new-password">
-      <input type="password" id="signup-pw2" placeholder="비밀번호 확인" autocomplete="new-password">
+      <label class="lbl" for="signup-id">이메일 (회사 메일)</label>
+      <input type="email" id="signup-id" autocomplete="username">
+      <label class="lbl" for="signup-pw">비밀번호 (8자 이상)</label>
+      <input type="password" id="signup-pw" autocomplete="new-password">
+      <label class="lbl" for="signup-pw2">비밀번호 확인</label>
+      <input type="password" id="signup-pw2" autocomplete="new-password">
       <button onclick="doSignup()" id="signup-btn">가입 신청</button>
       <div class="login-err" id="signup-err"></div>
       <div class="login-ok" id="signup-ok"></div>
