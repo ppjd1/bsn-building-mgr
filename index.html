@@ -358,6 +358,10 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 
     <!-- 로그인 폼 -->
     <div class="login-form on" id="form-login">
+      <div id="recent-accounts" style="display:none;margin-bottom:10px">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:4px">최근 계정 (클릭해서 선택)</div>
+        <div id="recent-accounts-list" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
       <label class="lbl" for="login-id">이메일</label>
       <input type="email" id="login-id" autofocus autocomplete="username">
       <label class="lbl" for="login-pw">비밀번호</label>
@@ -2196,6 +2200,51 @@ document.addEventListener('keydown',e=>{
   }
 });
 // ── AUTH (Supabase) ───────────────────────────────────────────────────
+// ── 최근 이메일 기억하기 ─────────────────────────────────────
+function rememberEmail(email){
+  if(!email) return;
+  try{
+    let list=JSON.parse(localStorage.getItem('bsn_recent_emails')||'[]');
+    list=list.filter(e=>e!==email);
+    list.unshift(email);
+    list=list.slice(0,3);
+    localStorage.setItem('bsn_recent_emails',JSON.stringify(list));
+    localStorage.setItem('bsn_last_email',email);
+  }catch(e){}
+}
+function pickEmail(email){
+  $('login-id').value=email;
+  $('login-pw').value='';
+  $('login-pw').focus();
+}
+function forgetEmail(email,ev){
+  if(ev) ev.stopPropagation();
+  try{
+    let list=JSON.parse(localStorage.getItem('bsn_recent_emails')||'[]');
+    list=list.filter(e=>e!==email);
+    localStorage.setItem('bsn_recent_emails',JSON.stringify(list));
+    if(localStorage.getItem('bsn_last_email')===email) localStorage.removeItem('bsn_last_email');
+    renderRecentEmails();
+  }catch(e){}
+}
+function renderRecentEmails(){
+  try{
+    const list=JSON.parse(localStorage.getItem('bsn_recent_emails')||'[]');
+    const box=$('recent-accounts'), ul=$('recent-accounts-list');
+    if(!box||!ul) return;
+    if(list.length===0){ box.style.display='none'; return; }
+    box.style.display='block';
+    ul.innerHTML=list.map(e=>{
+      const safe=String(e).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const esc=String(e).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+      return `<span onclick="pickEmail('${safe}')" style="cursor:pointer;background:var(--w2);border:1px solid var(--ln);border-radius:12px;padding:3px 8px;font-size:11px;display:inline-flex;align-items:center;gap:4px">${esc}<span onclick="forgetEmail('${safe}',event)" style="color:var(--t3);font-size:13px;line-height:1" title="삭제">×</span></span>`;
+    }).join('');
+    // 마지막 사용 이메일 자동 채우기 (비어있을 때만)
+    const last=localStorage.getItem('bsn_last_email');
+    if(last && !$('login-id').value) $('login-id').value=last;
+  }catch(e){}
+}
+
 async function doLogin(){
   const id=$('login-id').value.trim(),pw=$('login-pw').value;
   const btn=$('login-btn');const err=$('login-err');
@@ -2206,6 +2255,7 @@ async function doLogin(){
   try{
     const {data,error}=await sbClient.auth.signInWithPassword({email:id,password:pw});
     if(error)throw error;
+    rememberEmail(id);
     await enterApp();
   }catch(e){
     err.textContent='로그인 실패: '+(e.message||e);
@@ -2437,7 +2487,8 @@ document.addEventListener("DOMContentLoaded",async function(){
     }
   }catch(e){console.warn('세션 복원 실패:',e.message);}
   if(overlay)overlay.style.display='none';
-  // 세션 없으면 로그인 화면 유지
+  // 세션 없으면 로그인 화면 유지 + 최근 이메일 표시
+  try{ renderRecentEmails(); }catch(e){}
 });
 </script>
 </body>
