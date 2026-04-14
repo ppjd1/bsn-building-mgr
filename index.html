@@ -302,8 +302,8 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .login-box input{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box}
 .login-box input:focus{border-color:var(--bl)}
 .login-box .lbl{display:block;text-align:left;font-size:11px;font-weight:600;color:var(--t2);margin:0 0 4px 2px}
-.login-box button{width:100%;padding:8px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
-.login-box button:hover{background:#154e88}
+.login-box button:not(.login-tab){width:100%;padding:8px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
+.login-box button:not(.login-tab):hover{background:#154e88}
 .login-err{color:var(--rd);font-size:11px;margin-top:6px;min-height:16px}
 .login-ok{color:var(--gn);font-size:11px;margin-top:6px;min-height:16px}
 .login-tabs{display:flex;border-bottom:1px solid var(--ln);margin-bottom:14px}
