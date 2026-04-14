@@ -296,20 +296,32 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .cal-bottom{border-top:2px solid var(--ln2);flex-shrink:0;background:var(--w)}
 /* print */
 /* LOGIN */
-.login-ov{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-ov{position:fixed;inset:0;background:
+  radial-gradient(circle at 20% 20%, rgba(0,36,156,.08), transparent 40%),
+  radial-gradient(circle at 80% 80%, rgba(0,36,156,.06), transparent 45%),
+  linear-gradient(135deg, #eef0f5 0%, #f2f1ed 50%, #e9ecf2 100%);
+  z-index:9999;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.login-ov::before{content:'';position:absolute;inset:0;background-image:
+  linear-gradient(rgba(0,36,156,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,36,156,.04) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+.login-ov::after{content:'BSN.CARE';position:absolute;bottom:-80px;right:-40px;font-family:'Arial Black',sans-serif;font-weight:900;font-size:260px;color:rgba(0,36,156,.04);letter-spacing:-8px;pointer-events:none;line-height:.9;user-select:none}
 .login-ov.hide{display:none}
-.login-box{background:var(--w);border:1px solid var(--ln);border-radius:12px;padding:32px 28px;width:320px;box-shadow:0 4px 24px rgba(0,0,0,.1);text-align:center}
-.login-box h2{font-size:16px;font-weight:700;margin-bottom:18px}
+.login-box{position:relative;background:var(--w);border:1px solid var(--ln);border-radius:16px;padding:40px 36px;width:380px;box-shadow:0 8px 32px rgba(0,36,156,.08),0 2px 8px rgba(0,0,0,.04);text-align:center;z-index:1}
+.login-box h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.login-box .tagline{font-size:11px;color:var(--t3);display:block;margin-bottom:22px;font-weight:500;letter-spacing:.5px}
 .login-box small{font-size:10px;color:var(--t3);display:block;margin-bottom:18px;font-family:'IBM Plex Mono',monospace}
-.login-box input{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box}
-.login-box input:focus{border-color:var(--bl)}
+.login-box input{width:100%;padding:10px 12px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;transition:.15s}
+.login-box input:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(0,36,156,.08)}
 .login-box .lbl{display:block;text-align:left;font-size:11px;font-weight:600;color:var(--t2);margin:0 0 4px 2px}
-.login-box button:not(.login-tab){width:100%;padding:8px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
-.login-box button:not(.login-tab):hover{background:#154e88}
+.login-box button:not(.login-tab){width:100%;padding:10px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:inherit;cursor:pointer;font-weight:600;transition:.15s}
+.login-box button:not(.login-tab):hover{background:#154e88;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,36,156,.2)}
+.login-footer{position:absolute;bottom:20px;left:0;right:0;text-align:center;font-size:10px;color:var(--t4);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px;z-index:1}
 .login-err{color:var(--rd);font-size:11px;margin-top:6px;min-height:16px}
 .login-ok{color:var(--gn);font-size:11px;margin-top:6px;min-height:16px}
-.login-tabs{display:flex;border-bottom:1px solid var(--ln);margin-bottom:14px}
-.login-tab{flex:1;padding:8px 0;background:none;border:none;font-family:inherit;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.login-tabs{display:flex;border-bottom:1px solid var(--ln);margin-bottom:16px}
+.login-tab{flex:1;padding:9px 0;background:none;border:none;font-family:inherit;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
+.login-tab:hover{color:var(--t2)}
 .login-tab.on{color:var(--bl);border-bottom-color:var(--bl)}
 .login-form{display:none}
 .login-form.on{display:block}
@@ -351,7 +363,9 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 <!-- LOGIN -->
 <div class="login-ov" id="login-ov">
   <div class="login-box">
-    <div style="width:64px;height:64px;background:#00249C;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:#fff;font-weight:900;font-size:16px;line-height:1.05;letter-spacing:-.5px;font-family:'Noto Sans KR',sans-serif">BSN.<br>CARE</div>
+    <div style="width:72px;height:72px;background:#00249C;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:#fff;font-weight:900;font-size:18px;line-height:1.05;letter-spacing:-.5px;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 12px rgba(0,36,156,.25)">BSN.<br>CARE</div>
+    <h2>건물관리 2팀</h2>
+    <div class="tagline">통합 자산관리 시스템</div>
     <div class="login-tabs">
       <button class="login-tab on" id="tab-login" onclick="switchAuthTab('login')">로그인</button>
       <button class="login-tab" id="tab-signup" onclick="switchAuthTab('signup')">회원가입</button>
@@ -384,6 +398,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
       <div style="font-size:10px;color:var(--t4);margin-top:6px;text-align:center;line-height:1.5">가입 후 관리자 승인이 필요합니다</div>
     </div>
   </div>
+  <div class="login-footer">© BSN케어 · 건물관리 2팀 내부용</div>
 </div>
 
 <!-- PENDING (승인 대기 화면) -->
