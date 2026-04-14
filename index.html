@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>건물관리 2팀</title>
+<title>BSN케어</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 :root{
@@ -24,8 +24,9 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 
 /* SIDEBAR */
 .sb{width:168px;min-width:168px;background:var(--w);border-right:1px solid var(--ln);display:flex;flex-direction:column}
-.sb-logo{padding:11px 13px 9px;border-bottom:1px solid var(--ln)}
-.sb-logo h1{font-size:12px;font-weight:700}
+.sb-logo{padding:11px 13px 9px;border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:8px}
+.sb-logo .bsn-mark{flex-shrink:0;width:26px;height:26px;background:#00249C;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:9px;line-height:1;letter-spacing:-.5px;font-family:'Noto Sans KR',sans-serif;text-align:center;padding:1px}
+.sb-logo h1{font-size:12px;font-weight:700;line-height:1.1}
 .sb-logo small{font-size:9px;color:var(--t4);font-family:'IBM Plex Mono',monospace}
 .sb-nav{flex:1;padding:4px 0;overflow-y:auto}
 .nb{width:100%;background:none;border:none;border-left:2px solid transparent;padding:7px 12px;text-align:left;font-size:12px;font-family:inherit;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.1s;white-space:nowrap}
@@ -297,7 +298,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .login-ov{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
 .login-ov.hide{display:none}
 .login-box{background:var(--w);border:1px solid var(--ln);border-radius:12px;padding:32px 28px;width:320px;box-shadow:0 4px 24px rgba(0,0,0,.1);text-align:center}
-.login-box h2{font-size:16px;font-weight:700;margin-bottom:4px}
+.login-box h2{font-size:16px;font-weight:700;margin-bottom:18px}
 .login-box small{font-size:10px;color:var(--t3);display:block;margin-bottom:18px;font-family:'IBM Plex Mono',monospace}
 .login-box input{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box}
 .login-box input:focus{border-color:var(--bl)}
@@ -349,8 +350,8 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 <!-- LOGIN -->
 <div class="login-ov" id="login-ov">
   <div class="login-box">
+    <div style="width:64px;height:64px;background:#00249C;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:#fff;font-weight:900;font-size:16px;line-height:1.05;letter-spacing:-.5px;font-family:'Noto Sans KR',sans-serif">BSN.<br>CARE</div>
     <h2>건물관리 2팀</h2>
-    <small>PROPERTY MGR · BSN CARE</small>
     <div class="login-tabs">
       <button class="login-tab on" id="tab-login" onclick="switchAuthTab('login')">로그인</button>
       <button class="login-tab" id="tab-signup" onclick="switchAuthTab('signup')">회원가입</button>
@@ -409,7 +410,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 </div>
 <div class="app" style="display:none" id="app-main">
 <aside class="sb">
-  <div class="sb-logo"><h1>건물관리 2팀</h1><small>PROPERTY MGR</small></div>
+  <div class="sb-logo"><div class="bsn-mark"><span>BSN.<br>CARE</span></div><h1>건물관리 2팀</h1></div>
   <nav class="sb-nav" id="nav"></nav>
   <div class="sb-foot"><div id="sb-dt"></div><div id="sb-user" style="margin-top:4px;color:var(--t3)"></div><button onclick="doLogout()" style="margin-top:6px;padding:3px 8px;font-size:9px;border:1px solid var(--ln);background:var(--w);border-radius:var(--r);cursor:pointer;width:100%">로그아웃</button></div>
 </aside>
