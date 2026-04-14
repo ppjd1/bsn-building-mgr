@@ -305,11 +305,11 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
   linear-gradient(rgba(0,36,156,.04) 1px,transparent 1px),
   linear-gradient(90deg,rgba(0,36,156,.04) 1px,transparent 1px);
   background-size:40px 40px;pointer-events:none}
-.login-ov::after{content:'BSN.CARE';position:absolute;bottom:-80px;right:-40px;font-family:'Arial Black',sans-serif;font-weight:900;font-size:260px;color:rgba(0,36,156,.04);letter-spacing:-8px;pointer-events:none;line-height:.9;user-select:none}
+.login-ov::after{content:'BSN.CARE';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Arial Black',sans-serif;font-weight:900;font-size:220px;color:rgba(0,36,156,.04);letter-spacing:-8px;pointer-events:none;line-height:.9;user-select:none;white-space:nowrap}
 .login-ov.hide{display:none}
 .login-box{position:relative;background:var(--w);border:1px solid var(--ln);border-radius:16px;padding:40px 36px;width:380px;box-shadow:0 8px 32px rgba(0,36,156,.08),0 2px 8px rgba(0,0,0,.04);text-align:center;z-index:1}
 .login-box h2{font-size:18px;font-weight:700;margin-bottom:4px}
-.login-box .tagline{font-size:11px;color:var(--t3);display:block;margin-bottom:22px;font-weight:500;letter-spacing:.5px}
+.login-box .tagline{font-size:11px;color:var(--t3);display:block;margin-bottom:24px;font-weight:500;letter-spacing:.5px}
 .login-box small{font-size:10px;color:var(--t3);display:block;margin-bottom:18px;font-family:'IBM Plex Mono',monospace}
 .login-box input{width:100%;padding:10px 12px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;transition:.15s}
 .login-box input:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(0,36,156,.08)}
@@ -363,9 +363,8 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 <!-- LOGIN -->
 <div class="login-ov" id="login-ov">
   <div class="login-box">
-    <div style="width:72px;height:72px;background:#00249C;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:#fff;font-weight:900;font-size:18px;line-height:1.05;letter-spacing:-.5px;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 12px rgba(0,36,156,.25)">BSN.<br>CARE</div>
-    <h2>건물관리 2팀</h2>
-    <div class="tagline">통합 자산관리 시스템</div>
+    <div style="width:72px;height:72px;background:#00249C;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-weight:900;font-size:18px;line-height:1.05;letter-spacing:-.5px;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 12px rgba(0,36,156,.25)">BSN.<br>CARE</div>
+    <div class="tagline">통합 건물관리 시스템</div>
     <div class="login-tabs">
       <button class="login-tab on" id="tab-login" onclick="switchAuthTab('login')">로그인</button>
       <button class="login-tab" id="tab-signup" onclick="switchAuthTab('signup')">회원가입</button>
@@ -374,8 +373,10 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
     <!-- 로그인 폼 -->
     <div class="login-form on" id="form-login">
       <label class="lbl" for="login-id">이메일</label>
-      <input type="email" id="login-id" autofocus autocomplete="username" list="recent-emails">
-      <datalist id="recent-emails"></datalist>
+      <div style="position:relative">
+        <input type="email" id="login-id" autofocus autocomplete="off" onfocus="showRecentDropdown()" oninput="showRecentDropdown()">
+        <div id="recent-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:#fff;border:1px solid var(--ln);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:10;max-height:180px;overflow-y:auto"></div>
+      </div>
       <label class="lbl" for="login-pw">비밀번호</label>
       <input type="password" id="login-pw" autocomplete="current-password">
       <button onclick="doLogin()" id="login-btn">로그인</button>
@@ -385,7 +386,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
     <!-- 회원가입 폼 -->
     <div class="login-form" id="form-signup">
       <label class="lbl" for="signup-name">이름</label>
-      <input type="text" id="signup-name" autocomplete="name" placeholder="홍길동">
+      <input type="text" id="signup-name" autocomplete="name">
       <label class="lbl" for="signup-id">이메일 (회사 메일)</label>
       <input type="email" id="signup-id" autocomplete="username">
       <label class="lbl" for="signup-pw">비밀번호 (8자 이상)</label>
@@ -398,7 +399,6 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
       <div style="font-size:10px;color:var(--t4);margin-top:6px;text-align:center;line-height:1.5">가입 후 관리자 승인이 필요합니다</div>
     </div>
   </div>
-  <div class="login-footer">© BSN케어 · 건물관리 2팀 내부용</div>
 </div>
 
 <!-- PENDING (승인 대기 화면) -->
@@ -2225,21 +2225,47 @@ function rememberEmail(email){
     localStorage.setItem('bsn_last_email',email);
   }catch(e){}
 }
-function renderRecentEmails(){
+function pickEmail(email){
+  $('login-id').value=email;
+  $('recent-dropdown').style.display='none';
+  $('login-pw').focus();
+}
+function forgetEmail(email,ev){
+  if(ev){ev.stopPropagation();ev.preventDefault();}
+  try{
+    let list=JSON.parse(localStorage.getItem('bsn_recent_emails')||'[]');
+    list=list.filter(e=>e!==email);
+    localStorage.setItem('bsn_recent_emails',JSON.stringify(list));
+    if(localStorage.getItem('bsn_last_email')===email) localStorage.removeItem('bsn_last_email');
+    showRecentDropdown();
+  }catch(e){}
+}
+function showRecentDropdown(){
   try{
     const list=JSON.parse(localStorage.getItem('bsn_recent_emails')||'[]');
-    const dl=$('recent-emails');
-    if(dl){
-      dl.innerHTML=list.map(e=>{
-        const esc=String(e).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-        return `<option value="${esc}">`;
-      }).join('');
-    }
-    // 마지막 사용 이메일 자동 채우기 (비어있을 때만)
+    const dd=$('recent-dropdown');
+    if(!dd) return;
+    if(list.length===0){ dd.style.display='none'; return; }
+    dd.innerHTML=list.map(e=>{
+      const safe=String(e).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const esc=String(e).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+      return `<div onmousedown="pickEmail('${safe}')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--w2)" onmouseover="this.style.background='var(--w2)'" onmouseout="this.style.background=''"><span>${esc}</span><span onmousedown="forgetEmail('${safe}',event)" style="color:var(--t4);font-size:14px;padding:0 4px;line-height:1" title="삭제">×</span></div>`;
+    }).join('');
+    dd.style.display='block';
+  }catch(e){}
+}
+function renderRecentEmails(){
+  try{
     const last=localStorage.getItem('bsn_last_email');
     if(last && !$('login-id').value) $('login-id').value=last;
   }catch(e){}
 }
+// 드롭다운 외부 클릭시 닫기
+document.addEventListener('click',function(e){
+  const dd=document.getElementById('recent-dropdown');
+  const inp=document.getElementById('login-id');
+  if(dd && inp && !dd.contains(e.target) && e.target!==inp){ dd.style.display='none'; }
+});
 
 async function doLogin(){
   const id=$('login-id').value.trim(),pw=$('login-pw').value;
