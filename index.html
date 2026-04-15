@@ -78,6 +78,10 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .tw td{padding:5px 8px;border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);color:var(--t1);vertical-align:top}
 .tw td:last-child{border-right:none}
 .tw tbody tr:hover td{background:var(--w2)}
+/* 임대현황: 금액(.right) 외 모두 가운데정렬 */
+#lease-body td{text-align:center;vertical-align:middle}
+#lease-body td.right{text-align:right}
+#lease-body tr.bldg-sep td{text-align:left}
 .tw .tfoot td{background:var(--w2);font-weight:600;border-top:1px solid var(--ln2)}
 .mono{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .right{text-align:right!important}
@@ -124,6 +128,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .exp-cell.ec-rd{background:var(--rd2) !important;color:var(--t1) !important;font-weight:600}
 .exp-cell.ec-add{color:var(--t4);cursor:pointer;font-size:13px;background:var(--w)}
 .exp-cell.ec-add:hover{background:var(--bl2);color:var(--bl)}
+.exp-cell.ec-na,.exp-note-cell.ec-na{background:#f1f5f9 !important;color:#94a3b8 !important;font-weight:500}
 .exp-note-cell{font-size:11px;color:var(--t2);cursor:pointer;background:var(--w)}
 .exp-note-cell:hover{background:var(--bl2)}
 /* inline popup */
@@ -341,7 +346,12 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 .admin-pending-card .ap-email{font-weight:600;font-size:12px;color:var(--t1)}
 .admin-pending-card .ap-date{font-size:10px;color:var(--t3);font-family:'IBM Plex Mono',monospace;margin-top:2px}
 .admin-pending-card .ap-actions{display:flex;gap:4px}
-.admin-user-row{display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid var(--ln);gap:8px;font-size:12px}
+.admin-user-row{display:flex;align-items:center;padding:6px 2px 6px 8px !important;border-bottom:1px solid var(--ln);gap:6px;font-size:12px}
+#pg-admin .pb{padding:8px 2px 20px !important}
+#pg-admin .card{padding:0 !important}
+#pg-admin .admin-pending-card{padding:8px 4px 8px 8px !important;gap:6px}
+#pg-admin .admin-user-row .btn.sm,#pg-admin .admin-pending-card .btn.sm{padding:3px 6px;font-size:11px}
+#pg-admin .admin-user-row .role-sel{max-width:72px}
 .admin-user-row:last-child{border-bottom:none}
 .admin-user-row .au-email{flex:1;font-weight:500}
 .admin-user-row .au-meta{font-size:10px;color:var(--t3);font-family:'IBM Plex Mono',monospace}
@@ -422,7 +432,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
 </div>
 <div class="app" style="display:none" id="app-main">
 <aside class="sb">
-  <div class="sb-logo"><div class="bsn-mark"><span>BSN.<br>CARE</span></div><h1>건물관리 2팀</h1></div>
+  <div class="sb-logo"><div class="bsn-mark"><span>BSN.<br>CARE</span></div></div>
   <nav class="sb-nav" id="nav"></nav>
   <div class="sb-foot"><div id="sb-dt"></div><div id="sb-user" style="margin-top:4px;color:var(--t3)"></div><button onclick="doLogout()" style="margin-top:6px;padding:3px 8px;font-size:9px;border:1px solid var(--ln);background:var(--w);border-radius:var(--r);cursor:pointer;width:100%">로그아웃</button></div>
 </aside>
@@ -542,9 +552,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
           <div style="padding:5px 8px;display:flex;align-items:center;gap:5px;border-top:1px solid var(--ln2);background:var(--w2);flex-wrap:wrap">
             <input type="date" id="ca-date" style="width:108px;flex-shrink:0;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none">
             <select id="ca-bldg" style="width:110px;flex-shrink:0;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none"></select>
-            <select id="ca-user" style="width:68px;flex-shrink:0;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none">
-              <option>나</option><option>박정도</option><option>장승원</option><option>전원성</option><option>구정식</option>
-            </select>
+            <span id="ca-user-display" title="작성자 (회원가입시 입력한 이름이 자동으로 들어갑니다)" style="flex-shrink:0;padding:4px 8px;background:var(--w2);border:1px solid var(--ln);border-radius:var(--r);font-size:11px;color:var(--t2);min-width:60px;text-align:center">나</span>
             <input type="text" id="ca-title" placeholder="내용 입력 후 Enter" style="flex:1;min-width:140px;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none">
           </div>
         </div>
@@ -687,18 +695,31 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
   </div>
 </div>
 
-<!-- 관리자 : 승인 관리 -->
+<!-- 사용자 관리 (모두 볼 수 있음, 승인은 관리자, 권한부여는 총관리자) -->
 <div class="page" id="pg-admin">
-  <div class="ph"><h2>승인 관리</h2>
+  <div class="ph"><h2>사용자 관리</h2>
+    <span id="admin-role-tag" style="margin-left:8px;font-size:10px;color:var(--t3)"></span>
     <button class="btn sm" onclick="loadAdminUsers()" style="margin-left:auto">↻ 새로고침</button>
   </div>
   <div class="pb">
-    <div class="sl">승인 대기 <span id="admin-pending-count" style="color:var(--rd);font-family:'IBM Plex Mono',monospace">0</span></div>
-    <div id="admin-pending-list"><div class="empty" style="padding:20px;text-align:center;color:var(--t3);font-size:12px">대기중인 가입 신청이 없습니다.</div></div>
+    <div id="admin-pending-section" style="display:none">
+      <div class="sl">승인 대기 <span id="admin-pending-count" style="color:var(--rd);font-family:'IBM Plex Mono',monospace">0</span></div>
+      <div id="admin-pending-list"><div class="empty" style="padding:20px;text-align:center;color:var(--t3);font-size:12px">대기중인 가입 신청이 없습니다.</div></div>
+    </div>
 
     <div class="sl" style="margin-top:18px">전체 사용자</div>
     <div class="card">
       <div id="admin-all-list"></div>
+    </div>
+
+    <div id="admin-blocked-section" style="margin-top:18px;display:none">
+      <div class="sl" style="cursor:pointer;user-select:none" onclick="toggleBlockedList()">
+        <span id="admin-blocked-toggle">▶</span> 차단된 사용자
+        <span id="admin-blocked-count" style="color:var(--t3);font-family:'IBM Plex Mono',monospace;margin-left:4px">0</span>
+      </div>
+      <div class="card" id="admin-blocked-wrap" style="display:none">
+        <div id="admin-blocked-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -715,7 +736,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
     <div class="fr r3"><div class="fg"><label>임차인(상호)</label><input id="fl-t"></div><div class="fg"><label>납부방식</label><select id="fl-pt"><option>선불</option><option>후불</option><option>직영</option></select></div><div class="fg"><label>납부일</label><input id="fl-pd" placeholder="1일, 말일"></div></div>
     <div class="fr r2"><div class="fg"><label>계약 시작일</label><input type="date" id="fl-s"></div><div class="fg"><label>계약 만료일</label><input type="date" id="fl-e"></div></div>
     <div class="fr r3"><div class="fg"><label>보증금</label><input type="number" id="fl-d"></div><div class="fg"><label>임대료</label><input type="number" id="fl-r"></div><div class="fg"><label>관리비</label><input type="number" id="fl-m"></div></div>
-    <div class="fr r2"><div class="fg"><label>연락처</label><input id="fl-ph"></div><div class="fg"><label>메일</label><input id="fl-em"></div></div>
+    <div class="fr r2"><div class="fg"><label>연락처 <span style="font-size:10px;color:var(--t3);font-weight:400">(여러명: Shift+Enter로 줄바꿈)</span></label><textarea id="fl-ph" rows="2" style="font-family:inherit;resize:vertical"></textarea></div><div class="fg"><label>메일</label><input id="fl-em"></div></div>
     <div class="fg"><label>비고</label><textarea id="fl-n" rows="2"></textarea></div>
     <div class="mo-ft"><button class="btn" onclick="closeMo('mo-lease')">취소</button><button class="btn pri" onclick="saveLease()">저장</button></div>
   </div>
@@ -733,7 +754,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
     <input type="hidden" id="exp-eid">
     <div class="fr r2"><div class="fg"><label>건물</label><select id="fe-b"></select></div><div class="fg"><label>항목</label><select id="fe-t"><option>승강기 보험</option><option>화재 보험</option><option>주차기 보험</option><option>저수조 청소</option><option>정화조 청소</option><option>기타</option></select></div></div>
     <div class="fr r2"><div class="fg"><label>만료일</label><input type="date" id="fe-d"></div><div class="fg"><label>비고</label><input id="fe-n"></div></div>
-    <div class="mo-ft"><button class="btn" onclick="closeMo('mo-expire')">취소</button><button class="btn pri" onclick="saveExpire()">저장</button></div>
+    <div class="mo-ft"><button class="btn" onclick="closeMo('mo-expire')">취소</button><button class="btn" style="background:#e5e7eb;color:#374151" onclick="saveExpireNA()">해당없음</button><button class="btn pri" onclick="saveExpire()">저장</button></div>
   </div>
 </div>
 <div class="ov" id="mo-cal">
@@ -741,7 +762,7 @@ html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg)
     <div class="mo-hd"><h3 id="mo-cal-t">일정 추가</h3><button onclick="closeMo('mo-cal')">×</button></div>
     <input type="hidden" id="cal-eid">
     <div class="fr r2"><div class="fg"><label>날짜</label><input type="date" id="fc-d"></div><div class="fg"><label>건물</label><select id="fc-b"></select></div></div>
-    <div class="fr r2"><div class="fg"><label>담당자</label><select id="fc-user"><option>나</option><option>박정도</option><option>장승원</option><option>전원성</option><option>구정식</option></select></div><div class="fg"></div></div>
+    <div class="fr r2"><div class="fg"><label>담당자</label><input id="fc-user" readonly style="background:var(--w2);color:var(--t2)"></div><div class="fg"></div></div>
     <div class="fg"><label>제목</label><input id="fc-t"></div>
     <div class="fg"><label>상세 내용</label><textarea id="fc-n" rows="3"></textarea></div>
     <div class="mo-ft"><button class="btn" onclick="closeMo('mo-cal')">취소</button><button class="btn pri" onclick="saveCalEv()">저장</button></div>
@@ -875,6 +896,34 @@ async function loadFromSupabase(){
   }catch(e){ return null; }
 }
 
+// ── 실시간 동기화: 다른 사람이 데이터 수정시 자동 반영 ────────
+let _rtChannel=null;
+let _rtDebounce=null;
+function setupRealtimeSync(){
+  if(!sbClient || _rtChannel) return;
+  try{
+    _rtChannel = sbClient.channel('bm_data_sync')
+      .on('postgres_changes', {event:'UPDATE', schema:'public', table:'bm_data', filter:'id=eq.1'}, payload=>{
+        // 내가 방금 저장한 것은 무시 (updated_by가 본인이면 패스)
+        const row = payload.new;
+        if(!row || !row.data) return;
+        if(row.updated_by && CURRENT_USER_ID && row.updated_by===CURRENT_USER_ID) return;
+        // 디바운스: 0.5초 안에 여러번 와도 한번만 처리
+        clearTimeout(_rtDebounce);
+        _rtDebounce = setTimeout(()=>{
+          DB = row.data;
+          try{ localStorage.setItem(SK, JSON.stringify(DB)); }catch(_){}
+          // 현재 보고있는 페이지만 다시 그리기
+          const onPage = document.querySelector('.page.on');
+          const id = onPage ? onPage.id.replace('pg-','') : '';
+          ({lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,admin:loadAdminUsers})[id]?.();
+          showSaveStatus('🔄 다른 사용자의 변경사항 반영','var(--bl)');
+        },500);
+      })
+      .subscribe();
+  }catch(e){ console.warn('Realtime 구독 실패:', e.message); }
+}
+
 // ── 초기 DB (localStorage에서 임시 로드, 로그인 후 Supabase 데이터로 교체)
 let DB = (() => { try{const s=localStorage.getItem(SK);if(s)return JSON.parse(s);}catch(e){} return null; })() || mkDef();
 
@@ -1001,6 +1050,23 @@ ui:{calY:new Date().getFullYear(),calM:new Date().getMonth(),selBldg:null,selMem
 const $=id=>document.getElementById(id);
 function t0(){const t=new Date();t.setHours(0,0,0,0);return t;}
 function dday(s){if(!s)return 9999;return Math.ceil((new Date(s)-t0())/86400000);}
+// 연락처 자동 줄바꿈: "이름 010-XXXX-XXXX 이름2 010-YYYY-YYYY" → 이름+번호 쌍별로 줄 분리
+function fmtPhone(p){
+  if(!p) return '';
+  if(p.includes('\n')) return p;  // 이미 줄바꿈 있으면 그대로
+  // ① 번호 뒤에 공백+한글(이름)이 오면 그 한글 앞에서 줄바꿈
+  //    예: "대표 010-1111-2222 사장 010-3333-4444" → "대표 010-1111-2222\n사장 010-3333-4444"
+  let out = p.replace(/(\d{4})\s+(?=[가-힣])/g, '$1\n');
+  if(out !== p) return out;
+  // ② 이름 없이 번호만 여러 개인 경우: 번호 앞에서 줄바꿈
+  const nums = p.match(/01[016789][-\s]?\d{3,4}[-\s]?\d{4}/g);
+  if(!nums || nums.length < 2) return p;
+  let res = p;
+  for(let i=1; i<nums.length; i++){
+    res = res.replace(nums[i], '\n'+nums[i]);
+  }
+  return res;
+}
 function fd(s,sh){if(!s)return '—';const d=new Date(s);if(isNaN(d))return s;const y=sh?String(d.getFullYear()).slice(2):String(d.getFullYear());return`${y}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function fdS(s){return fd(s,true);}
 function fm(n){if(!n&&n!==0)return '—';return Number(n).toLocaleString('ko-KR');}
@@ -1024,7 +1090,7 @@ function inlineEdit(el,saveFn){
 }
 function ddBg(d,type){
   if(d<0)return`<span class="bg bg-gr">만료</span>`;
-  if(type==='lease'){if(d<=30)return`<span class="bg bg-rd">D-${d} 만료임박</span>`;if(d<=90)return`<span class="bg bg-am">D-${d} 만료예정</span>`;return`<span class="bg bg-gn">D-${d}</span>`;}
+  if(type==='lease'){if(d<=30)return`<span class="bg bg-rd" title="만료 임박 (30일 이내)">D-${d} ⚠</span>`;if(d<=90)return`<span class="bg bg-am" title="만료 예정 (90일 이내)">D-${d} ⏳</span>`;return`<span class="bg bg-gn">D-${d}</span>`;}
   if(d<=30)return`<span style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px">—</span>`;
   return``;
 }
@@ -1032,7 +1098,11 @@ function expCls(d){return d<=30?'ec-rd':'';} // only red for <=30
 function fillSel(id,withNone){const el=$(id);if(!el)return;el.innerHTML=(withNone?'<option value="">— 없음 —</option>':'')+DB.buildings.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');}
 
 // ── NAV ───────────────────────────────────────────────────────────────
-let IS_ADMIN=false;
+let IS_ADMIN=false;          // 관리자 (승인/차단 가능)
+let IS_SUPER_ADMIN=false;    // 총관리자 (권한 부여 가능)
+let CURRENT_USER_NAME='나';   // 회원가입시 입력한 이름 (enterApp에서 세팅)
+let CURRENT_USER_ID=null;
+let CURRENT_USER_ROLE='user'; // 'super_admin' | 'admin' | 'user'
 const PAGES=[
   {id:'lease',ico:'⊟',label:'임대현황'},
   {id:'expire',ico:'⏱',label:'만료일 관리'},
@@ -1044,7 +1114,7 @@ const PAGES=[
 ];
 function buildNav(){
   const pages=PAGES.slice();
-  if(IS_ADMIN) pages.push({id:'admin',ico:'✓',label:'승인 관리'});
+  pages.push({id:'admin',ico:'✓',label:'사용자 관리'});
   $('nav').innerHTML=pages.map(p=>`<button class="nb${p.id==='lease'?' on':''}" onclick="gp('${p.id}',this)">
     <span style="font-size:12px;width:14px;text-align:center;flex-shrink:0">${p.ico}</span>${p.label}
     ${p.id==='expire'?'<span class="nbadge" id="nb-ex">0</span>':''}
@@ -1103,7 +1173,7 @@ function rdLease(){
         <td class="mono right">${fm(l.deposit)}</td><td class="mono right">${fm(l.rent)}</td><td class="mono right">${fm(l.mgmt)}</td>
         <td class="mono right" style="font-weight:600">${vat>0?fm(Math.round(vat)):'—'}</td>
         <td style="${ptBg}">${l.paytype||''}</td><td style="${ptBg}">${l.payday||''}</td>
-        <td style="font-size:11px;white-space:pre-line;max-width:120px">${l.phone||''}</td>
+        <td style="font-size:11px;white-space:pre-line;max-width:120px">${fmtPhone(l.phone||'')}</td>
         <td style="font-size:11px;max-width:100px;word-break:break-all">${l.email||''}</td>
         <td style="font-size:11px;white-space:pre-line;max-width:160px">${l.note||''}</td>
         <td><button class="btn sm del" onclick="event.stopPropagation();delLease(${l.id})">삭제</button></td>
@@ -1162,19 +1232,26 @@ function rdExpire(){
     function insCell(t){
       const e=getE(b.id,t);
       if(!e)return`<td class="exp-cell ec-add" onclick="addExpFor(${b.id},'${t}')">+</td>`;
+      if(e.na)return`<td class="exp-cell ec-na" ondblclick="openExpEdit(${e.id})" title="더블클릭: 수정">해당없음</td>`;
       const d=dday(e.date),cls=expCls(d);
       return`<td class="exp-cell ${cls}" ondblclick="openIE(event,${e.id},'${t}')">${fdS(e.date)}${d<=30?` <span style="font-size:10px;font-weight:700">(D-${d})</span>`:''}</td>`;
     }
     function cleanCell(t){
       const e=getE(b.id,t);
       if(!e)return`<td class="exp-cell ec-add" onclick="addExpFor(${b.id},'${t}')">+</td><td class="exp-note-cell" onclick="addExpFor(${b.id},'${t}')">—</td>`;
+      if(e.na)return`<td class="exp-cell ec-na" ondblclick="openExpEdit(${e.id})" title="더블클릭: 수정">해당없음</td><td class="exp-note-cell ec-na" ondblclick="openExpEdit(${e.id})">—</td>`;
       const d=dday(e.date),cls=expCls(d);
       const dStr=d<=30?` <span style="font-size:10px;font-weight:700">(D-${d})</span>`:'';
       return`<td class="exp-cell ${cls}" ondblclick="openIE(event,${e.id},'${t}')">${fdS(e.date)}${dStr}</td><td class="exp-note-cell" ondblclick="openNoteIE(event,${e.id},'${t}')">${e.note||'—'}</td>`;
     }
     const others=DB.expires.filter(e=>e.bId==b.id&&!T.includes(e.type));
-    const sp=others.map(e=>`${e.type}:${fdS(e.date)}`).join(', ');
-    return`<tr><td class="col-b">${b.name}</td>${insCell('승강기 보험')}${insCell('화재 보험')}${insCell('주차기 보험')}${cleanCell('저수조 청소')}${cleanCell('정화조 청소')}<td class="exp-note-cell" style="font-size:11px;color:var(--t2);background:var(--w);min-width:100px" contenteditable="true" onblur="saveExpSp(${b.id},this.textContent)">${sp||''}</td></tr>`;
+    // 특이사항: 각 항목을 줄별로 표시 + 더블클릭으로 개별 수정 + 추가버튼
+    const spLines=others.map(e=>{
+      const dStr = e.na ? '<span style="color:#94a3b8">해당없음</span>' : fdS(e.date);
+      return `<div class="sp-line" ondblclick="openExpEdit(${e.id})" title="더블클릭: 수정" style="padding:1px 4px;border-bottom:1px dotted var(--ln);cursor:pointer">${esc(e.type)}: <span class="mono">${dStr}</span></div>`;
+    }).join('');
+    const spAdd=`<div class="sp-add" onclick="addExpForOther(${b.id})" title="특이사항 추가" style="padding:1px 4px;color:var(--t4);cursor:pointer;text-align:center;font-size:13px">+</div>`;
+    return`<tr><td class="col-b">${b.name}</td>${insCell('승강기 보험')}${insCell('화재 보험')}${insCell('주차기 보험')}${cleanCell('저수조 청소')}${cleanCell('정화조 청소')}<td class="exp-note-cell" style="font-size:11px;color:var(--t2);background:var(--w);min-width:140px;padding:0">${spLines}${spAdd}</td></tr>`;
   }).join('');
 }
 function openIE(evt,id,type){
@@ -1200,10 +1277,37 @@ function openNoteIE(evt,id,type){
   const td=evt.target.closest('td');if(!td)return;
   inlineEdit(td,v=>{if(v!==null){e.note=v;e._edit=editStamp();sv();}rdExpire();});
 }
-function addExpFor(bId,t){fillSel('fe-b');$('exp-eid').value='';$('mo-exp-t').textContent='만료일 추가';$('fe-b').value=bId;$('fe-t').value=t;$('fe-d').value='';$('fe-n').value='';
-  // 보험류는 비고란 숨김
+// 특이사항 새 항목 추가: 항목 종류 입력받음
+function addExpForOther(bId){
+  const t=prompt('특이사항 항목명을 입력하세요 (예: 소방시설 점검)');
+  if(!t||!t.trim())return;
+  fillSel('fe-b');$('exp-eid').value='';$('mo-exp-t').textContent=t.trim()+' 추가';
+  $('fe-b').value=bId;
+  // 항목 종류 select에 임시 추가
+  const sel=$('fe-t');
+  let opt=Array.from(sel.options).find(o=>o.value===t.trim());
+  if(!opt){opt=document.createElement('option');opt.value=t.trim();opt.textContent=t.trim();sel.appendChild(opt);}
+  sel.value=t.trim();
+  $('fe-d').value='';$('fe-n').value='';
+  const noteRow=$('fe-n').closest('.fg');if(noteRow)noteRow.style.display='';
+  $('mo-expire').classList.add('on');
+  setTimeout(()=>$('fe-d').focus(),50);
+}
+function addExpFor(bId,t){fillSel('fe-b');$('exp-eid').value='';$('mo-exp-t').textContent=t+' 만료일 추가';$('fe-b').value=bId;$('fe-t').value=t;$('fe-d').value='';$('fe-n').value='';
+  // 보험류는 비고란 숨김 (날짜만 입력하게)
   const noteRow=$('fe-n').closest('.fg');if(noteRow)noteRow.style.display=['승강기 보험','화재 보험','주차기 보험'].includes(t)?'none':'';
-  $('mo-expire').classList.add('on');}
+  $('mo-expire').classList.add('on');
+  setTimeout(()=>$('fe-d').focus(),50);
+}
+// 기존 항목 수정 (해당없음/일반 모두): 모달로 열어서 수정
+function openExpEdit(id){
+  const e=DB.expires.find(x=>x.id===id);if(!e)return;
+  fillSel('fe-b');$('exp-eid').value=id;$('mo-exp-t').textContent=e.type+' 수정';
+  $('fe-b').value=e.bId;$('fe-t').value=e.type;$('fe-d').value=e.date||'';$('fe-n').value=e.na?'':(e.note||'');
+  const noteRow=$('fe-n').closest('.fg');if(noteRow)noteRow.style.display=['승강기 보험','화재 보험','주차기 보험'].includes(e.type)?'none':'';
+  $('mo-expire').classList.add('on');
+  setTimeout(()=>$('fe-d').focus(),50);
+}
 function closeIE(){$('ie').classList.remove('on');ieTarget=null;}
 function delIE(){
   if(!ieTarget||!ieTarget.id)return;
@@ -1221,6 +1325,14 @@ document.addEventListener('click',e=>{if(ieTarget&&!$('ie').contains(e.target))c
 function saveExpire(){
   const eid=$('exp-eid').value;
   const o={bId:parseInt($('fe-b').value),type:$('fe-t').value,date:$('fe-d').value,note:$('fe-n').value.trim()};
+  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0)DB.expires[i]={...DB.expires[i],...o,na:false};}
+  else DB.expires.push({id:nid(),...o});
+  sv();closeMo('mo-expire');rdExpire();upBadges();
+}
+// "해당없음" 으로 저장: date=null, na=true
+function saveExpireNA(){
+  const eid=$('exp-eid').value;
+  const o={bId:parseInt($('fe-b').value),type:$('fe-t').value,date:'',note:'해당없음',na:true};
   if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0)DB.expires[i]={...DB.expires[i],...o};}
   else DB.expires.push({id:nid(),...o});
   sv();closeMo('mo-expire');rdExpire();upBadges();
@@ -1317,7 +1429,7 @@ function quickAdd(){
   const title=$('ca-title').value.trim(),date=$('ca-date').value;
   if(!date){alert('날짜를 선택하세요');return;}if(!title)return;
   const bv=$('ca-bldg').value;
-  DB.calEvents.push({id:nid(),date,bId:bv?parseInt(bv):null,title,note:'',user:$('ca-user').value,status:'plan'});
+  DB.calEvents.push({id:nid(),date,bId:bv?parseInt(bv):null,title,note:'',user:CURRENT_USER_NAME,status:'plan'});
   $('ca-title').value='';
   calSelDate=date;sv();rdCal();
 }
@@ -1354,11 +1466,12 @@ function showDayDetail(ds,evs){
 function calDblClick(ds){
   fillSel('fc-b',true);$('cal-eid').value='';$('mo-cal-t').textContent='일정 추가';
   $('fc-d').value=ds;$('fc-t').value='';$('fc-n').value='';
+  $('fc-user').value=CURRENT_USER_NAME;
   $('mo-cal').classList.add('on');
 }
 function saveCalEv(){
   const eid=$('cal-eid').value;
-  const o={date:$('fc-d').value,bId:$('fc-b').value?parseInt($('fc-b').value):null,title:$('fc-t').value.trim(),note:$('fc-n').value.trim(),user:$('fc-user').value,status:'plan'};
+  const o={date:$('fc-d').value,bId:$('fc-b').value?parseInt($('fc-b').value):null,title:$('fc-t').value.trim(),note:$('fc-n').value.trim(),user:CURRENT_USER_NAME,status:'plan'};
   if(!o.date||!o.title){alert('날짜와 제목을 입력하세요');return;}
   if(eid){const i=DB.calEvents.findIndex(e=>e.id==eid);if(i>=0)DB.calEvents[i]={...DB.calEvents[i],...o};}
   else DB.calEvents.push({id:nid(),...o});
@@ -1367,7 +1480,7 @@ function saveCalEv(){
 function editCalEv(id){
   const e=DB.calEvents.find(e=>e.id===id);if(!e)return;
   fillSel('fc-b',true);$('cal-eid').value=id;$('mo-cal-t').textContent='일정 수정';
-  $('fc-d').value=e.date;$('fc-b').value=e.bId||'';$('fc-t').value=e.title;$('fc-n').value=e.note;$('fc-user').value=e.user||'나';
+  $('fc-d').value=e.date;$('fc-b').value=e.bId||'';$('fc-t').value=e.title;$('fc-n').value=e.note;$('fc-user').value=e.user||CURRENT_USER_NAME;
   $('mo-cal').classList.add('on');
 }
 function saveCalTitle(id,val){
@@ -2303,7 +2416,7 @@ async function enterApp(){
     return;
   }
   try{
-    const {data}=await sbClient.from('profiles').select('status,is_admin,email').eq('user_id',user.id).single();
+    const {data}=await sbClient.from('profiles').select('*').eq('user_id',user.id).single();
     prof=data;
   }catch(e){}
 
@@ -2327,7 +2440,7 @@ async function enterApp(){
   if(!prof){
     await new Promise(r=>setTimeout(r,800));
     try{
-      const {data}=await sbClient.from('profiles').select('status,is_admin,email').eq('user_id',user.id).single();
+      const {data}=await sbClient.from('profiles').select('*').eq('user_id',user.id).single();
       prof=data;
     }catch(e){}
     if(!prof || prof.status!=='approved'){
@@ -2339,12 +2452,22 @@ async function enterApp(){
   }
 
   // 2) 승인됨 → 앱 진입
-  IS_ADMIN=!!prof.is_admin;
+  // role 우선, 없으면 is_admin으로 폴백
+  CURRENT_USER_ROLE = prof.role || (prof.is_admin ? 'admin' : 'user');
+  IS_SUPER_ADMIN = (CURRENT_USER_ROLE === 'super_admin');
+  IS_ADMIN = IS_SUPER_ADMIN || (CURRENT_USER_ROLE === 'admin') || !!prof.is_admin;
+  CURRENT_USER_NAME = (prof.name && prof.name.trim()) ? prof.name.trim() : (user.email||'나');
+  CURRENT_USER_ID = user.id;
   $('login-ov').classList.add('hide');
   $('pending-ov')?.classList.add('hide');
   $('rejected-ov')?.classList.add('hide');
   $('app-main').style.display='flex';
-  if($('sb-user')) $('sb-user').textContent = user.email + (IS_ADMIN?' (관리자)':'');
+  const roleTag = IS_SUPER_ADMIN ? ' (총관리자)' : (IS_ADMIN ? ' (관리자)' : '');
+  if($('sb-user')) $('sb-user').textContent = CURRENT_USER_NAME + roleTag;
+  // 캘린더 작성자 표시 갱신
+  const caUserBox=$('ca-user-display'); if(caUserBox) caUserBox.textContent = CURRENT_USER_NAME;
+  // 실시간 동기화 구독 (다른 사람이 데이터 수정시 자동 반영)
+  setupRealtimeSync();
 
   // 3) 클라우드 DB 로드
   const cloud=await loadFromSupabase();
@@ -2355,7 +2478,7 @@ async function enterApp(){
   rdLease();
 
   // 4) 관리자면 대기 건수 배지 갱신
-  if(IS_ADMIN) refreshAdminBadge();
+  refreshAdminBadge();
 }
 
 // ── 로그인/회원가입 탭 전환 ───────────────────────────────────
@@ -2382,17 +2505,25 @@ async function doSignup(){
   err.textContent='';
   if(!name||!id||!pw||!pw2){err.textContent='모든 항목을 입력하세요.';return;}
   if(name.length<2){err.textContent='이름은 2자 이상이어야 합니다.';return;}
+  // 한글 본명 강제: 최소 2자 한글 필요 (영문 임의 입력 방지)
+  if(!/[가-힣]{2,}/.test(name)){err.textContent='이름은 한글 본명으로 입력해주세요. (예: 박정도)';return;}
   if(pw.length<8){err.textContent='비밀번호는 8자 이상이어야 합니다.';return;}
   if(pw!==pw2){err.textContent='비밀번호가 일치하지 않습니다.';return;}
   if(!sbClient){err.textContent='서버에 연결할 수 없습니다.';return;}
   btn.disabled=true; btn.textContent='가입 중...';
   try{
-    const {data,error}=await sbClient.auth.signUp({email:id,password:pw,options:{data:{name:name}}});
+    const {data,error}=await sbClient.auth.signUp({email:id,password:pw,options:{data:{name:name,full_name:name}}});
     if(error) throw error;
     // 프로필 테이블에 이름 저장 (트리거가 있든 없든 안전하게)
+    // 트리거가 늦게 INSERT 한 후 name=null로 덮어쓰는 경우 방지: 약간 대기 후 update
     const uid=data.user&&data.user.id;
     if(uid){
+      // 즉시 1차 시도 (트리거가 아직 안 돌았을 때 INSERT)
       try{ await sbClient.from('profiles').upsert({user_id:uid,email:id,name:name},{onConflict:'user_id'}); }catch(_){}
+      // 800ms 후 2차 시도 (트리거가 덮어썼을 경우 다시 update)
+      setTimeout(async()=>{
+        try{ await sbClient.from('profiles').update({name:name,email:id}).eq('user_id',uid); }catch(_){}
+      },800);
     }
     // 바로 세션이 만들어지면 enterApp이 pending 화면을 띄워줌
     if(data.session){
@@ -2414,7 +2545,7 @@ async function doSignup(){
 // HTML 이스케이프: 이메일/이름 등 화면에 찍을 때 XSS 방어용
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
 async function refreshAdminBadge(){
-  if(!IS_ADMIN) return;
+  // 모두 볼 수 있게: IS_ADMIN 체크 제거
   try{
     const {count}=await sbClient.from('profiles').select('*',{count:'exact',head:true}).eq('status','pending');
     const el=$('nb-ad'); if(el) el.textContent = count||0;
@@ -2422,18 +2553,27 @@ async function refreshAdminBadge(){
   }catch(e){}
 }
 async function loadAdminUsers(){
-  if(!IS_ADMIN) return;
+  // 권한 안내 태그
+  const tag=$('admin-role-tag');
+  if(tag){
+    if(IS_SUPER_ADMIN) tag.textContent='· 총관리자: 모든 권한';
+    else if(IS_ADMIN) tag.textContent='· 관리자: 승인/차단 가능';
+    else tag.textContent='· 보기 전용';
+  }
+  // 승인대기 섹션: 관리자/총관리자만 표시
+  const pendSec=$('admin-pending-section'); if(pendSec) pendSec.style.display = IS_ADMIN ? '' : 'none';
   const pend=$('admin-pending-list'), all=$('admin-all-list');
-  if(pend) pend.innerHTML='<div style="color:var(--t2);padding:8px">불러오는 중...</div>';
+  if(pend && IS_ADMIN) pend.innerHTML='<div style="color:var(--t2);padding:8px">불러오는 중...</div>';
   if(all) all.innerHTML='';
   try{
     const {data:users,error}=await sbClient.from('profiles')
-      .select('user_id,email,name,status,is_admin,created_at,reviewed_at')
+      .select('*')
       .order('created_at',{ascending:false});
     if(error) throw error;
     const pending=users.filter(u=>u.status==='pending');
-    const others =users.filter(u=>u.status!=='pending');
-    if(pend){
+    const others =users.filter(u=>u.status!=='pending' && u.status!=='rejected');
+    const blocked=users.filter(u=>u.status==='rejected');
+    if(pend && IS_ADMIN){
       if(pending.length===0){
         pend.innerHTML='<div style="color:var(--t2);padding:8px">승인 대기 중인 사용자가 없습니다.</div>';
       }else{
@@ -2452,21 +2592,103 @@ async function loadAdminUsers(){
     }
     if(all){
       all.innerHTML=others.map(u=>{
+        const role = u.role || (u.is_admin?'admin':'user');
         const st=u.status==='approved'?'<span style="color:#16a34a">승인됨</span>':u.status==='rejected'?'<span style="color:#dc2626">거절됨</span>':esc(u.status);
-        const adm=u.is_admin?' <span style="color:var(--bl);font-weight:600">[관리자]</span>':'';
+        // 권한 표시: 총관리자만 드롭다운, 그 외에는 텍스트 배지
+        const isSuper = role === 'super_admin';
+        const isMe = u.user_id === CURRENT_USER_ID;
+        let roleEl;
+        if(IS_SUPER_ADMIN && !isMe){
+          // 총관리자가 본인이 아닌 다른 사람의 권한 변경 가능
+          roleEl = `<select class="role-sel" data-uid="${esc(u.user_id)}" onchange="changeUserRole('${esc(u.user_id)}',this.value)" style="font-size:11px;padding:2px 4px;border:1px solid var(--ln);border-radius:3px">
+            <option value="user"${role==='user'?' selected':''}>사용자</option>
+            <option value="admin"${role==='admin'?' selected':''}>관리자</option>
+            <option value="super_admin"${role==='super_admin'?' selected':''}>총관리자</option>
+          </select>`;
+        }else{
+          const tagColor = isSuper?'#7c3aed':role==='admin'?'#2563eb':'#6b7280';
+          const tagText = isSuper?'총관리자':role==='admin'?'관리자':'사용자';
+          roleEl = `<span style="font-size:11px;color:#fff;background:${tagColor};padding:2px 6px;border-radius:3px;font-weight:500">${tagText}</span>`;
+        }
         return `<div class="admin-user-row">
-          <div><b>${esc(u.name||'(이름없음)')}</b> <span style="color:var(--t2);font-size:11px">${esc(u.email||'')}</span>${adm}</div>
-          <div style="display:flex;gap:8px;align-items:center">
+          <div style="flex:1;min-width:0"><b>${esc(u.name||'(이름없음)')}</b> <span style="color:var(--t2);font-size:11px">${esc(u.email||'')}</span></div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+            ${roleEl}
             <span style="font-size:12px">${st}</span>
-            ${u.status==='approved' && !u.is_admin?`<button class="btn sm" style="background:#dc2626;color:#fff" onclick="rejectUser('${esc(u.user_id)}')">접근 차단</button>`:''}
-            ${u.status==='rejected'?`<button class="btn sm" onclick="approveUser('${esc(u.user_id)}')">재승인</button>`:''}
+            ${IS_ADMIN && u.status==='approved' && !isSuper && !isMe?`<button class="btn sm" style="background:#dc2626;color:#fff" onclick="rejectUser('${esc(u.user_id)}')">차단</button>`:''}
           </div>
         </div>`;
       }).join('') || '<div style="color:var(--t2);padding:8px">다른 사용자가 없습니다.</div>';
     }
+    // 차단목록 (관리자만 보임)
+    const blkSec=$('admin-blocked-section'), blkList=$('admin-blocked-list'), blkCnt=$('admin-blocked-count');
+    if(blkSec && IS_ADMIN && blocked.length>0){
+      blkSec.style.display='';
+      if(blkCnt) blkCnt.textContent = blocked.length;
+      if(blkList){
+        blkList.innerHTML=blocked.map(u=>`
+          <div class="admin-user-row" style="opacity:.7">
+            <div style="flex:1;min-width:0">
+              <b style="text-decoration:line-through">${esc(u.name||'(이름없음)')}</b>
+              <span style="color:var(--t2);font-size:11px">${esc(u.email||'')}</span>
+              ${u.reviewed_at?`<span style="font-size:10px;color:var(--t3);font-family:'IBM Plex Mono',monospace;margin-left:6px">차단: ${esc(new Date(u.reviewed_at).toLocaleDateString('ko-KR'))}</span>`:''}
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+              <span style="font-size:11px;color:#fff;background:#dc2626;padding:2px 6px;border-radius:3px">차단됨</span>
+              <button class="btn sm" onclick="approveUser('${esc(u.user_id)}')">재승인</button>
+              <button class="btn sm" style="background:#7f1d1d;color:#fff" onclick="deleteUser('${esc(u.user_id)}','${esc(u.name||u.email||'')}')">삭제</button>
+            </div>
+          </div>`).join('');
+      }
+    }else if(blkSec){
+      blkSec.style.display='none';
+    }
     refreshAdminBadge();
   }catch(e){
     if(pend) pend.innerHTML='<div style="color:#dc2626;padding:8px">오류: '+esc(e.message||e)+'</div>';
+  }
+}
+function toggleBlockedList(){
+  const wrap=$('admin-blocked-wrap'), tog=$('admin-blocked-toggle');
+  if(!wrap||!tog) return;
+  const open = wrap.style.display !== 'none';
+  wrap.style.display = open ? 'none' : '';
+  tog.textContent = open ? '▶' : '▼';
+}
+async function changeUserRole(userId, newRole){
+  if(!IS_SUPER_ADMIN){alert('총관리자만 권한 변경이 가능합니다.');loadAdminUsers();return;}
+  const labels={super_admin:'총관리자',admin:'관리자',user:'사용자'};
+  if(!confirm(`이 사용자의 권한을 [${labels[newRole]||newRole}] 로 변경하시겠습니까?`)){loadAdminUsers();return;}
+  try{
+    // role + is_admin 동시 갱신 (구버전 호환)
+    const {error}=await sbClient.from('profiles').update({
+      role: newRole,
+      is_admin: (newRole==='admin' || newRole==='super_admin')
+    }).eq('user_id',userId);
+    if(error) throw error;
+    loadAdminUsers();
+  }catch(e){ alert('권한 변경 실패: '+(e.message||e)); loadAdminUsers(); }
+}
+async function deleteUser(userId, label){
+  if(!IS_ADMIN){alert('관리자만 삭제할 수 있습니다.');return;}
+  if(!confirm(`[${label}] 을(를) 완전 삭제하시겠습니까?\n\n⚠️ 가입 이력까지 제거되며 복구 불가.`)) return;
+  try{
+    // 완전 삭제 RPC (profiles + auth.users 동시 삭제)
+    const {error}=await sbClient.rpc('delete_user_completely',{target_uid:userId});
+    if(error) throw error;
+    loadAdminUsers();
+  }catch(e){
+    // RPC가 아직 DB에 없는 경우(마이그레이션 전) profiles만 삭제로 폴백
+    if(e && (e.code==='PGRST202' || /function|not found|does not exist/i.test(e.message||''))){
+      if(!confirm('DB 마이그레이션이 안 되어있어 가입이력(auth.users)은 못 지웁니다. profiles 목록에서만 제거할까요? (재가입 시 동일계정 복구 가능)')) return;
+      try{
+        const {error:err2}=await sbClient.from('profiles').delete().eq('user_id',userId);
+        if(err2) throw err2;
+        loadAdminUsers();
+      }catch(e2){ alert('삭제 실패: '+(e2.message||e2)); }
+    }else{
+      alert('삭제 실패: '+(e.message||e));
+    }
   }
 }
 async function approveUser(userId){
