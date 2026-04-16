@@ -1001,9 +1001,8 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div style="padding:4px 12px 20px;height:calc(100vh - 52px);overflow-y:auto">
     <div id="water-filter" style="display:flex;justify-content:center;gap:3px;padding:0 0 8px">
       <button class="btn sm" data-wf="all" onclick="_setWaterFilter('all')" style="padding:3px 10px;font-size:11px;font-weight:600">전체</button>
-      <button class="btn sm" data-wf="odd" onclick="_setWaterFilter('odd')" style="padding:3px 10px;font-size:11px">홀수월</button>
-      <button class="btn sm" data-wf="even" onclick="_setWaterFilter('even')" style="padding:3px 10px;font-size:11px">짝수월</button>
-      <button class="btn sm" data-wf="thisMonth" onclick="_setWaterFilter('thisMonth')" style="padding:3px 10px;font-size:11px;color:#059669;font-weight:600" title="이번달 검침 대상">📋 이번달</button>
+      <button class="btn sm" data-wf="odd" onclick="_setWaterFilter('odd')" style="padding:3px 10px;font-size:11px" id="wf-odd">홀수월</button>
+      <button class="btn sm" data-wf="even" onclick="_setWaterFilter('even')" style="padding:3px 10px;font-size:11px" id="wf-even">짝수월</button>
     </div>
     <div id="water-list"></div>
   </div>
@@ -2759,6 +2758,16 @@ function _setWaterFilter(f){
   });
   rdWater();
 }
+// 홀수/짝수 버튼에 이번달 표시
+(function _markThisMonth(){
+  const m=new Date().getMonth()+1;
+  const isOdd=m%2===1;
+  const oddBtn=document.getElementById('wf-odd');
+  const evenBtn=document.getElementById('wf-even');
+  const tag='<span style="background:#059669;color:#fff;padding:1px 5px;border-radius:8px;font-size:9.5px;margin-left:4px;vertical-align:middle">'+m+'월</span>';
+  if(oddBtn) oddBtn.innerHTML='홀수월'+(isOdd?tag:'');
+  if(evenBtn) evenBtn.innerHTML='짝수월'+(!isOdd?tag:'');
+})();
 function _autoMeterCycle(w){
   // meterCycle이 이미 설정되어 있으면 그대로
   if(w.meterCycle) return w.meterCycle;
@@ -2810,9 +2819,6 @@ function rdWater(){
   const list=$('water-list'); if(!list) return;
   const q='';
   const bills=(DB.waterBills||[]);
-  // 현재 달 홀짝 판별 (이번달 필터용)
-  const curMonth=new Date().getMonth()+1;
-  const curIsOdd=curMonth%2===1;
   // 건물별 그룹핑
   const grp={};
   DB.buildings.forEach(b=>{ grp[b.id]={bldg:b,items:[]}; });
@@ -2828,10 +2834,6 @@ function rdWater(){
     if(_waterFilter==='all'){ grp[w.bId].items.push(w); }
     else if(_waterFilter==='odd'&&w.meterCycle==='odd'){ grp[w.bId].items.push(w); }
     else if(_waterFilter==='even'&&w.meterCycle==='even'){ grp[w.bId].items.push(w); }
-    else if(_waterFilter==='thisMonth'){
-      const mc=w.meterCycle||'odd';
-      if((mc==='odd'&&curIsOdd)||(mc==='even'&&!curIsOdd)){ grp[w.bId].items.push(w); }
-    }
   });
   let html='';
   const filterMatch=(w,b)=>{
@@ -3068,34 +3070,12 @@ function openWaterSite(url, id){
 // 브라우저 보안(Same-Origin Policy)상 다른 도메인 폼을 JS로 직접 채울 수 없어서
 // window.name에 고객정보를 넣어둔 뒤 북마클릿(사용자가 한 번 설치)으로 자동입력하는 방식
 // ── 1클릭 수도요금 조회 (Edge Function 프록시) ──
-async function fetchWaterBill(id){
+function fetchWaterBill(id){
   const w=(DB.waterBills||[]).find(x=>x.id===id);
   if(!w||!w.custNo){ _waterToast('⚠ 고객번호가 없습니다','#d97706'); return; }
-  const btn=event&&event.target;
-  if(btn){ btn.disabled=true; btn.textContent='⏳ 조회중...'; }
-  _waterToast('🌐 아리수 조회중...');
-  try{
-    const res=await fetch(SB_URL+'/functions/v1/water-proxy',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
-      body:JSON.stringify({custNo:w.custNo})
-    });
-    const data=await res.json();
-    if(!data.ok){
-      _waterToast('⚠ '+( data.error||'조회 실패')+'  — 아리수 직접 조회로 전환','#d97706');
-      openWaterBill(id);
-      return;
-    }
-    // 결과를 모달로 표시
-    console.log('[water-proxy] 응답:', JSON.stringify(data).slice(0,500));
-    try{ _showWaterResult(w, data); }catch(mErr){ console.error('[water-proxy] 모달 에러:',mErr); _waterToast('⚠ 모달 표시 에러: '+mErr.message,'#dc2626'); return; }
-    _waterToast('✅ 조회 완료 — '+(data.amount?Number(data.amount).toLocaleString()+'원':'금액없음')+' / '+(data.period||'기간없음'),'#059669');
-  }catch(err){
-    _waterToast('⚠ 서버 오류 — 아리수 직접 조회로 전환','#d97706');
-    openWaterBill(id);
-  }finally{
-    if(btn){ btn.disabled=false; btn.textContent='🌐 조회'; }
-  }
+  try{ navigator.clipboard.writeText(w.custNo); }catch(_){}
+  window.open('https://i121.seoul.go.kr/CvlSrvc/NR_cgJungInfo.do','_blank');
+  _waterToast('📋 고객번호 '+w.custNo+' 복사됨 — 아리수에서 붙여넣기(Ctrl+V) 후 조회','#0284c7');
 }
 function _showWaterResult(w, data){
   // 기존 모달 재사용 또는 새 모달
@@ -6729,8 +6709,9 @@ const _CHANGELOG=[
   {q:'Gmail 연동 구현',a:'📧 Gmail OAuth 연동 — Google Identity Services(GIS) 동적 로드 + OAuth 2.0 토큰 발급 + Gmail REST API로 한전 메일(cyber@kepco.co.kr) 최근 6개월 검색 + PDF 첨부 자동 추출 + 건물별 자동매칭 저장. 진행상황 모달에서 실시간 로그 표시. Client ID 1회 설정 후 버튼 한 번으로 전자동',done:true},
   {q:'수도 북마클릿 파싱 에러 수정',a:'🐛 _getWaterBookmarklet() 정규식 이스케이핑 버그 수정 — /^\\\\\\\\//.test() 에서 백슬래시 4개→2개로 수정. 디코딩 후 /^\\\\//.test()가 되어 JS파서가 정규식 종료 후 남은 /를 인식 못하는 문제. 수정 후 15377자 북마클릿 정상 파싱 확인',done:true},
   {q:'AI 챗봇 추가',a:'🤖 AI 도우미 챗봇 — 우하단 플로팅 버튼(🤖) 클릭 시 채팅 패널 표시. 카테고리별 메뉴(임대차/관리비/수도전기/세금/시설/법률/BSN.CARE) → 30개+ FAQ 로컬 응답. API 불필요',done:true},
-  {q:'수도요금 1클릭 조회 (Edge Function)',a:'🌐 수도요금 "아리수" 버튼 → "조회" 1클릭으로 변경. Supabase Edge Function이 아리수 서버에 직접 요청(서버→서버, CORS 무관) → 금액/사용량/기간 자동 추출 → 결과 모달에서 확인 후 저장. 북마클릿 불필요. Edge Function 1회 배포 후 모든 PC에서 자동 작동',done:true},
-  {q:'수도요금 홀짝월 필터 & 검침일 자동분류',a:'📊 수도요금 테이블에 홀수월/짝수월/미설정/이번달 필터 추가. 청구 데이터에서 홀짝월 자동 판별(수동설정도 가능). 검침일(매 N일)도 자동 감지하여 표기 — 나중에 고정일정 등록 시 활용',done:true},
+  {q:'수도요금 1클릭 조회 (Edge Function→간편조회)',a:'🌐 수도요금 "조회" 버튼 → 고객번호 클립보드 복사 + 아리수 사이트 새 탭 오픈. 초기엔 Supabase Edge Function 서버프록시 시도했으나 아리수 서버가 서버접근 차단(meta refresh redirect) → 사용자 브라우저에서 직접 조회하는 방식으로 전환. 붙여넣기(Ctrl+V) 후 조회하면 됨',done:true},
+  {q:'수도요금 홀짝월 필터 & 검침일 자동분류',a:'📊 수도요금 테이블에 홀수월/짝수월 필터 추가(미설정 제거, 기본값 홀수월). 청구 데이터에서 홀짝월 자동 판별(수동설정도 가능). 검침일(매 N일)도 자동 감지하여 표기',done:true},
+  {q:'배포방식 Netlify→GitHub Pages 전환',a:'🚀 Netlify 무료 빌드시간(300분/월) 소진 → GitHub Pages로 전환. 정적 HTML 단일파일이라 빌드 불필요, GitHub Pages가 파일 그대로 서빙. _headers(Netlify전용) 삭제, CSP는 기존 meta태그로 충분. 레포 Settings→Pages→main 브랜치 선택만 하면 완료',done:true},
 ];
 // ══════════════════════════════════════════════════════
 // AI 챗봇
