@@ -547,6 +547,27 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   .main,.page{overflow:visible!important}
   .tw{max-height:none!important}
 }
+/* ── AI 챗봇 ── */
+#ai-chat-fab{position:fixed;bottom:20px;right:20px;z-index:9990;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e40af,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 14px rgba(30,64,175,.35);display:flex;align-items:center;justify-content:center;transition:.2s;color:#fff;font-size:24px}
+#ai-chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(30,64,175,.45)}
+#ai-chat-panel{position:fixed;bottom:80px;right:20px;z-index:9991;width:380px;max-width:calc(100vw - 40px);height:520px;max-height:calc(100vh - 120px);background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0}
+#ai-chat-panel.open{display:flex}
+#ai-chat-hd{padding:12px 16px;background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;display:flex;align-items:center;gap:8px;flex-shrink:0}
+#ai-chat-hd h4{margin:0;font-size:14px;font-weight:700;flex:1}
+#ai-chat-hd button{background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;padding:2px 6px}
+#ai-chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f8fafc}
+.ai-msg{max-width:85%;padding:8px 12px;border-radius:10px;font-size:12.5px;line-height:1.55;word-break:break-word;white-space:pre-wrap}
+.ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e2e8f0;color:#1e293b}
+.ai-msg.user{align-self:flex-end;background:#1e40af;color:#fff}
+.ai-msg.typing{color:#94a3b8;font-style:italic;border:1px dashed #cbd5e1}
+#ai-chat-input{display:flex;padding:8px 10px;border-top:1px solid #e2e8f0;gap:6px;flex-shrink:0;background:#fff}
+#ai-chat-input input{flex:1;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12.5px;font-family:inherit;outline:none;transition:.15s}
+#ai-chat-input input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+#ai-chat-input button{background:#1e40af;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+#ai-chat-input button:disabled{opacity:.5;cursor:default}
+#ai-chat-suggest{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}
+#ai-chat-suggest button{background:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;padding:4px 10px;font-size:11px;cursor:pointer;color:#1e40af;font-family:inherit;transition:.1s}
+#ai-chat-suggest button:hover{background:#dbeafe}
 </style>
 </head>
 <body>
@@ -978,9 +999,11 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <span style="font-size:10px;color:var(--t3);margin-left:4px">고객번호·고객명 저장 → 열기 클릭 시 자동 복사 & 사이트 오픈</span>
   </div>
   <div style="padding:4px 12px 20px;height:calc(100vh - 52px);overflow-y:auto">
-    <div style="display:flex;justify-content:center;gap:4px;padding:4px 0 8px;flex-wrap:wrap">
-      <button class="btn pri sm" onclick="openWaterModal()" style="padding:4px 10px">+ 추가</button>
-      <button class="btn sm" onclick="showWaterAutoFillSetup()" title="아리수 자동입력 북마클릿 (1회 설치)" style="padding:4px 10px">⚡ 자동입력</button>
+    <div id="water-filter" style="display:flex;justify-content:center;gap:3px;padding:0 0 8px">
+      <button class="btn sm" data-wf="all" onclick="_setWaterFilter('all')" style="padding:3px 10px;font-size:11px;font-weight:600">전체</button>
+      <button class="btn sm" data-wf="odd" onclick="_setWaterFilter('odd')" style="padding:3px 10px;font-size:11px">홀수월</button>
+      <button class="btn sm" data-wf="even" onclick="_setWaterFilter('even')" style="padding:3px 10px;font-size:11px">짝수월</button>
+      <button class="btn sm" data-wf="thisMonth" onclick="_setWaterFilter('thisMonth')" style="padding:3px 10px;font-size:11px;color:#059669;font-weight:600" title="이번달 검침 대상">📋 이번달</button>
     </div>
     <div id="water-list"></div>
   </div>
@@ -999,6 +1022,17 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 </div>
 
 </main>
+</div>
+
+<!-- AI 챗봇 -->
+<button id="ai-chat-fab" onclick="toggleAiChat()" title="AI 도우미">🤖</button>
+<div id="ai-chat-panel">
+  <div id="ai-chat-hd"><span style="font-size:18px">🤖</span><h4>BSN AI 도우미</h4><button onclick="toggleAiChat()">×</button></div>
+  <div id="ai-chat-msgs">
+    <div class="ai-msg bot">안녕하세요! BSN.CARE AI 도우미입니다. 건물관리에 관한 질문을 해보세요.</div>
+  </div>
+  <div id="ai-chat-suggest"></div>
+  <div id="ai-chat-input"><input id="ai-q" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"><button onclick="aiSend()" id="ai-send-btn">전송</button></div>
 </div>
 
 <!-- 변경이력 패널 -->
@@ -2714,14 +2748,91 @@ function showRentSchPopup(leaseId){
   mo.classList.add('on');
 }
 // ── 수도요금 ──────────────────────────────────────────
+let _waterFilter='all';
+function _setWaterFilter(f){
+  _waterFilter=f;
+  // 버튼 활성화 표시
+  document.querySelectorAll('#water-filter button').forEach(b=>{
+    const wf=b.dataset.wf;
+    if(wf===f){ b.style.background='var(--bl)'; b.style.color='#fff'; b.style.borderColor='var(--bl)'; }
+    else { b.style.background=''; b.style.color=''; b.style.borderColor=''; }
+  });
+  rdWater();
+}
+function _autoMeterCycle(w){
+  // meterCycle이 이미 설정되어 있으면 그대로
+  if(w.meterCycle) return w.meterCycle;
+  // bills에서 최근 청구 기간으로 자동 판별
+  if(w.bills&&w.bills.length){
+    const periods=w.bills.map(b=>parseInt((b.period||'').split('-')[1])).filter(m=>m>0);
+    if(periods.length){
+      const last=periods[periods.length-1];
+      return last%2===1?'odd':'even';
+    }
+  }
+  return 'odd'; // 기본값: 홀수월
+}
+function _autoMeterDay(w){
+  // 이미 수동 설정되어 있으면 그대로
+  if(w.meterDay) return w.meterDay;
+  // bills의 dueDate 또는 period에서 검침일(일자) 패턴 추출
+  if(!w.bills||!w.bills.length) return 0;
+  const days=[];
+  w.bills.forEach(b=>{
+    // dueDate에서 일자 추출 (예: 2024-03-15 → 15)
+    if(b.dueDate){
+      const dm=b.dueDate.match(/(\d{1,2})\s*$/);
+      if(dm) days.push(parseInt(dm[1]));
+      else{
+        const dm2=b.dueDate.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+        if(dm2) days.push(parseInt(dm2[3]));
+      }
+    }
+    // readDate (검침일) 필드가 있으면 사용
+    if(b.readDate){
+      const rm=b.readDate.match(/(\d{1,2})\s*$/);
+      if(rm) days.push(parseInt(rm[1]));
+      else{
+        const rm2=b.readDate.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+        if(rm2) days.push(parseInt(rm2[3]));
+      }
+    }
+  });
+  if(!days.length) return 0;
+  // 최빈값(mode) 계산 — 가장 자주 나오는 일자가 검침일
+  const freq={};
+  days.forEach(d=>{ freq[d]=(freq[d]||0)+1; });
+  let best=0, bestCnt=0;
+  Object.keys(freq).forEach(k=>{ if(freq[k]>bestCnt){ bestCnt=freq[k]; best=parseInt(k); }});
+  return best;
+}
 function rdWater(){
   const list=$('water-list'); if(!list) return;
   const q='';
   const bills=(DB.waterBills||[]);
+  // 현재 달 홀짝 판별 (이번달 필터용)
+  const curMonth=new Date().getMonth()+1;
+  const curIsOdd=curMonth%2===1;
   // 건물별 그룹핑
   const grp={};
   DB.buildings.forEach(b=>{ grp[b.id]={bldg:b,items:[]}; });
-  bills.forEach(w=>{ if(grp[w.bId]) grp[w.bId].items.push(w); });
+  bills.forEach(w=>{
+    if(!grp[w.bId]) return;
+    // 자동분류: meterCycle 없으면 bills에서 추론
+    const cycle=_autoMeterCycle(w);
+    if(cycle && !w.meterCycle){ w.meterCycle=cycle; } // DB에도 반영 (다음 sv때 저장)
+    // 검침일 자동감지
+    const mDay=_autoMeterDay(w);
+    if(mDay && !w.meterDay){ w.meterDay=mDay; }
+    // 필터 적용
+    if(_waterFilter==='all'){ grp[w.bId].items.push(w); }
+    else if(_waterFilter==='odd'&&w.meterCycle==='odd'){ grp[w.bId].items.push(w); }
+    else if(_waterFilter==='even'&&w.meterCycle==='even'){ grp[w.bId].items.push(w); }
+    else if(_waterFilter==='thisMonth'){
+      const mc=w.meterCycle||'odd';
+      if((mc==='odd'&&curIsOdd)||(mc==='even'&&!curIsOdd)){ grp[w.bId].items.push(w); }
+    }
+  });
   let html='';
   const filterMatch=(w,b)=>{
     if(!q) return true;
@@ -2730,13 +2841,13 @@ function rdWater(){
   // 한 눈에 보이는 테이블 — 중앙정렬, 가독성 있는 크기
   html+='<div style="display:flex;justify-content:center;padding:6px">';
   html+='<table style="border-collapse:collapse;font-size:13px;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);overflow:hidden;text-align:center;width:auto;max-width:100%;box-shadow:0 1px 2px rgba(0,0,0,.03)">';
-  html+='<thead><tr style="background:#f8fafc;color:var(--t3);font-weight:700;font-size:11.5px;border-bottom:2px solid var(--ln)"><th style="padding:8px 14px;border-right:1px solid var(--ln)">건물</th><th style="padding:8px 14px;border-right:1px solid var(--ln)">고객번호</th><th style="padding:8px 14px;border-right:1px solid var(--ln)">고객명</th><th style="padding:8px 14px;border-right:1px solid var(--ln)">메모</th><th style="padding:8px 14px">작업</th></tr></thead><tbody>';
+  html+='<thead><tr style="background:#f8fafc;color:var(--t3);font-weight:700;font-size:11.5px;border-bottom:2px solid var(--ln)"><th style="padding:8px 14px;border-right:1px solid var(--ln)">건물</th><th style="padding:8px 14px;border-right:1px solid var(--ln)">고객번호</th><th style="padding:8px 14px;border-right:1px solid var(--ln)">고객명</th><th style="padding:8px 10px;border-right:1px solid var(--ln)">검침</th><th style="padding:8px 14px;border-right:1px solid var(--ln)">메모</th><th style="padding:8px 14px">작업</th></tr></thead><tbody>';
   Object.values(grp).forEach(g=>{
     const b=g.bldg;
     const items=g.items.filter(w=>filterMatch(w,b));
-    if(!items.length && q) return;
+    if(!items.length && (q || _waterFilter!=='all')) return;
     if(!items.length){
-      html+='<tr style="border-top:1px solid var(--ln);background:#fafcff"><td style="padding:7px 14px;font-weight:600;font-size:13px;border-right:1px solid var(--ln)">'+esc(b.name)+'</td><td colspan="3" style="padding:7px 14px;color:var(--t4);font-size:12px;border-right:1px solid var(--ln)">등록된 고객정보 없음</td><td style="padding:6px 12px"><button class="btn sm" style="padding:4px 10px;font-size:12px" onclick="openWaterModal(null,'+b.id+')">+ 추가</button></td></tr>';
+      html+='<tr style="border-top:1px solid var(--ln);background:#fafcff"><td style="padding:7px 14px;font-weight:600;font-size:13px;border-right:1px solid var(--ln)">'+esc(b.name)+'</td><td colspan="4" style="padding:7px 14px;color:var(--t4);font-size:12px;border-right:1px solid var(--ln)">등록된 고객정보 없음</td><td style="padding:6px 12px"><button class="btn sm" style="padding:4px 10px;font-size:12px" onclick="openWaterModal(null,'+b.id+')">+ 추가</button></td></tr>';
       return;
     }
     items.forEach((w,idx)=>{
@@ -2747,10 +2858,16 @@ function rdWater(){
       }
       html+='<td style="padding:8px 14px;font-family:\'Pretendard\',monospace;font-weight:700;color:var(--bl);user-select:all;white-space:nowrap;font-size:13.5px;letter-spacing:0.3px;border-right:1px solid var(--ln)">'+esc(w.custNo||'')+'</td>';
       html+='<td style="padding:8px 14px;white-space:nowrap;font-size:13px;border-right:1px solid var(--ln)">'+esc(w.custName||'')+'</td>';
+      const mc=w.meterCycle||'odd';
+      const mcLabel=mc==='odd'?'홀수월':'짝수월';
+      const mcColor=mc==='odd'?'#0284c7':'#d97706';
+      const mDay=w.meterDay||0;
+      const mDayStr=mDay?'매'+mDay+'일':'';
+      html+='<td style="padding:6px 8px;border-right:1px solid var(--ln);line-height:1.5"><span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10.5px;font-weight:600;color:#fff;background:'+mcColor+'">'+mcLabel+'</span>'+(mDayStr?'<br><span style="font-size:10px;color:var(--t3)">'+mDayStr+'</span>':'')+'</td>';
       html+='<td style="padding:7px 14px;color:var(--t2);font-size:11.5px;white-space:pre-line;line-height:1.45;text-align:left;max-width:360px;border-right:1px solid var(--ln)">'+esc(w.note||'')+'</td>';
       html+='<td style="padding:6px 10px;white-space:nowrap">';
       const _bc=(w.bills&&w.bills.length)?w.bills.length:0;
-      html+='<button class="btn pri sm" onclick="event.stopPropagation();openWaterBill('+w.id+')" style="padding:5px 11px;font-size:12px;background:#0284c7;border-color:#0284c7" title="아리수 열기 → 💧 북마클릿 클릭하면 자동 저장">🌐 아리수</button> ';
+      html+='<button class="btn pri sm" onclick="event.stopPropagation();fetchWaterBill('+w.id+')" style="padding:5px 11px;font-size:12px;background:#0284c7;border-color:#0284c7" title="1클릭 수도요금 조회">🌐 조회</button> ';
       if(_bc){ html+='<button class="btn sm" onclick="event.stopPropagation();openWaterBillViewer('+w.id+')" style="padding:5px 9px;font-size:11.5px;background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd" title="저장된 청구서 '+_bc+'장 보기">📄 '+_bc+'</button> '; }
       html+='<button class="btn sm del" onclick="event.stopPropagation();delWater('+w.id+')" style="padding:5px 9px;font-size:12px">×</button>';
       html+='</td></tr>';
@@ -2770,11 +2887,11 @@ function rdWater(){
 }
 let _waterFormSnap='';
 function _snapWater(){
-  return ($('fw-id')?$('fw-id').value:'')+'|'+($('fw-b')?$('fw-b').value:'')+'|'+($('fw-cn')?$('fw-cn').value:'')+'|'+($('fw-cm')?$('fw-cm').value:'')+'|'+($('fw-note')?$('fw-note').value:'');
+  return ($('fw-id')?$('fw-id').value:'')+'|'+($('fw-b')?$('fw-b').value:'')+'|'+($('fw-cn')?$('fw-cn').value:'')+'|'+($('fw-mc')?$('fw-mc').value:'')+'|'+($('fw-cm')?$('fw-cm').value:'')+'|'+($('fw-note')?$('fw-note').value:'');
 }
 function _saveWaterDraft(){
   try{
-    const d={id:$('fw-id').value||'',bId:$('fw-b').value||'',custNo:$('fw-cn').value||'',custName:$('fw-cm').value||'',note:$('fw-note').value||'',ts:Date.now()};
+    const d={id:$('fw-id').value||'',bId:$('fw-b').value||'',custNo:$('fw-cn').value||'',meterCycle:$('fw-mc').value||'',custName:$('fw-cm').value||'',note:$('fw-note').value||'',ts:Date.now()};
     // 드래프트는 '신규 추가' 중일 때만(= id 비어있을 때) 저장하여 편집 대상과 섞이지 않게
     if(!d.id && (d.custNo||d.custName||d.note)){
       localStorage.setItem('bsn_water_draft', JSON.stringify(d));
@@ -2818,7 +2935,10 @@ function openWaterModal(id, bId){
       <div style="padding:8px 14px 6px;display:flex;flex-direction:column;gap:6px;align-items:center">
         <input type="hidden" id="fw-id">
         <div class="fg" style="margin:0;width:100%;display:flex;align-items:center;gap:8px"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">건물</label><select id="fw-b" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></select></div>
-        <div class="fg" style="margin:0;width:100%;display:flex;align-items:center;gap:8px"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">고객번호</label><input id="fw-cn" placeholder="예: 029056246" autocomplete="off" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></div>
+        <div style="margin:0;width:100%;display:flex;align-items:center;gap:8px">
+          <div class="fg" style="margin:0;display:flex;align-items:center;gap:8px;flex:1"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">고객번호</label><input id="fw-cn" placeholder="예: 029056246" autocomplete="off" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></div>
+          <div class="fg" style="margin:0;display:flex;align-items:center;gap:6px;flex-shrink:0"><label style="font-size:11.5px;color:var(--t3);white-space:nowrap">검침</label><select id="fw-mc" style="font-size:12px;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-family:inherit"><option value="odd">홀수월(1,3,5..)</option><option value="even">짝수월(2,4,6..)</option></select></div>
+        </div>
         <div class="fg" style="margin:0;width:100%;display:flex;align-items:center;gap:8px"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">고객명</label><input id="fw-cm" placeholder="예: 프로젝트에이스주식회사" autocomplete="off" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></div>
         <div class="fg" style="margin:0;width:100%;display:flex;align-items:flex-start;gap:8px"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right;padding-top:6px">메모</label><textarea id="fw-note" rows="2" placeholder="예: 일반용 · 검침일: 짝수월 · 기타 특이사항" style="font-size:12.5px;padding:5px 8px;flex:1;box-sizing:border-box;line-height:1.4;resize:vertical"></textarea></div>
       </div>
@@ -2835,7 +2955,7 @@ function openWaterModal(id, bId){
     mo.addEventListener('keydown',function(ev){ if(ev.key==='Escape') closeWaterModalGuarded(); });
     document.body.appendChild(mo);
     // 입력 감지 → 드래프트 자동 저장
-    ['fw-cn','fw-cm','fw-note','fw-b'].forEach(id=>{
+    ['fw-cn','fw-mc','fw-cm','fw-note','fw-b'].forEach(id=>{
       const el=$(id); if(el){
         el.addEventListener('input',_saveWaterDraft);
         el.addEventListener('change',_saveWaterDraft);
@@ -2846,6 +2966,7 @@ function openWaterModal(id, bId){
   $('fw-id').value=w?w.id:'';
   $('fw-b').value=w?w.bId:(bId||bldgs[0].id);
   $('fw-cn').value=w?(w.custNo||''):'';
+  $('fw-mc').value=w?(w.meterCycle||'odd'):'odd';
   $('fw-cm').value=w?(w.custName||''):'';
   $('fw-note').value=w?(w.note||''):'';
   $('mo-water-t').textContent=w?'수도요금 고객정보 수정':'수도요금 고객정보 추가';
@@ -2857,6 +2978,7 @@ function openWaterModal(id, bId){
     if(draft && (draft.custNo||draft.custName||draft.note)){
       if(draft.bId && bldgs.find(b=>String(b.id)===String(draft.bId))) $('fw-b').value=draft.bId;
       $('fw-cn').value=draft.custNo||'';
+      $('fw-mc').value=draft.meterCycle||'';
       $('fw-cm').value=draft.custName||'';
       $('fw-note').value=draft.note||'';
       if(banner) banner.style.display='flex';
@@ -2871,14 +2993,15 @@ function saveWater(){
   const id=parseInt($('fw-id').value)||0;
   const bId=parseInt($('fw-b').value);
   const custNo=($('fw-cn').value||'').trim();
+  const meterCycle=($('fw-mc').value||'');
   const custName=($('fw-cm').value||'').trim();
   const note=($('fw-note').value||'').trim();
   if(!custNo){ alert('고객번호를 입력하세요.'); return; }
   if(id){
     const i=DB.waterBills.findIndex(x=>x.id===id);
-    if(i>=0) DB.waterBills[i]={...DB.waterBills[i],bId,custNo,custName,note};
+    if(i>=0) DB.waterBills[i]={...DB.waterBills[i],bId,custNo,custName,note,meterCycle,meterDay:DB.waterBills[i].meterDay||0};
   } else {
-    DB.waterBills.push({id:nid(),bId,custNo,custName,note});
+    DB.waterBills.push({id:nid(),bId,custNo,custName,note,meterCycle,meterDay:0});
   }
   _clearWaterDraft();
   _waterFormSnap=_snapWater();
@@ -2944,6 +3067,125 @@ function openWaterSite(url, id){
 // 요금조회 바로가기 + 자동입력
 // 브라우저 보안(Same-Origin Policy)상 다른 도메인 폼을 JS로 직접 채울 수 없어서
 // window.name에 고객정보를 넣어둔 뒤 북마클릿(사용자가 한 번 설치)으로 자동입력하는 방식
+// ── 1클릭 수도요금 조회 (Edge Function 프록시) ──
+async function fetchWaterBill(id){
+  const w=(DB.waterBills||[]).find(x=>x.id===id);
+  if(!w||!w.custNo){ _waterToast('⚠ 고객번호가 없습니다','#d97706'); return; }
+  const btn=event&&event.target;
+  if(btn){ btn.disabled=true; btn.textContent='⏳ 조회중...'; }
+  _waterToast('🌐 아리수 조회중...');
+  try{
+    const res=await fetch(SB_URL+'/functions/v1/water-proxy',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({custNo:w.custNo})
+    });
+    const data=await res.json();
+    if(!data.ok){
+      _waterToast('⚠ '+( data.error||'조회 실패')+'  — 아리수 직접 조회로 전환','#d97706');
+      openWaterBill(id);
+      return;
+    }
+    // 결과를 모달로 표시
+    console.log('[water-proxy] 응답:', JSON.stringify(data).slice(0,500));
+    try{ _showWaterResult(w, data); }catch(mErr){ console.error('[water-proxy] 모달 에러:',mErr); _waterToast('⚠ 모달 표시 에러: '+mErr.message,'#dc2626'); return; }
+    _waterToast('✅ 조회 완료 — '+(data.amount?Number(data.amount).toLocaleString()+'원':'금액없음')+' / '+(data.period||'기간없음'),'#059669');
+  }catch(err){
+    _waterToast('⚠ 서버 오류 — 아리수 직접 조회로 전환','#d97706');
+    openWaterBill(id);
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='🌐 조회'; }
+  }
+}
+function _showWaterResult(w, data){
+  // 기존 모달 재사용 또는 새 모달
+  let mo=$('mo-water-result');
+  if(mo) mo.remove();
+  mo=document.createElement('div');
+  mo.id='mo-water-result';
+  mo.className='ov';
+  const period=data.period||'기간 미확인';
+  const amount=data.amount?Number(data.amount).toLocaleString()+'원':'금액 미확인';
+  const usage=data.usage?(data.usage+'㎥'):'';
+  const custName=data.custName||w.custName||'';
+  let billsHtml='';
+  if(data.bills&&data.bills.length){
+    billsHtml='<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:12px">';
+    billsHtml+='<thead><tr style="background:#f1f5f9;font-weight:600"><th style="padding:6px 10px;border:1px solid #e2e8f0;text-align:left">기간</th><th style="padding:6px 10px;border:1px solid #e2e8f0;text-align:right">금액</th></tr></thead><tbody>';
+    data.bills.forEach(function(b){
+      billsHtml+='<tr><td style="padding:6px 10px;border:1px solid #e2e8f0">'+esc(b.period)+'</td><td style="padding:6px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:600">'+Number(b.amount).toLocaleString()+'원</td></tr>';
+    });
+    billsHtml+='</tbody></table>';
+  }
+  mo.innerHTML=`<div class="modal" style="width:min(440px,92vw);padding:0">
+    <div class="mo-hd" style="padding:12px 16px;background:#0284c7;color:#fff;border-radius:8px 8px 0 0;border-bottom:none">
+      <div style="display:flex;align-items:center;gap:8px;flex:1"><span style="font-size:18px">💧</span><h3 style="color:#fff;font-size:14px;margin:0">수도요금 조회 결과</h3></div>
+      <button onclick="this.closest('.ov').remove()" style="color:#fff;font-size:20px;background:transparent;border:none;cursor:pointer;padding:0 4px">×</button>
+    </div>
+    <div style="padding:16px 20px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="background:#f0f9ff;padding:10px;border-radius:6px;text-align:center">
+          <div style="font-size:10px;color:#64748b;margin-bottom:4px">고객번호</div>
+          <div style="font-size:14px;font-weight:700;color:#0369a1">${esc(w.custNo)}</div>
+        </div>
+        <div style="background:#f0f9ff;padding:10px;border-radius:6px;text-align:center">
+          <div style="font-size:10px;color:#64748b;margin-bottom:4px">고객명</div>
+          <div style="font-size:14px;font-weight:700;color:#0369a1">${esc(custName)}</div>
+        </div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:8px;padding:14px;text-align:center;margin-bottom:12px">
+        <div style="font-size:11px;color:#92400e;margin-bottom:4px">${esc(period)}</div>
+        <div style="font-size:22px;font-weight:800;color:#b45309">${amount}</div>
+        ${usage?'<div style="font-size:11px;color:#92400e;margin-top:4px">사용량: '+esc(usage)+'</div>':''}
+      </div>
+      ${(function(){
+        if(!data.meterDay && !data.meterCycle) return '';
+        let h='<div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">';
+        if(data.meterDay) h+='<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">검침일: 매 '+data.meterDay+'일</span>';
+        if(data.meterCycle){
+          const bg=data.meterCycle==='odd'?'#dbeafe;color:#1d4ed8':'#fef3c7;color:#b45309';
+          const lb=data.meterCycle==='odd'?'홀수월':'짝수월';
+          const ms=(data.meterMonths||[]).map(function(m){return m+'월'}).join(',');
+          h+='<span style="background:'+bg+';padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">'+lb+(ms?' ('+ms+')':'')+'</span>';
+        }
+        h+='</div>'; return h;
+      })()}
+      ${billsHtml}
+      ${data.htmlPreview?'<details style="margin-top:10px"><summary style="font-size:10px;color:#94a3b8;cursor:pointer">원본 데이터 미리보기</summary><div style="font-size:10px;color:#64748b;margin-top:6px;max-height:100px;overflow:auto;white-space:pre-wrap;background:#f8fafc;padding:8px;border-radius:4px">'+esc(data.htmlPreview)+'</div></details>':''}
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+        <button class="btn sm" onclick="this.closest('.ov').remove()" style="padding:6px 16px;font-size:12px">닫기</button>
+        <button class="btn pri sm" onclick="_saveWaterFromProxy(${w.id},${JSON.stringify(JSON.stringify(data))})" style="padding:6px 16px;font-size:12px;background:#059669;border-color:#059669">💾 저장</button>
+      </div>
+    </div>
+  </div>`;
+  mo.addEventListener('click',function(ev){ if(ev.target===mo) mo.remove(); });
+  document.body.appendChild(mo);
+}
+function _saveWaterFromProxy(wid, dataStr){
+  try{
+    const data=JSON.parse(dataStr);
+    const w=(DB.waterBills||[]).find(x=>x.id===wid);
+    if(!w) return;
+    if(!w.bills) w.bills=[];
+    const period=data.period||new Date().toISOString().slice(0,7);
+    // 중복 체크
+    const dup=w.bills.find(b=>b.period===period);
+    if(dup){
+      if(!confirm(period+' 청구서가 이미 있습니다. 덮어쓸까요?')) return;
+      Object.assign(dup,{amount:data.amount||'',usage:data.usage||'',custName:data.custName||'',fetchedAt:new Date().toISOString(),source:'proxy'});
+    }else{
+      w.bills.push({period:period,amount:data.amount||'',usage:data.usage||'',custName:data.custName||'',fetchedAt:new Date().toISOString(),source:'proxy'});
+    }
+    // 프록시에서 파싱된 검침일/홀짝월 자동 저장
+    if(data.meterDay && data.meterDay>0) w.meterDay=data.meterDay;
+    if(data.meterCycle) w.meterCycle=data.meterCycle;
+    sv();
+    _waterToast('✅ '+period+' 청구서 저장됨','#059669');
+    const mo=$('mo-water-result');
+    if(mo) mo.remove();
+    rdWater();
+  }catch(e){ _waterToast('⚠ 저장 실패: '+e.message,'#dc2626'); }
+}
 function openWaterBill(id){
   const w=(DB.waterBills||[]).find(x=>x.id===id);
   if(!w){ openWaterSite(null); return; }
@@ -3092,11 +3334,12 @@ function _getWaterBookmarklet(){
   // ── capture: zoom out + getDisplayMedia ──
   parts.push("var _origZoom='';");
   parts.push("function capture(){");
+  // 캡처 전: BSN UI 요소 모두 숨기기 (토스트/로그/팁이 캡처에 안 찍히게)
+  parts.push("try{var _h=['bsn_ts','bsn_dbg','bsn_tip'];_h.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});}catch(_){}");
   // 캡처 전: 파란박스가 뷰포트보다 크면 zoom out
   parts.push("var blueEl=document.querySelector('#bsn_ov')||document.querySelector('.box_type1,.bill_box,.tbl_view,#printArea,.sub_content table.tbl_type1');if(!blueEl){var tbls=document.querySelectorAll('table');var best=null,bestA=0;for(var ti=0;ti<tbls.length;ti++){var tb=tbls[ti];if(tb.offsetParent===null)continue;var rr=tb.getBoundingClientRect();if(rr.width*rr.height>bestA&&rr.width>200){bestA=rr.width*rr.height;best=tb;}}blueEl=best;}");
-  parts.push("if(blueEl){try{blueEl.scrollIntoView({block:'start',behavior:'instant'});}catch(_){}var bh=blueEl.scrollHeight||blueEl.offsetHeight;var vh=window.innerHeight;if(bh>vh-40){var z=Math.max(0.35,(vh-40)/bh);_origZoom=document.body.style.zoom||'';document.body.style.zoom=z;_l('🔍 zoom out: '+Math.round(z*100)+'% (요소 '+bh+'px, 뷰포트 '+vh+'px)','#7dd3fc');try{blueEl.scrollIntoView({block:'start',behavior:'instant'});}catch(_){}}}");
-  parts.push("_t('🎥 화면공유 요청중...','#0284c7');_l('🎥 getDisplayMedia','#7dd3fc');");
-  parts.push("var tip=document.createElement('div');tip.id='bsn_tip';tip.innerHTML='🎬 <b>Chrome 탭 → 이 탭</b> 선택 → 공유';tip.style.cssText='position:fixed;top:0;left:0;right:0;background:#0284c7;color:#fff;padding:12px;text-align:center;font-weight:700;font-family:sans-serif;z-index:2147483646;font-size:14px';var ot=document.getElementById('bsn_tip');if(ot)ot.remove();document.body.appendChild(tip);");
+  parts.push("if(blueEl){try{blueEl.scrollIntoView({block:'start',behavior:'instant'});}catch(_){}var bh=blueEl.scrollHeight||blueEl.offsetHeight;var vh=window.innerHeight;if(bh>vh-40){var z=Math.max(0.35,(vh-40)/bh);_origZoom=document.body.style.zoom||'';document.body.style.zoom=z;try{blueEl.scrollIntoView({block:'start',behavior:'instant'});}catch(_){}}}");
+  parts.push("_l('🎥 getDisplayMedia','#7dd3fc');");
   parts.push("if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){alert('화면공유 미지원');return;}");
   parts.push("navigator.mediaDevices.getDisplayMedia({video:{cursor:'never'},audio:false,preferCurrentTab:true,selfBrowserSurface:'include',surfaceSwitching:'exclude'}).then(function(stream){");
   parts.push("var tp=document.getElementById('bsn_tip');if(tp)tp.remove();");
@@ -3123,7 +3366,7 @@ function _getWaterBookmarklet(){
   // onclick에서 URL 추출 시도 (window.open('url') 패턴)
   parts.push("var printUrl=null;if(pBtn){var oc=pBtn.getAttribute('onclick')||pBtn.getAttribute('href')||'';var qi=oc.indexOf(\"'\");var qi2=oc.indexOf('\"');var qc=(qi>=0&&(qi2<0||qi<qi2))?\"'\":'\"';var s1=oc.indexOf(qc);if(s1>=0){var s2=oc.indexOf(qc,s1+1);if(s2>s1)printUrl=oc.slice(s1+1,s2);}if(printUrl&&printUrl.indexOf('.')<0&&printUrl.indexOf('/')<0)printUrl=null;_l('🖨 인쇄버튼: '+(printUrl||'URL없음')+' oc='+oc.slice(0,50),'#7dd3fc');}");
   // 인쇄 URL로 fetch → 오버레이
-  parts.push("if(printUrl){_t('🖨 인쇄페이지 가져오는중...','#0284c7');var fullUrl=printUrl;if(printUrl.indexOf('http')!==0)fullUrl=location.origin+(/^\\\\//.test(printUrl)?'':'/')+printUrl;fetch(fullUrl,{credentials:'same-origin'}).then(function(r){return r.text();}).then(function(html){_l('✅ 인쇄페이지 수신 '+html.length+'자','#86efac');var ov=document.createElement('div');ov.id='bsn_ov';ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:2147483640;overflow:auto;padding:0';var ifr=document.createElement('iframe');ifr.style.cssText='width:100%;height:100%;border:none';ov.appendChild(ifr);document.body.appendChild(ov);ifr.contentDocument.open();ifr.contentDocument.write(html);ifr.contentDocument.close();_t('📸 인쇄 화면 캡처중...','#059669');setTimeout(capture,800);}).catch(function(e){_l('⚠ 인쇄페이지 fetch 실패: '+e.message+' — 일반 캡처','#fca5a5');doNormalCapture();});}else{_l('ℹ 인쇄버튼 없거나 URL 추출 불가 — 일반 캡처','#fde68a');doNormalCapture();}}");
+  parts.push("if(printUrl){_t('🖨 인쇄페이지 가져오는중...','#0284c7');var fullUrl=printUrl;if(printUrl.indexOf('http')!==0)fullUrl=location.origin+(/^\\//.test(printUrl)?'':'/')+printUrl;fetch(fullUrl,{credentials:'same-origin'}).then(function(r){return r.text();}).then(function(html){_l('✅ 인쇄페이지 수신 '+html.length+'자','#86efac');var ov=document.createElement('div');ov.id='bsn_ov';ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:2147483640;overflow:auto;padding:0';var ifr=document.createElement('iframe');ifr.style.cssText='width:100%;height:100%;border:none';ov.appendChild(ifr);document.body.appendChild(ov);ifr.contentDocument.open();ifr.contentDocument.write(html);ifr.contentDocument.close();_t('📸 인쇄 화면 캡처중...','#059669');setTimeout(capture,800);}).catch(function(e){_l('⚠ 인쇄페이지 fetch 실패: '+e.message+' — 일반 캡처','#fca5a5');doNormalCapture();});}else{_l('ℹ 인쇄버튼 없거나 URL 추출 불가 — 일반 캡처','#fde68a');doNormalCapture();}}");
   // 일반 캡처 (인쇄페이지 실패시)
   parts.push("function doNormalCapture(){var blueEl=document.querySelector('.box_type1,.bill_box,.tbl_view,#printArea');if(blueEl){try{blueEl.scrollIntoView({block:'start',behavior:'instant'});}catch(_){}}setTimeout(capture,500);}");
   // ── fetchQuery: fetch로 폼 POST (페이지이동 없이 조회) ──
@@ -3154,7 +3397,7 @@ function _getWaterBookmarklet(){
   parts.push("var iNo=pk('input[name*=\"custNo\" i],input[id*=\"custNo\" i]',false)||pk('input[name*=\"ntcNo\" i],input[id*=\"ntcNo\" i]',false)||pk('input[name*=\"cst\" i],input[id*=\"cst\" i]',true)||pk('input[placeholder*=\"고객번호\"],input[placeholder*=\"납부자번호\"]',false)||byLabel('고객번호')||byLabel('납부자번호')||pk('form input[type=\"text\"]',true);");
   parts.push("var iNm=vNm?(pk('input[name*=\"custNm\" i],input[id*=\"custNm\" i]',false)||pk('input[name*=\"custName\" i],input[id*=\"custName\" i]',false)||pk('input[placeholder*=\"고객명\"]',false)||byLabel('사용자명')||byLabel('고객명')):null;");
   // ── 복원모드 (sessionStorage에서 복원된 경우) ──
-  parts.push("if(fromSS){var urlNow=(location.pathname||'')+(location.search||'');if(/cgTotal|Total\\\\.do|goTotal/i.test(urlNow)){_l('↩ 전체보기→정기분 자동이동','#fca5a5');location.href='https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgJungInfo.do?_m=m1_1_1';return;}_l('🔄 복원모드 — 캡처 시작','#86efac');_t('🔄 복원됨 — 캡처중','#059669');waitCap();return;}");
+  parts.push("if(fromSS){var urlNow=(location.pathname||'')+(location.search||'');if(/cgTotal|Total\\\\.do|goTotal/i.test(urlNow)){_l('↩ 전체보기→정기분 자동이동','#fca5a5');location.href='https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgJungInfo.do?_m=m1_1_1';return;}_l('🔄 복원모드 — 바로 캡처','#86efac');tryPrintPage();return;}");
   // ── 일반모드: 입력 → fetch 조회 → 캡처 ──
   parts.push("if(iNo&&(!iNo.value||iNo.value!==vNo)){fill(iNo,vNo);if(iNm&&iNm!==iNo)fill(iNm,vNm);_l('⚡ 고객번호 입력완료','#86efac');_t('⚡ 입력완료 — 조회중...','#0284c7');");
   // fetch 방식 시도
@@ -6484,7 +6727,126 @@ const _CHANGELOG=[
   {q:'건축물대장/계약서 안열림, 수정삭제 없음',a:'📂 건축물대장·관리계약서 배지 → 클릭 시 드롭다운 메뉴(열기/수정/삭제) 표시. 기존 우클릭 삭제(발견 어려움) 대체. 관리계약서도 동일 메뉴 추가',done:true},
   {q:'호실수정 이미지 삭제안됨 (PDF만 삭제됨)',a:'🐛 deleteFromModal()에서 t.data(단일 PDF 필드만) 체크하던 것을 _getDocData()(복수 이미지 contractFiles 포함)로 변경. 이미지 파일도 정상 삭제 가능',done:true},
   {q:'Gmail 연동 구현',a:'📧 Gmail OAuth 연동 — Google Identity Services(GIS) 동적 로드 + OAuth 2.0 토큰 발급 + Gmail REST API로 한전 메일(cyber@kepco.co.kr) 최근 6개월 검색 + PDF 첨부 자동 추출 + 건물별 자동매칭 저장. 진행상황 모달에서 실시간 로그 표시. Client ID 1회 설정 후 버튼 한 번으로 전자동',done:true},
+  {q:'수도 북마클릿 파싱 에러 수정',a:'🐛 _getWaterBookmarklet() 정규식 이스케이핑 버그 수정 — /^\\\\\\\\//.test() 에서 백슬래시 4개→2개로 수정. 디코딩 후 /^\\\\//.test()가 되어 JS파서가 정규식 종료 후 남은 /를 인식 못하는 문제. 수정 후 15377자 북마클릿 정상 파싱 확인',done:true},
+  {q:'AI 챗봇 추가',a:'🤖 AI 도우미 챗봇 — 우하단 플로팅 버튼(🤖) 클릭 시 채팅 패널 표시. 카테고리별 메뉴(임대차/관리비/수도전기/세금/시설/법률/BSN.CARE) → 30개+ FAQ 로컬 응답. API 불필요',done:true},
+  {q:'수도요금 1클릭 조회 (Edge Function)',a:'🌐 수도요금 "아리수" 버튼 → "조회" 1클릭으로 변경. Supabase Edge Function이 아리수 서버에 직접 요청(서버→서버, CORS 무관) → 금액/사용량/기간 자동 추출 → 결과 모달에서 확인 후 저장. 북마클릿 불필요. Edge Function 1회 배포 후 모든 PC에서 자동 작동',done:true},
+  {q:'수도요금 홀짝월 필터 & 검침일 자동분류',a:'📊 수도요금 테이블에 홀수월/짝수월/미설정/이번달 필터 추가. 청구 데이터에서 홀짝월 자동 판별(수동설정도 가능). 검침일(매 N일)도 자동 감지하여 표기 — 나중에 고정일정 등록 시 활용',done:true},
 ];
+// ══════════════════════════════════════════════════════
+// AI 챗봇
+// ══════════════════════════════════════════════════════
+let _aiChatOpen=false;
+const _AI_CATS=[
+  {label:'📋 임대차',items:['계약 갱신 절차','보증금 반환','권리금 보호','전대(재임대)','확정일자/대항력','계약서 작성 항목']},
+  {label:'💰 관리비',items:['관리비 정산 방법','관리비 항목 구성','관리비 연체 처리']},
+  {label:'💧 수도/전기',items:['수도요금 분담 기준','전기요금 안분 계산','수도요금 조회(아리수)','전기요금 관리(한전)']},
+  {label:'🏛 세금',items:['부가가치세(임대)','종합소득세(임대소득)','재산세/취득세']},
+  {label:'🔧 시설',items:['수선 의무(누수 등)','소방 점검','승강기 관리','원상복구 기준']},
+  {label:'⚖ 법률',items:['내용증명 활용','소송/분쟁 해결']},
+  {label:'🏠 BSN.CARE',items:['호실 추가 방법','건물 등록','청구서 발행','메모 기능','캘린더/일정','만료일 관리','전체 기능 안내']},
+];
+let _aiCatLevel=0; // 0=카테고리, 1=항목, 2=숨김(대화중)
+function toggleAiChat(){
+  _aiChatOpen=!_aiChatOpen;
+  const p=$('ai-chat-panel');
+  if(p) p.classList.toggle('open',_aiChatOpen);
+  if(_aiChatOpen){ _aiShowCats(); setTimeout(()=>{const q=$('ai-q');if(q)q.focus();},200); }
+}
+function _aiShowCats(){
+  const sg=$('ai-chat-suggest'); if(!sg) return;
+  _aiCatLevel=0;
+  sg.innerHTML=_AI_CATS.map((c,i)=>`<button onclick="_aiShowItems(${i})">${c.label}</button>`).join('');
+}
+function _aiShowItems(ci){
+  const sg=$('ai-chat-suggest'); if(!sg) return;
+  const cat=_AI_CATS[ci]; if(!cat) return;
+  _aiCatLevel=1;
+  sg.innerHTML=`<button onclick="_aiShowCats()" style="background:#f1f5f9;border-color:#cbd5e1;color:#64748b">← 뒤로</button>`+
+    cat.items.map(it=>`<button onclick="aiAsk('${it}')">${it}</button>`).join('');
+}
+function aiAsk(txt){ const q=$('ai-q'); if(q){q.value=txt;} aiSend(); }
+function _aiAddMsg(role,text){
+  const c=$('ai-chat-msgs'); if(!c) return;
+  const d=document.createElement('div');
+  d.className='ai-msg '+(role==='user'?'user':'bot');
+  d.textContent=text;
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+  return d;
+}
+function aiSend(){
+  const q=$('ai-q'); if(!q) return;
+  const txt=q.value.trim(); if(!txt) return;
+  q.value='';
+  _aiAddMsg('user',txt);
+  const answer=_aiLocalAnswer(txt);
+  _aiAddMsg('bot',answer);
+  // 답변 후 카테고리 다시 표시
+  _aiShowCats();
+  q.focus();
+}
+function _aiLocalAnswer(q){
+  const raw=q;
+  q=q.replace(/\s/g,'').toLowerCase();
+  // ── 건물관리 FAQ (로컬 전용, API 불필요) ──
+  const faq=[
+    // 임대차 계약
+    {k:/임대차.*갱신|계약.*갱신|갱신.*절차|갱신청구/,a:'임대차 계약 갱신 절차:\n\n1. 만료 6개월~1개월 전 갱신 요구\n2. 임차인 계약갱신 청구권 (최초 계약 포함 10년간)\n3. 임대료 인상 상한 5% (상가건물임대차보호법)\n4. 갱신 계약서 작성 + 확정일자\n5. BSN.CARE에서 계약기간 업데이트\n\n※ 임대인이 거절할 수 있는 사유: 3기 차임 연체, 무단 전대, 철거·재건축 등'},
+    {k:/계약서.*작성|임대계약.*필수|계약서.*항목/,a:'임대차 계약서 필수 항목:\n\n• 당사자(임대인/임차인) 인적사항\n• 소재지, 면적, 용도\n• 보증금, 차임(월세), 관리비\n• 계약기간(시작일~만료일)\n• 특약사항(원상복구, 권리금 등)\n• 확정일자 받기 (관할 세무서/주민센터)\n\nBSN.CARE 호실 추가에서 이 정보를 모두 관리할 수 있습니다.'},
+    {k:/보증금.*반환|보증금.*돌려|퇴거.*보증금/,a:'보증금 반환 절차:\n\n1. 임차인 퇴거 및 원상복구 확인\n2. 공과금(수도/전기/가스) 정산\n3. 미납 차임·관리비 공제\n4. 원상복구 비용 공제 (특약 확인)\n5. 잔액 반환 (퇴거일 기준)\n\n※ 반환 지연 시 연 12% 지연이자 발생 가능\n※ 계약서 특약에 반환 시기 명시 권장'},
+    {k:/권리금|권리금.*보호|권리금.*회수/,a:'권리금 보호 (상가건물임대차보호법):\n\n• 임차인은 계약 만료 6개월~3개월 전 신규 임차인 주선 가능\n• 임대인은 정당한 사유 없이 거절 불가\n• 거절 시 임대인이 권리금 배상 책임\n• 환산보증금 초과 시에도 권리금 보호 적용\n• 10년 초과 갱신 거절은 권리금 보호 해당 안 됨\n\n※ 권리금 = 영업권리금 + 시설권리금 + 바닥권리금'},
+    {k:/전대|전전세|임차권.*양도|전대차/,a:'전대(재임대) 관련:\n\n• 임대인 동의 없는 전대 → 계약 해지 사유\n• 전대 동의 받았으면 전대차 계약서 별도 작성\n• 전차인(전대받은 자)은 임대인에게 직접 의무 부담\n• 원 임차인도 임대인에 대한 의무 유지\n\n계약서 특약에 전대 가능 여부를 명확히 기재하세요.'},
+    {k:/확정일자|대항력|우선변제/,a:'확정일자와 대항력:\n\n• 확정일자: 계약서에 날짜 도장 (세무서/주민센터)\n• 대항력: 인도(입주) + 사업자등록 → 다음날 발생\n• 우선변제권: 대항력 + 확정일자 → 보증금 우선 회수\n• 소액임차인: 일정 금액까지 최우선 변제\n\n※ 상가 환산보증금 기준 (서울: 9억원 이하)'},
+    // 관리비
+    {k:/관리비.*정산|정산.*방법|관리비.*계산/,a:'관리비 정산 방법:\n\n1. 공용관리비: 전용면적 비례 배분\n2. 전기/수도: 개별계량 시 실사용량, 공용계량 시 면적비\n3. 공용전기(복도/주차장): 면적비 또는 균등분할\n4. 청소/경비/엘리베이터: 관리규약에 따름\n5. 수선유지비: 적립 후 사용\n\nBSN.CARE 청구서 메뉴에서 자동 안분 계산 가능합니다.'},
+    {k:/관리비.*항목|관리비.*구성|관리비.*포함/,a:'관리비 구성 항목:\n\n[공용부분]\n• 공용전기, 공용수도, 승강기 유지비\n• 청소비, 경비비, 소독비\n• 수선유지비(적립금)\n• 화재보험, 건물보험\n\n[개별부분]\n• 전기, 수도, 가스 (개별계량)\n• 냉난방비 (개별 또는 공용)\n• 통신비, 인터넷\n\n※ 관리비 영수증은 매월 발행이 원칙'},
+    {k:/관리비.*연체|연체.*이자|연체료/,a:'관리비 연체 처리:\n\n• 연체이자: 관리규약에 따라 부과 (통상 연 12~15%)\n• 납부기한 경과 시 독촉장 발송\n• 3개월 이상 연체 시 단전/단수 가능 (사전통보 필수)\n• 장기 연체 시 소액소송 또는 지급명령 신청\n\n※ 연체 기록은 BSN.CARE 메모에 기록해두세요'},
+    // 수도/전기
+    {k:/수도.*분담|수도.*기준|수도.*배분/,a:'수도요금 분담 기준:\n\n1. 개별계량기 설치 → 각 호실 실사용량 기준\n2. 공용계량기만 있을 때 → 면적비 또는 인원비 배분\n3. 공용수도(청소/조경) → 관리비에 포함하여 배분\n\n서울 아리수 요금 조회: i.seoul.go.kr\nBSN.CARE 수도요금 탭에서 고객번호 등록 후 자동수집 가능'},
+    {k:/전기.*안분|전기.*계산|전기.*분담/,a:'전기요금 안분 계산:\n\n1. 총 전기요금 ÷ 총 사용량(kWh) = 단가\n2. 각 호실 사용량 × 단가 = 호실별 요금\n3. 공용전기(복도/주차장): 면적비 배분\n\n※ 한전 고압 계약 시 기본요금도 비례 배분\n※ 계절별 누진제 적용으로 여름·겨울 요금 주의\n\nBSN.CARE 청구서에서 자동 안분 계산 지원'},
+    {k:/수도.*요금|수도.*고지서|아리수/,a:'수도요금 조회/관리:\n\n• 서울 아리수: i.seoul.go.kr (고객번호로 조회)\n• 2개월마다 고지 (격월제)\n• 요금 = 상수도 + 하수도 + 물이용부담금\n• 누수 시 감면 신청 가능 (검침 전후 비교)\n\nBSN.CARE에서 수도요금 탭 → 🌐 자동수집 북마클릿으로 원클릭 저장'},
+    {k:/전기.*요금|한전|전기.*고지서|kepco/,a:'전기요금 관리:\n\n• 한전 사이버지점: cyber.kepco.co.kr\n• 매월 검침·고지\n• 일반용/산업용 요금제 확인\n• 기본요금 + 전력량요금 + 기후환경요금 + 연료비조정\n\nBSN.CARE 전기요금 탭에서 Gmail 연동으로 한전 메일 자동 수집 가능'},
+    // 세금
+    {k:/부가세|부가가치세|vat|세금계산서/,a:'임대 부가가치세:\n\n• 상가 임대료에 10% 부가세 부과\n• 임대인은 세금계산서 발행 의무\n• 분기별 신고 (1/4/7/10월 25일)\n• 간이과세자: 매출 1억 400만원 미만 시 간이과세\n• 주택 임대: 부가세 면제\n\n※ 관리비 중 실비(수도/전기)는 부가세 과세 대상 아님'},
+    {k:/종합소득세|소득세|임대소득/,a:'임대소득 종합소득세:\n\n• 매년 5월 종합소득세 신고\n• 필요경비: 감가상각, 수선비, 보험료, 재산세 등\n• 분리과세: 주택 임대소득 2천만원 이하 시 선택 가능\n• 간편장부 또는 복식부기\n• 세무사 상담 권장 (규모에 따라)\n\n※ BSN.CARE 월간보고서에서 수입 내역 확인 가능'},
+    {k:/재산세|종부세|건물.*세금|취득세/,a:'건물 관련 세금:\n\n• 취득세: 매입 시 1회 (4.6%)\n• 재산세: 매년 7월(건물), 9월(토지)\n• 종합부동산세: 공시가 기준 초과분 (매년 12월)\n• 양도소득세: 매도 시 차익에 과세\n\n※ 공시가격 확인: realtyprice.kr'},
+    // 시설/수선
+    {k:/수선.*의무|수리.*책임|하자.*보수|누수/,a:'수선 의무 (민법 제623조):\n\n• 대수선(지붕, 기둥, 벽체 등): 임대인 부담\n• 소수선(전구, 수도꼭지 등): 임차인 부담\n• 계약서 특약으로 변경 가능\n• 누수: 원인에 따라 책임 구분\n  - 건물 노후/공용배관 → 임대인\n  - 임차인 과실/전용배관 → 임차인\n\n※ 수선 내역은 BSN.CARE 메모에 기록 권장'},
+    {k:/소방.*점검|소방.*의무|화재.*안전/,a:'소방 안전 관리:\n\n• 소방시설 자체점검: 연 1회 이상\n• 소방안전관리자 선임 (일정 규모 이상)\n• 소화기 비치: 각 층, 유효기한 확인\n• 피난안내도 게시 의무\n• 스프링클러/경보기 점검\n\n※ 위반 시 과태료 최대 300만원\n※ 화재보험 가입 권장 (건물+임대인배상)'},
+    {k:/엘리베이터|승강기.*점검|승강기.*검사/,a:'승강기 관리:\n\n• 월 1회 이상 자체점검 (관리업체)\n• 연 1회 정기검사 (한국승강기안전공단)\n• 정밀안전검사: 설치 후 15년, 이후 3년마다\n• 고장 시 즉시 수리 및 이용중지 조치\n• 비용: 관리비에서 승강기 유지비로 배분\n\n※ 미점검 시 과태료 부과'},
+    // 원상복구
+    {k:/원상복구|원상회복|퇴거.*수리/,a:'원상복구 기준:\n\n• 원칙: 임차 당시 상태로 복구\n• 통상적 사용에 의한 마모·변색: 임차인 책임 아님\n• 인테리어 철거: 계약서 특약 확인\n• 벽체 훼손, 구멍 등: 임차인 복구\n• 시설물 추가 설치분: 원칙적으로 철거\n\n※ 입주 시 사진촬영 → 퇴거 시 비교 (분쟁 예방)\n※ 원상복구 범위는 계약서 특약에 구체적으로 명시'},
+    // BSN.CARE 사용법
+    {k:/호실.*추가|방.*추가|임차인.*등록/,a:'BSN.CARE 호실 추가 방법:\n\n1. 좌측 메뉴 "임대현황"\n2. "+ 호실 추가" 버튼 클릭\n3. 건물, 층/호실, 임차인 입력\n4. 계약기간, 보증금, 임대료, 관리비 입력\n5. 담당자 연락처 추가 가능\n6. 저장 → 목록에 바로 반영'},
+    {k:/건물.*추가|건물.*등록/,a:'BSN.CARE 건물 추가:\n\n1. 좌측 "임대현황" 메뉴\n2. "+ 건물 추가" 버튼\n3. 건물명, 주소, 메모 입력\n4. 저장 후 건축물대장·관리계약서 첨부 가능\n\n건물 추가 후 해당 건물에 호실을 등록할 수 있습니다.'},
+    {k:/청구서.*만들|청구서.*발행|인보이스/,a:'BSN.CARE 청구서 발행:\n\n1. 좌측 "청구서" 메뉴\n2. 건물 선택 → 호실·항목 확인\n3. 전기/수도 안분 입력 (자동계산)\n4. 미리보기 확인 후 저장\n\n청구서는 PDF로 출력하거나 공유할 수 있습니다.'},
+    {k:/메모.*사용|메모.*기능/,a:'BSN.CARE 메모 기능:\n\n• 건물 메모: 건물별 관리 사항 기록\n• 개인 메모: 나만 보는 메모\n• 자동 저장 (실시간)\n• 항목 더블클릭 → 수정\n• 우클릭 → 삭제\n• 날짜별·건물별 보기 전환 가능'},
+    {k:/캘린더|일정.*등록|일정.*관리/,a:'BSN.CARE 일정 관리:\n\n• 일정 캘린더: 월별 일정 조회\n• 고정 일정: 반복 일정 등록 (매월 관리비 납부일 등)\n• 만료일 관리: 계약 만료 임박 호실 알림\n• 일정 클릭 시 상세 내용 확인/수정'},
+    {k:/만료.*관리|계약.*만료|만료.*알림/,a:'계약 만료 관리:\n\n1. 좌측 "만료일 관리" 메뉴\n2. 만료 임박 순으로 자동 정렬\n3. 배지에 건수 표시\n4. 갱신/재계약 시 호실 수정에서 날짜 변경\n\n※ 만료 3개월 전부터 갱신 여부 확인 권장'},
+    // 분쟁/법률
+    {k:/내용증명|통보서|법적.*조치/,a:'내용증명 활용:\n\n• 차임 연체 독촉\n• 계약 해지 통보\n• 원상복구 요구\n• 보증금 반환 청구\n\n작성법: 우체국 방문 또는 인터넷우체국(epost.kr)\n비용: 약 3,000~5,000원\n\n※ 내용증명 자체는 법적 강제력 없으나 증거로 활용'},
+    {k:/소송|법원|조정|분쟁.*해결/,a:'임대차 분쟁 해결 절차:\n\n1. 당사자 간 협의\n2. 대한법률구조공단 상담 (132)\n3. 임대차분쟁조정위원회 조정 신청\n4. 소액사건심판 (3,000만원 이하)\n5. 민사소송\n\n※ 조정 신청: 관할 법원 또는 대한상사중재원\n※ 증거자료(계약서, 내용증명, 사진 등) 미리 준비'},
+    // 기타
+    {k:/공실.*관리|빈방.*관리|공실률/,a:'공실 관리 팁:\n\n• 공실 기간 최소화: 만료 2~3개월 전 신규 모집\n• 부동산 중개업소 2~3곳에 의뢰\n• 네이버부동산, 직방 등 온라인 등록\n• 인테리어 정비 (도배, 청소)\n• 임대 조건 시장가 대비 경쟁력 확인\n\nBSN.CARE에서 공실 호실을 별도 표시하여 관리하세요.'},
+    {k:/보험|화재보험|건물보험|배상/,a:'건물 보험 종류:\n\n• 화재보험: 기본 필수 (건물 구조·면적 기준)\n• 임대인배상책임보험: 시설물 하자로 임차인 피해 시\n• 가스사고배상: 가스시설 사고 대비\n• 풍수해보험: 태풍·홍수 피해\n\n※ 보험료는 관리비에 반영 가능\n※ 건물 규모에 따라 의무가입 대상 확인'},
+    {k:/도움말|사용법|help|기능/,a:'BSN.CARE 주요 기능:\n\n🏠 임대현황 — 건물·호실·계약 관리\n⏱ 만료일 관리 — 계약만료 알림\n📅 일정 캘린더 — 월간 일정\n↺ 고정 일정 — 반복 일정\n📊 월간보고서 — 수입 현황\n📄 청구서 — 관리비 자동계산\n💧 수도요금 — 아리수 자동수집\n⚡ 전기요금 — Gmail 연동\n📝 개인메모 — 나만의 메모\n\n질문이 있으면 편하게 물어보세요!'},
+  ];
+  for(const f of faq){ if(f.k.test(q)) return f.a; }
+  // 키워드 부분 매칭
+  const keywords=[
+    {w:['임대','계약','갱신'],i:0},{w:['보증금','반환','퇴거'],i:2},{w:['권리금'],i:3},
+    {w:['관리비','정산'],i:6},{w:['관리비','항목','구성'],i:7},{w:['연체'],i:8},
+    {w:['수도','요금'],i:9},{w:['전기','안분'],i:10},{w:['세금','부가세'],i:12},
+    {w:['소방','점검'],i:16},{w:['엘리베이터','승강기'],i:17},{w:['원상복구'],i:18},
+    {w:['호실','추가'],i:19},{w:['건물','추가'],i:20},{w:['청구서'],i:21},
+    {w:['메모'],i:22},{w:['캘린더','일정'],i:23},{w:['만료'],i:24},
+    {w:['소송','분쟁','조정'],i:26},{w:['공실','빈방'],i:27},{w:['보험'],i:28},
+  ];
+  for(const kw of keywords){
+    if(kw.w.some(w=>q.includes(w))) return faq[kw.i].a;
+  }
+  return '아래 주제에 대해 답변할 수 있습니다:\n\n📋 임대차 — 계약갱신, 보증금반환, 권리금, 전대, 확정일자\n💰 관리비 — 정산방법, 항목구성, 연체처리\n💧 수도/전기 — 요금분담, 안분계산, 자동수집\n🏛 세금 — 부가세, 소득세, 재산세\n🔧 시설 — 수선의무, 소방점검, 승강기, 원상복구\n⚖ 법률 — 내용증명, 분쟁해결, 소송절차\n🏠 BSN.CARE — 호실추가, 건물등록, 청구서, 메모\n\n위 주제 중 궁금한 것을 물어보세요!';
+}
 function openChangelog(){
   if(!IS_SUPER_ADMIN){ try{ alert('총 관리자 전용 기능입니다.'); }catch(_){} return; }
   const body=$('cl-body'); if(!body) return;
