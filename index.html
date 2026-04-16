@@ -3074,8 +3074,9 @@ function fetchWaterBill(id){
   const w=(DB.waterBills||[]).find(x=>x.id===id);
   if(!w||!w.custNo){ _waterToast('⚠ 고객번호가 없습니다','#d97706'); return; }
   try{ navigator.clipboard.writeText(w.custNo); }catch(_){}
-  window.open('https://i121.seoul.go.kr/CvlSrvc/NR_cgJungInfo.do','_blank');
-  _waterToast('📋 고객번호 '+w.custNo+' 복사됨 — 아리수에서 붙여넣기(Ctrl+V) 후 조회','#0284c7');
+  // 확장프로그램 설치 시 #bsn= 해시로 자동입력+조회, 미설치 시 클립보드 붙여넣기
+  window.open('https://i121.seoul.go.kr/cs/cyber/front/main/NR_index.do#bsn='+encodeURIComponent(w.custNo),'_blank');
+  _waterToast('📋 '+w.custNo+' 복사됨 — 확장프로그램 있으면 자동조회, 없으면 Ctrl+V → 조회','#0284c7');
 }
 function _showWaterResult(w, data){
   // 기존 모달 재사용 또는 새 모달
@@ -3347,8 +3348,15 @@ function _getWaterBookmarklet(){
   parts.push("var printUrl=null;if(pBtn){var oc=pBtn.getAttribute('onclick')||pBtn.getAttribute('href')||'';var qi=oc.indexOf(\"'\");var qi2=oc.indexOf('\"');var qc=(qi>=0&&(qi2<0||qi<qi2))?\"'\":'\"';var s1=oc.indexOf(qc);if(s1>=0){var s2=oc.indexOf(qc,s1+1);if(s2>s1)printUrl=oc.slice(s1+1,s2);}if(printUrl&&printUrl.indexOf('.')<0&&printUrl.indexOf('/')<0)printUrl=null;_l('🖨 인쇄버튼: '+(printUrl||'URL없음')+' oc='+oc.slice(0,50),'#7dd3fc');}");
   // 인쇄 URL로 fetch → 오버레이
   parts.push("if(printUrl){_t('🖨 인쇄페이지 가져오는중...','#0284c7');var fullUrl=printUrl;if(printUrl.indexOf('http')!==0)fullUrl=location.origin+(/^\\//.test(printUrl)?'':'/')+printUrl;fetch(fullUrl,{credentials:'same-origin'}).then(function(r){return r.text();}).then(function(html){_l('✅ 인쇄페이지 수신 '+html.length+'자','#86efac');var ov=document.createElement('div');ov.id='bsn_ov';ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:2147483640;overflow:auto;padding:0';var ifr=document.createElement('iframe');ifr.style.cssText='width:100%;height:100%;border:none';ov.appendChild(ifr);document.body.appendChild(ov);ifr.contentDocument.open();ifr.contentDocument.write(html);ifr.contentDocument.close();_t('📸 인쇄 화면 캡처중...','#059669');setTimeout(capture,800);}).catch(function(e){_l('⚠ 인쇄페이지 fetch 실패: '+e.message+' — 일반 캡처','#fca5a5');doNormalCapture();});}else{_l('ℹ 인쇄버튼 없거나 URL 추출 불가 — 일반 캡처','#fde68a');doNormalCapture();}}");
-  // 일반 캡처 (인쇄페이지 실패시)
-  parts.push("function doNormalCapture(){var blueEl=document.querySelector('.box_type1,.bill_box,.tbl_view,#printArea');if(blueEl){try{blueEl.scrollIntoView({block:'start',behavior:'instant'});}catch(_){}}setTimeout(capture,500);}");
+  // 일반 캡처 (인쇄페이지 실패시) → 청구서 영역만 오버레이로 추출 후 캡처
+  parts.push("function doNormalCapture(){");
+  parts.push("var blueEl=document.querySelector('.box_type1,.bill_box,.tbl_view,#printArea,.sub_content');");
+  parts.push("if(!blueEl){var tbls=document.querySelectorAll('table');var best=null,bestA=0;for(var ti=0;ti<tbls.length;ti++){var tb=tbls[ti];if(tb.offsetParent===null)continue;var cells=tb.querySelectorAll('td,th');if(cells.length>bestA){bestA=cells.length;best=tb;}}blueEl=best;}");
+  parts.push("if(blueEl){_l('📋 청구서 영역 추출 → 오버레이','#7dd3fc');");
+  parts.push("var ov=document.createElement('div');ov.id='bsn_ov';ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:2147483640;overflow:auto;padding:10px';");
+  parts.push("var styles=document.querySelectorAll('style,link[rel=stylesheet]');var sh='';for(var si=0;si<styles.length;si++){sh+=styles[si].outerHTML;}");
+  parts.push("ov.innerHTML=sh+'<div style=\"max-width:900px;margin:0 auto\">'+blueEl.outerHTML+'</div>';");
+  parts.push("document.body.appendChild(ov);setTimeout(capture,600);}else{try{window.scrollTo(0,0);}catch(_){}setTimeout(capture,500);}}");
   // ── fetchQuery: fetch로 폼 POST (페이지이동 없이 조회) ──
   parts.push("function fetchQuery(form){_t('🌐 조회중 (fetch)...','#0284c7');_l('🌐 fetch POST — 페이지이동 없음','#7dd3fc');var fd=new FormData(form);var action=form.action||location.href;fetch(action,{method:form.method||'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.text();}).then(function(html){_l('✅ fetch 응답 수신 '+html.length+'자','#86efac');");
   // 응답 HTML 파싱 → 파란박스 추출 → 현재 페이지에 오버레이
