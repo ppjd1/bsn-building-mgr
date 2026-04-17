@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co; frame-src blob: 'self'; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com; frame-src blob: 'self'; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -3958,8 +3958,11 @@ function _showWaterBillModal(selectedPeriod){
     (w.bills||[]).forEach(function(bill){
       const p=bill.period||'';
       if(!byMonth[p]) byMonth[p]={period:p, items:[], total:0};
-      byMonth[p].items.push({w:w, bldg:bldg, period:p, files:(bill.files||[]), bill:bill});
-      byMonth[p].total+=(bill.files||[]).length;
+      var realFiles=(bill.files||[]).filter(function(f){return f.storage||(f.data&&f.data!=='__IMG_IN_LOCAL__'&&(typeof f.data!=='string'||f.data.length>=30||f.data.startsWith('data:')));});
+      if(realFiles.length){
+        byMonth[p].items.push({w:w, bldg:bldg, period:p, files:realFiles, bill:bill});
+        byMonth[p].total+=realFiles.length;
+      }
     });
   });
   const months=Object.values(byMonth).sort(function(a,b){return String(b.period).localeCompare(String(a.period));});
@@ -3970,7 +3973,7 @@ function _showWaterBillModal(selectedPeriod){
   if(!mo){
     mo=document.createElement('div');
     mo.id='mo-water-view'; mo.className='ov';
-    mo.innerHTML='<div class="modal" style="width:min(1040px,97vw);height:min(780px,93vh);padding:0;display:flex;flex-direction:column;overflow:hidden">' +
+    mo.innerHTML='<div class="modal" style="width:min(936px,90vw);height:min(700px,85vh);padding:0;display:flex;flex-direction:column;overflow:hidden">' +
       '<div class="mo-hd" style="padding:10px 16px 8px"><h3 id="wv-t" style="font-size:14px;margin:0;line-height:1.3">💧 수도요금 청구서 월별 모아보기</h3><button onclick="closeMo(\'mo-water-view\')" style="font-size:22px;padding:0 10px;min-width:34px;min-height:34px;line-height:1">×</button></div>'+
       '<div style="display:flex;flex:1;min-height:0;border-top:1px solid var(--ln)">'+
       '<div id="wv-list" style="width:140px;flex-shrink:0;border-right:1px solid var(--ln);overflow:auto;background:#fafafa"></div>'+
@@ -4014,7 +4017,8 @@ function _showWaterBillModal(selectedPeriod){
         var bg=active?'background:#e0f2fe;border-left:3px solid #0284c7;font-weight:700':'border-left:3px solid transparent';
         html+='<div style="padding:8px 12px;border-bottom:1px solid var(--ln2);cursor:pointer;'+bg+'" onclick="_showWaterBillModal(\''+pEsc+'\')">';
         html+='<div style="font-size:12.5px;color:var(--t1)">'+_periodLabel(mo2.period)+'</div>';
-        html+='<div style="font-size:10px;color:var(--t3);margin-top:2px">'+mo2.total+'장 · '+mo2.items.length+'건</div>';
+        var _bSet={};mo2.items.forEach(function(it){var bid=it.bldg?it.bldg.id:'0';_bSet[bid]=1;});
+        html+='<div style="font-size:10px;color:var(--t3);margin-top:2px">건물'+Object.keys(_bSet).length+'개, '+mo2.total+'장</div>';
         html+='</div>';
       });
       html+='</div>';
@@ -4076,30 +4080,12 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
     var items=[];
     Object.keys(selected).forEach(function(k){ var g=_billGalleryAll[parseInt(k)]; if(g) items.push(g); });
     if(!items.length) return;
-    if(items.length===1){ _downloadBillFile(items[0].f,{period:items[0].period,bldgName:items[0].bldg?items[0].bldg.name:''}); return; }
-    (async function(){
-      try{
-        var dh=await _pickSaveDir();
-        if(dh==='abort') return;
-        if(dh){
-          var saved=0;
-          for(var i=0;i<items.length;i++){
-            var it=items[i];
-            var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
-            if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
-            var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
-            var bl=await _fileToBlobForDownload(it.f);
-            var fh=await dh.getFileHandle(fn,{create:true});
-            var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
-          }
-          _waterToast('✅ '+saved+'장 저장 완료');
-          return;
-        }
-        for(var i=0;i<items.length;i++){
-          try{ await _downloadBillFile(items[i].f,{period:items[i].period,bldgName:items[i].bldg?items[i].bldg.name:''}); }catch(e){}
-        }
-      }catch(e){}
-    })();
+    var infos=items.map(function(it,i){
+      var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
+      if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
+      return {f:it.f, name:(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext};
+    });
+    _saveBillsToDesktop(infos);
   };
   topBar.appendChild(selSaveBtn);
   // 선택 삭제 버튼
@@ -4137,22 +4123,10 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
   // ─ 파일 영역 (스크롤 + 드래그 선택)
   var fileArea=document.createElement('div');
   fileArea.style.cssText='flex:1;overflow-y:auto;overflow-x:hidden;position:relative;padding:8px;user-select:none;-webkit-user-select:none;background:#f5f5f5';
-  // ── 카톡 등에서 이미지 드래그&드롭 ──
-  var _dropOverlay=document.createElement('div');
-  _dropOverlay.style.cssText='display:none;position:absolute;inset:0;z-index:20;background:rgba(14,99,156,.12);border:3px dashed #0e639c;border-radius:8px;pointer-events:none;align-items:center;justify-content:center';
-  _dropOverlay.innerHTML='<div style="text-align:center;pointer-events:none"><div style="font-size:36px;margin-bottom:6px">📎</div><div style="font-size:14px;font-weight:700;color:#0e639c">여기에 놓으면 청구서 등록</div><div style="font-size:11px;color:#64748b;margin-top:4px">'+_periodLabel(monthData.period)+'</div></div>';
-  fileArea.appendChild(_dropOverlay);
-  var _dragCnt=0;
-  fileArea.addEventListener('dragenter',function(e){ e.preventDefault(); _dragCnt++; _dropOverlay.style.display='flex'; });
-  fileArea.addEventListener('dragleave',function(e){ _dragCnt--; if(_dragCnt<=0){_dragCnt=0;_dropOverlay.style.display='none';} });
-  fileArea.addEventListener('dragover',function(e){ e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
-  fileArea.addEventListener('drop',function(e){
-    e.preventDefault(); _dragCnt=0; _dropOverlay.style.display='none';
-    var droppedFiles=Array.from(e.dataTransfer.files||[]).filter(function(f){ return f.type.startsWith('image/')||f.type==='application/pdf'; });
-    if(!droppedFiles.length){ _waterToast('⚠ 이미지 또는 PDF 파일만 등록 가능'); return; }
-    var period=monthData.period;
+  // ── 공통: 파일(File/Blob) 배열 → 현재 월에 청구서 등록 ──
+  function _registerBillFiles(fileList, period){
+    if(!fileList.length){ _waterToast('⚠ 이미지 또는 PDF 파일만 등록 가능'); return; }
     if(!period){ _waterToast('⚠ 기간 정보 없음'); return; }
-    // 어떤 고객(waterBill)에 넣을지 — 첫 번째 고객으로 (1개만 있으면 자동, 여러개면 선택)
     var wIds=[];
     (DB.waterBills||[]).forEach(function(w){
       var bldg=(DB.buildings||[]).find(function(b){return b.id===w.bId;});
@@ -4167,21 +4141,20 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
       var n=parseInt(pick); if(n>=1&&n<=wIds.length) targetId=wIds[n-1].id;
       else{ _waterToast('⚠ 잘못된 선택'); return; }
     }
-    // 파일 읽고 업로드
-    _waterToast('⬆ '+droppedFiles.length+'장 업로드 중...');
+    _waterToast('⬆ '+fileList.length+'장 업로드 중...');
     var loaded=0,res=[];
-    droppedFiles.forEach(function(f,idx){
+    fileList.forEach(function(f,idx){
       var rd=new FileReader();
-      rd.onload=function(ev){ res[idx]={data:ev.target.result,name:f.name,mime:f.type||''}; loaded++; if(loaded===droppedFiles.length) doDrop(); };
-      rd.onerror=function(){ loaded++; if(loaded===droppedFiles.length) doDrop(); };
+      rd.onload=function(ev){ res[idx]={data:ev.target.result,name:f.name||('paste_'+Date.now()+'.png'),mime:f.type||'image/png'}; loaded++; if(loaded===fileList.length) doUpload(); };
+      rd.onerror=function(){ loaded++; if(loaded===fileList.length) doUpload(); };
       rd.readAsDataURL(f);
     });
-    async function doDrop(){
+    async function doUpload(){
       var valid=res.filter(Boolean); if(!valid.length) return;
       var uploaded=[];
       for(var vi=0;vi<valid.length;vi++){
         var v=valid[vi];
-        var ext=(v.name||'file').split('.').pop()||'jpg';
+        var ext=(v.name||'file').split('.').pop()||'png';
         var spath='waterBills/'+targetId+'/'+period+'/'+Date.now()+'_'+vi+'.'+ext;
         uploaded.push(await _uploadFileToStorage(v.data, spath, v.name, v.mime));
       }
@@ -4194,7 +4167,56 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
       sv(); _showWaterBillModal(period); rdWater();
       _waterToast('✅ '+uploaded.length+'장 등록 완료');
     }
+  }
+  // ── 드래그&드롭 (윈도우 폴더에서 파일 끌어넣기) ──
+  var _dropOverlay=document.createElement('div');
+  _dropOverlay.style.cssText='display:none;position:absolute;inset:0;z-index:20;background:rgba(14,99,156,.12);border:3px dashed #0e639c;border-radius:8px;pointer-events:none;align-items:center;justify-content:center';
+  _dropOverlay.innerHTML='<div style="text-align:center;pointer-events:none"><div style="font-size:36px;margin-bottom:6px">📎</div><div style="font-size:14px;font-weight:700;color:#0e639c">여기에 놓으면 청구서 등록</div><div style="font-size:11px;color:#64748b;margin-top:4px">'+_periodLabel(monthData.period)+'</div></div>';
+  fileArea.appendChild(_dropOverlay);
+  var _dragCnt=0;
+  function _hasFiles(dt){ try{ return dt.types&&(dt.types.indexOf('Files')>=0||dt.types.includes('Files')); }catch(e){return false;} }
+  fileArea.addEventListener('dragenter',function(e){ if(!_hasFiles(e.dataTransfer))return; e.preventDefault(); _dragCnt++; _dropOverlay.style.display='flex'; });
+  fileArea.addEventListener('dragleave',function(e){ if(!_hasFiles(e.dataTransfer))return; _dragCnt--; if(_dragCnt<=0){_dragCnt=0;_dropOverlay.style.display='none';} });
+  fileArea.addEventListener('dragover',function(e){ if(!_hasFiles(e.dataTransfer))return; e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
+  fileArea.addEventListener('drop',function(e){
+    e.preventDefault(); _dragCnt=0; _dropOverlay.style.display='none';
+    var files=Array.from(e.dataTransfer.files||[]).filter(function(f){ return f.type.startsWith('image/')||f.type==='application/pdf'; });
+    _registerBillFiles(files, monthData.period);
   });
+  // ── Ctrl+V 붙여넣기 (카톡에서 이미지 복사 → 붙여넣기) ──
+  pane.setAttribute('tabindex','0'); // 포커스 가능하게
+  pane.addEventListener('paste',function(e){
+    var items=e.clipboardData&&e.clipboardData.items;
+    if(!items) return;
+    var files=[];
+    for(var i=0;i<items.length;i++){
+      if(items[i].kind==='file'&&(items[i].type.startsWith('image/')||items[i].type==='application/pdf')){
+        var f=items[i].getAsFile(); if(f) files.push(f);
+      }
+    }
+    if(files.length){ e.preventDefault(); _registerBillFiles(files, monthData.period); }
+  });
+  // document 전역 paste도 — 모달 열려있으면 여기로
+  var _globalPasteHandler=function(e){
+    if(!$('mo-water-view')||!$('mo-water-view').classList.contains('on')) return;
+    var items=e.clipboardData&&e.clipboardData.items;
+    if(!items) return;
+    var files=[];
+    for(var i=0;i<items.length;i++){
+      if(items[i].kind==='file'&&(items[i].type.startsWith('image/')||items[i].type==='application/pdf')){
+        var f=items[i].getAsFile(); if(f) files.push(f);
+      }
+    }
+    if(files.length){ e.preventDefault(); _registerBillFiles(files, monthData.period); }
+  };
+  document.addEventListener('paste',_globalPasteHandler);
+  // 모달 닫힐 때 리스너 정리
+  var _moEl=$('mo-water-view');
+  if(_moEl&&_moEl.dataset._pasteClean){
+    try{document.removeEventListener('paste',window['_wvPasteH']);}catch(e){}
+  }
+  window['_wvPasteH']=_globalPasteHandler;
+  if(_moEl) _moEl.dataset._pasteClean='1';
   pane.appendChild(fileArea);
   var container=document.createElement('div');
   container.style.cssText='max-width:700px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;justify-content:flex-start;padding:0 20px';
@@ -4217,24 +4239,21 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
       (function(item,idx){
         var gIdx=_billGalleryAll.indexOf(item);
         var card=document.createElement('div');
-        card.style.cssText='display:flex;flex-direction:column;align-items:center;width:68px;padding:4px 2px 3px;border-radius:2px;cursor:default;margin:1px';
+        card.style.cssText='display:flex;flex-direction:column;align-items:center;width:56px;padding:3px 2px 2px;border-radius:2px;cursor:default;margin:1px';
         card.dataset.gi=gIdx;
         var thumb=document.createElement('div');
-        thumb.style.cssText='width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
+        thumb.style.cssText='width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
         var img=document.createElement('img');
-        if(item.f.storage){ img.src=_stUrl(item.f.storage); }
-        else { try{ var _tb=_dataUrlToBlob(item.f.data); img.src=URL.createObjectURL(_tb); }catch(_e){ img.src=item.f.data||''; } }
-        img.style.cssText='max-width:46px;max-height:46px;object-fit:contain';
+        var _imgUrl='';
+        if(item.f.storage){ _imgUrl=_stUrl(item.f.storage); img.src=_imgUrl; }
+        else { try{ var _tb=_dataUrlToBlob(item.f.data); _imgUrl=URL.createObjectURL(_tb); img.src=_imgUrl; }catch(_e){ img.src=item.f.data||''; _imgUrl=img.src; } }
+        img.style.cssText='max-width:36px;max-height:36px;object-fit:contain';
         img.draggable=false;
         thumb.appendChild(img);
         card.appendChild(thumb);
         var lbl=document.createElement('div');
-        lbl.style.cssText='color:#444;font-size:9px;margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:64px;line-height:1.2';
-        if(isMulti){
-          var ft=(item.w.custName||'').replace(/[^0-9F층B가-힣]/gi,'');
-          if(!ft) ft=item.w.custName||item.w.custNo||'';
-          lbl.textContent=ft;
-        } else { lbl.textContent='청구서'; }
+        lbl.style.cssText='color:#444;font-size:8px;margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:52px;line-height:1.2';
+        lbl.textContent=(idx+1);
         card.appendChild(lbl);
         card.onmousedown=function(e){
           if(e.button!==0) return;
@@ -4345,33 +4364,12 @@ function _openFolderView(){
     var items=[];
     Object.keys(selected).forEach(function(k){ var g=_billGalleryAll[parseInt(k)]; if(g) items.push(g); });
     if(!items.length) return;
-    if(items.length===1){ _downloadBillFile(items[0].f,{period:items[0].period,bldgName:items[0].bldg?items[0].bldg.name:''}); return; }
-    (async function(){
-      try{
-        if(window.showDirectoryPicker){
-          try{
-            _waterToast('📁 저장할 폴더를 선택하세요');
-            var dh=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
-            var saved=0;
-            for(var i=0;i<items.length;i++){
-              var it=items[i];
-              var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
-              if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
-              var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
-              var bl=await _fileToBlobForDownload(it.f);
-              var fh=await dh.getFileHandle(fn,{create:true});
-              var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
-            }
-            _waterToast('✅ '+saved+'장 저장 완료');
-            return;
-          }catch(e){ if(e.name==='AbortError') return; console.warn(e); }
-        }
-        // 폴백: 개별 파일 다운로드 (<a download>)
-        for(var i=0;i<items.length;i++){
-          try{ await _downloadBillFile(items[i].f,{period:items[i].period,bldgName:items[i].bldg?items[i].bldg.name:''}); }catch(e){}
-        }
-      }catch(e){ if(e.name!=='AbortError') console.warn(e); }
-    })();
+    var infos=items.map(function(it,i){
+      var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
+      if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
+      return {f:it.f, name:(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext};
+    });
+    _saveBillsToDesktop(infos);
   };
   addrBar.appendChild(selSaveBtn);
   // 선택 삭제 버튼
@@ -4436,21 +4434,22 @@ function _openFolderView(){
       (function(item,idx){
         var gIdx=_billGalleryAll.indexOf(item);
         var card=document.createElement('div');
-        card.style.cssText='display:flex;flex-direction:column;align-items:center;width:68px;padding:4px 2px 3px;border-radius:2px;cursor:default;margin:1px';
+        card.style.cssText='display:flex;flex-direction:column;align-items:center;width:56px;padding:3px 2px 2px;border-radius:2px;cursor:default;margin:1px';
         card.dataset.gi=gIdx;
         // 썸네일 아이콘
         var thumb=document.createElement('div');
-        thumb.style.cssText='width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
+        thumb.style.cssText='width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
         var img=document.createElement('img');
-        if(item.f.storage){ img.src=_stUrl(item.f.storage); }
-        else { try{ var _tb=_dataUrlToBlob(item.f.data); img.src=URL.createObjectURL(_tb); }catch(_e){ img.src=item.f.data||''; } }
-        img.style.cssText='max-width:46px;max-height:46px;object-fit:contain';
+        var _imgUrl='';
+        if(item.f.storage){ _imgUrl=_stUrl(item.f.storage); img.src=_imgUrl; }
+        else { try{ var _tb=_dataUrlToBlob(item.f.data); _imgUrl=URL.createObjectURL(_tb); img.src=_imgUrl; }catch(_e){ img.src=item.f.data||''; _imgUrl=img.src; } }
+        img.style.cssText='max-width:36px;max-height:36px;object-fit:contain';
         img.draggable=false;
         thumb.appendChild(img);
         card.appendChild(thumb);
         // 파일명 라벨
         var lbl=document.createElement('div');
-        lbl.style.cssText='color:#444;font-size:9px;margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:64px;line-height:1.2';
+        lbl.style.cssText='color:#444;font-size:8px;margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:52px;line-height:1.2';
         if(isMulti){
           var ft=(item.w.custName||'').replace(/[^0-9F층B가-힣]/gi,'');
           if(!ft) ft=item.w.custName||item.w.custNo||'';
@@ -4677,10 +4676,10 @@ function _openBillGallery(startIdx, backFn){
   btnR.style.cssText='position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.4);border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;z-index:3';
   btnR.onclick=function(e){e.stopPropagation();go(1);};
   ov.appendChild(btnR);
-  // 하단: 현재 이미지 정보만 표시
+  // 하단: 현재 이미지 정보
   var foot=document.createElement('div');
   foot.id='bg-foot-info';
-  foot.style.cssText='position:absolute;bottom:0;left:0;right:0;z-index:2;text-align:center;padding:10px 20px 14px;color:rgba(255,255,255,.55);font-size:11px;pointer-events:none';
+  foot.style.cssText='position:absolute;bottom:0;left:0;right:0;z-index:2;text-align:center;padding:10px 20px 14px;color:rgba(255,255,255,.55);font-size:11px';
   ov.appendChild(foot);
   function _updateTabs(){
     var g=_billGalleryAll[curIdx]; if(!g) return;
@@ -4835,26 +4834,6 @@ function _renderWaterBillPane(pane, files, id, period, billObj){
   });
 }
 // dataUrl → 정상 Blob 변환 (fetch 대신 직접 파싱)
-// JSZip 동적 로드 (CDN 2개 폴백)
-function _loadJSZip(){
-  return new Promise(function(resolve,reject){
-    if(window.JSZip) return resolve(window.JSZip);
-    var urls=[
-      'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-      'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'
-    ];
-    function tryLoad(i){
-      if(i>=urls.length) return reject(new Error('JSZip 로드 실패'));
-      var s=document.createElement('script');
-      s.src=urls[i];
-      s.onload=function(){ if(window.JSZip) resolve(window.JSZip); else tryLoad(i+1); };
-      s.onerror=function(){ tryLoad(i+1); };
-      document.head.appendChild(s);
-    }
-    tryLoad(0);
-  });
-}
 function _dataUrlToBlob(dataUrl){
   var parts=dataUrl.split(',');
   var mime=(parts[0].match(/:(.*?);/)||[])[1]||'application/octet-stream';
@@ -4873,6 +4852,73 @@ async function _fileToBlobForDownload(f){
   }
   if(f.data && typeof f.data==='string' && f.data.startsWith('data:')) return _dataUrlToBlob(f.data);
   throw new Error('No file data');
+}
+// ★ 범용 토스트 알림
+function _showToast(msg,type){
+  var t=document.getElementById('_gToast');
+  if(t) t.remove();
+  t=document.createElement('div');
+  t.id='_gToast';
+  var bg=type==='error'?'#dc2626':type==='ok'?'#16a34a':'#334155';
+  t.style.cssText='position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:999999;padding:10px 22px;border-radius:8px;color:#fff;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.3);pointer-events:none;opacity:0;transition:opacity .25s;background:'+bg;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){t.style.opacity='1';});
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},300);},2500);
+}
+// ★ 바탕화면 일괄 저장 (다운로드 기록 X)
+// showDirectoryPicker → 한번 폴더 선택하면 IndexedDB에 저장, 이후 자동
+// ※ 바탕화면 직접 선택은 Chrome이 차단 → 바탕화면 안의 폴더를 선택/생성
+
+function _getBillDir(){
+  if(!window.showDirectoryPicker) return Promise.resolve(null);
+  return new Promise(function(resolve){
+    // 안내 모달
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
+    var box=document.createElement('div');
+    box.style.cssText='background:#fff;border-radius:14px;padding:28px 32px;max-width:340px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25)';
+    box.innerHTML='<div style="font-size:28px;margin-bottom:10px">📁</div>'
+      +'<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:8px">저장할 폴더를 선택하세요</div>'
+      +'<div style="font-size:12px;color:#dc2626;font-weight:600;margin-bottom:14px">⚠ 바탕화면 자체는 선택 불가<br>바탕화면 안의 폴더를 선택해주세요</div>'
+      +'<button id="_bdPickBtn" style="padding:10px 28px;font-size:13px;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer">📁 폴더 선택</button>'
+      +' <button id="_bdCancelBtn" style="padding:10px 20px;font-size:13px;font-weight:600;background:#e5e7eb;color:#374151;border:none;border-radius:8px;cursor:pointer;margin-left:8px">취소</button>';
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    document.getElementById('_bdCancelBtn').onclick=function(){ ov.remove(); resolve('abort'); };
+    document.getElementById('_bdPickBtn').onclick=async function(){
+      ov.remove();
+      try{
+        var h=await window.showDirectoryPicker({id:'bsn-bill-dir',mode:'readwrite'});
+        resolve(h);
+      }catch(e){
+        if(e.name==='AbortError') resolve('abort');
+        else{ _showToast('폴더 선택 실패: '+e.message,'error'); resolve(null); }
+      }
+    };
+  });
+}
+async function _saveBillsToDesktop(fileDataArr){
+  if(!fileDataArr.length) return;
+  var dir=await _getBillDir();
+  if(dir==='abort') return;
+  if(!dir){ _showToast('폴더 선택이 필요합니다','error'); return; }
+  _showToast('⬇ '+fileDataArr.length+'장 저장 중...','ok');
+  var saved=0, errors=[];
+  for(var i=0;i<fileDataArr.length;i++){
+    try{
+      var fd=fileDataArr[i];
+      var blob=await _fileToBlobForDownload(fd.f);
+      var fname=fd.name||(fd.f.name||('bill_'+(i+1)+'.jpg'));
+      var fh=await dir.getFileHandle(fname,{create:true});
+      var wr=await fh.createWritable();await wr.write(blob);await wr.close();
+      saved++;
+    }catch(e){ console.warn('[saveBills]',i,e); errors.push(e.message); }
+  }
+  if(saved>0){
+    var folderName=dir.name||'선택한 폴더';
+    _showToast('✅ '+saved+'장 저장 완료 → 📁 '+folderName,'ok');
+  } else _showToast('❌ 저장 실패: '+(errors[0]||'알 수 없는 오류'),'error');
 }
 // 파일 저장 — showSaveFilePicker로 저장위치 직접 선택 (다운로드 기록 X)
 // opts: {period:'2025-09', bldgName:'건물명'} — 파일명에 월+건물명 포함
@@ -4900,7 +4946,9 @@ async function _downloadBillFile(f, opts){
     if(window.showSaveFilePicker){
       try{
         var handle=await window.showSaveFilePicker({
+          id:'bsn-bill-save',
           suggestedName:fname,
+          startIn:'desktop',
           types:[{description:'청구서 파일',accept:{[mime]:['.'+ext]}}]
         });
         var writable=await handle.createWritable();
@@ -4923,182 +4971,51 @@ async function _downloadBillFile(f, opts){
     _waterToast('⬇ 다운로드 폴더에 저장됨');
   }catch(e){ alert('다운로드 실패: '+e.message); }
 }
-// 해당 기간의 전체 파일 순차 다운로드
-// 해당 월 전체 건물 청구서 일괄 다운로드 (showSaveFilePicker → 다운로드 기록 X)
-// 특정 건물 전체 청구서 다운로드
-var _savedDirHandle=null; // 한 번 선택한 폴더 기억
-async function _pickSaveDir(){
-  if(!window.showDirectoryPicker) return null;
-  // 이전에 선택한 폴더가 있으면 권한 확인 후 재사용
-  if(_savedDirHandle){
-    try{
-      var perm=await _savedDirHandle.queryPermission({mode:'readwrite'});
-      if(perm==='granted') return _savedDirHandle;
-      perm=await _savedDirHandle.requestPermission({mode:'readwrite'});
-      if(perm==='granted') return _savedDirHandle;
-    }catch(e){ _savedDirHandle=null; }
-  }
-  // 새로 선택
-  try{
-    var h=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite',startIn:'desktop'});
-    _savedDirHandle=h;
-    // IndexedDB에 핸들 저장 (세션 넘어서도 기억)
-    try{ _idbPut('savedDirHandle',h); }catch(e){}
-    return h;
-  }catch(e){
-    if(e.name==='AbortError') return 'abort';
-    // 시스템 폴더(바탕화면 등) 선택 시 안내
-    alert('이 폴더는 직접 선택이 안 됩니다.\n바탕화면에 "청구서" 폴더를 만든 뒤 선택하세요.\n(최초 1회만 선택하면 다음부턴 자동 저장됩니다)');
-    try{
-      var h2=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite',startIn:'desktop'});
-      _savedDirHandle=h2;
-      try{ _idbPut('savedDirHandle',h2); }catch(e2){}
-      return h2;
-    }catch(e2){
-      if(e2.name==='AbortError') return 'abort';
-      return null;
-    }
-  }
-}
-// 앱 시작 시 저장된 폴더 핸들 복원
-(function(){ try{ _idbGet('savedDirHandle').then(function(h){ if(h) _savedDirHandle=h; }); }catch(e){} })();
+// ── 일괄 다운로드 (showDirectoryPicker 제거 → showSaveFilePicker만 사용) ──
 async function _downloadBldgBills(bldg, bldgFiles){
-  try{
-    if(!bldgFiles||!bldgFiles.length){ _waterToast('⚠ 다운로드할 파일이 없습니다'); return; }
-    var bName=bldg?bldg.name:'건물';
-    var dirHandle=await _pickSaveDir();
-    if(dirHandle==='abort') return;
-    if(dirHandle){
-      _waterToast('⬇ '+bName+' '+bldgFiles.length+'장 저장 중...');
-      var saved=0;
-      for(var i=0;i<bldgFiles.length;i++){
-        var item=bldgFiles[i];
-        try{
-          var ext=((item.f.name||'').split('.').pop()||'png').toLowerCase();
-          if(!['jpg','png','pdf','jpeg'].includes(ext)) ext='png';
-          if(ext==='jpeg') ext='jpg';
-          var fname=(item.period||'')+'_'+bName+'_'+(item.w.custName||item.w.custNo||'')+'_'+(i+1)+'.'+ext;
-          var blob=await _fileToBlobForDownload(item.f);
-          var fh=await dirHandle.getFileHandle(fname,{create:true});
-          var wr=await fh.createWritable();
-          await wr.write(blob);await wr.close();
-          saved++;
-        }catch(e){ console.warn('[bldgDL] skip',i,e); }
-      }
-      _waterToast('✅ '+bName+' '+saved+'장 저장 완료');
-      return;
-    }
-    // 폴백: 개별 다운로드
-    _waterToast('⬇ '+bldgFiles.length+'장 다운로드 중...');
-    for(var i=0;i<bldgFiles.length;i++){
-      try{ await _downloadBillFile(bldgFiles[i].f,{period:bldgFiles[i].period,bldgName:bName}); }catch(e){}
-      if(i<bldgFiles.length-1) await new Promise(function(r){setTimeout(r,300);});
-    }
-  }catch(e){ alert('다운로드 실패: '+e.message); }
+  if(!bldgFiles||!bldgFiles.length){ _waterToast('⚠ 다운로드할 파일이 없습니다'); return; }
+  var bName=bldg?bldg.name:'건물';
+  var infos=[];
+  bldgFiles.forEach(function(item,i){
+    var ext=((item.f.name||'').split('.').pop()||'png').toLowerCase();
+    if(!['jpg','png','pdf','jpeg'].includes(ext)) ext='png'; if(ext==='jpeg') ext='jpg';
+    infos.push({f:item.f, name:(item.period||'')+'_'+bName+'_'+(item.w.custName||item.w.custNo||'')+'_'+(i+1)+'.'+ext});
+  });
+  await _saveBillsToDesktop(infos);
 }
 async function _downloadAllMonthBills(period){
-  try{
-    var bldgs=DB.buildings||[];
-    var bills=DB.waterBills||[];
-    var files=[];
-    bills.forEach(function(w){
-      var bldg=bldgs.find(function(b){return b.id===w.bId;});
-      var bName=bldg?bldg.name:'';
-      (w.bills||[]).forEach(function(bill){
-        if(bill.period!==period) return;
-        (bill.files||[]).forEach(function(f,i){
-          if(!f.storage && (!f.data||f.data==='__IMG_IN_LOCAL__')) return;
-          files.push({f:f, bName:bName, idx:i});
-        });
+  var bldgs=DB.buildings||[];
+  var bills=DB.waterBills||[];
+  var infos=[];
+  bills.forEach(function(w){
+    var bldg=bldgs.find(function(b){return b.id===w.bId;});
+    var bName=bldg?bldg.name:'';
+    (w.bills||[]).forEach(function(bill){
+      if(bill.period!==period) return;
+      (bill.files||[]).forEach(function(f,i){
+        if(!f.storage && (!f.data||f.data==='__IMG_IN_LOCAL__')) return;
+        var ext=((f.name||'').split('.').pop()||'jpg').toLowerCase();
+        if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
+        infos.push({f:f, name:(period||'')+'_'+(bName||'bill')+'_'+(i+1)+'.'+ext});
       });
     });
-    if(!files.length){ _waterToast('⚠ 다운로드할 파일이 없습니다'); return; }
-    var dirHandle=await _pickSaveDir();
-    if(dirHandle==='abort') return;
-    if(dirHandle){
-      _waterToast('⬇ '+files.length+'장 저장 중...');
-      var saved=0;
-      for(var i=0;i<files.length;i++){
-        var it=files[i];
-        try{
-          var ext2=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
-          if(ext2==='jpeg') ext2='jpg'; if(!['jpg','png','pdf'].includes(ext2)) ext2='jpg';
-          var fn2=(period||'')+'_'+(it.bName||'bill')+'_'+(it.idx+1)+'.'+ext2;
-          var bl2=await _fileToBlobForDownload(it.f);
-          var fh=await dirHandle.getFileHandle(fn2,{create:true});
-          var wr=await fh.createWritable();
-          await wr.write(bl2);await wr.close();
-          saved++;
-        }catch(e){ console.warn('[allDL] skip',i,e); }
-      }
-      _waterToast('✅ '+saved+'장 저장 완료');
-      return;
-    }
-    // 폴백
-    _waterToast('⬇ '+files.length+'장 다운로드 중...');
-    for(var i=0;i<files.length;i++){
-      try{
-        var it=files[i];
-        var ext2=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
-        if(ext2==='jpeg') ext2='jpg'; if(!['jpg','png','pdf'].includes(ext2)) ext2='jpg';
-        var fn2=(period||'')+'_'+(it.bName||'bill')+'_'+(it.idx+1)+'.'+ext2;
-        var bl2=await _fileToBlobForDownload(it.f);
-        var url2=URL.createObjectURL(bl2);
-        var a2=document.createElement('a');a2.href=url2;a2.download=fn2;
-        document.body.appendChild(a2);a2.click();
-        setTimeout((function(u,el){return function(){try{el.remove();URL.revokeObjectURL(u);}catch(_){}};})(url2,a2),200);
-      }catch(e){}
-      if(i<files.length-1) await new Promise(function(r){setTimeout(r,300);});
-    }
-    _waterToast('✅ '+files.length+'장 다운로드 완료');
-  }catch(e){ alert('다운로드 실패: '+e.message); }
+  });
+  if(!infos.length){ _waterToast('⚠ 다운로드할 파일이 없습니다'); return; }
+  await _saveBillsToDesktop(infos);
 }
 async function _downloadAllBills(id, period, kind){
-  try{
-    const arr=(kind==='electric'?(DB.electricBills||[]):(DB.waterBills||[]));
-    const w=arr.find(x=>x.id===id); if(!w){ alert('고객정보 없음'); return; }
-    const bill=(w.bills||[]).find(x=>x.period===period); if(!bill||!bill.files||!bill.files.length){ alert('파일 없음'); return; }
-    // 건물명 찾기
-    var bldgName='';
-    (DB.buildings||[]).forEach(function(b){ if(b.waterIds&&b.waterIds.includes(id)) bldgName=b.name||''; });
-    if(!bldgName)(DB.buildings||[]).forEach(function(b){ if(b.electricIds&&b.electricIds.includes(id)) bldgName=b.name||''; });
-    // 파일 1개면 개별 저장
-    if(bill.files.length===1){
-      var f0=bill.files[0];
-      var ext0=((f0.mime||'').includes('pdf')||/\.pdf$/i.test(f0.name||''))?'pdf':'jpg';
-      var fname0=(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+'.'+ext0;
-      await _downloadBillFile({data:f0.data, storage:f0.storage, name:fname0, mime:f0.mime},{period:period,bldgName:bldgName||w.custName||''});
-      return;
-    }
-    // showDirectoryPicker로 폴더 선택 → 이미지 직접 저장
-    if(window.showDirectoryPicker){
-      try{
-        var dirHandle=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
-        for(var i=0;i<bill.files.length;i++){
-          var f=bill.files[i];
-          var ext=((f.mime||'').includes('pdf')||/\.pdf$/i.test(f.name||''))?'pdf':'jpg';
-          var fname=(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+'_'+(i+1)+'.'+ext;
-          var blob=await _fileToBlobForDownload(f);
-          var fh=await dirHandle.getFileHandle(fname,{create:true});
-          var wr=await fh.createWritable();
-          await wr.write(blob);
-          await wr.close();
-        }
-        _waterToast('✅ '+bill.files.length+'장 저장 완료');
-        return;
-      }catch(e){
-        if(e.name==='AbortError') return;
-        console.warn('showDirectoryPicker 실패',e);
-      }
-    }
-    // 폴백: 개별 showSaveFilePicker
-    for(var i=0;i<bill.files.length;i++){
-      var f=bill.files[i];
-      var ext=((f.mime||'').includes('pdf')||/\.pdf$/i.test(f.name||''))?'pdf':'jpg';
-      var fname=(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+'_'+(i+1)+'.'+ext;
-      try{ await _downloadBillFile({data:f.data, storage:f.storage, name:fname, mime:f.mime},{period:period,bldgName:bldgName||w.custName||''}); }catch(e){}
-    }
-  }catch(e){ alert('다운로드 실패: '+e.message); }
+  var arr=(kind==='electric'?(DB.electricBills||[]):(DB.waterBills||[]));
+  var w=arr.find(function(x){return x.id===id;}); if(!w){ alert('고객정보 없음'); return; }
+  var bill=(w.bills||[]).find(function(x){return x.period===period;}); if(!bill||!bill.files||!bill.files.length){ alert('파일 없음'); return; }
+  var bldgName='';
+  (DB.buildings||[]).forEach(function(b){ if(b.waterIds&&b.waterIds.includes(id)) bldgName=b.name||''; });
+  if(!bldgName)(DB.buildings||[]).forEach(function(b){ if(b.electricIds&&b.electricIds.includes(id)) bldgName=b.name||''; });
+  var infos=[];
+  bill.files.forEach(function(f,i){
+    var ext=((f.mime||'').includes('pdf')||/\.pdf$/i.test(f.name||''))?'pdf':'jpg';
+    infos.push({f:f, name:(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+(bill.files.length>1?'_'+(i+1):'')+'.'+ext});
+  });
+  await _saveBillsToDesktop(infos);
 }
 function uploadWaterBill(id){
   const w=(DB.waterBills||[]).find(x=>x.id===id); if(!w){ alert('고객정보 없음'); return; }
@@ -5303,14 +5220,9 @@ function uploadElectricBill(id){
 function uploadElectricBillAppend(id, period){ _pickElectricBillFiles(id, period); }
 // 📧 Gmail 연동 — 한전 청구서 자동 불러오기 (Google Identity Services OAuth)
 let _gmailToken=null; // {access_token, expires_at}
+var _BSN_GMAIL_CID='474471358069-i4aldj1b7f42cbr28jirgsoe1stlbkb4.apps.googleusercontent.com';
 function openGmailElectricImport(){
-  const cid=(DB.settings&&DB.settings.gmailClientId)||'';
-  if(!cid){
-    // Client ID 미설정 → 설정 모달
-    _showGmailSetupModal();
-    return;
-  }
-  // Client ID 있음 → 바로 인증 시도
+  var cid=(DB.settings&&DB.settings.gmailClientId)||_BSN_GMAIL_CID;
   _gmailStartImport(cid);
 }
 function _showGmailSetupModal(){
@@ -8458,6 +8370,49 @@ function buildDemoDB(){
       3:{password:'샘플 출입정보',cctv:'데모 영상 시스템',fire:'(샘플)',elevator:'(샘플)',water:'(샘플)',etc:''},
       4:{password:'정문: 9999\n후문: 8888',cctv:'데모 CCTV',fire:'소방관리: 건물주',elevator:'승강기관리: 방문자',water:'수도: 짝수월',etc:''},
     },
+    waterBills:(function(){
+      // 샘플 청구서 이미지 생성 (Canvas → dataURL)
+      function _mkImg(txt,color){
+        var c=document.createElement('canvas');c.width=320;c.height=440;
+        var x=c.getContext('2d');
+        x.fillStyle='#f0f4ff';x.fillRect(0,0,320,440);
+        x.fillStyle=color||'#1e40af';x.font='bold 18px sans-serif';x.textAlign='center';
+        x.fillText('수도요금 청구서',160,40);
+        x.fillStyle='#334155';x.font='13px sans-serif';
+        x.fillText(txt,160,80);
+        x.fillStyle='#0f172a';x.font='bold 22px sans-serif';
+        x.fillText('납부금액: '+((Math.floor(Math.random()*80)+20)*1000).toLocaleString()+'원',160,140);
+        x.strokeStyle='#cbd5e1';x.lineWidth=1;
+        for(var i=0;i<8;i++){x.beginPath();x.moveTo(30,180+i*28);x.lineTo(290,180+i*28);x.stroke();
+          x.fillStyle='#64748b';x.font='11px sans-serif';x.textAlign='left';
+          x.fillText(['기본요금','물이용부담금','하수도사용료','수질개선부담금','구경별요금','부가세','합계','납기내금액'][i],40,175+i*28);
+          x.textAlign='right';x.fillText(((Math.floor(Math.random()*50)+5)*100).toLocaleString()+'원',280,175+i*28);
+        }
+        x.textAlign='center';x.fillStyle='#94a3b8';x.font='10px sans-serif';
+        x.fillText('※ 샘플 청구서 (테스트용)',160,420);
+        return c.toDataURL('image/jpeg',0.85);
+      }
+      var months=['2026-01','2026-02','2026-03','2026-04'];
+      var colors=['#1e40af','#7c3aed','#059669','#dc2626'];
+      function _mkBills(bName,cName,color){
+        return months.map(function(m,mi){
+          var amt=(Math.floor(Math.random()*80)+20)*1000;
+          var usg=Math.floor(Math.random()*25)+5;
+          var label=m.replace('-','년 ')+'월';
+          return {period:m,files:[{data:_mkImg(bName+' / '+cName+'\n'+label,colors[(mi+colors.indexOf(color))%4]),name:m+'_'+bName+'_'+cName+'.jpg',mime:'image/jpeg'}],amount:amt,usage:usg,uploadedAt:Date.now()};
+        });
+      }
+      return [
+        {id:'sw1',bId:1,custNo:'12345678',custName:'웨이곤주식회사',note:'',meterCycle:2,meterDay:15,
+          bills:_mkBills('샘플프라자','웨이곤주식회사','#1e40af')},
+        {id:'sw2',bId:1,custNo:'12345679',custName:'웨이곤주식회사2',note:'',meterCycle:2,meterDay:15,
+          bills:_mkBills('샘플프라자','웨이곤주식회사2','#7c3aed')},
+        {id:'sw3',bId:2,custNo:'55556666',custName:'데모타워수도',note:'',meterCycle:2,meterDay:10,
+          bills:_mkBills('데모타워','데모타워수도','#dc2626')},
+        {id:'sw4',bId:4,custNo:'98765432',custName:'청담수도',note:'',meterCycle:2,meterDay:20,
+          bills:_mkBills('가상오피스','청담수도','#059669')},
+      ];
+    })(),
     reports:[],
     repPhotos:{},
     expAdjustments:[],
