@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co; frame-src blob: 'self'; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co; frame-src blob: 'self'; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1329,7 +1329,7 @@ function _renderOfflineBar(){
       ovl.innerHTML='<div style="background:#fff;border-radius:14px;padding:34px 36px;max-width:440px;width:92%;box-shadow:0 10px 40px rgba(0,0,0,.25);text-align:center;font-family:inherit">'
         +'<div style="font-size:44px;margin-bottom:12px">📡❌</div>'
         +'<div style="font-size:19px;font-weight:800;color:#dc2626;margin-bottom:10px">인터넷 연결 끊김</div>'
-        +'<div style="font-size:13.5px;color:#475569;line-height:1.6;margin-bottom:18px">오프라인 상태에서 수정하면 다른 기기와 동기화되지 않아요.<br>잘못된 데이터 덮어쓰기를 막기 위해 <b>인터넷 복구 전까지 편집이 잠겼어요</b>.</div>'
+        +'<div style="font-size:13.5px;color:#475569;line-height:1.6;margin-bottom:18px">오프라인 상태에서는 동기화가 안 돼요.<br>데이터 보호를 위해 <b style="white-space:nowrap">인터넷 복구 전까지 편집 잠금</b> 상태입니다.</div>'
         +'<div style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:22px;font-size:12.5px;color:#991b1b;font-weight:600"><span class="pulse-dot" style="width:8px;height:8px;background:#dc2626;border-radius:50%;animation:pulse 1.2s infinite"></span>연결 재시도 중…</div>'
         +'<div style="font-size:11.5px;color:#94a3b8;margin-top:16px;line-height:1.5">Wi-Fi · 이더넷 상태 확인 후 <br>연결되면 <b>자동으로 잠금 해제</b>됩니다</div>'
         +'</div>';
@@ -1347,10 +1347,66 @@ function _renderOfflineBar(){
 try{
   window.addEventListener('online',()=>{ _renderOfflineBar(); showSaveStatus('🌐 인터넷 복구됨 — 편집 잠금 해제','var(--gn)'); });
   window.addEventListener('offline',()=>{ _renderOfflineBar(); });
+  _renderOfflineBar(); // 즉시 실행 (로그인 화면에서도 차단)
   setTimeout(_renderOfflineBar,500);
   // 주기적 체크 (navigator.onLine이 거짓 양성 낼 수 있으니 5초마다 재확인)
   setInterval(_renderOfflineBar,5000);
 }catch(_){}
+
+// ═══ Supabase Storage ═══
+// 파일(계약서/청구서/건축물대장 등)을 Supabase Storage에 업로드하고 URL로 접근
+const _SB_BUCKET='bsn-files';
+// base64 data URL → Storage 업로드, 경로 반환
+async function _stUpload(path, dataUrlOrBlob){
+  if(!sbClient) throw new Error('Supabase 미연결');
+  var blob;
+  if(typeof dataUrlOrBlob==='string' && dataUrlOrBlob.startsWith('data:')){
+    blob=_dataUrlToBlob(dataUrlOrBlob);
+  } else if(dataUrlOrBlob instanceof Blob){
+    blob=dataUrlOrBlob;
+  } else { throw new Error('invalid file data'); }
+  // 파일명 충돌 방지: 경로에 타임스탬프 포함
+  var {data,error}=await sbClient.storage.from(_SB_BUCKET).upload(path, blob, {upsert:true, contentType:blob.type});
+  if(error) throw error;
+  return path;
+}
+// Storage 경로 → 공개 URL
+function _stUrl(path){
+  if(!sbClient||!path) return '';
+  var {data}=sbClient.storage.from(_SB_BUCKET).getPublicUrl(path);
+  return data.publicUrl||'';
+}
+// Storage 파일 삭제
+async function _stDelete(paths){
+  if(!sbClient) return;
+  if(typeof paths==='string') paths=[paths];
+  try{ await sbClient.storage.from(_SB_BUCKET).remove(paths); }catch(e){ console.warn('[stDelete]',e); }
+}
+// 파일 객체에서 표시용 URL 가져오기 (Storage 우선, base64 폴백)
+function _fileDisplayUrl(f){
+  if(!f) return '';
+  if(f.storage) return _stUrl(f.storage);
+  if(f.data && f.data.startsWith('data:')) return f.data;
+  return '';
+}
+// 파일 객체에서 blob URL 가져오기 (다운로드/뷰어용)
+function _fileBlobUrl(f, fallbackMime){
+  if(!f) return '';
+  if(f.storage) return _stUrl(f.storage);
+  if(f.data && f.data.startsWith('data:')) return _dataUrlToBlobUrl(f.data, fallbackMime||f.mime||'application/octet-stream');
+  return '';
+}
+// attachDoc, 청구서 업로드 등에서 사용: 파일을 Storage에 올리고 {storage,name,mime} 반환
+async function _uploadFileToStorage(dataUrl, storagePath, fileName, mimeType){
+  try{
+    await _stUpload(storagePath, dataUrl);
+    return {storage:storagePath, name:fileName, mime:mimeType};
+  }catch(e){
+    console.warn('[Storage 업로드 실패, 로컬 저장]', e.message);
+    // 폴백: base64 로컬 저장 (기존 방식)
+    return {data:dataUrl, name:fileName, mime:mimeType};
+  }
+}
 
 // ── 롤링 백업: 데이터 손실 방어. 매번 저장 전·후로 로컬에 최대 5세대 보관
 function _pushRollingBackup(tag){
@@ -1429,27 +1485,46 @@ function _idbGet(key){
 }
 // ── 이미지(base64) 분리 유틸: Supabase에는 가벼운 데이터만 저장, 이미지는 IndexedDB에
 function _stripBillImages(db){
-  // DB 깊은 복사 후 bills[].files[].data 제거 (수도+전기)
+  // DB 깊은 복사 후 로컬 base64 data만 제거 (Storage URL은 유지)
   try{
     const c=JSON.parse(JSON.stringify(db));
     ['waterBills','electricBills'].forEach(function(k){
       (c[k]||[]).forEach(function(w){
         (w.bills||[]).forEach(function(b){
-          (b.files||[]).forEach(function(f){ f.data='__IMG_IN_LOCAL__'; });
+          (b.files||[]).forEach(function(f){
+            if(f.storage) { delete f.data; } // Storage에 있으면 data 불필요
+            else if(f.data) { f.data='__IMG_IN_LOCAL__'; } // 로컬만 있으면 마커
+          });
         });
       });
     });
-    // 건물 cert, mgmtContract, 호실 contract 등 큰 파일도 분리
     (c.buildings||[]).forEach(function(b){
       if(b.cert && typeof b.cert==='string' && b.cert.length>1000) b.cert='__IMG_IN_LOCAL__';
-      (b.certFiles||[]).forEach(function(f){ if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__'; });
-      (b.mgmtContractFiles||[]).forEach(function(f){ if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__'; });
+      (b.certFiles||[]).forEach(function(f){
+        if(f.storage){ delete f.data; }
+        else if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__';
+      });
+      (b.mgmtContractFiles||[]).forEach(function(f){
+        if(f.storage){ delete f.data; }
+        else if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__';
+      });
       if(b.mgmtContract && typeof b.mgmtContract==='string' && b.mgmtContract.length>1000) b.mgmtContract='__IMG_IN_LOCAL__';
     });
     (c.leases||[]).forEach(function(l){
       if(l.contract && typeof l.contract==='string' && l.contract.length>1000) l.contract='__IMG_IN_LOCAL__';
-      (l.contractFiles||[]).forEach(function(f){ if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__'; });
+      (l.contractFiles||[]).forEach(function(f){
+        if(f.storage){ delete f.data; }
+        else if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__';
+      });
     });
+    // repPhotos: cover_* 등 base64 문자열도 스트립
+    if(c.repPhotos){
+      Object.keys(c.repPhotos).forEach(function(k){
+        var v=c.repPhotos[k];
+        if(typeof v==='string' && v.length>1000) c.repPhotos[k]='__IMG_IN_LOCAL__';
+        if(Array.isArray(v)) c.repPhotos[k]=v.map(function(p){ return (typeof p==='string'&&p.length>1000)?'__IMG_IN_LOCAL__':p; });
+      });
+    }
     return c;
   }catch(e){ return db; }
 }
@@ -1486,8 +1561,63 @@ function _mergeLocalImages(cloud, local){
       if(cl.contract==='__IMG_IN_LOCAL__' && ll.contract) cl.contract=ll.contract;
       (cl.contractFiles||[]).forEach(function(f,i){ if(f.data==='__IMG_IN_LOCAL__' && ll.contractFiles && ll.contractFiles[i]) f.data=ll.contractFiles[i].data; });
     });
+    // repPhotos 복원
+    if(cloud.repPhotos && local.repPhotos){
+      Object.keys(cloud.repPhotos).forEach(function(k){
+        var cv=cloud.repPhotos[k];
+        var lv=local.repPhotos[k];
+        if(!lv) return;
+        if(cv==='__IMG_IN_LOCAL__' && typeof lv==='string') cloud.repPhotos[k]=lv;
+        if(Array.isArray(cv) && Array.isArray(lv)){
+          cv.forEach(function(p,i){ if(p==='__IMG_IN_LOCAL__' && lv[i]) cv[i]=lv[i]; });
+        }
+      });
+    }
   }catch(e){ console.warn('[mergeImg]', e); }
   return cloud;
+}
+// ── 클라우드↔로컬 배열 머지 (id 기준, 양쪽에만 있는 항목 보존 + 최신 우선)
+function _mergeArrayById(cloudArr, localArr){
+  if(!Array.isArray(cloudArr)) return localArr||[];
+  if(!Array.isArray(localArr)) return cloudArr;
+  var map={};
+  cloudArr.forEach(function(item){ if(item&&item.id!=null) map[item.id]=item; });
+  localArr.forEach(function(item){
+    if(!item||item.id==null) return;
+    var existing=map[item.id];
+    if(!existing){ map[item.id]=item; return; } // 로컬에만 있음 → 추가
+    // 양쪽 다 있으면 최신(_edit/_created 타임스탬프) 우선
+    var cTime=(existing._edit||existing._created||'');
+    var lTime=(item._edit||item._created||'');
+    if(lTime>cTime) map[item.id]=item;
+  });
+  return Object.values(map);
+}
+function _mergeDB(cloud, local){
+  // 클라우드 기본, 배열은 id 기준 머지 (양쪽 항목 보존)
+  var merged=JSON.parse(JSON.stringify(cloud));
+  var arrKeys=['calEvents','leases','expires','fixedEvents','memos','pMemos'];
+  arrKeys.forEach(function(k){
+    if(Array.isArray(cloud[k]) || Array.isArray(local[k])){
+      merged[k]=_mergeArrayById(cloud[k]||[], local[k]||[]);
+    }
+  });
+  // waterBills, electricBills — bills 하위 배열도 머지
+  ['waterBills','electricBills'].forEach(function(k){
+    merged[k]=_mergeArrayById(cloud[k]||[], local[k]||[]);
+    // 각 고객의 bills 배열도 period 기준 머지
+    (merged[k]||[]).forEach(function(w){
+      var cw=(cloud[k]||[]).find(function(x){return x.id===w.id;});
+      var lw=(local[k]||[]).find(function(x){return x.id===w.id;});
+      if(cw&&lw&&Array.isArray(cw.bills)&&Array.isArray(lw.bills)){
+        var bmap={};
+        cw.bills.forEach(function(b){ if(b.period) bmap[b.period]=b; });
+        lw.bills.forEach(function(b){ if(b.period&&!bmap[b.period]) bmap[b.period]=b; });
+        w.bills=Object.values(bmap);
+      }
+    });
+  });
+  return merged;
 }
 // ── 저장: Supabase 우선, 실패시 localStorage 폴백
 async function sv(){
@@ -1602,8 +1732,10 @@ function _rtShowToast(msg){
 function _rtApplyRow(row){
   if(!row||!row.data) return;
   _pushRollingBackup('pre-remote-apply');
-  // ★ 클라우드 데이터(__IMG_IN_LOCAL__)에 현재 메모리의 실제 이미지 복원 후 반영
-  DB=_mergeLocalImages(row.data, DB);
+  // ★ 클라우드↔로컬 머지 (양쪽 항목 보존) + 이미지 복원
+  var _localSnap=JSON.parse(JSON.stringify(DB));
+  DB=_mergeDB(row.data, _localSnap);
+  DB=_mergeLocalImages(DB, _localSnap);
   // IndexedDB에도 이미지 포함 전체 저장 (로컬 이미지 유실 방지)
   try{ _idbPut('fullDB',DB).catch(function(e){console.warn('[rt] idb err',e);}); }catch(e){}
   try{ localStorage.setItem(SK, JSON.stringify(_stripBillImages(DB))); }catch(_){}
@@ -2848,19 +2980,6 @@ if(!window._meterMigrated2){
     if(_fixed){ try{sv();}catch(e){} console.log('[meter 마이그레이션] '+_fixed+'건 보정'); }
   }catch(e){}
 }
-// 1회 마이그레이션3: 청구서 이미지에서 확인한 검침일 반영 (더파크청담=7일)
-if(!window._meterMigrated3){
-  window._meterMigrated3=true;
-  try{
-    var _f3=0;
-    var _meterDayMap={14:7}; // bId:meterDay — 청구서 이미지에서 직접 확인한 값
-    (DB.waterBills||[]).forEach(function(w){
-      var day=_meterDayMap[w.bId];
-      if(day && w.meterDay!==day){ w.meterDay=day; _f3++; }
-    });
-    if(_f3){ try{sv();}catch(e){} console.log('[meter 마이그레이션3] 검침일 '+_f3+'건 반영'); }
-  }catch(e){}
-}
 function rdWater(){
   const list=$('water-list'); if(!list) return;
   const q='';
@@ -2878,9 +2997,10 @@ function rdWater(){
       if(cycle) w.meterCycle=cycle;
     }
     if(!w.meterCycle) w.meterCycle='odd'; // 최종 기본값
-    // 검침일: 이미지(북마클릿) 파싱값만 사용 — 고정일정 자동체크용
+    // 검침일: 이미지(북마클릿) 우선 → 건물정보 텍스트 폴백 (신규건물도 자동 인식)
     const mDay=_autoMeterDay(w);
     if(mDay && !w.meterDay){ w.meterDay=mDay; }
+    if(!w.meterDay && bInfo && bInfo.meterDay){ w.meterDay=bInfo.meterDay; }
     // 필터 적용
     if(_waterFilter==='all'){ grp[w.bId].items.push(w); }
     else if(_waterFilter==='odd'&&w.meterCycle==='odd'){ grp[w.bId].items.push(w); }
@@ -3368,7 +3488,7 @@ function openWaterBill(id){
 // 최초 1회 등록 (중복 방지)
 if(!window._bsnWaterMsgHooked){
   window._bsnWaterMsgHooked=true;
-  window.addEventListener('message', function(ev){
+  window.addEventListener('message', async function(ev){
     try{
       const d=ev.data; if(!d||typeof d!=='object') return;
       // ── ① 데이터 요청 핸드셰이크 ──
@@ -3417,7 +3537,14 @@ if(!window._bsnWaterMsgHooked){
         var _bi=_parseBldgWaterInfo(w.bId);
         if(_bi && _bi.meterCycle) w.meterCycle=_bi.meterCycle;
       }
-      const file=dataUrl?{data:dataUrl, name:period+'_청구서.jpg', mime:dataUrl.slice(5,dataUrl.indexOf(';'))||'image/jpeg'}:null;
+      // ★ Storage 업로드
+      var file=null;
+      if(dataUrl && dataUrl.startsWith('data:image/')){
+        var _mime=dataUrl.slice(5,dataUrl.indexOf(';'))||'image/jpeg';
+        var _ext=_mime.includes('png')?'png':'jpg';
+        var _spath='waterBills/'+w.id+'/'+period+'/'+Date.now()+'.'+_ext;
+        file=await _uploadFileToStorage(dataUrl, _spath, period+'_청구서.'+_ext, _mime);
+      }
       const ex=w.bills.find(x=>x.period===period);
       let mergedInto='새 폴더';
       if(ex){
@@ -3761,7 +3888,7 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
   groups.forEach(function(bg){
     bg.items.forEach(function(it){
       (it.files||[]).forEach(function(f,idx){
-        var isPlaceholder=(!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:')));
+        var isPlaceholder=(!f.storage && (!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:'))));
         if(!isPlaceholder){
           _billGalleryAll.push({f:f, w:it.w, bldg:bg.bldg, period:it.period, fileIdx:idx, gIdx:galleryIdx});
           galleryIdx++;
@@ -3800,7 +3927,7 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
               var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
               if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
               var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
-              var bl=_dataUrlToBlob(it.f.data);
+              var bl=await _fileToBlobForDownload(it.f);
               var fh=await dh.getFileHandle(fn,{create:true});
               var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
             }
@@ -3877,9 +4004,8 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
         var thumb=document.createElement('div');
         thumb.style.cssText='width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
         var img=document.createElement('img');
-        var blob=_dataUrlToBlob(item.f.data);
-        var blobUrl=URL.createObjectURL(blob);
-        img.src=blobUrl;
+        if(item.f.storage){ img.src=_stUrl(item.f.storage); }
+        else { try{ var _tb=_dataUrlToBlob(item.f.data); img.src=URL.createObjectURL(_tb); }catch(_e){ img.src=item.f.data||''; } }
         img.style.cssText='max-width:46px;max-height:46px;object-fit:contain';
         img.draggable=false;
         thumb.appendChild(img);
@@ -4014,7 +4140,7 @@ function _openFolderView(){
               var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
               if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
               var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
-              var bl=_dataUrlToBlob(it.f.data);
+              var bl=await _fileToBlobForDownload(it.f);
               var fh=await dh.getFileHandle(fn,{create:true});
               var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
             }
@@ -4098,9 +4224,8 @@ function _openFolderView(){
         var thumb=document.createElement('div');
         thumb.style.cssText='width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
         var img=document.createElement('img');
-        var blob=_dataUrlToBlob(item.f.data);
-        var blobUrl=URL.createObjectURL(blob);
-        img.src=blobUrl;
+        if(item.f.storage){ img.src=_stUrl(item.f.storage); }
+        else { try{ var _tb=_dataUrlToBlob(item.f.data); img.src=URL.createObjectURL(_tb); }catch(_e){ img.src=item.f.data||''; } }
         img.style.cssText='max-width:46px;max-height:46px;object-fit:contain';
         img.draggable=false;
         thumb.appendChild(img);
@@ -4247,7 +4372,7 @@ function _openBldgMultiView(bid, bldgFiles){
       var cImg=document.createElement('img');
       cImg.style.cssText='height:88vh;max-width:33vw;object-fit:contain;display:block';
       var cBlob=null;
-      try{ cBlob=_dataUrlToBlobUrl(item.f.data, item.f.mime||'image/jpeg'); }catch(ex){}
+      try{ cBlob=item.f.storage?_stUrl(item.f.storage):_dataUrlToBlobUrl(item.f.data, item.f.mime||'image/jpeg'); }catch(ex){}
       cImg.src=cBlob||item.f.data||'';
       card.appendChild(cImg);
       var lbl=document.createElement('div');
@@ -4363,7 +4488,7 @@ function _openBillGallery(startIdx, backFn){
     _zReset();
     setTimeout(function(){
       var blob=null;
-      try{ blob=_dataUrlToBlobUrl(g.f.data, g.f.mime||'image/jpeg'); }catch(e){}
+      try{ blob=g.f.storage?_stUrl(g.f.storage):_dataUrlToBlobUrl(g.f.data, g.f.mime||'image/jpeg'); }catch(e){}
       imgEl.src=blob||g.f.data||'';
       imgEl.style.opacity='1';
     },80);
@@ -4457,11 +4582,13 @@ function _renderWaterBillPane(pane, files, id, period, billObj){
     }
     const mime=(f.mime||'').toLowerCase();
     const isPdf=mime.includes('pdf')||/\.pdf$/i.test(f.name||'');
+    // ★ Storage URL 또는 base64 둘 다 지원
+    var fileUrl=f.storage?_stUrl(f.storage):null;
     if(isPdf){
-      const blob=_dataUrlToBlobUrl(f.data, f.mime||'application/pdf');
-      if(blob) window._waterBillBlobs.push(blob);
+      const blob=fileUrl||_dataUrlToBlobUrl(f.data, f.mime||'application/pdf');
+      if(blob && !fileUrl) window._waterBillBlobs.push(blob);
       const iframe=document.createElement('iframe');
-      iframe.src=blob||f.data;
+      iframe.src=blob||f.data||'';
       iframe.style.cssText='width:100%;height:82vh;border:none;background:#fff;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.3)';
       div.appendChild(iframe);
     } else {
@@ -4473,14 +4600,17 @@ function _renderWaterBillPane(pane, files, id, period, billObj){
         }
         const errBox=document.createElement('div');
         errBox.style.cssText='padding:20px;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:12.5px;line-height:1.6';
-        errBox.innerHTML='❌ 이미지 렌더 실패<br><span style="font-size:11px">데이터 크기: '+((f.data||'').length/1024).toFixed(1)+'KB · mime: '+(f.mime||'?')+'</span>';
+        errBox.innerHTML='❌ 이미지 렌더 실패<br><span style="font-size:11px">mime: '+(f.mime||'?')+(f.storage?' · Storage: '+f.storage:'')+'</span>';
         img.replaceWith(errBox);
       };
       img.onload=function(){ console.log('[viewer] img loaded',img.naturalWidth+'x'+img.naturalHeight); };
-      var imgBlob=null;
-      try{ imgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){}
-      if(imgBlob){ window._waterBillBlobs.push(imgBlob); img.src=imgBlob; }
-      else { img.src=f.data||''; }
+      if(fileUrl){ img.src=fileUrl; }
+      else {
+        var imgBlob=null;
+        try{ imgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){}
+        if(imgBlob){ window._waterBillBlobs.push(imgBlob); img.src=imgBlob; }
+        else { img.src=f.data||''; }
+      }
       div.appendChild(img);
     }
     pane.appendChild(div);
@@ -4515,11 +4645,22 @@ function _dataUrlToBlob(dataUrl){
   for(var i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
   return new Blob([arr],{type:mime});
 }
+// ★ Storage URL 또는 base64 → Blob 변환 (다운로드용)
+async function _fileToBlobForDownload(f){
+  if(f.storage){
+    var url=_stUrl(f.storage);
+    var resp=await fetch(url);
+    if(!resp.ok) throw new Error('Storage fetch failed: '+resp.status);
+    return await resp.blob();
+  }
+  if(f.data && typeof f.data==='string' && f.data.startsWith('data:')) return _dataUrlToBlob(f.data);
+  throw new Error('No file data');
+}
 // 파일 저장 — showSaveFilePicker로 저장위치 직접 선택 (다운로드 기록 X)
 // opts: {period:'2025-09', bldgName:'건물명'} — 파일명에 월+건물명 포함
 async function _downloadBillFile(f, opts){
   try{
-    if(!f||!f.data){ alert('파일 데이터 없음'); return; }
+    if(!f||(!f.data && !f.storage)){ alert('파일 데이터 없음'); return; }
     var ext=((f.name||'').split('.').pop()||'jpg').toLowerCase();
     if(ext==='jpeg') ext='jpg';
     if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
@@ -4536,7 +4677,7 @@ async function _downloadBillFile(f, opts){
       fname=f.name||('bill_'+Date.now()+'.'+ext);
       if(!/\.\w+$/.test(fname)) fname+='.jpg';
     }
-    var blob=_dataUrlToBlob(f.data);
+    var blob=await _fileToBlobForDownload(f);
     // File System Access API — 바탕화면 등 직접 위치 선택 가능
     if(window.showSaveFilePicker){
       try{
@@ -4584,7 +4725,7 @@ async function _downloadBldgBills(bldg, bldgFiles){
             if(!['jpg','png','pdf','jpeg'].includes(ext)) ext='png';
             if(ext==='jpeg') ext='jpg';
             var fname=(item.period||'')+'_'+bName+'_'+(item.w.custName||item.w.custNo||'')+'_'+(i+1)+'.'+ext;
-            var blob=_dataUrlToBlob(item.f.data);
+            var blob=await _fileToBlobForDownload(item.f);
             var fh=await dirHandle.getFileHandle(fname,{create:true});
             var wr=await fh.createWritable();
             await wr.write(blob);
@@ -4617,7 +4758,7 @@ async function _downloadAllMonthBills(period){
       (w.bills||[]).forEach(function(bill){
         if(bill.period!==period) return;
         (bill.files||[]).forEach(function(f,i){
-          if(!f.data||f.data==='__IMG_IN_LOCAL__') return;
+          if(!f.storage && (!f.data||f.data==='__IMG_IN_LOCAL__')) return;
           files.push({f:f, bName:bName, idx:i});
         });
       });
@@ -4636,7 +4777,7 @@ async function _downloadAllMonthBills(period){
             if(ext==='jpeg') ext='jpg';
             if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
             var fname=(period||'')+'_'+(item.bName||'bill')+'_'+(item.idx+1)+'.'+ext;
-            var blob=_dataUrlToBlob(item.f.data);
+            var blob=await _fileToBlobForDownload(item.f);
             var fh=await dirHandle.getFileHandle(fname,{create:true});
             var wr=await fh.createWritable();
             await wr.write(blob);
@@ -4659,7 +4800,7 @@ async function _downloadAllMonthBills(period){
         var ext2=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
         if(ext2==='jpeg') ext2='jpg'; if(!['jpg','png','pdf'].includes(ext2)) ext2='jpg';
         var fn2=(period||'')+'_'+(it.bName||'bill')+'_'+(it.idx+1)+'.'+ext2;
-        var bl2=_dataUrlToBlob(it.f.data);
+        var bl2=await _fileToBlobForDownload(it.f);
         var url2=URL.createObjectURL(bl2);
         var a2=document.createElement('a');
         a2.href=url2; a2.download=fn2;
@@ -4685,7 +4826,7 @@ async function _downloadAllBills(id, period, kind){
       var f0=bill.files[0];
       var ext0=((f0.mime||'').includes('pdf')||/\.pdf$/i.test(f0.name||''))?'pdf':'jpg';
       var fname0=(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+'.'+ext0;
-      await _downloadBillFile({data:f0.data, name:fname0},{period:period,bldgName:bldgName||w.custName||''});
+      await _downloadBillFile({data:f0.data, storage:f0.storage, name:fname0, mime:f0.mime},{period:period,bldgName:bldgName||w.custName||''});
       return;
     }
     // showDirectoryPicker로 폴더 선택 → 이미지 직접 저장
@@ -4696,7 +4837,7 @@ async function _downloadAllBills(id, period, kind){
           var f=bill.files[i];
           var ext=((f.mime||'').includes('pdf')||/\.pdf$/i.test(f.name||''))?'pdf':'jpg';
           var fname=(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+'_'+(i+1)+'.'+ext;
-          var blob=_dataUrlToBlob(f.data);
+          var blob=await _fileToBlobForDownload(f);
           var fh=await dirHandle.getFileHandle(fname,{create:true});
           var wr=await fh.createWritable();
           await wr.write(blob);
@@ -4714,7 +4855,7 @@ async function _downloadAllBills(id, period, kind){
       var f=bill.files[i];
       var ext=((f.mime||'').includes('pdf')||/\.pdf$/i.test(f.name||''))?'pdf':'jpg';
       var fname=(period||'')+'_'+(bldgName||w.custName||w.custNo||'bill')+'_'+(i+1)+'.'+ext;
-      try{ await _downloadBillFile({data:f.data, name:fname},{period:period,bldgName:bldgName||w.custName||''}); }catch(e){}
+      try{ await _downloadBillFile({data:f.data, storage:f.storage, name:fname, mime:f.mime},{period:period,bldgName:bldgName||w.custName||''}); }catch(e){}
     }
   }catch(e){ alert('다운로드 실패: '+e.message); }
 }
@@ -4747,23 +4888,31 @@ function _pickWaterBillFiles(id, period){
         rd.onerror=()=>{ loaded++; if(loaded===files.length) done(); };
         rd.readAsDataURL(f);
       });
-      function done(){
+      async function done(){
         const valid=res.filter(Boolean);
         if(!valid.length){ alert('파일 읽기 실패'); cleanup(); return; }
+        // ★ Storage 업로드
+        const uploaded=[];
+        for(var vi=0;vi<valid.length;vi++){
+          var v=valid[vi];
+          var ext=(v.name||'file').split('.').pop()||'jpg';
+          var spath='waterBills/'+id+'/'+period+'/'+Date.now()+'_'+vi+'.'+ext;
+          uploaded.push(await _uploadFileToStorage(v.data, spath, v.name, v.mime));
+        }
         const wi=DB.waterBills.findIndex(x=>x.id===id);
         if(wi<0){ alert('고객정보 없음'); cleanup(); return; }
         if(!DB.waterBills[wi].bills) DB.waterBills[wi].bills=[];
         const ex=DB.waterBills[wi].bills.find(x=>x.period===period);
         if(ex){
-          ex.files=(ex.files||[]).concat(valid);
+          ex.files=(ex.files||[]).concat(uploaded);
           ex.uploadedAt=Date.now();
         } else {
-          DB.waterBills[wi].bills.push({period, files:valid, uploadedAt:Date.now()});
+          DB.waterBills[wi].bills.push({period, files:uploaded, uploadedAt:Date.now()});
         }
         try{ sv(); }catch(e){ console.warn('save err', e); }
         _showWaterBillModal(period);
         rdWater();
-        _waterToast('✅ '+period+' 청구서 '+valid.length+'장 저장됨');
+        _waterToast('✅ '+period+' 청구서 '+uploaded.length+'장 저장됨');
         cleanup();
       }
     }catch(err){ alert('첨부 오류: '+err.message); cleanup(); }
@@ -5075,7 +5224,7 @@ async function _gmailStartImport(clientId){
       return;
     }
     // 건물별 자동매칭 + 저장
-    const saved=_gmailSaveExtracted(extracted);
+    const saved=await _gmailSaveExtracted(extracted);
     // 결과 표시
     let resHtml='<div style="padding:6px"><div style="font-size:15px;font-weight:700;color:#16a34a;margin-bottom:10px">✅ '+saved.total+'건 청구서 저장 완료!</div>';
     resHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.7;max-height:260px;overflow-y:auto">';
@@ -5101,14 +5250,14 @@ function _gmailFindParts(part, result){
   return result;
 }
 // 추출된 파일을 DB에 저장 + 건물 매칭
-function _gmailSaveExtracted(extracted){
+async function _gmailSaveExtracted(extracted){
   if(!DB.electricBills) DB.electricBills=[];
   const bldgs=DB.buildings||[];
   const firstBldgId=bldgs.length?bldgs[0].id:0;
   let total=0, unmatched=0;
   const items=[];
   // 제목에서 고객번호 추출 시도
-  extracted.forEach(function(ex){
+  for(const ex of extracted){
     // 한전 메일 제목 예: "[한국전력] 2025년 9월 전기요금 청구서" 또는 고객번호 포함
     const subj=ex.subject||'';
     // 기존 등록된 전기요금 고객 중 고객번호로 매칭
@@ -5149,15 +5298,18 @@ function _gmailSaveExtracted(extracted){
     }
     // 해당 고객에 bills 배열에 추가
     const wi=DB.electricBills.findIndex(function(e){return e.id===targetId;});
-    if(wi<0) return;
+    if(wi<0) continue;
     if(!DB.electricBills[wi].bills) DB.electricBills[wi].bills=[];
     const period=ex.period;
     const existing=DB.electricBills[wi].bills.find(function(b){return b.period===period;});
-    const fileObj={data:ex.data, name:ex.filename, mime:ex.mime};
+    const ts=Date.now();
+    const ext2=(ex.filename||'').split('.').pop()||'jpg';
+    const stPath='electricBills/'+targetId+'/'+period+'/'+ts+'.'+ext2;
+    const fileObj=await _uploadFileToStorage(ex.data, stPath, ex.filename, ex.mime);
     if(existing){
       // 같은 기간에 중복파일 체크 (파일명 기준)
       const dup=(existing.files||[]).some(function(f){return f.name===ex.filename;});
-      if(dup) return; // 이미 있는 파일 스킵
+      if(dup) continue; // 이미 있는 파일 스킵
       existing.files=(existing.files||[]).concat([fileObj]);
       existing.uploadedAt=Date.now();
     } else {
@@ -5165,7 +5317,7 @@ function _gmailSaveExtracted(extracted){
     }
     total++;
     items.push({period:period, filename:ex.filename, bldgName:bldgName});
-  });
+  }
   try{ sv(); }catch(e){ console.warn('[Gmail save]',e); }
   return {total:total, unmatched:unmatched, items:items};
 }
@@ -5186,19 +5338,27 @@ function _pickElectricBillFiles(id, period){
         rd.onerror=()=>{ loaded++; if(loaded===files.length) done(); };
         rd.readAsDataURL(f);
       });
-      function done(){
+      async function done(){
         const valid=res.filter(Boolean);
         if(!valid.length){ alert('파일 읽기 실패'); cleanup(); return; }
+        // ★ Storage 업로드
+        const uploaded=[];
+        for(var vi=0;vi<valid.length;vi++){
+          var v=valid[vi];
+          var ext=(v.name||'file').split('.').pop()||'pdf';
+          var spath='electricBills/'+id+'/'+period+'/'+Date.now()+'_'+vi+'.'+ext;
+          uploaded.push(await _uploadFileToStorage(v.data, spath, v.name, v.mime));
+        }
         const wi=DB.electricBills.findIndex(x=>x.id===id);
         if(wi<0){ alert('고객정보 없음'); cleanup(); return; }
         if(!DB.electricBills[wi].bills) DB.electricBills[wi].bills=[];
         const ex=DB.electricBills[wi].bills.find(x=>x.period===period);
-        if(ex){ ex.files=(ex.files||[]).concat(valid); ex.uploadedAt=Date.now(); }
-        else { DB.electricBills[wi].bills.push({period, files:valid, uploadedAt:Date.now()}); }
+        if(ex){ ex.files=(ex.files||[]).concat(uploaded); ex.uploadedAt=Date.now(); }
+        else { DB.electricBills[wi].bills.push({period, files:uploaded, uploadedAt:Date.now()}); }
         try{ sv(); }catch(e){ console.warn('save err', e); }
         _showElectricBillModal(id, period);
         rdElectric();
-        _electricToast('✅ '+period+' 전기청구서 '+valid.length+'장 저장됨','#16a34a');
+        _electricToast('✅ '+period+' 전기청구서 '+uploaded.length+'장 저장됨','#16a34a');
         cleanup();
       }
     }catch(err){ alert('첨부 오류: '+err.message); cleanup(); }
@@ -5331,7 +5491,7 @@ function _renderElectricBillPane(pane, files, id, period){
     const nameSpan=document.createElement('span');
     nameSpan.textContent=(idx+1)+' / '+files.length+' — '+(f.name||'');
     lbl.appendChild(nameSpan);
-    const isPlaceholder=(!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:')));
+    const isPlaceholder=(!f.storage && (!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:'))));
     if(!isPlaceholder){
       const dlBtn=document.createElement('button');
       dlBtn.textContent='⬇ 파일 저장';
@@ -5350,11 +5510,13 @@ function _renderElectricBillPane(pane, files, id, period){
     }
     const mime=(f.mime||'').toLowerCase();
     const isPdf=mime.includes('pdf')||/\.pdf$/i.test(f.name||'');
+    // ★ Storage URL 또는 base64 둘 다 지원
+    var eFileUrl=f.storage?_stUrl(f.storage):null;
     if(isPdf){
-      const blob=_dataUrlToBlobUrl(f.data, f.mime||'application/pdf');
-      if(blob) window._electricBillBlobs.push(blob);
+      const blob=eFileUrl||_dataUrlToBlobUrl(f.data, f.mime||'application/pdf');
+      if(blob && !eFileUrl) window._electricBillBlobs.push(blob);
       const iframe=document.createElement('iframe');
-      iframe.src=blob||f.data;
+      iframe.src=blob||f.data||'';
       iframe.style.cssText='width:100%;height:82vh;border:none;background:#fff;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.3)';
       div.appendChild(iframe);
     } else {
@@ -5366,13 +5528,16 @@ function _renderElectricBillPane(pane, files, id, period){
         }
         const errBox=document.createElement('div');
         errBox.style.cssText='padding:20px;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:12.5px;line-height:1.6';
-        errBox.innerHTML='❌ 이미지 렌더 실패<br><span style="font-size:11px">데이터 크기: '+((f.data||'').length/1024).toFixed(1)+'KB</span>';
+        errBox.innerHTML='❌ 이미지 렌더 실패<br><span style="font-size:11px">mime: '+(f.mime||'?')+(f.storage?' · Storage: '+f.storage:'')+'</span>';
         img.replaceWith(errBox);
       };
-      var eImgBlob=null;
-      try{ eImgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){}
-      if(eImgBlob){ window._electricBillBlobs.push(eImgBlob); img.src=eImgBlob; }
-      else { img.src=f.data||''; }
+      if(eFileUrl){ img.src=eFileUrl; }
+      else {
+        var eImgBlob=null;
+        try{ eImgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){}
+        if(eImgBlob){ window._electricBillBlobs.push(eImgBlob); img.src=eImgBlob; }
+        else { img.src=f.data||''; }
+      }
       div.appendChild(img);
     }
     pane.appendChild(div);
@@ -5412,51 +5577,42 @@ function attachDoc(id, kind, callback){
         rd.onerror=()=>{ loaded++; if(loaded===files.length) finishAttach(results); };
         rd.readAsDataURL(f);
       });
-      function finishAttach(res){
+      async function finishAttach(res){
         const valid=res.filter(Boolean);
         if(!valid.length){ alert('파일 읽기 실패'); cleanup(); return; }
+        // ★ Storage 업로드: 각 파일을 Supabase Storage에 올리고 경로만 DB에 저장
+        const uploaded=[];
+        for(let vi=0;vi<valid.length;vi++){
+          var v=valid[vi];
+          var ext=(v.name||'file').split('.').pop()||'bin';
+          var ts=Date.now()+'_'+vi;
+          var spath;
+          if(kind==='cert') spath='buildings/'+id+'/cert/'+ts+'.'+ext;
+          else if(kind==='contract') spath='buildings/'+id+'/mgmtContract/'+ts+'.'+ext;
+          else spath='leases/'+id+'/contract/'+ts+'.'+ext;
+          uploaded.push(await _uploadFileToStorage(v.data, spath, v.name, v.mime));
+        }
         if(kind==='cert'||kind==='contract'){
           const i=DB.buildings.findIndex(b=>String(b.id)===String(id));
           if(i<0){ alert('건물을 찾을 수 없습니다.'); cleanup(); return; }
           if(kind==='contract'){
-            if(valid.length===1&&(valid[0].mime||'').includes('pdf')){
-              DB.buildings[i].mgmtContract=valid[0].data;
-              DB.buildings[i].mgmtContractName=valid[0].name;
-              DB.buildings[i].mgmtContractMime=valid[0].mime;
-              delete DB.buildings[i].mgmtContractFiles;
-            } else {
-              DB.buildings[i].mgmtContractFiles=valid;
-              DB.buildings[i].mgmtContractName=valid.length+'장';
-              DB.buildings[i].mgmtContractMime='multi';
-              delete DB.buildings[i].mgmtContract;
-            }
+            DB.buildings[i].mgmtContractFiles=uploaded;
+            DB.buildings[i].mgmtContractName=uploaded.length===1?uploaded[0].name:uploaded.length+'장';
+            DB.buildings[i].mgmtContractMime=uploaded.length===1?uploaded[0].mime:'multi';
+            delete DB.buildings[i].mgmtContract;
           } else {
-            if(valid.length===1&&(valid[0].mime||'').includes('pdf')){
-              DB.buildings[i].cert=valid[0].data;
-              DB.buildings[i].certName=valid[0].name;
-              DB.buildings[i].certMime=valid[0].mime;
-              delete DB.buildings[i].certFiles;
-            } else {
-              DB.buildings[i].certFiles=valid;
-              DB.buildings[i].certName=valid.length+'장';
-              DB.buildings[i].certMime='multi';
-              delete DB.buildings[i].cert;
-            }
+            DB.buildings[i].certFiles=uploaded;
+            DB.buildings[i].certName=uploaded.length===1?uploaded[0].name:uploaded.length+'장';
+            DB.buildings[i].certMime=uploaded.length===1?uploaded[0].mime:'multi';
+            delete DB.buildings[i].cert;
           }
         } else if(kind==='lease'){
           const i=DB.leases.findIndex(l=>String(l.id)===String(id));
           if(i<0){ alert('호실을 찾을 수 없습니다.'); cleanup(); return; }
-          if(valid.length===1&&(valid[0].mime||'').includes('pdf')){
-            DB.leases[i].contract=valid[0].data;
-            DB.leases[i].contractName=valid[0].name;
-            DB.leases[i].contractMime=valid[0].mime;
-            delete DB.leases[i].contractFiles;
-          } else {
-            DB.leases[i].contractFiles=valid;
-            DB.leases[i].contractName=valid.length+'장';
-            DB.leases[i].contractMime='multi';
-            delete DB.leases[i].contract;
-          }
+          DB.leases[i].contractFiles=uploaded;
+          DB.leases[i].contractName=uploaded.length===1?uploaded[0].name:uploaded.length+'장';
+          DB.leases[i].contractMime=uploaded.length===1?uploaded[0].mime:'multi';
+          delete DB.leases[i].contract;
         }
         try{ sv(); }catch(e){ console.warn('save err', e); }
         rdLease();
@@ -5480,6 +5636,8 @@ function docFileCount(obj, prefix){
 // data URL → Blob URL (브라우저가 data: 탑레벨/iframe을 차단하는 경우 대응)
 function _dataUrlToBlobUrl(dataUrl, fallbackMime){
   try{
+    // Storage URL이면 그대로 반환
+    if(typeof dataUrl==='string' && (dataUrl.startsWith('http')||dataUrl.startsWith('//'))) return dataUrl;
     const arr=String(dataUrl).split(',');
     const head=arr[0]||'';
     const mimeMatch=head.match(/data:([^;]+)/);
@@ -5511,19 +5669,21 @@ function _getDocData(id, kind){
 function viewDoc(id, kind){
   const doc=_getDocData(id,kind);
   if(!doc||!doc.files.length){ alert('첨부된 파일이 없습니다.'); return; }
+  // 파일 URL 해석 헬퍼 (Storage URL 우선, base64 폴백)
+  function _resolveFileUrl(f, fallbackMime){ return f.storage?_stUrl(f.storage):_dataUrlToBlobUrl(f.data, fallbackMime||f.mime||'application/octet-stream'); }
   // 단일 PDF → 브라우저 네이티브 뷰어로 직접 열기 (가장 안정적)
   if(doc.files.length===1&&(doc.files[0].mime||'').includes('pdf')){
-    const blob=_dataUrlToBlobUrl(doc.files[0].data, doc.files[0].mime);
+    const blob=_resolveFileUrl(doc.files[0], doc.files[0].mime);
     if(!blob){ alert('PDF를 열 수 없습니다.'); return; }
     const w=window.open(blob,'_blank');
     if(!w){ const a=document.createElement('a');a.href=blob;a.download=doc.files[0].name||'document.pdf';document.body.appendChild(a);a.click();a.remove(); }
-    setTimeout(()=>{try{URL.revokeObjectURL(blob)}catch(e){}},60000);
+    if(!doc.files[0].storage) setTimeout(()=>{try{URL.revokeObjectURL(blob)}catch(e){}},60000);
     return;
   }
   // 이미지 → 커스텀 갤러리 (휠 확대/축소 + 드래그 이동)
   const w=window.open('','_blank');
   if(!w){ alert('팝업이 차단되어 있습니다.'); return; }
-  const blobInfos=doc.files.map((f,i)=>({url:_dataUrlToBlobUrl(f.data,f.mime||'image/jpeg'), name:f.name||'', idx:i}));
+  const blobInfos=doc.files.map((f,i)=>({url:_resolveFileUrl(f,f.mime||'image/jpeg'), name:f.name||'', idx:i}));
   const total=blobInfos.length;
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(doc.label)}</title>
 <style>
@@ -7873,6 +8033,7 @@ document.addEventListener('click',function(e){
 });
 
 async function doLogin(){
+  if(!navigator.onLine){ const err=$('login-err'); if(err) err.textContent='⚠️ 인터넷 연결이 없습니다. 연결 후 다시 시도하세요.'; return; }
   const id=$('login-id').value.trim(),pw=$('login-pw').value;
   const btn=$('login-btn');const err=$('login-err');
   err.textContent='';
@@ -8100,8 +8261,10 @@ async function enterApp(){
       const localJSON=JSON.stringify(DB);
       const cloudJSON=JSON.stringify(cloud);
       if(localJSON!==cloudJSON){
-        // cloud 데이터에 이미지 플레이스홀더가 있으면 현재 DB의 이미지로 복원
-        DB=_mergeLocalImages(cloud, DB);
+        // cloud↔local 배열 머지 (양쪽 항목 보존) + 이미지 복원
+        var _localDB=JSON.parse(JSON.stringify(DB));
+        DB=_mergeDB(cloud, _localDB);
+        DB=_mergeLocalImages(DB, _localDB);
         // UI 초기화 상태는 유지
         if(!DB.ui) DB.ui={};
         DB.ui.leaseF='all';
@@ -8141,6 +8304,7 @@ function switchAuthTab(mode){
 
 // ── 회원가입 ──────────────────────────────────────────────────
 async function doSignup(){
+  if(!navigator.onLine){ const err=$('signup-err'); if(err) err.textContent='⚠️ 인터넷 연결이 없습니다.'; return; }
   const name=$('signup-name').value.trim();
   const id=$('signup-id').value.trim();
   const pw=$('signup-pw').value;
