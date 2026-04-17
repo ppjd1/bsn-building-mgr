@@ -4079,23 +4079,21 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
     if(items.length===1){ _downloadBillFile(items[0].f,{period:items[0].period,bldgName:items[0].bldg?items[0].bldg.name:''}); return; }
     (async function(){
       try{
-        if(window.showDirectoryPicker){
-          try{
-            _waterToast('📁 저장할 폴더를 선택하세요');
-            var dh=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
-            var saved=0;
-            for(var i=0;i<items.length;i++){
-              var it=items[i];
-              var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
-              if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
-              var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
-              var bl=await _fileToBlobForDownload(it.f);
-              var fh=await dh.getFileHandle(fn,{create:true});
-              var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
-            }
-            _waterToast('✅ '+saved+'장 저장 완료');
-            return;
-          }catch(e){ if(e.name==='AbortError') return; }
+        var dh=await _pickSaveDir();
+        if(dh==='abort') return;
+        if(dh){
+          var saved=0;
+          for(var i=0;i<items.length;i++){
+            var it=items[i];
+            var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
+            if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
+            var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
+            var bl=await _fileToBlobForDownload(it.f);
+            var fh=await dh.getFileHandle(fn,{create:true});
+            var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
+          }
+          _waterToast('✅ '+saved+'장 저장 완료');
+          return;
         }
         for(var i=0;i<items.length;i++){
           try{ await _downloadBillFile(items[i].f,{period:items[i].period,bldgName:items[i].bldg?items[i].bldg.name:''}); }catch(e){}
@@ -4139,6 +4137,64 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
   // ─ 파일 영역 (스크롤 + 드래그 선택)
   var fileArea=document.createElement('div');
   fileArea.style.cssText='flex:1;overflow-y:auto;overflow-x:hidden;position:relative;padding:8px;user-select:none;-webkit-user-select:none;background:#f5f5f5';
+  // ── 카톡 등에서 이미지 드래그&드롭 ──
+  var _dropOverlay=document.createElement('div');
+  _dropOverlay.style.cssText='display:none;position:absolute;inset:0;z-index:20;background:rgba(14,99,156,.12);border:3px dashed #0e639c;border-radius:8px;pointer-events:none;align-items:center;justify-content:center';
+  _dropOverlay.innerHTML='<div style="text-align:center;pointer-events:none"><div style="font-size:36px;margin-bottom:6px">📎</div><div style="font-size:14px;font-weight:700;color:#0e639c">여기에 놓으면 청구서 등록</div><div style="font-size:11px;color:#64748b;margin-top:4px">'+_periodLabel(monthData.period)+'</div></div>';
+  fileArea.appendChild(_dropOverlay);
+  var _dragCnt=0;
+  fileArea.addEventListener('dragenter',function(e){ e.preventDefault(); _dragCnt++; _dropOverlay.style.display='flex'; });
+  fileArea.addEventListener('dragleave',function(e){ _dragCnt--; if(_dragCnt<=0){_dragCnt=0;_dropOverlay.style.display='none';} });
+  fileArea.addEventListener('dragover',function(e){ e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
+  fileArea.addEventListener('drop',function(e){
+    e.preventDefault(); _dragCnt=0; _dropOverlay.style.display='none';
+    var droppedFiles=Array.from(e.dataTransfer.files||[]).filter(function(f){ return f.type.startsWith('image/')||f.type==='application/pdf'; });
+    if(!droppedFiles.length){ _waterToast('⚠ 이미지 또는 PDF 파일만 등록 가능'); return; }
+    var period=monthData.period;
+    if(!period){ _waterToast('⚠ 기간 정보 없음'); return; }
+    // 어떤 고객(waterBill)에 넣을지 — 첫 번째 고객으로 (1개만 있으면 자동, 여러개면 선택)
+    var wIds=[];
+    (DB.waterBills||[]).forEach(function(w){
+      var bldg=(DB.buildings||[]).find(function(b){return b.id===w.bId;});
+      wIds.push({id:w.id, label:(bldg?bldg.name:'')+'/'+(w.custName||w.custNo||w.id)});
+    });
+    if(!wIds.length){ _waterToast('⚠ 수도요금 고객이 없습니다'); return; }
+    var targetId=wIds[0].id;
+    if(wIds.length>1){
+      var msg='어떤 고객에 등록할까요?\n\n'+wIds.map(function(x,i){return (i+1)+'. '+x.label;}).join('\n');
+      var pick=prompt(msg,'1');
+      if(!pick) return;
+      var n=parseInt(pick); if(n>=1&&n<=wIds.length) targetId=wIds[n-1].id;
+      else{ _waterToast('⚠ 잘못된 선택'); return; }
+    }
+    // 파일 읽고 업로드
+    _waterToast('⬆ '+droppedFiles.length+'장 업로드 중...');
+    var loaded=0,res=[];
+    droppedFiles.forEach(function(f,idx){
+      var rd=new FileReader();
+      rd.onload=function(ev){ res[idx]={data:ev.target.result,name:f.name,mime:f.type||''}; loaded++; if(loaded===droppedFiles.length) doDrop(); };
+      rd.onerror=function(){ loaded++; if(loaded===droppedFiles.length) doDrop(); };
+      rd.readAsDataURL(f);
+    });
+    async function doDrop(){
+      var valid=res.filter(Boolean); if(!valid.length) return;
+      var uploaded=[];
+      for(var vi=0;vi<valid.length;vi++){
+        var v=valid[vi];
+        var ext=(v.name||'file').split('.').pop()||'jpg';
+        var spath='waterBills/'+targetId+'/'+period+'/'+Date.now()+'_'+vi+'.'+ext;
+        uploaded.push(await _uploadFileToStorage(v.data, spath, v.name, v.mime));
+      }
+      var wi=DB.waterBills.findIndex(function(x){return x.id===targetId;});
+      if(wi<0) return;
+      if(!DB.waterBills[wi].bills) DB.waterBills[wi].bills=[];
+      var ex=DB.waterBills[wi].bills.find(function(x){return x.period===period;});
+      if(ex){ ex.files=(ex.files||[]).concat(uploaded); ex.uploadedAt=Date.now(); }
+      else{ DB.waterBills[wi].bills.push({period:period, files:uploaded, uploadedAt:Date.now()}); }
+      sv(); _showWaterBillModal(period); rdWater();
+      _waterToast('✅ '+uploaded.length+'장 등록 완료');
+    }
+  });
   pane.appendChild(fileArea);
   var container=document.createElement('div');
   container.style.cssText='max-width:700px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;justify-content:flex-start;padding:0 20px';
@@ -4870,42 +4926,73 @@ async function _downloadBillFile(f, opts){
 // 해당 기간의 전체 파일 순차 다운로드
 // 해당 월 전체 건물 청구서 일괄 다운로드 (showSaveFilePicker → 다운로드 기록 X)
 // 특정 건물 전체 청구서 다운로드
+var _savedDirHandle=null; // 한 번 선택한 폴더 기억
+async function _pickSaveDir(){
+  if(!window.showDirectoryPicker) return null;
+  // 이전에 선택한 폴더가 있으면 권한 확인 후 재사용
+  if(_savedDirHandle){
+    try{
+      var perm=await _savedDirHandle.queryPermission({mode:'readwrite'});
+      if(perm==='granted') return _savedDirHandle;
+      perm=await _savedDirHandle.requestPermission({mode:'readwrite'});
+      if(perm==='granted') return _savedDirHandle;
+    }catch(e){ _savedDirHandle=null; }
+  }
+  // 새로 선택
+  try{
+    var h=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite',startIn:'desktop'});
+    _savedDirHandle=h;
+    // IndexedDB에 핸들 저장 (세션 넘어서도 기억)
+    try{ _idbPut('savedDirHandle',h); }catch(e){}
+    return h;
+  }catch(e){
+    if(e.name==='AbortError') return 'abort';
+    // 시스템 폴더(바탕화면 등) 선택 시 안내
+    alert('이 폴더는 직접 선택이 안 됩니다.\n바탕화면에 "청구서" 폴더를 만든 뒤 선택하세요.\n(최초 1회만 선택하면 다음부턴 자동 저장됩니다)');
+    try{
+      var h2=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite',startIn:'desktop'});
+      _savedDirHandle=h2;
+      try{ _idbPut('savedDirHandle',h2); }catch(e2){}
+      return h2;
+    }catch(e2){
+      if(e2.name==='AbortError') return 'abort';
+      return null;
+    }
+  }
+}
+// 앱 시작 시 저장된 폴더 핸들 복원
+(function(){ try{ _idbGet('savedDirHandle').then(function(h){ if(h) _savedDirHandle=h; }); }catch(e){} })();
 async function _downloadBldgBills(bldg, bldgFiles){
   try{
     if(!bldgFiles||!bldgFiles.length){ _waterToast('⚠ 다운로드할 파일이 없습니다'); return; }
     var bName=bldg?bldg.name:'건물';
-    if(window.showDirectoryPicker){
-      try{
-        _waterToast('📁 저장할 폴더를 선택하세요');
-        var dirHandle=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
-        _waterToast('⬇ '+bName+' '+bldgFiles.length+'장 저장 중...');
-        var saved=0;
-        for(var i=0;i<bldgFiles.length;i++){
-          var item=bldgFiles[i];
-          try{
-            var ext=((item.f.name||'').split('.').pop()||'png').toLowerCase();
-            if(!['jpg','png','pdf','jpeg'].includes(ext)) ext='png';
-            if(ext==='jpeg') ext='jpg';
-            var fname=(item.period||'')+'_'+bName+'_'+(item.w.custName||item.w.custNo||'')+'_'+(i+1)+'.'+ext;
-            var blob=await _fileToBlobForDownload(item.f);
-            var fh=await dirHandle.getFileHandle(fname,{create:true});
-            var wr=await fh.createWritable();
-            await wr.write(blob);
-            await wr.close();
-            saved++;
-          }catch(e){ console.warn('[bldgDL] skip',i,e); }
-        }
-        _waterToast('✅ '+bName+' '+saved+'장 저장 완료');
-        return;
-      }catch(e){
-        if(e.name==='AbortError') return;
-        console.warn('showDirectoryPicker 실패',e);
+    var dirHandle=await _pickSaveDir();
+    if(dirHandle==='abort') return;
+    if(dirHandle){
+      _waterToast('⬇ '+bName+' '+bldgFiles.length+'장 저장 중...');
+      var saved=0;
+      for(var i=0;i<bldgFiles.length;i++){
+        var item=bldgFiles[i];
+        try{
+          var ext=((item.f.name||'').split('.').pop()||'png').toLowerCase();
+          if(!['jpg','png','pdf','jpeg'].includes(ext)) ext='png';
+          if(ext==='jpeg') ext='jpg';
+          var fname=(item.period||'')+'_'+bName+'_'+(item.w.custName||item.w.custNo||'')+'_'+(i+1)+'.'+ext;
+          var blob=await _fileToBlobForDownload(item.f);
+          var fh=await dirHandle.getFileHandle(fname,{create:true});
+          var wr=await fh.createWritable();
+          await wr.write(blob);await wr.close();
+          saved++;
+        }catch(e){ console.warn('[bldgDL] skip',i,e); }
       }
+      _waterToast('✅ '+bName+' '+saved+'장 저장 완료');
+      return;
     }
     // 폴백: 개별 다운로드
-    _waterToast('⬇ '+bldgFiles.length+'장 개별 저장...');
+    _waterToast('⬇ '+bldgFiles.length+'장 다운로드 중...');
     for(var i=0;i<bldgFiles.length;i++){
       try{ await _downloadBillFile(bldgFiles[i].f,{period:bldgFiles[i].period,bldgName:bName}); }catch(e){}
+      if(i<bldgFiles.length-1) await new Promise(function(r){setTimeout(r,300);});
     }
   }catch(e){ alert('다운로드 실패: '+e.message); }
 }
@@ -4926,36 +5013,29 @@ async function _downloadAllMonthBills(period){
       });
     });
     if(!files.length){ _waterToast('⚠ 다운로드할 파일이 없습니다'); return; }
-    if(window.showDirectoryPicker){
-      try{
-        _waterToast('📁 저장할 폴더를 선택하세요');
-        var dirHandle=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
-        _waterToast('⬇ '+files.length+'장 저장 중...');
-        var saved=0;
-        for(var i=0;i<files.length;i++){
-          var item=files[i];
-          try{
-            var ext=((item.f.name||'').split('.').pop()||'jpg').toLowerCase();
-            if(ext==='jpeg') ext='jpg';
-            if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
-            var fname=(period||'')+'_'+(item.bName||'bill')+'_'+(item.idx+1)+'.'+ext;
-            var blob=await _fileToBlobForDownload(item.f);
-            var fh=await dirHandle.getFileHandle(fname,{create:true});
-            var wr=await fh.createWritable();
-            await wr.write(blob);
-            await wr.close();
-            saved++;
-          }catch(e){ console.warn('[allDL] skip',i,e); }
-        }
-        _waterToast('✅ '+saved+'장 저장 완료');
-        return;
-      }catch(e){
-        if(e.name==='AbortError') return;
-        console.warn('showDirectoryPicker 실패',e);
+    var dirHandle=await _pickSaveDir();
+    if(dirHandle==='abort') return;
+    if(dirHandle){
+      _waterToast('⬇ '+files.length+'장 저장 중...');
+      var saved=0;
+      for(var i=0;i<files.length;i++){
+        var it=files[i];
+        try{
+          var ext2=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
+          if(ext2==='jpeg') ext2='jpg'; if(!['jpg','png','pdf'].includes(ext2)) ext2='jpg';
+          var fn2=(period||'')+'_'+(it.bName||'bill')+'_'+(it.idx+1)+'.'+ext2;
+          var bl2=await _fileToBlobForDownload(it.f);
+          var fh=await dirHandle.getFileHandle(fn2,{create:true});
+          var wr=await fh.createWritable();
+          await wr.write(bl2);await wr.close();
+          saved++;
+        }catch(e){ console.warn('[allDL] skip',i,e); }
       }
+      _waterToast('✅ '+saved+'장 저장 완료');
+      return;
     }
-    // 폴백: <a download>로 다운로드 폴더에 직접 저장
-    _waterToast('⬇ '+files.length+'장 다운로드 폴더에 저장...');
+    // 폴백
+    _waterToast('⬇ '+files.length+'장 다운로드 중...');
     for(var i=0;i<files.length;i++){
       try{
         var it=files[i];
@@ -4964,12 +5044,11 @@ async function _downloadAllMonthBills(period){
         var fn2=(period||'')+'_'+(it.bName||'bill')+'_'+(it.idx+1)+'.'+ext2;
         var bl2=await _fileToBlobForDownload(it.f);
         var url2=URL.createObjectURL(bl2);
-        var a2=document.createElement('a');
-        a2.href=url2; a2.download=fn2;
-        document.body.appendChild(a2); a2.click();
+        var a2=document.createElement('a');a2.href=url2;a2.download=fn2;
+        document.body.appendChild(a2);a2.click();
         setTimeout((function(u,el){return function(){try{el.remove();URL.revokeObjectURL(u);}catch(_){}};})(url2,a2),200);
       }catch(e){}
-      if(i<files.length-1) await new Promise(function(r){setTimeout(r,150);});
+      if(i<files.length-1) await new Promise(function(r){setTimeout(r,300);});
     }
     _waterToast('✅ '+files.length+'장 다운로드 완료');
   }catch(e){ alert('다운로드 실패: '+e.message); }
