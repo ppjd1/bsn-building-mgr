@@ -643,7 +643,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div class="sb-logo" style="justify-content:center"><div class="bsn-txt"><h1 style="font-size:18px">BSN<span style="color:#1e40af">.CARE</span></h1></div></div>
   <nav class="sb-nav" id="nav"></nav>
   <div class="sb-foot"><div id="sb-dt" style="font-size:10px"></div><div id="sb-user" style="margin-top:4px;color:var(--t3);font-size:10px"></div>
-    <button id="cl-btn" onclick="openChangelog()" style="display:none;margin-top:7px;padding:5px 6px;font-size:10px;border:1px solid #c4b5fd;background:#f5f3ff;color:#5b21b6;border-radius:var(--r);cursor:pointer;width:100%;font-weight:600;font-family:inherit;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.15;white-space:nowrap"><span style="display:block;font-size:10.5px">📋 변경이력</span><span style="display:inline-block;padding:1px 5px;font-size:8px;font-weight:700;background:#7c3aed;color:#fff;border-radius:6px;letter-spacing:-.2px;line-height:1.4">총 관리자용</span></button>
+
     <button onclick="doLogout()" style="margin-top:4px;padding:4px 8px;font-size:10px;border:1px solid var(--ln);background:var(--w);border-radius:var(--r);cursor:pointer;width:100%">로그아웃</button>
   </div>
 </aside>
@@ -1029,16 +1029,6 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div id="ai-chat-input"><input id="ai-q" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"><button onclick="aiSend()" id="ai-send-btn">전송</button></div>
 </div>
 
-<!-- 변경이력 패널 -->
-<div class="ov" id="mo-changelog">
-  <div class="modal" style="width:min(640px,94vw);height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
-    <div class="mo-hd" style="padding:12px 16px;background:linear-gradient(135deg,#4338ca,#7c3aed);color:#fff;border-radius:8px 8px 0 0;border-bottom:none;flex-shrink:0">
-      <div style="display:flex;align-items:center;gap:8px;flex:1"><span style="font-size:18px">📋</span><h3 style="color:#fff;font-size:14px;margin:0">요청사항 / 변경이력</h3><span style="font-size:10px;opacity:.7;margin-left:4px" id="cl-count"></span></div>
-      <button onclick="closeMo('mo-changelog')" style="color:#fff;font-size:20px;background:transparent;border:none;cursor:pointer;padding:0 4px">×</button>
-    </div>
-    <div id="cl-body" style="flex:1;overflow-y:auto;padding:10px 14px;background:var(--w2)"></div>
-  </div>
-</div>
 
 <!-- MODALS -->
 <div class="ov" id="mo-lease">
@@ -2842,6 +2832,35 @@ function _autoMeterDay(w){
   Object.keys(freq).forEach(k=>{ if(freq[k]>bestCnt){ bestCnt=freq[k]; best=parseInt(k); }});
   return best;
 }
+// 1회 마이그레이션: 건물정보 기준으로 meterCycle(홀짝) + meterDay(검침일) 교정
+if(!window._meterMigrated2){
+  window._meterMigrated2=true;
+  try{
+    var _fixed=0;
+    (DB.waterBills||[]).forEach(function(w){
+      var bi=_parseBldgWaterInfo(w.bId);
+      if(!bi) return;
+      // 홀짝 주기: 건물정보가 정확한 기준 — 잘못된 값도 덮어씀
+      if(bi.meterCycle && w.meterCycle!==bi.meterCycle){ w.meterCycle=bi.meterCycle; _fixed++; }
+      // 검침일: 없을 때만 건물정보에서 채움 (이후로는 이미지에서만)
+      if(!w.meterDay && bi.meterDay){ w.meterDay=bi.meterDay; _fixed++; }
+    });
+    if(_fixed){ try{sv();}catch(e){} console.log('[meter 마이그레이션] '+_fixed+'건 보정'); }
+  }catch(e){}
+}
+// 1회 마이그레이션3: 청구서 이미지에서 확인한 검침일 반영 (더파크청담=7일)
+if(!window._meterMigrated3){
+  window._meterMigrated3=true;
+  try{
+    var _f3=0;
+    var _meterDayMap={14:7}; // bId:meterDay — 청구서 이미지에서 직접 확인한 값
+    (DB.waterBills||[]).forEach(function(w){
+      var day=_meterDayMap[w.bId];
+      if(day && w.meterDay!==day){ w.meterDay=day; _f3++; }
+    });
+    if(_f3){ try{sv();}catch(e){} console.log('[meter 마이그레이션3] 검침일 '+_f3+'건 반영'); }
+  }catch(e){}
+}
 function rdWater(){
   const list=$('water-list'); if(!list) return;
   const q='';
@@ -2851,15 +2870,15 @@ function rdWater(){
   DB.buildings.forEach(b=>{ grp[b.id]={bldg:b,items:[]}; });
   bills.forEach(w=>{
     if(!grp[w.bId]) return;
-    // 자동분류: meterCycle 없으면 bills에서 추론 → 없으면 건물정보에서
-    const cycle=_autoMeterCycle(w);
-    if(cycle && !w.meterCycle){ w.meterCycle=cycle; }
-    if(!w.meterCycle){
-      var bInfo=_parseBldgWaterInfo(w.bId);
-      if(bInfo&&bInfo.meterCycle){ w.meterCycle=bInfo.meterCycle; }
+    // meterCycle: 건물정보가 정확한 기준 (항상 우선)
+    var bInfo=_parseBldgWaterInfo(w.bId);
+    if(bInfo&&bInfo.meterCycle){ w.meterCycle=bInfo.meterCycle; }
+    else if(!w.meterCycle){
+      const cycle=_autoMeterCycle(w);
+      if(cycle) w.meterCycle=cycle;
     }
     if(!w.meterCycle) w.meterCycle='odd'; // 최종 기본값
-    // 검침일 자동감지: bills 데이터에서만 (청구서 캡처 시 파싱됨)
+    // 검침일: 이미지(북마클릿) 파싱값만 사용 — 고정일정 자동체크용
     const mDay=_autoMeterDay(w);
     if(mDay && !w.meterDay){ w.meterDay=mDay; }
     // 필터 적용
@@ -2904,7 +2923,7 @@ function rdWater(){
   html+='<button class="btn sm" onclick="_setWaterFilter(\'even\')" style="padding:2px 8px;font-size:10px;'+(_waterFilter==='even'?_wfOn:'')+'" id="wf-even">짝수월</button>';
   html+='</div></th>';
   html+='<th style="border-right:1px solid var(--ln);background:var(--w2)"></th>';
-  html+='<th style="background:var(--w2)"></th></tr>';
+  html+='<th style="background:var(--w2);padding:4px 8px"><button class="btn sm" onclick="_showWaterBillModal()" style="padding:3px 10px;font-size:10.5px;font-weight:600;background:#6366f1;color:#fff;border:none;border-radius:4px;cursor:pointer">📁 청구서</button></th></tr>';
   // 2행: 컬럼 헤더
   html+='<tr style="background:var(--w2);color:var(--t3);font-weight:700;font-size:11.5px;border-bottom:2px solid var(--ln)">';
   html+='<th style="padding:8px 14px;border-right:1px solid var(--ln)">건물</th>';
@@ -2925,7 +2944,7 @@ function rdWater(){
       const isFirst=(idx===0);
       html+='<tr ondblclick="openWaterModal('+w.id+')" style="border-top:1px solid var(--ln);cursor:pointer" title="더블클릭: 수정">';
       if(isFirst){
-        html+='<td style="padding:8px 10px;font-weight:700;vertical-align:middle;font-size:13px;border-right:1px solid var(--ln);white-space:nowrap" rowspan="'+items.length+'"><div style="display:flex;flex-direction:column;align-items:center;gap:3px"><span>'+esc(b.name)+'</span><button class="btn sm" style="padding:0 5px;font-size:9px;line-height:16px;min-width:18px;min-height:16px;border-radius:3px;color:var(--t3)" onclick="event.stopPropagation();openWaterModal(null,'+b.id+')" title="고객정보 추가">+</button></div></td>';
+        html+='<td style="padding:8px 10px;font-weight:700;vertical-align:middle;font-size:13px;border-right:1px solid var(--ln);white-space:nowrap" rowspan="'+items.length+'"><div style="display:inline-flex;align-items:center;gap:4px"><span>'+esc(b.name)+'</span><button class="btn sm" style="padding:0 5px;font-size:9px;line-height:16px;min-width:18px;min-height:16px;border-radius:3px;color:var(--t3)" onclick="event.stopPropagation();openWaterModal(null,'+b.id+')" title="고객정보 추가">+</button></div></td>';
       }
       html+='<td style="padding:8px 14px;font-family:\'Pretendard\',monospace;font-weight:700;color:var(--bl);user-select:all;white-space:nowrap;font-size:13.5px;letter-spacing:0.3px;border-right:1px solid var(--ln)">'+esc(w.custNo||'')+'</td>';
       html+='<td style="padding:8px 14px;white-space:nowrap;font-size:13px;border-right:1px solid var(--ln)">'+esc(w.custName||'')+'</td>';
@@ -2933,25 +2952,23 @@ function rdWater(){
       const mcLabel=mc==='odd'?'홀수월':'짝수월';
       const mcColor=mc==='odd'?'#0284c7':'#d97706';
       const mDay=w.meterDay||0;
-      const mDayStr=mDay?'매'+mDay+'일':'<span style="color:#9ca3af;font-style:italic">미기입</span>';
-      html+='<td style="padding:6px 6px;border-right:1px solid var(--ln);line-height:1.5;white-space:nowrap;text-align:center"><span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10.5px;font-weight:600;color:#fff;background:'+mcColor+';white-space:nowrap">'+mcLabel+'</span><br><span style="font-size:10px;color:var(--t3);white-space:nowrap">'+mDayStr+'</span></td>';
+      html+='<td style="padding:6px 8px;border-right:1px solid var(--ln);white-space:nowrap;text-align:center"><span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10.5px;font-weight:600;color:#fff;background:'+mcColor+'">'+mcLabel+'</span>'+(mDay?' <span style="font-size:11px;color:var(--t2);font-weight:600">'+mDay+'일</span>':'')+'</td>';
       html+='<td style="padding:6px 10px;white-space:nowrap;height:38px">';
-      var _bc=0; if(w.bills&&w.bills.length){ w.bills.forEach(function(b){_bc+=(b.files&&b.files.length)?b.files.length:1;}); }
-      // 현재 월 캡쳐 완료 여부 (해당 월 청구 대상만 표시)
       var _curMonth=new Date().toISOString().slice(0,7);
       var _curMon=parseInt(_curMonth.split('-')[1]);
       var _isMyMonth=(w.meterCycle==='even')?(_curMon%2===0):(w.meterCycle==='odd')?(_curMon%2===1):true;
-      if(_isMyMonth){
-        var _hasCur=false;
-        if(w.bills&&w.bills.length){ w.bills.forEach(function(b){ if(b.period===_curMonth&&b.files&&b.files.length) _hasCur=true; }); }
-        if(_hasCur){ html+='<span style="display:inline-block;width:52px;text-align:center;padding:2px 0;border-radius:10px;font-size:10px;font-weight:600;color:#fff;background:#059669;margin-right:4px" title="'+_curMonth+' 캡쳐완료">✓ 완료</span>'; }
-        else { html+='<span style="display:inline-block;width:52px;text-align:center;padding:2px 0;border-radius:10px;font-size:10px;font-weight:600;color:#fff;background:#9ca3af;margin-right:4px" title="'+_curMonth+' 미완료">미완료</span>'; }
+      var _hasCur=false;
+      if(w.bills&&w.bills.length){ w.bills.forEach(function(b){ if(b.period===_curMonth&&b.files&&b.files.length) _hasCur=true; }); }
+      var _bc=0; if(w.bills&&w.bills.length){ w.bills.forEach(function(b){_bc+=(b.files&&b.files.length)?b.files.length:0;}); }
+      // 📄 상태 표시 (클릭 없음, 색상으로 구분)
+      if(_isMyMonth && _hasCur){
+        html+='<span style="display:inline-block;padding:3px 8px;font-size:11px;background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:4px" title="'+_curMonth+' 캡쳐완료">📄 ✓</span> ';
+      } else if(_isMyMonth && !_hasCur){
+        html+='<span style="display:inline-block;padding:3px 8px;font-size:11px;background:#fff7ed;color:#c2410c;border:1px solid #fdba74;border-radius:4px" title="'+_curMonth+' 미캡쳐">📄 !</span> ';
       } else {
-        html+='<span style="display:inline-block;width:52px;text-align:center;padding:2px 0;border-radius:10px;font-size:10px;font-weight:600;color:#d1d5db;background:#f3f4f6;border:1px solid #e5e7eb;margin-right:4px" title="'+_curMonth+' 해당없음">해당없음</span>';
+        html+='<span style="display:inline-block;padding:3px 8px;font-size:11px;color:#ccc;background:#f9fafb;border:1px solid #eee;border-radius:4px" title="이번 달 해당없음">📄 —</span> ';
       }
       html+='<button class="btn pri sm" onclick="event.stopPropagation();fetchWaterBill('+w.id+')" style="padding:5px 11px;font-size:12px;background:#0284c7;border-color:#0284c7" title="1클릭 수도요금 조회">🌐 조회</button> ';
-      if(_bc){ html+='<button class="btn sm" onclick="event.stopPropagation();openWaterBillViewer('+w.id+')" style="padding:5px 9px;font-size:11.5px;background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd" title="저장된 청구서 '+_bc+'장 보기">📄 '+_bc+'</button> '; }
-      else { html+='<span style="display:inline-block;padding:5px 9px;font-size:11.5px;color:#d1d5db;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px">📄 0</span> '; }
       html+='</td></tr>';
     });
   });
@@ -3392,9 +3409,14 @@ if(!window._bsnWaterMsgHooked){
       const period=/^\d{4}-\d{2}$/.test(d.period||'')?d.period:(new Date().toISOString().slice(0,7));
       const w=DB.waterBills[wi];
       if(!w.bills) w.bills=[];
-      // 정기검침일 / 홀짝수월 자동 반영
+      // 정기검침일: 이미지(북마클릿 파싱)에서만 가져옴 — 고정일정 자동체크용
       if(d.meterDay && parseInt(d.meterDay)>0) w.meterDay=parseInt(d.meterDay);
+      // 홀짝수월: 북마클릿 → 건물정보 폴백
       if(d.meterCycle==='odd'||d.meterCycle==='even') w.meterCycle=d.meterCycle;
+      if(!w.meterCycle){
+        var _bi=_parseBldgWaterInfo(w.bId);
+        if(_bi && _bi.meterCycle) w.meterCycle=_bi.meterCycle;
+      }
       const file=dataUrl?{data:dataUrl, name:period+'_청구서.jpg', mime:dataUrl.slice(5,dataUrl.indexOf(';'))||'image/jpeg'}:null;
       const ex=w.bills.find(x=>x.period===period);
       let mergedInto='새 폴더';
@@ -3476,7 +3498,9 @@ function _getWaterBookmarklet(){
   // ── findPeriod ──
   parts.push("function findPeriod(txt){txt=txt||(document.body.innerText||'');var m=txt.match(/(\\\\d{4})[.\\\\-\\\\/년]\\\\s*(\\\\d{1,2})[월.\\\\-\\\\/]?/);if(m)return m[1]+'-'+('0'+m[2]).slice(-2);var now=new Date();return now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2);}");
   // ── sendCap: BSN케어로 전송 ──
-  parts.push("function sendCap(url,periodOverride){var period=periodOverride||findPeriod();if(window.opener&&!window.opener.closed){try{window.opener.postMessage({type:'bsn_water_bill',wid:vWid,custNo:vNo,custName:vNm,period:period,dataUrl:url,ts:Date.now()},'*');_t('✅ BSN케어로 전송 — '+period,'#059669');_l('✅ 전송완료 period='+period+' size='+(url.length/1024).toFixed(0)+'KB','#86efac');try{sessionStorage.removeItem('bsn_water_auto');}catch(_){}setTimeout(function(){try{window.close();}catch(_){}},1500);}catch(e){_t('❌ 전송실패: '+e.message,'#dc2626');}}else{var a=document.createElement('a');a.href=url;a.download='water_'+vNo+'_'+period+'.jpg';a.click();_t('⚠ BSN창 없어 파일저장','#d97706');}}");
+  // ── parseMeter: 페이지 텍스트에서 검침일+홀짝 파싱 ──
+  parts.push("function parseMeter(){var r={};try{var t=document.body.innerText||'';var dm=t.match(/정기검침일[\\\\s:]*(?:매\\\\s*)?(\\\\d{1,2})\\\\s*일/);if(!dm) dm=t.match(/검침일[\\\\s:]*(?:매\\\\s*)?(\\\\d{1,2})\\\\s*일/);if(!dm) dm=t.match(/검침\\\\s*(?:예정)?\\\\s*일[\\\\s:]*(\\\\d{1,2})/);if(dm) r.meterDay=parseInt(dm[1]);var cm=t.match(/([홀짝]수)\\\\s*월/);if(cm) r.meterCycle=cm[1]==='홀수'?'odd':'even';if(!r.meterCycle){var pm=t.match(/(\\\\d{1,2})\\\\s*[,~]\\\\s*(\\\\d{1,2})\\\\s*월/);if(pm){var m1=parseInt(pm[1]);r.meterCycle=(m1%2===1)?'odd':'even';}}}catch(_){}return r;}");
+  parts.push("function sendCap(url,periodOverride){var period=periodOverride||findPeriod();var meter=parseMeter();_l('🔍 검침정보: day='+(meter.meterDay||'-')+' cycle='+(meter.meterCycle||'-'),'#7dd3fc');if(window.opener&&!window.opener.closed){try{window.opener.postMessage({type:'bsn_water_bill',wid:vWid,custNo:vNo,custName:vNm,period:period,dataUrl:url,meterDay:meter.meterDay||0,meterCycle:meter.meterCycle||'',ts:Date.now()},'*');_t('✅ BSN케어로 전송 — '+period,'#059669');_l('✅ 전송완료 period='+period+' size='+(url.length/1024).toFixed(0)+'KB','#86efac');try{sessionStorage.removeItem('bsn_water_auto');}catch(_){}setTimeout(function(){try{window.close();}catch(_){}},1500);}catch(e){_t('❌ 전송실패: '+e.message,'#dc2626');}}else{var a=document.createElement('a');a.href=url;a.download='water_'+vNo+'_'+period+'.jpg';a.click();_t('⚠ BSN창 없어 파일저장','#d97706');}}");
   // ── capture: zoom out + getDisplayMedia ──
   parts.push("var _origZoom='';");
   parts.push("function capture(){");
@@ -3724,7 +3748,7 @@ var _billGalleryAll=[]; // 전체 이미지 목록 (갤러리용)
 function _renderMonthlyOverview(pane, monthData, bldgs){
   pane.innerHTML='';
   _billGalleryAll=[];
-  // 건물별로 그룹 → 건물 id순 정렬
+  // 건물별로 그룹
   var bldgGrp={};
   monthData.items.forEach(function(it){
     var bid=it.w.bId||0;
@@ -3745,193 +3769,200 @@ function _renderMonthlyOverview(pane, monthData, bldgs){
       });
     });
   });
-  // 상단: 전체 다운로드 버튼
+  // ─ 상단 바: 선택 정보 + 저장 버튼 + 전체 다운로드
+  var selected={};
+  var allCards=[];
   var topBar=document.createElement('div');
-  topBar.style.cssText='padding:6px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;background:#f8fafc';
-  var totalFiles=0;
-  groups.forEach(function(bg){bg.items.forEach(function(it){totalFiles+=(it.files||[]).length;});});
-  topBar.innerHTML='<span style="font-size:11px;color:#64748b">'+_periodLabel(monthData.period)+' · '+groups.length+'건물 · '+totalFiles+'장</span>'
-    +'<button class="btn sm" style="padding:4px 12px;font-size:11px;background:#16a34a;color:#fff;border:none;font-weight:600;border-radius:4px" onclick="_downloadAllMonthBills(\''+esc(monthData.period||'')+'\')">⬇ 전체 다운로드</button>';
-  pane.appendChild(topBar);
-  // 건물별 가로 나열: [건물A: 이름→사진들] [건물B: 이름→사진들] ...
-  var hWrap=document.createElement('div');
-  hWrap.style.cssText='display:flex;gap:0;overflow-x:auto;align-items:flex-start;padding:4px 0';
-  groups.forEach(function(bg, gi){
-    var bldgName=bg.bldg?bg.bldg.name:'(건물없음)';
-    // 건물 컬럼
-    var col=document.createElement('div');
-    col.style.cssText='flex-shrink:0;width:148px'+(gi>0?';border-left:1px solid #e2e8f0':'');
-    // 상단: 건물명만
-    var hdr=document.createElement('div');
-    hdr.style.cssText='padding:5px 4px 4px;font-weight:700;font-size:11px;color:#1e3a5f;background:#eef2f7;border-bottom:1px solid #e2e8f0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-    hdr.textContent=bldgName;
-    col.appendChild(hdr);
-    // 기본 첫 장만 표시, +N 클릭 시 3장까지 펼침, 4장+ 갤러리
-    var photos=document.createElement('div');
-    photos.style.cssText='padding:4px;display:flex;flex-direction:column;gap:4px;align-items:center';
-    var hasFiles=false;
-    var allFiles=[];
-    bg.items.forEach(function(it){
-      (it.files||[]).forEach(function(f,idx){
-        var isPlaceholder=(!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:')));
-        if(!isPlaceholder){
-          hasFiles=true;
-          var gIdx=_billGalleryAll.findIndex(function(g){ return g.w.id===it.w.id && g.period===it.period && g.fileIdx===idx; });
-          allFiles.push({f:f, gIdx:gIdx>=0?gIdx:0});
+  topBar.style.cssText='display:flex;align-items:center;gap:8px;padding:4px 12px;background:#fff;border-bottom:1px solid #e0e0e0;flex-shrink:0;min-height:32px';
+  topBar.innerHTML='<span style="font-size:10px">📁</span><span style="color:#333;font-size:11px;font-weight:600">'+_periodLabel(monthData.period)+'</span>'
+    +'<span style="color:#888;font-size:10px;flex:1">'+_billGalleryAll.length+'개 항목</span>';
+  var selInfo=document.createElement('span');
+  selInfo.style.cssText='color:#0066cc;font-size:10px;display:none';
+  topBar.appendChild(selInfo);
+  var selSaveBtn=document.createElement('button');
+  selSaveBtn.textContent='⬇ 저장';
+  selSaveBtn.style.cssText='padding:2px 10px;font-size:10px;background:#0e639c;color:#fff;border:none;border-radius:2px;cursor:pointer;display:none';
+  selSaveBtn.onclick=function(e){
+    e.stopPropagation();
+    var items=[];
+    Object.keys(selected).forEach(function(k){ var g=_billGalleryAll[parseInt(k)]; if(g) items.push(g); });
+    if(!items.length) return;
+    if(items.length===1){ _downloadBillFile(items[0].f,{period:items[0].period,bldgName:items[0].bldg?items[0].bldg.name:''}); return; }
+    (async function(){
+      try{
+        if(window.showDirectoryPicker){
+          try{
+            _waterToast('📁 저장할 폴더를 선택하세요');
+            var dh=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
+            var saved=0;
+            for(var i=0;i<items.length;i++){
+              var it=items[i];
+              var ext=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
+              if(ext==='jpeg') ext='jpg'; if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
+              var fn=(it.period||'')+'_'+(it.bldg?it.bldg.name:'')+'_'+(it.w.custName||it.w.custNo||'')+'_'+(i+1)+'.'+ext;
+              var bl=_dataUrlToBlob(it.f.data);
+              var fh=await dh.getFileHandle(fn,{create:true});
+              var wr=await fh.createWritable(); await wr.write(bl); await wr.close(); saved++;
+            }
+            _waterToast('✅ '+saved+'장 저장 완료');
+            return;
+          }catch(e){ if(e.name==='AbortError') return; }
         }
-      });
+        for(var i=0;i<items.length;i++){
+          try{ await _downloadBillFile(items[i].f,{period:items[i].period,bldgName:items[i].bldg?items[i].bldg.name:''}); }catch(e){}
+        }
+      }catch(e){}
+    })();
+  };
+  topBar.appendChild(selSaveBtn);
+  // 선택 삭제 버튼
+  var selDelBtn2=document.createElement('button');
+  selDelBtn2.textContent='× 삭제';
+  selDelBtn2.style.cssText='padding:2px 10px;font-size:10px;background:#dc2626;color:#fff;border:none;border-radius:2px;cursor:pointer;display:none';
+  selDelBtn2.onclick=function(e){
+    e.stopPropagation();
+    var keys=Object.keys(selected);
+    if(!keys.length) return;
+    if(!confirm(keys.length+'장을 삭제하시겠습니까?')) return;
+    keys.forEach(function(k){
+      var g=_billGalleryAll[parseInt(k)];
+      if(g) delWaterBillFile(g.w.id,g.period,g.fileIdx);
     });
-    function _mkThumb(item, overlayText){
-      var thumb=document.createElement('div');
-      thumb.style.cssText='width:134px;height:100px;border-radius:5px;overflow:hidden;border:1px solid #e2e8f0;cursor:pointer;background:#f1f5f9;position:relative';
-      var mime2=(item.f.mime||'').toLowerCase();
-      var isPdf=mime2.includes('pdf')||/\.pdf$/i.test(item.f.name||'');
-      if(isPdf){
-        thumb.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;background:#fff">📄</div>';
-      } else {
-        var tImg=document.createElement('img');
-        tImg.style.cssText='width:100%;height:100%;object-fit:cover';
-        var tBlob=null;
-        try{ tBlob=_dataUrlToBlobUrl(item.f.data, item.f.mime||'image/jpeg'); }catch(e){}
-        if(tBlob){ window._waterBillBlobs.push(tBlob); tImg.src=tBlob; }
-        else { tImg.src=item.f.data||''; }
-        tImg.onerror=function(){ thumb.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#991b1b">❌</div>'; };
-        thumb.appendChild(tImg);
-      }
-      if(overlayText){
-        var ov=document.createElement('div');
-        ov.style.cssText='position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700';
-        ov.textContent=overlayText;
-        thumb.appendChild(ov);
-      }
-      thumb.onclick=(function(_gi){return function(){ _openFolderView(); };})(item.gIdx);
-      return thumb;
-    }
-    // 3장씩 페이지 넘기기 팝업 + 건물 탭
-    var _allF=allFiles;
-    function _openMultiView(startBid){
-      var pop=document.createElement('div');
-      pop.style.cssText='position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;padding:10px';
-      // 건물별 그룹
-      var bldgGroups=[];var bldgMap={};
-      _billGalleryAll.forEach(function(g){
-        var bid=g.bldg?g.bldg.id:'0';
-        if(!bldgMap[bid]){ bldgMap[bid]={bid:bid,name:g.bldg?g.bldg.name:'(건물없음)',files:[]}; bldgGroups.push(bldgMap[bid]); }
-        bldgMap[bid].files.push(g);
-      });
-      // 현재 건물 찾기
-      var curBid=startBid||(_allF[0]&&_allF[0].bldg?_allF[0].bldg.id:'0');
-      var curGroup=bldgMap[curBid]||bldgGroups[0];
-      // 상단 건물 탭바
-      var tabBar=document.createElement('div');
-      tabBar.style.cssText='display:flex;gap:0;overflow-x:auto;padding:6px 8px 0;width:100%;justify-content:center;flex-shrink:0';
-      function renderTabs(){
-        tabBar.innerHTML='';
-        bldgGroups.forEach(function(bg){
-          if(!bg.files.length) return;
-          var tb=document.createElement('button');
-          tb.textContent=bg.name+' ('+bg.files.length+')';
-          var isActive=bg.bid===curGroup.bid;
-          tb.style.cssText='padding:6px 14px;font-size:11px;border:none;border-bottom:2px solid '+(isActive?'#3b82f6':'transparent')+';cursor:pointer;white-space:nowrap;flex-shrink:0;background:transparent;color:'+(isActive?'#fff':'#94a3b8')+';font-weight:'+(isActive?'700':'400');
-          tb.onclick=function(e){ e.stopPropagation(); curGroup=bg; curBid=bg.bid; page=0; totalPages=Math.ceil(curGroup.files.length/perPage); renderTabs(); render(); };
-          tabBar.appendChild(tb);
-        });
-      }
-      pop.appendChild(tabBar);
-      // 페이지 표시
-      var pageInfo=document.createElement('div');
-      pageInfo.style.cssText='color:#fff;font-size:13px;font-weight:600;margin:6px 0';
-      pop.appendChild(pageInfo);
-      // 이미지 컨테이너
-      var imgRow=document.createElement('div');
-      imgRow.style.cssText='display:flex;align-items:center;justify-content:center;gap:8px;flex:1';
-      pop.appendChild(imgRow);
-      // 좌우 버튼
-      var btnL=document.createElement('button');
-      btnL.innerHTML='◀';
-      btnL.style.cssText='position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.4);border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;z-index:3';
-      btnL.onclick=function(e){e.stopPropagation();if(page>0){page--;render();}};
-      pop.appendChild(btnL);
-      var btnR=document.createElement('button');
-      btnR.innerHTML='▶';
-      btnR.style.cssText='position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.4);border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;z-index:3';
-      btnR.onclick=function(e){e.stopPropagation();if(page<totalPages-1){page++;render();}};
-      pop.appendChild(btnR);
-      var page=0, perPage=3, totalPages=Math.ceil(curGroup.files.length/perPage);
-      function render(){
-        imgRow.innerHTML='';
-        var files=curGroup.files;
-        totalPages=Math.ceil(files.length/perPage);
-        if(page>=totalPages) page=totalPages-1;
-        if(page<0) page=0;
-        var start=page*perPage;
-        var end=Math.min(start+perPage, files.length);
-        pageInfo.textContent=curGroup.name+' — '+(start+1)+'~'+end+' / '+files.length+'장';
-        btnL.style.display=page<=0?'none':'';
-        btnR.style.display=page>=totalPages-1?'none':'';
-        dlBtn.textContent=(files.length===1)?'⬇ 저장':'⬇ '+curGroup.name+' '+files.length+'장 저장';
-        for(var si=start;si<end;si++){
-          var card=document.createElement('div');
-          card.style.cssText='border-radius:4px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center';
-          var cImg=document.createElement('img');
-          cImg.style.cssText='height:82vh;max-width:33vw;object-fit:contain;display:block';
-          var cBlob=null;
-          try{ cBlob=_dataUrlToBlobUrl(files[si].f.data, files[si].f.mime||'image/jpeg'); }catch(ex){}
-          cImg.src=cBlob||files[si].f.data||'';
-          card.appendChild(cImg);
-          var gIdx=_billGalleryAll.indexOf(files[si]);
-          card.onclick=(function(gi,bid){return function(){ pop.remove(); document.removeEventListener('keydown',onK); _openBillGallery(gi, function(){ _openMultiView(bid); }); };})(gIdx>=0?gIdx:0, curGroup.bid);
-          imgRow.appendChild(card);
-        }
-      }
-      // 하단 버튼 바
-      var bottomBar=document.createElement('div');
-      bottomBar.style.cssText='display:flex;gap:8px;margin-top:8px;flex-shrink:0;align-items:center';
-      var dlBtn=document.createElement('button');
-      dlBtn.style.cssText='padding:6px 18px;font-size:12px;font-weight:600;background:#059669;color:#fff;border:none;border-radius:4px;cursor:pointer';
-      dlBtn.onclick=function(e){
-        e.stopPropagation();
-        var bldg=curGroup.files[0]&&curGroup.files[0].bldg?curGroup.files[0].bldg:null;
-        if(bldg){ _downloadBldgBills(bldg, curGroup.files); }
-        else { _downloadAllMonthBills(curGroup.files[0]&&curGroup.files[0].period||''); }
-      };
-      bottomBar.appendChild(dlBtn);
-      var folderBtn=document.createElement('button');
-      folderBtn.textContent='📁 폴더';
-      folderBtn.style.cssText='padding:6px 18px;font-size:12px;font-weight:600;background:#6366f1;color:#fff;border:none;border-radius:4px;cursor:pointer';
-      folderBtn.onclick=function(e){ e.stopPropagation(); pop.remove(); document.removeEventListener('keydown',onK); _openFolderView(); };
-      bottomBar.appendChild(folderBtn);
-      pop.appendChild(bottomBar);
-      renderTabs();
-      render();
-      var onK=function(ev){
-        if(ev.key==='Escape'){ pop.remove(); document.removeEventListener('keydown',onK); }
-        else if(ev.key==='ArrowLeft'&&page>0){ page--; render(); }
-        else if(ev.key==='ArrowRight'&&page<totalPages-1){ page++; render(); }
-      };
-      document.addEventListener('keydown',onK);
-      document.body.appendChild(pop);
-    }
-    if(allFiles.length===1){
-      photos.appendChild(_mkThumb(allFiles[0]));
-    } else if(allFiles.length>1){
-      var firstThumb=_mkThumb(allFiles[0]);
-      // +N 뱃지
-      var badge=document.createElement('div');
-      badge.style.cssText='position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px';
-      badge.textContent='+'+(allFiles.length-1);
-      firstThumb.appendChild(badge);
-      // 사진 클릭 = 폴더뷰 (윈도우 탐색기 스타일)
-      firstThumb.onclick=function(e){ e.stopPropagation(); _openFolderView(); };
-      photos.appendChild(firstThumb);
-    }
-    if(!hasFiles){
-      photos.innerHTML='<div style="color:#9ca3af;font-size:9px;padding:6px">없음</div>';
-    }
-    col.appendChild(photos);
-    hWrap.appendChild(col);
+    selected={};
+  };
+  topBar.appendChild(selDelBtn2);
+  var dlAllBtn=document.createElement('button');
+  dlAllBtn.textContent='⬇ 전체 다운로드';
+  dlAllBtn.style.cssText='padding:2px 10px;font-size:10px;background:#16a34a;color:#fff;border:none;border-radius:2px;cursor:pointer';
+  dlAllBtn.onclick=function(e){ e.stopPropagation(); _downloadAllMonthBills(monthData.period||''); };
+  topBar.appendChild(dlAllBtn);
+  pane.appendChild(topBar);
+  function upSel(){
+    var cnt=Object.keys(selected).length;
+    selInfo.style.display=cnt?'':'none';
+    selInfo.textContent=cnt+'개 선택';
+    selSaveBtn.style.display=cnt?'':'none';
+    selSaveBtn.textContent='⬇ '+cnt+'장 저장';
+    selDelBtn2.style.display=cnt?'':'none';
+    selDelBtn2.textContent='× '+cnt+'장 삭제';
+    allCards.forEach(function(c){ c.el.style.background=selected[c.gi]?'rgba(0,100,210,.15)':'transparent'; });
+  }
+  // ─ 파일 영역 (스크롤 + 드래그 선택)
+  var fileArea=document.createElement('div');
+  fileArea.style.cssText='flex:1;overflow-y:auto;overflow-x:hidden;position:relative;padding:8px;user-select:none;-webkit-user-select:none;background:#f5f5f5';
+  pane.appendChild(fileArea);
+  var container=document.createElement('div');
+  container.style.cssText='max-width:700px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;justify-content:flex-start;padding:0 20px';
+  fileArea.appendChild(container);
+  // ─ 건물별 파일 카드 생성
+  var bldgOrder=[];var bldgMap={};
+  _billGalleryAll.forEach(function(g){
+    var bid=g.bldg?g.bldg.id:'0';
+    if(!bldgMap[bid]){ bldgMap[bid]={name:g.bldg?g.bldg.name:'(건물없음)',files:[]}; bldgOrder.push(bid); }
+    bldgMap[bid].files.push(g);
   });
-  pane.appendChild(hWrap);
+  bldgOrder.forEach(function(bid){
+    var bg=bldgMap[bid];
+    var hdr=document.createElement('div');
+    hdr.style.cssText='width:100%;display:flex;align-items:center;gap:6px;padding:8px 4px 3px;margin-top:4px';
+    hdr.innerHTML='<span style="font-size:10px">📂</span><span style="color:#333;font-size:10px;font-weight:600">'+esc(bg.name)+'</span><span style="color:#888;font-size:9px">('+bg.files.length+')</span>';
+    container.appendChild(hdr);
+    var isMulti=bg.files.length>1;
+    for(var i=0;i<bg.files.length;i++){
+      (function(item,idx){
+        var gIdx=_billGalleryAll.indexOf(item);
+        var card=document.createElement('div');
+        card.style.cssText='display:flex;flex-direction:column;align-items:center;width:68px;padding:4px 2px 3px;border-radius:2px;cursor:default;margin:1px';
+        card.dataset.gi=gIdx;
+        var thumb=document.createElement('div');
+        thumb.style.cssText='width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d0d0d0;border-radius:2px;overflow:hidden';
+        var img=document.createElement('img');
+        var blob=_dataUrlToBlob(item.f.data);
+        var blobUrl=URL.createObjectURL(blob);
+        img.src=blobUrl;
+        img.style.cssText='max-width:46px;max-height:46px;object-fit:contain';
+        img.draggable=false;
+        thumb.appendChild(img);
+        card.appendChild(thumb);
+        var lbl=document.createElement('div');
+        lbl.style.cssText='color:#444;font-size:9px;margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:64px;line-height:1.2';
+        if(isMulti){
+          var ft=(item.w.custName||'').replace(/[^0-9F층B가-힣]/gi,'');
+          if(!ft) ft=item.w.custName||item.w.custNo||'';
+          lbl.textContent=ft;
+        } else { lbl.textContent='청구서'; }
+        card.appendChild(lbl);
+        card.onmousedown=function(e){
+          if(e.button!==0) return;
+          e.stopPropagation();
+          if(e.ctrlKey||e.metaKey){ if(selected[gIdx]) delete selected[gIdx]; else selected[gIdx]=true; }
+          else { selected={}; selected[gIdx]=true; }
+          upSel();
+        };
+        // 더블클릭: 개별보기
+        card.ondblclick=function(e){
+          e.stopPropagation();
+          _openBillGallery(gIdx);
+        };
+        allCards.push({el:card,gi:gIdx});
+        container.appendChild(card);
+      })(bg.files[i],i);
+    }
+  });
+  // ─ 드래그 사각형 (rubber band) 선택
+  var selBox=document.createElement('div');
+  selBox.style.cssText='position:absolute;border:1px solid #0078d4;background:rgba(0,120,212,.12);display:none;z-index:5;pointer-events:none';
+  fileArea.appendChild(selBox);
+  var dragging=false,dragSX=0,dragSY=0,didDrag=false;
+  fileArea.onmousedown=function(e){
+    if(e.target!==fileArea && e.target!==container) return;
+    if(e.button!==0) return;
+    dragging=true;
+    var r=fileArea.getBoundingClientRect();
+    dragSX=e.clientX-r.left+fileArea.scrollLeft;
+    dragSY=e.clientY-r.top+fileArea.scrollTop;
+    selBox.style.left=dragSX+'px'; selBox.style.top=dragSY+'px';
+    selBox.style.width='0'; selBox.style.height='0';
+    selBox.style.display='block';
+    if(!e.ctrlKey&&!e.metaKey) selected={};
+    e.preventDefault();
+  };
+  fileArea.onmousemove=function(e){
+    if(!dragging) return;
+    var r=fileArea.getBoundingClientRect();
+    var mx=e.clientX-r.left+fileArea.scrollLeft;
+    var my=e.clientY-r.top+fileArea.scrollTop;
+    var x1=Math.min(dragSX,mx),y1=Math.min(dragSY,my);
+    var x2=Math.max(dragSX,mx),y2=Math.max(dragSY,my);
+    selBox.style.left=x1+'px'; selBox.style.top=y1+'px';
+    selBox.style.width=(x2-x1)+'px'; selBox.style.height=(y2-y1)+'px';
+    var areaRect=fileArea.getBoundingClientRect();
+    allCards.forEach(function(c){
+      var cr=c.el.getBoundingClientRect();
+      var cx=cr.left-areaRect.left+fileArea.scrollLeft;
+      var cy=cr.top-areaRect.top+fileArea.scrollTop;
+      var cw=cr.width, ch=cr.height;
+      var hit=!(cx+cw<x1||cx>x2||cy+ch<y1||cy>y2);
+      if(hit) selected[c.gi]=true;
+      else if(!e.ctrlKey&&!e.metaKey) delete selected[c.gi];
+    });
+    upSel();
+  };
+  function endDrag(){
+    if(!dragging) return;
+    didDrag=true; dragging=false;
+    selBox.style.display='none';
+    upSel();
+    setTimeout(function(){ didDrag=false; },50);
+  }
+  fileArea.onmouseup=endDrag;
+  fileArea.onmouseleave=endDrag;
+  fileArea.onclick=function(e){
+    if(didDrag) return;
+    if(e.target===fileArea||e.target===container){
+      if(Object.keys(selected).length){ selected={}; upSel(); }
+    }
+  };
 }
 // 📁 폴더 — 윈도우 탐색기 스타일 (드래그 사각형 선택 + 저장)
 function _openFolderView(){
@@ -3939,14 +3970,20 @@ function _openFolderView(){
   var selected={};
   var allCards=[];
   // ─ 팝업
-  // ─ 사이드바 영역 클릭 시 닫기 오버레이 (반투명 색상으로 구분)
-  var backdrop=document.createElement('div');
-  backdrop.style.cssText='position:fixed;top:0;left:0;bottom:0;width:180px;z-index:99997;cursor:pointer;background:rgba(0,0,0,.18)';
-  backdrop.title='클릭하면 닫힘';
-  backdrop.onclick=function(){ _closeFolder(); };
-  document.body.appendChild(backdrop);
+  // ─ 좌측 사이드바 영역 클릭 시 닫기 오버레이
+  var backdropL=document.createElement('div');
+  backdropL.style.cssText='position:fixed;top:0;left:0;bottom:0;width:180px;z-index:99997;cursor:pointer;background:rgba(0,0,0,.18)';
+  backdropL.title='클릭하면 닫힘';
+  backdropL.onclick=function(){ _closeFolder(); };
+  document.body.appendChild(backdropL);
+  // ─ 우측 사이드 영역 클릭 시 닫기 오버레이
+  var backdropR=document.createElement('div');
+  backdropR.style.cssText='position:fixed;top:0;right:0;bottom:0;width:80px;z-index:99997;cursor:pointer;background:rgba(0,0,0,.12)';
+  backdropR.title='클릭하면 닫힘';
+  backdropR.onclick=function(){ _closeFolder(); };
+  document.body.appendChild(backdropR);
   var pop=document.createElement('div');
-  pop.style.cssText='position:fixed;top:0;right:0;bottom:0;left:180px;z-index:99998;background:#f5f5f5;display:flex;flex-direction:column;overflow:hidden;font-family:\"Segoe UI\",\"Pretendard\",sans-serif;border-left:1px solid #d0d0d0;box-shadow:-4px 0 20px rgba(0,0,0,.1)';
+  pop.style.cssText='position:fixed;top:0;right:80px;bottom:0;left:180px;z-index:99998;background:#f5f5f5;display:flex;flex-direction:column;overflow:hidden;font-family:\"Segoe UI\",\"Pretendard\",sans-serif;border-left:1px solid #d0d0d0;border-right:1px solid #d0d0d0;box-shadow:0 0 20px rgba(0,0,0,.1)';
   // ─ 주소바 (윈도우 탐색기 상단 — 라이트 테마)
   var addrBar=document.createElement('div');
   addrBar.style.cssText='display:flex;align-items:center;gap:8px;padding:4px 12px;background:#fff;border-bottom:1px solid #e0e0e0;flex-shrink:0;min-height:32px';
@@ -3993,6 +4030,23 @@ function _openFolderView(){
     })();
   };
   addrBar.appendChild(selSaveBtn);
+  // 선택 삭제 버튼
+  var selDelBtn=document.createElement('button');
+  selDelBtn.textContent='× 삭제';
+  selDelBtn.style.cssText='padding:3px 12px;font-size:10px;background:#dc2626;color:#fff;border:none;border-radius:2px;cursor:pointer;display:none';
+  selDelBtn.onclick=function(e){
+    e.stopPropagation();
+    var keys=Object.keys(selected);
+    if(!keys.length) return;
+    if(!confirm(keys.length+'장을 삭제하시겠습니까?')) return;
+    keys.forEach(function(k){
+      var g=_billGalleryAll[parseInt(k)];
+      if(g) delWaterBillFile(g.w.id,g.period,g.fileIdx);
+    });
+    selected={};
+    _closeFolder();
+  };
+  addrBar.appendChild(selDelBtn);
   var closeBtn=document.createElement('button');
   closeBtn.textContent='✕';
   closeBtn.style.cssText='background:none;border:none;color:#666;font-size:15px;cursor:pointer;padding:0 4px;margin-left:6px';
@@ -4005,6 +4059,8 @@ function _openFolderView(){
     selInfo.textContent=cnt+'개 선택됨';
     selSaveBtn.style.display=cnt?'':'none';
     selSaveBtn.textContent='⬇ '+cnt+'장 저장';
+    selDelBtn.style.display=cnt?'':'none';
+    selDelBtn.textContent='× '+cnt+'장 삭제';
     allCards.forEach(function(c){
       c.el.style.background=selected[c.gi]?'rgba(0,100,210,.15)':'transparent';
     });
@@ -4072,10 +4128,10 @@ function _openFolderView(){
           }
           upSel();
         };
-        card.ondblclick=function(e){
+        card.ondblclick=(function(_gIdx){return function(e){
           e.stopPropagation();
-          _openBillGallery(gIdx);
-        };
+          _openBillGallery(_gIdx);
+        };})(gIdx);
         allCards.push({el:card,gi:gIdx});
         container.appendChild(card);
       })(bg.files[i],i);
@@ -4143,7 +4199,7 @@ function _openFolderView(){
   statusBar.style.cssText='padding:3px 12px;background:#e8e8e8;color:#555;font-size:10px;flex-shrink:0;border-top:1px solid #d0d0d0';
   statusBar.textContent=_billGalleryAll.length+'개 항목 | Ctrl+클릭: 개별추가 | 드래그: 영역선택 | ESC: 닫기';
   pop.appendChild(statusBar);
-  function _closeFolder(){ pop.remove(); backdrop.remove(); document.removeEventListener('keydown',onKF); }
+  function _closeFolder(){ pop.remove(); backdropL.remove(); backdropR.remove(); document.removeEventListener('keydown',onKF); }
   var onKF=function(ev){
     if(ev.key==='Escape') _closeFolder();
     if(ev.key==='a'&&(ev.ctrlKey||ev.metaKey)){
@@ -4229,9 +4285,20 @@ function _openBillGallery(startIdx, backFn){
     }
     bldgTabMap[bid].count++;
   });
+  // 좌측 사이드 오버레이 (클릭 닫기)
+  var galBackL=document.createElement('div');
+  galBackL.style.cssText='position:fixed;top:0;left:0;bottom:0;width:480px;z-index:100000;cursor:pointer;background:rgba(255,255,255,.06)';
+  galBackL.onclick=function(){ _closeGal(); };
+  document.body.appendChild(galBackL);
+  // 우측 사이드 오버레이 (클릭 닫기)
+  var galBackR=document.createElement('div');
+  galBackR.style.cssText='position:fixed;top:0;right:0;bottom:0;width:480px;z-index:100000;cursor:pointer;background:rgba(255,255,255,.06)';
+  galBackR.onclick=function(){ _closeGal(); };
+  document.body.appendChild(galBackR);
   var ov=document.createElement('div');
   ov.id='bill-gallery-ov';
-  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;top:0;left:480px;right:480px;bottom:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center';
+  function _closeGal(){ ov.remove(); galBackL.remove(); galBackR.remove(); document.removeEventListener('keydown',onKey); }
   // 건물 탭바 (상단, 가운데 정렬)
   var tabBar=document.createElement('div');
   tabBar.style.cssText='position:absolute;top:0;left:0;right:0;display:flex;gap:0;overflow-x:auto;background:rgba(0,0,0,.6);z-index:2;padding:6px 8px 0;justify-content:center';
@@ -4267,13 +4334,10 @@ function _openBillGallery(startIdx, backFn){
   btnR.style.cssText='position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.4);border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;z-index:3';
   btnR.onclick=function(e){e.stopPropagation();go(1);};
   ov.appendChild(btnR);
-  // 하단 버튼
+  // 하단: 현재 이미지 정보만 표시
   var foot=document.createElement('div');
-  foot.style.cssText='position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;z-index:2;justify-content:center;padding:18px 20px 20px';
-  foot.innerHTML='<button id="bg-dl" class="btn sm" style="padding:5px 12px;font-size:11px;background:#059669;color:#fff;border:none;border-radius:4px">⬇ 저장</button>'
-    +'<button id="bg-bldg-dl" class="btn sm" style="padding:5px 12px;font-size:11px;background:#0d9488;color:#fff;border:none;border-radius:4px;display:none">⬇ 건물 전체 저장</button>'
-    +'<button id="bg-folder" class="btn sm" style="padding:5px 12px;font-size:11px;background:#6366f1;color:#fff;border:none;border-radius:4px">📁 폴더</button>'
-    +'<button id="bg-del" class="btn sm" style="padding:5px 12px;font-size:11px;background:#dc2626;color:#fff;border:none;border-radius:4px">× 삭제</button>';
+  foot.id='bg-foot-info';
+  foot.style.cssText='position:absolute;bottom:0;left:0;right:0;z-index:2;text-align:center;padding:10px 20px 14px;color:rgba(255,255,255,.55);font-size:11px;pointer-events:none';
   ov.appendChild(foot);
   function _updateTabs(){
     var g=_billGalleryAll[curIdx]; if(!g) return;
@@ -4303,28 +4367,9 @@ function _openBillGallery(startIdx, backFn){
       imgEl.src=blob||g.f.data||'';
       imgEl.style.opacity='1';
     },80);
-    // 버튼 연결
-    document.getElementById('bg-dl').onclick=function(e){e.stopPropagation();_downloadBillFile(g.f,{period:g.period,bldgName:(g.bldg?g.bldg.name:'')});};
-    document.getElementById('bg-del').onclick=function(e){e.stopPropagation();delWaterBillFile(g.w.id,g.period,g.fileIdx);try{ov.remove();}catch(e){}};
-    // 건물 전체 다운로드 버튼: 같은 건물에 2장 이상이면 표시
-    var curBid=g.bldg?g.bldg.id:'0';
-    var bldgFiles=_billGalleryAll.filter(function(x){ return (x.bldg?x.bldg.id:'0')===curBid; });
-    var bgBldgDlBtn=document.getElementById('bg-bldg-dl');
-    if(bgBldgDlBtn){
-      if(bldgFiles.length>1){
-        bgBldgDlBtn.style.display='';
-        bgBldgDlBtn.textContent='⬇ '+(g.bldg?g.bldg.name:'건물')+' '+bldgFiles.length+'장 저장';
-        bgBldgDlBtn.onclick=function(e){
-          e.stopPropagation();
-          _downloadBldgBills(g.bldg, bldgFiles);
-        };
-      } else { bgBldgDlBtn.style.display='none'; }
-    }
-    // 📁 폴더보기 버튼
-    var folderBtn=document.getElementById('bg-folder');
-    if(folderBtn){
-      folderBtn.onclick=function(e){ e.stopPropagation(); ov.remove(); document.removeEventListener('keydown',onKey); _openFolderView(); };
-    }
+    // 하단 정보 표시
+    var infoEl=document.getElementById('bg-foot-info');
+    if(infoEl){ infoEl.textContent=(curIdx+1)+' / '+_billGalleryAll.length+'  ·  '+bName; }
     // 첫/끝 사진이면 해당 방향 화살표 숨김
     btnL.style.display=(curIdx<=0)?'none':'';
     btnR.style.display=(curIdx>=_billGalleryAll.length-1)?'none':'';
@@ -4338,10 +4383,9 @@ function _openBillGallery(startIdx, backFn){
   function onKey(e){
     if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}
     else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();go(1);}
-    else if(e.key==='Escape'){ov.remove();document.removeEventListener('keydown',onKey);}
+    else if(e.key==='Escape'){_closeGal();}
   }
   document.addEventListener('keydown',onKey);
-  ov.addEventListener('click',function(e){if(e.target===ov||e.target===imgWrap){ov.remove();document.removeEventListener('keydown',onKey);}});
   document.body.appendChild(ov);
   show();
 }
@@ -4498,8 +4542,7 @@ async function _downloadBillFile(f, opts){
       try{
         var handle=await window.showSaveFilePicker({
           suggestedName:fname,
-          types:[{description:'청구서 파일',accept:{[mime]:['.'+ext]}}],
-          startIn:'desktop'
+          types:[{description:'청구서 파일',accept:{[mime]:['.'+ext]}}]
         });
         var writable=await handle.createWritable();
         await writable.write(blob);
@@ -4518,7 +4561,7 @@ async function _downloadBillFile(f, opts){
     a.download=fname;
     document.body.appendChild(a); a.click();
     setTimeout(function(){ try{a.remove();URL.revokeObjectURL(url);}catch(_){} },100);
-    _waterToast('⬇ 다운로드 폴더에 저장됨 (바탕화면 저장은 HTTPS 필요)');
+    _waterToast('⬇ 다운로드 폴더에 저장됨');
   }catch(e){ alert('다운로드 실패: '+e.message); }
 }
 // 해당 기간의 전체 파일 순차 다운로드
@@ -4608,11 +4651,24 @@ async function _downloadAllMonthBills(period){
         console.warn('showDirectoryPicker 실패',e);
       }
     }
-    // 폴백: 개별 다운로드
-    _waterToast('⬇ '+files.length+'장 개별 저장...');
+    // 폴백: <a download>로 다운로드 폴더에 직접 저장
+    _waterToast('⬇ '+files.length+'장 다운로드 폴더에 저장...');
     for(var i=0;i<files.length;i++){
-      try{ await _downloadBillFile(files[i].f,{period:period,bldgName:files[i].bName}); }catch(e){}
+      try{
+        var it=files[i];
+        var ext2=((it.f.name||'').split('.').pop()||'jpg').toLowerCase();
+        if(ext2==='jpeg') ext2='jpg'; if(!['jpg','png','pdf'].includes(ext2)) ext2='jpg';
+        var fn2=(period||'')+'_'+(it.bName||'bill')+'_'+(it.idx+1)+'.'+ext2;
+        var bl2=_dataUrlToBlob(it.f.data);
+        var url2=URL.createObjectURL(bl2);
+        var a2=document.createElement('a');
+        a2.href=url2; a2.download=fn2;
+        document.body.appendChild(a2); a2.click();
+        setTimeout((function(u,el){return function(){try{el.remove();URL.revokeObjectURL(u);}catch(_){}};})(url2,a2),200);
+      }catch(e){}
+      if(i<files.length-1) await new Promise(function(r){setTimeout(r,150);});
     }
+    _waterToast('✅ '+files.length+'장 다운로드 완료');
   }catch(e){ alert('다운로드 실패: '+e.message); }
 }
 async function _downloadAllBills(id, period, kind){
@@ -4635,7 +4691,7 @@ async function _downloadAllBills(id, period, kind){
     // showDirectoryPicker로 폴더 선택 → 이미지 직접 저장
     if(window.showDirectoryPicker){
       try{
-        var dirHandle=await window.showDirectoryPicker({id:'bsn-bills',startIn:'downloads',mode:'readwrite'});
+        var dirHandle=await window.showDirectoryPicker({id:'bsn-bills',mode:'readwrite'});
         for(var i=0;i<bill.files.length;i++){
           var f=bill.files[i];
           var ext=((f.mime||'').includes('pdf')||/\.pdf$/i.test(f.name||''))?'pdf':'jpg';
@@ -7627,349 +7683,6 @@ function delPMemoTodo(idx){
   sv(); rdPMemo(); _showPMemoSaved();
 }
 
-// ── 변경이력 ──────────────────────────────────────────────────────
-const _CHANGELOG=[
-  {q:'bsn 케어 사이에 점 찍어, 밑에 빌딩케어 지우고 / b만하는것도 이상해 당구장같애 / 사이드바 b박스는 없애 / 로그인페이지 b박스 지워 / 브라우저 b는 너무 작아 글자도 안보여',a:'🎨 로고·파비콘 정리 — (1) 탭 타이틀 "BSN케어" → "BSN.CARE" (2) 파비콘: 그라데이션 네이비 바탕 + 큰 "B" + 우하단 하늘색 점(BSN.CARE 의 "." 강조, 당구장 탈피) 작은 크기에서도 점만 봐도 구분 가능 (3) 사이드바: bsn-mark(B박스) 제거, 텍스트만 "BSN.CARE" 가운데정렬 (4) 로그인페이지: 큰 B 박스 삭제, "BSN.CARE" 타이틀만 표시 (5) BUILDING·CARE 소제목 전체 삭제',done:true},
-  {q:'수도청구서 들어가서 있는 추가버튼 없애 저기에 왜넣겠니',a:'🧹 수도 청구서 뷰어 헤더의 `＋ 추가` 버튼 제거 — 좌측 트리에서 이미 📎+ 로 기간 추가되니 중복. "⬇ 전체 다운로드" 버튼만 남김',done:true},
-  {q:'수도청구서 누르면 좌측상단에 뜨는거 너무 넓다 줄여줘',a:'📐 수도 뷰어 좌측 트리 너비 240px → 180px. 우측 이미지 뷰어 영역 60px 추가 확보',done:true},
-  {q:'전기청구서도 한전로그인 없애고 가운데정렬, 간격 넓다 / 지메일 연동해서 청구서 불러오기',a:'⚡ 전기청구서 탭 정리 — "한전 로그인 필요 → 이메일로 받은 PDF/이미지 업로드 방식" 안내문 제거, 제목 중앙정렬, 상단/상하 padding 축소(6→4→2px). 📧 Gmail 연동 버튼 추가: Google OAuth Client ID 저장 다이얼로그 구현 + 설정 저장 후 한전(cyber@kepco.co.kr) 메일 자동검색 · PDF 첨부 추출 · YYYY-MM 폴더 자동분류 흐름 안내. 실제 gapi 로드·OAuth 플로우는 Client ID 등록된 상태에서 활성화 예정 (Google Cloud Console 프로젝트 생성 + Gmail API 사용 설정 + OAuth 클라이언트 ID 발급 1회 필요)',done:true},
-  {q:'북마크도 2번눌러야되는데 한번만누르거나 안해도되게해줘',a:'🔎 1클릭화 기술제약 설명 — 아리수 조회버튼 클릭 시 페이지가 새 URL로 하드 네비게이션(cgJungInfo.do 재로드) → 북마클릿 실행컨텍스트가 소멸되어 캡처 단계는 무조건 2번째 💧 클릭 필요. 대안: ① 같은도메인 fetch+FormData로 조회 응답 직접받기(CSRF·POST페이로드 파싱 불안정) ② Chrome 확장프로그램으로 재작성(0클릭 가능, 별도 배포·설치 필요) ③ 현 상태 유지하며 2번째 클릭 전 상단 배너로 유도. 실사용은 sessionStorage 복원으로 두번째 클릭도 입력/조회 생략 즉시 캡처라 실제 소요시간은 1클릭과 거의 동일',done:true},
-  {q:'스타트 없어도되는데? 수도청구서 이미지 안보여 / 스타트 누르면 cmd에러',a:'🖥 start.bat 리팩터 — 인라인 PowerShell `^` 줄연결이 cmd에서 `?/server/5/9009` 에러 유발하던 문제 해결. 외부 _server.ps1(System.Net.HttpListener, 포트8765, MIME 테이블 포함)로 분리 → `start.bat` 은 Python → py launcher → Node → PowerShell 폴백 순서로 시도. file:// 직접 열기는 Origin:null 로 Supabase CORS 차단되므로 start.bat 통한 http://localhost:8765 접근이 이미지 표시·로그인 정상동작 필수 (localStorage도 origin별 분리라 file:// 세션과 http://localhost 세션 데이터 별도 유지)',done:true},
-  {q:'캡쳐까지 잘했는데 bsn케어에서 이미지파일이 안보이네 / 허용 버튼 계속뜸? / 전기요금은 로그인해야만 조회가능?',a:'📂 저장 직후 뷰어 자동오픈 — 기존엔 확인모달에 "📄 저장된 청구서 보기" 버튼만 있고 사용자가 눌러야 확인 가능했는데 이제 postMessage로 이미지 수신되는 즉시 openWaterBillViewer(wid) 자동호출 + 250ms 뒤 _showWaterBillModal(wid, period)로 방금 저장된 월 강제선택. 확인모달도 중앙 큰 박스 → 상단 작은 초록 토스트로 축소(뷰어 보이게 비침), 4.5초 후 자동소멸. 캡쳐 허용버튼(getDisplayMedia) 매번 뜨는 건 브라우저 API 보안제약 — 영구승인 불가, Chrome은 두번째부터 "이 탭"이 기본선택되어 "공유"만 클릭. 전기요금(KEPCO)은 한전:ON/사이버지점 모두 공동인증서+간편인증 로그인 필수라 비로그인 자동조회 불가능, 실용대안으로 이메일첨부 직접업로드 기능 준비 가능',done:true},
-  {q:'한번에 알아서 잘하자',a:'💪 findBtn 전면 재설계 — 점수기반 매칭. `전체/목록/이전/다음/취소/초기화/Reset/Clear/List/Total/Print/인쇄/닫기` 텍스트 포함 버튼 전부 -999점 탈락. href/onclick에 `cgTotal|Total.do|List.do|goTotal|javascript:history` 있어도 탈락. 남은 후보 중 ① "조회/검색/Search/조회하기" 정확일치 +100 ② "조회/검색" 부분 +25 ③ type=submit +40 ④ onclick에 fnSearch/fn_search/doSearch +30 ⑤ class에 btn-search/search-btn +15. 최소 30점 넘어야 클릭. 이 필터링으로 "전체조회" 같은 네비게이션 링크 영원히 제거. 추가 안전장치로 fromStorage 복원모드 진입 시 현재 URL이 cgTotal 계열이면 정기분(NR_cgJungInfo)으로 자동 되돌림',done:true},
-  {q:'한번 클릭하면 내용은 다 들어가는데 전체보기창으로 넘어감',a:'🎯 조회버튼 오탐 수정: 기존 findBtn이 /조회$/ 정규식으로 "전체조회" 같은 네비게이션 링크까지 매칭해서 전체보기 페이지로 이동되던 문제. 이제 ① anchor(고객번호 입력칸)의 form 안에서만 먼저 탐색 → ② 폼 내부에서 정확히 "조회/검색" 텍스트거나 submit 타입 찾기 → ③ 못찾으면 전역에서 isSearch(헤더/nav) 제외하고 정확매칭만. `/조회$/` 부분문자열 매칭 제거, `a[onclick*="search"]` 너무 넓은 셀렉터 제거, fnSearch/fn_search만 허용. 로그에 "조회버튼 클릭: \\"label\\" (폼내부/폼밖)" 표시',done:true},
-  {q:'그 조회버튼도 수동인데 자동으로해줘',a:'🤖 조회버튼 자동클릭 복원: 고객번호 자동입력 후 400ms 대기 → findBtn() 호출해 조회/검색 버튼 자동 클릭. AJAX로 같은 페이지에 결과 뜨면 waitThenCapture로 자동 캡처. 새 URL로 페이지 이동하면 sessionStorage에 저장된 상태가 10분간 유지되므로 💧를 한 번 더만 누르면 "복원모드"로 입력단계 스킵하고 즉시 캡처. 상단 노란 배너 문구도 "자동진행중 · 이동하면 한번 더 💧"로 업데이트',done:true},
-  {q:'인덱스 바탕화면에있는거 열었는데 캡쳐중이후 로드실패그대로임 (html2canvas CDN 4개 다 CSP 차단)',a:'🎥 캡처 방식을 getDisplayMedia로 교체: 아리수 CSP가 cdnjs/jsdelivr/unpkg/skypack 전부 차단 → 외부 라이브러리 불필요한 브라우저 내장 API(navigator.mediaDevices.getDisplayMedia)로 변경. 호출 시 브라우저 네이티브 화면공유 대화상자 뜨고 "Chrome 탭 → 이 탭" 선택하면 스트림을 video→canvas로 한 프레임 추출해 jpeg 변환. CSP 영향 0. 상단 파란 배너로 "이 탭 선택" 안내',done:true},
-  {q:'인터넷 연결안되면 접속자체를막아',a:'🚫 오프라인 전면 차단: 상단 배너 → 전체화면 블로커 모달로 승격. 인터넷 끊기면 반투명 어두운 오버레이(blur 포함) + "인터넷 연결 끊김 · 편집이 잠겼어요" 흰 카드 + pulse 애니메이션 "연결 재시도 중…". 클릭·입력 자체 차단. 복구되면 자동 해제 + 토스트. 5초마다 재체크(거짓양성 대응)',done:true},
-  {q:'인터넷끊으면 app링크가 안먹는거야? 혹시나 인터넷 연결안돼있는데 모르고 수정하고 반영안될까봐',a:'📡 오프라인 감지 추가: navigator.onLine + window online/offline 이벤트 → 인터넷 끊기면 상단에 빨간 띠로 "⚠️ 인터넷 끊김 — 수정해도 다른 기기에 반영 안됨" 경고 상시 표시. 복구되면 자동 사라지고 토스트. 저장 실패 시 기존 주황색 경고를 빨간색으로 강화 + 6초 표시',done:true},
-  {q:'다른사용자가 일하면서 금액같은걸 수정해도 실시간 반영되는걸로',a:'🔄 실시간 동기화 강화: 기존엔 "모달 열려있으면 원격 변경사항 그냥 버림(큐도 없음)"이었는데 → 최신 payload를 _rtPendingRow에 큐잉. 모달 닫히면 closeMo에서 _rtFlushIfIdle() 호출해 자동 반영. 모달 안 열려있으면 300ms 디바운스 후 즉시 반영 (기존 500ms). 다른 사용자 변경 감지 시 하단에 "🔄 다른 사용자가 업데이트함" 토스트 표시 (3초 쿨다운). 인터넷+Supabase 로그인 상태일 때 동작',done:true},
-  {q:'📸 로그에 html2canvas 로드 실패 (스크린샷 첨부)',a:'아리수 사이트 CSP가 cdnjs.cloudflare.com 차단. CDN 폴백 4개로 확장 (cdnjs→jsdelivr→unpkg→skypack) 차례로 시도. 모두 실패 시 Win+Shift+S 영역캡처 가이드 alert',done:true},
-  {q:'로그창 바로사라지고 결과대기중까지 보이긴해',a:'북마클릿이 조회 버튼을 자동클릭하니 페이지가 바로 넘어가서 로그·안내가 날아가던 문제. 자동클릭 제거 → 고객번호 자동입력만 하고 상단에 큰 노란 배너로 "① 조회 직접 누르세요 → ② 결과 뜨면 💧 다시 클릭" 안내. 두 번째 클릭은 sessionStorage 복원모드(fromStorage=true)로 입력단계 스킵하고 즉시 캡처',done:true},
-  {q:'계약서 첨부하면 색이 변하긴하는데 더찐하게해줘',a:'임대차계약서 📄 아이콘: 첨부 시 saturate(1.8)+text-shadow 파란 글로우, 미첨부 시 grayscale+opacity 0.18 처리',done:true},
-  {q:'호실수정 열심히 수정하고 저장안누르고 나갈거같은데',a:'호실수정 모달에 미저장 감지 추가. 폼 값 스냅샷 비교 → 변경 시 "수정사항이 저장되지 않았습니다. 닫으시겠습니까?" 확인 다이얼로그',done:true},
-  {q:'첨부한 파일누르면 열리는창에서 마우스좌클릭으로 이동 가능하게끔 / 건물수정에 세로길이 늘려',a:'새 창 이미지 갤러리에 좌클릭 드래그 이동 구현. 건물수정 모달 뷰어 영역 확대',done:true},
-  {q:'건물수정도 열심히 수정하고 저장안누르고 나갈거같은데',a:'건물수정 모달에도 동일한 미저장 감지 추가 (폼 스냅샷 비교 → 확인 다이얼로그)',done:true},
-  {q:'호실수정 건물수정에 첨부한 파일이 콘텐츠 차단으로 안보여',a:'CSP(Content Security Policy)에 frame-src blob:, object-src blob: 추가하여 blob URL이 iframe에서 표시되도록 수정',done:true},
-  {q:'모달뷰어말고 새창에서 계약서 pdf,이미지 파일열면 좌클릭 드래그 안됨',a:'새 창 뷰어에 드래그 이동 + 휠 확대/축소 구현. 이미지 위 휠=줌, 밖 휠=스크롤',done:true},
-  {q:'건물메모 몰아보기에 검색기능 삭제 / 건물맨앞에 전체 몰아보기버튼 추가',a:'몰아보기 검색 제거, 건물 탭 맨 앞에 🗂전체 버튼 추가, 📝개별보기 버튼 헤더에 배치',done:true},
-  {q:'확대,축소 버튼 없애고 화면에 대고 휠하게끔하자',a:'새 창 뷰어에서 확대/축소 버튼 제거, 이미지 위 휠=확대축소, 밖 휠=다음장, 우측하단 확대율 잠깐 표시',done:true},
-  {q:'건물메모 들어가서 상단탭누르면 바로옆건물이 눌림표시됨',a:'탭 버튼에 data-bid 속성 추가하여 인덱스 대신 건물ID로 정확히 매칭하도록 수정',done:true},
-  {q:'몰아보기 개별버튼 → 전체 좌측에 추가해서 맨앞건물로 가게끔',a:'몰아보기 헤더에 📝개별보기 버튼 배치, 클릭 시 첫번째 건물 개별 메모로 이동',done:true},
-  {q:'건물메모에서 각 탭을 눌렀을때 창이 커졌다작아졌다하는데 고정해',a:'건물메모 모달 max-height → height:90vh 고정. 탭 전환해도 크기 일정',done:true},
-  {q:'개인메모장 있으면 좋을거같은데 / 다른사람이 볼수있게 수정은 본인만',a:'📝개인메모 페이지 추가. 본인 메모는 편집 가능(파란 테두리), 타인 메모는 읽기 전용. 실시간 동기화',done:true},
-  {q:'임대 관리비말고 건물관리비 합계말하는거임',a:'임대현황에 건물관리비 표시 체크 시 합계 뱃지 좌측 표시',done:true},
-  {q:'호실수정 작성칸을 좌측으로 밀어서 줄이고 임대차계약서가 좀더 크게',a:'모달 1180→1280px, 좌측폼 640→420px 축소, 5칸→3+2칸 분리, 우측 뷰어 대폭 확대',done:true},
-  {q:'표시 체크박스를 우측 합계를 좌측으로 밀자',a:'합계 뱃지 좌측, 체크박스 margin-left:auto로 우측 배치',done:true},
-  {q:'합계 클릭하면 상세보기 쭈르륵 나오게해줘',a:'합계 클릭 → 건물별 관리비 상세 테이블(건물명/관리기간/D-day/월관리비) 토글 펼침',done:true},
-  {q:'호실수정창 계약서가 잘보이게 세로로 늘려줘',a:'호실수정 모달 max-height:92vh → height:94vh 고정으로 세로 확대',done:true},
-  {q:'표시 글자를 좌측에 두는데 체크박스만 글자 우측으로',a:'label에 flex-direction:row-reverse 적용 → "건물관리비 표시" 글자 좌측, 체크박스 우측',done:true},
-  {q:'호실수정,건물수정에 파일을 휠로 확대,축소되게해줘 / 여백에서 휠하면 이동',a:'이미지: 위 휠=줌, 밖 휠=스크롤 + 줌 인디케이터. PDF: 오버레이로 휠줌 지원. 건물수정도 1280px/94vh로 확대',done:true},
-  {q:'내가 채팅쳤던것들 우측에 따로빼놔 / 클릭하면 답변도 보이게',a:'📋변경이력 모달 추가. 요청 클릭 시 답변(처리내용) 아코디언 펼침. 개인메모에 ☑투두리스트+✓저장됨 표시도 추가',done:true},
-  {q:'32인치 기준인데 다른 모니터에서도 글자 안짤리게 자동맞춤',a:'뷰포트별 미디어쿼리 추가 (≤1920/≤1600/≤1366/≤1100px). zoom 값 자동 축소, 사이드바·모달·테이블·폼 반응형 대응. 테이블 가로스크롤 보장',done:true},
-  {q:'파일 화면이 안보여 이런일이 안생기게',a:'모달 뷰어에 로딩 스피너+에러 핸들링 추가. blob URL 실패 시 data URL 폴백. iframe onload/onerror 처리. 3초 타임아웃 후 강제 표시. 이미지도 onerror 폴백',done:true},
-  {q:'건물관리비 상세보기에 매출도 적어줘 / 10%는 회사, 나머지가 수익',a:'상세 테이블에 회사몫(10%), 매출(실수령 90%) 행 추가. 합계 뱃지에도 매출 금액 표시',done:true},
-  {q:'건물수정 저장안하고 나가면 안내창 / 관리비 금액 가끔 사라지는 원인',a:'editBldg에서 _bldgFormSnap 설정 누락 → 수정. 근본원인: 실시간 동기화가 모달 편집 중에도 전체 DB를 타인의 오래된 스냅샷으로 덮어쓰던 문제. 모달 열린 중 수신되면 대기열에 보관, 모달 닫힐 때 반영하도록 변경. saveBldg/saveLease에 스냅 리셋 추가',done:true},
-  {q:'계약서 위아래 스크롤 / 좌클릭 화면이동 / 화질 깨짐 복구',a:'PDF 뷰어에서 pointer-events:none 오버레이와 transform:scale 제거. 네이티브 iframe 뷰어로 전환하여 휠 스크롤·Ctrl+휠 확대축소·스크롤바 드래그 모두 기본 기능 복구. transform 제거로 화질 네이티브 해상도 유지. 드래그 팬이 필요하면 새 창 뷰어 사용',done:true},
-  {q:'계약서 미리보기 휠 방법같은 설명서 삭제',a:'PDF 뷰어 하단의 안내 문구(휠=스크롤 / Ctrl+휠=확대축소 / 새 창 드래그) 제거',done:true},
-  {q:'인상구간 대기는 불필요 1개만 입력하면1개, 여러개 입력하면 그때만 넣어줘',a:'인상구간이 1개일 때는 상태 배지(⏳대기/✓전체) 표시 생략. 2개 이상일 때만 진행상황 배지 표시 (0/N·✓N/M·✓전체). 📈N구간 카운트 배지는 그대로 유지',done:true},
-  {q:'렌트프리기간 일자까지 보이게 앞에 20은 불필요',a:'렌트프리 표시 포맷 YY.MM.DD로 변경 (예: 2025-05-01 → 25.05.01). 연도 앞 "20" 생략 + 일(day)까지 표시. rfLabelDay() 헬퍼 추가',done:true},
-  {q:'인상구간도 년도에 20 불필요 일자까지표시',a:'인상구간 툴팁과 상태 배지의 날짜 표시도 rfLabelDay로 변경 (예: 25.05.01). 계약기간 검증 경고 메시지 날짜도 동일 포맷으로 통일',done:true},
-  {q:'모든 날짜옆에 요일때문에 괄호뜨는데 없애줘',a:'캘린더 일자별 목록/상세 타이틀에서 "(요일)" 괄호 제거. 네이티브 date 피커 "(요일)" 오버레이 덮는 범위 확대 (left:98→86, 모달 90→82 등)',done:true},
-  {q:'렌트프리 옆에 며칠인지도 써주자',a:'렌트프리 열 아래에 (N일) 배지 추가. rfStart~rfEnd 포함 일수 자동 계산 (End-Start+1일)',done:true},
-  {q:'인상구간 마우스 클릭해도 금액이 안보여',a:'인상구간 배지(📈N구간·0/N·✓N/M·✓전체) 클릭 시 showRentSchPopup() 팝업 오픈. 시작일·임대료·관리비·상태(현재/적용/대기)를 표 형식으로 표시. 수정/닫기 버튼 포함',done:true},
-  {q:'수도요금청구서는 사이트에 고객번호 고객명 입력 후 캡쳐해서 쓰는데 탭 하나 만들어서 정보 입력해두면 청구서 불러오기',a:'💧수도요금 탭 신설. 건물별 고객번호+고객명 CRUD. "사이트 열기" 버튼 클릭 시 아리수(i121.seoul.go.kr) 새창 오픈 + 고객번호 자동 클립보드 복사. 여러 고객번호/건물도 지원',done:true},
-  {q:'호실수정에 인상구간 관리비 박스가 선넘어나간다',a:'호실 수정 모달의 인상구간 행(.rsch-row) 오버플로우 수정: flex-wrap:wrap 추가 + box-sizing:border-box 명시 + overflow:hidden. date 입력 120px로 축소(135→120, padding 조정). 임대료/관리비 입력 min-width 80→60, flex-basis 70px로 축소하여 모달 좁아져도 선 안 넘게',done:true},
-  {q:'인상구간 삭제 후 나가기 누르면 저장안했다고 안내안떠',a:'_snapLeaseForm() 스냅샷에 인상구간 행(#fl-rsch-wrap .rsch-row) 데이터(시작일/임대료/관리비) 포함. 담당자 연락처 행도 함께 포함하여 행 추가/삭제/수정 모두 감지. 이제 인상구간 하나만 지우고 닫아도 "수정사항이 저장되지 않았습니다" 경고 정상 출력',done:true},
-  {q:'인상구간 날짜 박스를 줄여 임대료 관리비 칸이 좁아보여',a:'날짜 박스 120→104px로 추가 축소, padding·font도 축소(11px, letter-spacing -0.3). 라벨 "임대료/관리비" → "임대/관리"로 줄여 공간 확보. 임대·관리 입력 flex-basis 70→90px, min-width 60→72px로 확대 — 실제 금액 칸이 눈에 띄게 넓어짐',done:true},
-  {q:'아까 요청한 모든 날짜옆 요일 괄호는?',a:'CSS 오버레이로 가리던 방식 → 네이티브 텍스트를 완전 투명화(color:transparent + ::-webkit-datetime-edit color:transparent)하고 우리가 직접 YYYY-MM-DD를 그리는 .ndate-disp 표시 레이어로 교체. 브라우저/줌에 상관없이 "(요일)"이 절대 안 보임. 달력 픽커 아이콘은 전체 영역 클릭으로 열림(opacity 0 absolute)',done:true},
-  {q:'렌트프리 없음도 선택 가능하게끔 누락이랑 구분용',a:'호실 수정 모달에 "렌트프리 □해당없음" 체크박스 추가. 체크 시 날짜 입력 비활성화(opacity 0.4). 저장 시 rfNone 플래그 기록. 리스트에서 3상태 구분: 있음(기존), 없음(회색 "없음" 배지), 미입력("?" 주의 마크). _snapLeaseForm에도 포함하여 미저장 경고 정상 작동',done:true},
-  {q:'인상구간도 (해당없음 구분)',a:'인상구간에도 동일한 "□해당없음" 체크박스 추가. rentSchNone 플래그 저장. 리스트 배지: 있음(📈N구간), 없음("없음" 회색), 미입력("?" 주황)',done:true},
-  {q:'건물관리피 표시를 매출 우측으로이동',a:'임대현황 합계 뱃지 순서 변경: "🏢 관리비 합계 · 💰매출" → "💰 매출 · 🏢 관리비 합계". 매출 금액이 먼저, 관리비 합계가 뒤로 이동',done:true},
-  {q:'변경이력 최신이 위로오게끔해줘',a:'openChangelog()에서 배열을 reverse하여 최신 항목이 맨 위에 표시. 원본 번호(#N)는 유지하며 가장 최근 항목엔 빨간 NEW 배지 자동 부착',done:true},
-  {q:'건물관리비표시랑 체크박스를 매출 우측으로 매출 위치도 조금전으로',a:'다시 해석: 매출 위치를 좌측으로 복원("💰 매출 · 🏢 관리비 합계"), 관리비 합계와 체크박스를 매출 우측에 배치. 최종 순서: [💰 매출] · [🏢 관리비 합계] [☑ 건물관리비 표시]',done:true},
-  {q:'체크박스 누르면 내용이 가려지면서 앞으로 밀리는데 체크박스 위치 고정',a:'체크박스 label에 margin-left:auto + flex-shrink:0 복원. 뱃지가 display:none 상태여도 체크박스는 컨테이너 우측 끝에 고정 — 토글해도 위치 불변',done:true},
-  {q:'매출을 합계 우측, 매출옆에 관리비표시 체크박스 위치, 체크박스 누르면 내용이 가려지면서 앞으로 밀리는데 체크박스 위치 고정',a:'합계 뱃지 순서: "🏢 관리비 합계 · 💰 매출" (합계 좌측, 매출 우측). 체크박스 label을 margin-left:10px로 뱃지 옆 밀착 배치. 토글 off 시 display:none → visibility:hidden으로 변경하여 뱃지 자리는 유지되고 내용만 가려지게 → 체크박스 위치 완전 고정',done:true},
-  {q:'체크박스를 합계 좌측으로 보내봐',a:'체크박스 label을 bmfee-total span 앞으로 이동(HTML 순서 변경). margin-left:10px → margin-right:10px로 변경하여 체크박스와 뱃지 사이 간격 확보. 최종 레이아웃: [☑ 건물관리비 표시] [🏢 관리비 합계 · 💰 매출]',done:true},
-  {q:'매출 상세보기 ui 깔끔하게해봐 우측 공간도 너무 넓다',a:'상세보기를 기존 3열 테이블(우측 공백 넓음) → inline-block 카드 + CSS grid(건물/상태/관리기간/월관리비) 로 변경. 하단 합계/회사몫/매출은 3등분 플렉스 카드(파랑/노랑/초록)로 요약. D-day 대신 상태 배지(정상/D-N/만료)로 시각화. 우측 여백이 자연스럽게 사라짐',done:true},
-  {q:'수도요금 ui 너무 간격이 멀어 한눈에 보이게',a:'건물별 카드/테이블 구조를 단일 컴팩트 테이블로 통합. 건물명(rowspan)·고객번호·고객명·메모·작업 컬럼을 한 줄에 배치. 행 높이·폰트 축소(font-size 11.5px, padding 4px)로 한 화면에 더 많은 건물이 보이게. 빈 건물도 "등록된 고객정보 없음 + 추가" 한 줄로 압축',done:true},
-  {q:'사이트도 간편조회말고 요금조회 들어가서 입력하면 청구서가 바로 나오니 그걸 불러와 / 고객번호 자동 불러오게',a:'🌐 청구서 버튼 신설 — 아리수 요금조회 페이지(cyberBill/cyberBillList.do)로 딥링크 + 고객번호 자동 클립보드 복사. 동시에 우측하단에 💧 플로팅 퀵패널 표시(큰 글씨 고객번호·고객명 + 1클릭 복사 버튼 + 안내). 브라우저 보안(Same-Origin Policy)상 크로스도메인 폼 자동입력은 불가 — 대신 "새 창에서 입력란 클릭 → Ctrl+V" 흐름이 최대한 1초로 단축',done:true},
-  {q:'수도요금 가운데정렬해 간격멀어',a:'테이블을 width:100% → width:auto + flex(justify-content:center)로 변경하여 화면 중앙 정렬. 모든 셀 text-align:center 적용(메모만 가독성 위해 좌측정렬 유지). 패딩 4~5px → 3~4px, 컬럼 고정폭 제거하여 실제 내용 길이만큼만 차지. 건물명 셀도 중앙정렬 + ＋ 버튼 아래 배치',done:true},
-  {q:'사이트는 아리수 사이버고객센터 > 요금조회 > 요금조회 및 납부 > 전체보기로 해줘',a:'🌐 청구서 버튼과 헤더 🌐 아리수 버튼 모두 전체보기 딥링크로 교체 (https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgTotalInfo.do?_m=m1_1_5). 홈 폴백 URL도 사이버고객센터 메인(NR_index.do)으로 변경',done:true},
-  {q:'수도요금 사이즈 키워 간격을 줄이니 너무 작아보여',a:'폰트/패딩 키움: 본문 11.5→13px, 헤더 10→11.5px, 셀 padding 3~4→7~8px. 고객번호는 letter-spacing 0.3px + 13.5px로 강조. 버튼도 2x7 → 5x11px로 클릭 영역 확보',done:true},
-  {q:'우측밑에 복사 안나오게해줘 / 자동입력해줘',a:'우측하단 플로팅 퀵패널 제거. 크로스도메인 보안상 JS 직접 자동입력은 불가 → window.name에 고객정보 저장 + 아리수에서 한 번 클릭하면 자동입력되는 북마클릿 방식 도입. 헤더에 ⚡자동입력 버튼 추가 (1회 북마크바 드래그 설치 안내)',done:true},
-  {q:'추가버튼 창, 바깥쪽 클릭으로 닫히게 / 취소·x버튼 누르기 힘들고 글자 짤림',a:'수도요금 모달: 오버레이 바깥 클릭 시 자동 닫힘 + ESC 닫힘. × 버튼 22px(34x34 클릭영역), 취소/저장 버튼 padding 8x16~18px, min-height 36px로 확대. 폰트 14→15px, input·select·textarea 13px. 모달 폭 460→520px, 패딩 여유있게',done:true},
-  {q:'자동입력하고 너가 이미지만 가져오던가',a:'청구서 이미지 자체를 이 앱에서 직접 가져오는 건 아리수가 세션 로그인 + CORS 차단된 외부 도메인이라 정적 HTML에서는 불가능. 대신 "🌐 청구서 → 아리수에서 북마클릿 클릭 → 자동입력" 흐름을 2클릭으로 줄였고, 캡쳐는 각 청구서 페이지에서 직접 수행. (진짜 0클릭 이미지 자동수집은 브라우저 확장프로그램/서버 프록시가 필요해 별도 제품 수준)',done:true},
-  {q:'추가누르고 창뜨는거 간격줄여봐 입력하려고 마우스 이동할때 일이다',a:'수도요금 추가 모달을 2열 그리드로 재배치. 건물·고객번호를 한 줄에, 고객명·메모는 전체폭. 필드간 gap 12→6px, 라벨 여백 4→2px, 입력 padding 7→5px, 헤더/푸터 padding 14~18→6~8px로 축소. 모달 전체 높이 약 40% 감소 → 마우스 이동 거리 대폭 단축',done:true},
-  {q:'고객정보 입력한거 지워졌잖아 안지워지게하게 복구해놔 / 가운데 정렬해 너무멀다',a:'① 입력 보호: 바깥 클릭/ESC/취소/X 닫기 전에 스냅샷 비교 → 변경분 있으면 localStorage(bsn_water_draft, 24h 유지)에 자동 저장 + 확인 창으로 손실 방지. 모달 다시 열면 노란 배너 "⏱ 저장 안 한 내용 복구됨 [지우기]"로 자동 복원. ② 가운데 정렬: 2열 그리드 → 단일열 flex로 변경, 라벨 폭 72px 우측정렬 + input flex:1로 라벨과 입력칸이 중앙에서 딱 붙게 배치. 모달 폭 520→480px',done:true},
-  {q:'데이터·파일 첨부 자주 사라짐 / 수도요금 헤더 버튼 간격 멀다',a:'💥 근본원인: 실시간 동기화가 편집 모달 중 "대기열"에 원격 스냅샷을 쌓아두다가 모달 닫힐 때 반영했는데, 그 사이 attachDoc 같은 즉시-sv 동작으로 내 DB가 더 최신이 돼도 대기열의 옛 스냅샷이 내 수정분을 덮어쓰는 버그. 🛡 수정: (1) sv() 성공 시 _pendingSync 즉시 폐기 — stale 덮어쓰기 차단. (2) 편집 모달 보호 리스트 확장: mo-bmemo·mo-expire·mo-cal·mo-report·mo-water·mo-invoice 추가 (기존은 4개뿐). (3) 모달 닫힐 때 대기열 반영 대신 Supabase에서 한 번 더 최신본 fetch해서 적용. (4) 롤링 백업 스택: 저장 직전/원격 덮어쓰기 직전 최대 5세대 localStorage(bm_backup_stack)에 DB 스냅샷 저장, 콘솔에서 restoreLastBackup() 호출로 복원 가능. 파일(계약서/대장/사진)도 DB JSON에 같이 들어가므로 같은 방어선에 포함됨. 💧 수도요금 헤더: 버튼 3개(추가/자동입력/아리수)를 하나의 flex 그룹으로 묶고 gap 8→3px, 개별 padding 10→8px로 타이트하게',done:true},
-  {q:'건물명위로 그것들이 이동하게해',a:'수도요금 페이지의 [+ 추가 / ⚡ 자동입력 / 🌐 아리수] 버튼을 상단 헤더(제목 옆 우측)에서 테이블 바로 위로 이동. 중앙정렬 + 4px gap으로 건물명 컬럼 바로 위쪽에 배치 → 시선 동선이 "건물명 찾기 → 추가/외부" 순으로 수직 정렬됨',done:true},
-  {q:'수도 검색기능 없애',a:'수도요금 페이지 헤더의 검색 input 제거. 건물 수가 14개뿐이라 한 화면에 다 들어가 검색 불필요. rdWater() 내부의 q 필터링 로직은 빈 문자열로 유지(항상 전체 표시), filterMatch 로직은 그대로 두어 향후 확장 시 바로 복원 가능',done:true},
-  {q:'로컬이든 웹이든 내가 직접사용하는게 메인이여야지 db에서 덮어지며 날아가는게 말이되나',a:'🏛 동기화 패러다임 전환: 원격-우선 → 로컬-우선(Local-First). 원칙: ① 내가 지금 쓰는 메모리/브라우저 localStorage가 절대 메인. ② Supabase 실시간 이벤트는 자동 덮어쓰기 전면 금지, 우측 상단에 노란 배너 "🔔 다른 기기에서 변경됨 [불러오기]"만 노출. ③ 사용자가 [불러오기] 누를 때만 백업 후 반영. 편집 모달 열려있으면 경고 confirm 한 번 더. ④ 사이드바에 [🔄 원격 불러오기] 상시 버튼 추가 — 호실/건물/메모 개수 차이까지 미리보기 후 덮어쓰기 선택. ⑤ sv() 성공 시 대기중 원격 알림 자동 폐기. 결과: 원격이 네 입력을 절대 지우지 못하고, 지우려면 네가 명시적으로 눌러야만 가능',done:true},
-  {q:'그 글자가 우측구석이라 안보여',a:'원격 변경 알림 배너 위치·크기 재설계: 우측상단 구석(top:52px right:14px 340px) → 화면 상단 중앙(top:14px left:50% translateX)으로 이동. 폰트 12→13px, 아이콘 14→18px, 버튼 11→12px + padding 키움, 테두리 1→2px, 배경 옅은노랑 → 진한노랑(#fef3c7)으로 시인성 강화. 2초 주기 박스섀도 pulse 애니메이션 추가로 주의 끌게 함. 최대폭 340→520px',done:true},
-  {q:'우측 구석에뜨는데 그리고 버튼 용도 아직도 헷갈려',a:'우측 하단 구석 10px pill로 뜨던 showSaveStatus(저장/로드 상태) → 화면 하단 중앙(bottom:18px left:50%)로 이동, 폰트 10→12px·padding 3x8→6x14px·그림자 추가로 읽히게. 사이드바 버튼 재정리: ① 상단에 "💾 자동저장 ON / 입력 즉시 서버 반영" 초록 배지 추가하여 기본 동작을 명시. ② "🔄 원격 불러오기" → "☁️ 다른 기기 변경분 가져오기" 로 이름 변경 + 부제 "(안 눌러도 내 입력은 자동저장됨)" 추가하여 용도 명확화. tooltip도 "다른 PC·폰에서 수정한 최신 데이터를 가져와 덮어씁니다" 로 확장',done:true},
-  {q:'버튼 누르면 최신상태라 뜨는데 그 안내문이 클릭한 버튼옆에 뜨게해',a:'_showBtnTip() 헬퍼 신설: 클릭된 버튼의 getBoundingClientRect()로 버튼 우측에 말풍선(삼각 꼬리 포함) 렌더링. 0.18s fade-in + 2.2s 후 자동 소멸. manualPullLatest(event)에 event 전달하여 현재 버튼 참조. ① 오프라인/모달열림 경고 주황, ② ⏳확인중 회색, ③ ✅이미 최신 / ✅반영됨 초록으로 상황별 색상 구분. 기존 하단 중앙 showSaveStatus는 자동저장 상태 표시에만 유지',done:true},
-  {q:'화면에서 누가 수정중이면 표시를 띄워줘 수정할때 겹쳐서 오류안뜨게 / 임대료·관리비·파일첨부·고객번호 같은거 동시 수정 오류 예방',a:'🔴 Supabase Realtime Presence 구독 추가 (bm_presence 채널). 각 클라이언트가 편집중인 항목(type,id,label)을 실시간으로 공유. 화면 상단 중앙 "presence-bar"에 초록 pill "● 이름"(온라인) 또는 노란 pill "● 이름 · ✏ 16.트러스트힐 3층 ABC"(특정 항목 편집중) 형식으로 표시. 편집 진입점에 startEditing() 훅 — editLease(임대료/관리비/파일첨부), editBldg(건물 파일), openWaterModal(고객번호), openBMemo(건물메모), openExpEdit(만료일), editCalEv(캘린더). 같은 항목을 다른 사람이 편집중이면 열기 전 경고 confirm → "그래도 열기 / 기다리기" 선택. closeMo()에서 stopEditing()으로 편집 세션 종료. beforeunload 시 untrack. 스코프: 모달 레벨 필드(금액·파일·고객번호 등) 동시수정 방지. Supabase DB 직접 편집은 관리자도 안 건드리므로 대상 외',done:true},
-  {q:'사이트탭 순서는 사용자선택',a:'🎯 좌측 사이드바 8개 탭(임대현황/만료일/캘린더/고정일정/월간보고서/청구서/수도요금/개인메모) 드래그 앤 드롭으로 순서 자유 변경. 드래그 시작하면 0.4 투명도, 드롭 위치에 하늘색 2px 라인 인디케이터(마우스가 탭 위쪽 절반이면 상단, 아래쪽 절반이면 하단) 표시. 드롭하면 PAGES 배열 재정렬 + localStorage.bm_navOrder에 순서 저장 → 새로고침/재접속 후에도 유지. 사용자 관리(admin) 탭은 항상 맨 아래 고정(draggable=false, 드롭 타겟 제외). 각 탭 hover 시 "드래그해서 순서 변경" 툴팁. 콘솔에서 resetNavOrder()로 원래 순서 복원 가능',done:true},
-  {q:'수동 불러오기 왜 넣었냐 / 내 입력 날아가지 않게만 해',a:'📌 지적 타당: 원인(편집 중 stale 원격 덮어쓰기)은 이미 sv()에서 _pendingSync 즉시 폐기로 고쳤으면서 사용자에게 수동 버튼을 떠넘긴 과잉설계였음. 정리: ① 상단 노란 배너(🔔 다른 기기에서 변경됨) 제거, ② 사이드바 [☁️ 다른 기기 변경분 가져오기] 버튼 제거, ③ [💾 자동저장 ON] 뱃지 제거, ④ _showRemoteNotice/pullRemoteNow/dismissRemoteNotice/manualPullLatest 모두 삭제. 대신 setupRealtimeSync() 단순화: "모달 열려있으면 원격 이벤트 통째로 무시(큐도 없음), 모달 전부 닫혀있을 때만 백업 후 조용히 반영". 내가 뭔가 입력/수정 중일 땐 원격이 절대 끼어들지 못함 → 내 데이터가 "날아갈" 타이밍이 존재하지 않음. Presence는 동시편집 경고 유지',done:true},
-  {q:'한참전에 써둔것도 보면 어느순간 숫자가 사라져있길레',a:'🚨 데이터 사라짐 근본 원인 수정: enterApp의 cloud 로드 실패시 await sv() 경로에서 stale 로컬 DB로 서버 최신을 덮어쓰는 사고 차단. 신설: ① _cloudLoadOk 플래그 — 클라우드 로드 1회 성공 전엔 sv()가 서버에 절대 쓰지 않고 로컬만 저장("⚠️ 로컬만 저장됨(클라우드 미연결)" 배지). ② _validDB(d) 구조 검증자 — buildings 비었거나 leases 배열 누락이면 거부. 원격에서 들어온 이상한 데이터도 적용 안 함, 내 DB도 구조 깨지면 서버 저장 생략. ③ loadFromSupabase 재시도 3회 × 400ms — 세션이 아직 준비 안 됐을 때 즉시 null 반환 않고 대기. 결과: "오랜 시간 후 재접속 / 세션 꼬임" 같은 경계 상황에서도 내가 써둔 숫자가 텅 빈 로컬로 덮어써지는 사고 방지',done:true},
-  {q:'화면 안켜져 몇번째야 왜그런건데',a:'🚨 흰화면 재발 방지: loadFromSupabase 재시도 추가 후 네트워크가 완전히 멈추면 sbClient.from().single()이 무기한 대기 → $("app-main") 이미 보이지만 그 뒤 buildNav/rdLease 호출이 await 뒤라 실행 안 되어 흰화면처럼 보이는 문제. _withTimeout(p,ms) 헬퍼로 감싸서 auth.getSession 2.5초, DB 쿼리 3.5초 강제 타임아웃. 실패 시 catch → 재시도 → 최종 null 반환으로 폴백 보장. 최악 6초 내에 앱이 로컬 DB로라도 반드시 뜸',done:true},
-  {q:'검색에 복붙되는데? 위치에 맞게들어가고 사용자명도 같이 넣어줘',a:'⚡ 수도 북마클릿 전면 개선: ① 이전엔 fallback 셀렉터 input[type=text]가 상단 검색창을 먼저 잡아서 고객번호가 엉뚱한 곳에 들어감. 수정: isSearch(el) 판정 — <header>·<nav> 태그 안쪽, placeholder에 "검색", name/id에 keyword/query/srchword/\\bsrch\\b 포함시 제외. ② byLabel(kw) 추가 — <label>·<th>·<dt>·<legend> 텍스트가 "고객번호"/"납부자번호"/"사용자명"/"고객명"인 요소를 찾아 연결된 input(htmlFor·inline·부모·다음 형제) 타게팅. 라벨-input name이 어떻든 매칭됨. ③ 사용자명(custName)도 동시 입력 — openWaterBill 페이로드에 이미 custName 있었는데 북마클릿이 안 읽고 있었음. custNm/custName/userNm name·id + 사용자명/고객명 placeholder 셀렉터 + 라벨 매칭까지 다층 탐색. ④ 완료 토스트 "✅ 고객번호 ○○ + 사용자명 ○○ 입력됨" 2.5초. 기존 설치된 북마클릿은 새로 드래그해서 교체 필요',done:true},
-  {q:'저장누르고 다른거 추가하면 자꾸 복구창뜸',a:'🐛 수도요금 모달 드래프트 버그: saveWater()/delWater()가 DB엔 저장하면서 localStorage.bsn_water_draft는 안 지워서, 모달 닫고 [+ 추가] 다시 누르면 _loadWaterDraft()가 이전 입력 복구 → 노란 "⏱ 저장 안 한 내용 복구됨" 배너가 엉뚱하게 뜸. 수정: 저장/삭제 성공 직후 _clearWaterDraft() + _waterFormSnap=_snapWater()로 드래프트 초기화 + 스냅샷 리셋 → 다음 모달 오픈은 깨끗한 상태',done:true},
-  {q:'수도청구서 옆에 복사버튼 없애 아리수홈페이지 전체보기말고 정기분에 복사되게해줘',a:'🌐 수도요금 UI 정리 + 아리수 링크 변경: ① 행별 [📋 복사] 버튼 제거 — 청구서 버튼 클릭 시 클립보드 복사 + 북마클릿 자동입력이 이미 되므로 중복. ② 상단 [🌐 아리수] 버튼 제거 — 어차피 행 [🌐 청구서]가 아리수로 열어줘서 중복. ③ deeplink를 전체보기(NR_cgTotalInfo.do?_m=m1_1_5)에서 정기분(NR_cgJungInfo.do?_m=m1_1)으로 변경 — 정기분이 기본 요금조회 화면이라 고객번호 입력칸이 바로 보여서 북마클릿 자동입력 타겟 훨씬 안정적',done:true},
-  {q:'같은주손가? 오른쪽화면이 정상이 (스크린샷: 왼쪽 NR_cgTotalInfo.do vs 오른쪽 NR_cgJungInfo.do)',a:'🔧 아리수 정기분 URL path 자체 수정: NR_cgTotalInfo.do → NR_cgJungInfo.do (사용자 스크린샷으로 진짜 정기분 경로 확인). _m 파라미터는 m1_1_1 유지',done:true},
-  {q:'정기분 사이트가 아닌데 전체보기임 / 주소 끝자리가 5대신 1이야',a:'🔧 아리수 정기분 URL 파라미터 수정: path는 NR_cgTotalInfo.do 공통(탭 하나에서 _m으로 분기), _m 끝자리만 5(전체보기 m1_1_5)→1(정기분 m1_1_1)로 변경. 사용자가 주소창에서 직접 확인한 진짜 정기분 URL',done:true},
-  {q:'새로고침하면 화면뜨는게 왜케오래걸리지 / 수도요금탭에서 새로고침하면 내용이 안뜨고 다른탭눌렀다가 와야떠',a:'⚡ 초기 렌더 패러다임 전환 + 수도요금 탭 빈화면 버그 수정: ① 기존엔 enterApp이 await loadFromSupabase()를 기다린 뒤에야 buildNav/렌더 호출 → Supabase 응답 느리면 최악 18초(2.5+3.5 타임아웃×3재시도) 동안 화면이 비어보임. 수정: 로컬 DB(localStorage)로 즉시 렌더, cloud 로드는 백그라운드 async IIFE로 분리 — await 하지 않음. cloud가 로컬과 다르면 재렌더, 같으면 생략. 모달 열려있으면 cloud 반영 보류(내 수정 보호). ② _renderers dispatch 테이블에 water:rdWater, pmemo:rdPMemo 누락됐던 거 추가 — 수도요금/개인메모 탭에서 새로고침시 초기 렌더가 undefined 호출이라 빈화면 → 다른 탭 갔다와야 그려지던 버그 해결. ③ _renderCurrentTab 헬퍼로 렌더 호출 일원화 → 실패시 rdLease() 폴백',done:true},
-  {q:'지금 기능은 반수동이라 보조로 쓰자 / 내가 원하는건 고객번호,고객명만 한번 써두면 청구서버튼 눌렀을때 청구서 이미지를 보는거야 / 건물별로 자동 폴더링되면 좋을듯',a:'💧 수도요금 청구서 이미지 내장 뷰어 신설 — 아리수 경유를 "보조(🌐)"로 강등, "📄 청구서"가 주력. 데이터 모델 확장: DB.waterBills[].bills=[{period:"YYYY-MM", files:[{data,name,mime}], uploadedAt}] — 고객별·기간별로 청구서 PDF/이미지를 여러 장 저장. ① rdWater 행의 버튼 재배치: [📄 청구서(N)] 파란 카운트 뱃지로 저장된 기간 수 즉시 확인 → 클릭시 전용 뷰어 모달, [🌐] 작은 회색 보조 버튼으로 아리수 진입 유지, [×] 삭제. ② mo-water-view 모달: 좌측 사이드바에 기간 폴더 최신순 정렬 + 각 기간 오른쪽에 개별 × 삭제, 상단 [＋ 청구서 추가] 버튼. 우측 1a1a2e 다크 패널에 파일 연속 스크롤 뷰어 — PDF는 iframe blob(네이티브 뷰어), 이미지는 inline <img> 확대·스크롤. sticky 헤더에 "📅 2025-09 · 3장 [＋ 추가]". ③ uploadWaterBill: YYYY-MM prompt → 파일선택(다중·10MB제한) → 같은 period면 files 배열에 merge, 새 period면 push. ④ 데이터는 JSON base64로 Supabase에 함께 sync (bm_data 기존 경로) — 다른 기기에서도 즉시 열람',done:true},
-  {q:'반수동이란거잖아 자동으로 넣어줘',a:'🤖 북마클릿 전자동화 — 이전엔 fill만 했지만 이제 한 번 클릭으로: ① 고객번호·사용자명 자동입력 → ② "조회/검색" 버튼 자동 탐색 & 클릭 → ③ 결과 테이블 렌더 대기 (MutationObserver형 interval, 최대 9초) → ④ html2canvas(CDN cdnjs) 동적 로드 후 main/#contents/body 캡처 → ⑤ dataUrl을 window.opener.postMessage({type:"bsn_water_bill",wid,custNo,custName,period,dataUrl})로 BSN케어 창에 전송 → ⑥ BSN케어는 message 이벤트로 수신 즉시 DB.waterBills[wid].bills에 자동 append + sv() + rdWater() + 토스트 알림. 아리수 창은 전송 완료 후 1.2초 뒤 자동 close. openWaterBill 페이로드에 wid(고객 id) 추가하여 같은 고객번호 중복 방지. period는 페이지 innerText에서 "YYYY년 M월" 정규식으로 파싱, 실패시 현재월로 폴백. 이미지 품질 scale=1.6, JPEG 0.85 압축. 캡처 실패/opener 없음 등 각 단계별 토스트 피드백. 창 닫혀있으면 자동 다운로드 폴백. 기존 북마클릿은 북마크바에서 삭제 후 새 버튼을 재드래그해서 교체 필요',done:true},
-  {q:'폴더링은 건물별이 아닌 월별이야 / 건물에 고객번호가 여러개면 폴더생성',a:'📅 청구서 뷰어 좌측 트리 재구조 — 이전엔 "한 고객의 기간 목록"만 보여줬는데, 이제 "전체 청구서 라이브러리"로 전환. 최상위 월(YYYY-MM) 내림차순 정렬, 각 월 아래에 건물별 그룹. DB 전체에서 같은 건물에 고객번호가 2개 이상이면 "🏢 건물명 (n명)" 서브폴더 생성 → 그 안에 "👤 고객명 📎N" 나열. 건물당 고객이 1명이면 "🏢 건물명 / 👤 고객명" 인라인 표시(폴더 없음). 현재 포커스 고객의 기간은 파란 하이라이트 + 3px 좌측 보더로 표시. 사이드바에서 다른 고객·다른 월을 클릭하면 모달 제목이 갱신되고 우측 뷰어가 해당 고객의 해당 월 청구서로 전환. 상단 고정 헤더에 "작업대상: 현재 고객"과 [＋ 청구서 추가] [🌐 아리수에서 받기] 버튼 유지. 모달 너비 980→1040px, 사이드바 200→240px로 트리 가독성 확보. 빈 상태: 월 총장수(N장)·건물 고객수(n명)·기간별 파일수(📎N) 등 각 레벨에 수치 표기',done:true},
-  {q:'드래그 새로했는데 이렇게댐 (북마클릿이 "정보 없음" 얼럿만 띄움)',a:'🔑 핵심 원인: Chrome 88+(2021년~)부터 보안상 cross-origin navigation시 window.name을 자동으로 비워버림. 우리 앱이 window.name에 payload 넣어도 아리수로 navigate되는 순간 증발 → 북마클릿이 "정보 없음" 얼럿. 해결: postMessage 핸드셰이크로 전환 — ① openWaterBill이 window._pendingWaterReq={wid,custNo,custName}에 저장 + window.open으로 아리수 열기(noopener 금지 — opener 유지 필수). ② 북마클릿이 window.name 먼저 시도 후 실패하면 window.opener.postMessage({type:"bsn_water_req",nonce}) 전송. ③ BSN케어 message 리스너가 bsn_water_req 받으면 _pendingWaterReq 기반으로 {type:"bsn_water_data",nonce,wid,custNo,custName} 회신 + "🔗 북마클릿과 연결됨" 토스트. ④ 북마클릿이 nonce 매칭된 응답 받으면 기존 fill→submit→capture→postback 플로우 진행. ⑤ 2.5초 타임아웃시 "BSN케어 응답 없음" 안내. 이전 window.name 폴백도 유지(혹시 동작하는 브라우저 대비). 추가로 fallback 경로들에 있던 "noopener" 옵션 전부 제거 — opener가 없으면 핸드셰이크 불가',done:true},
-  {q:'변경이력 옆에 총관리자용 이라고쓰자 나만 눌러지게끔 / 총관리자용 글자위치좀 맞춰 / 총관리자라고 써져있는거 총 관리자로 띄워써',a:'🔐 변경이력 = 총 관리자 전용으로 격하. ① 사이드바 📋 변경이력 버튼 기본 display:none — enterApp에서 IS_SUPER_ADMIN일 때만 display:flex로 노출 (관리자·일반 사용자는 버튼 자체가 안 보임). ② 버튼 옆에 보라색 "총 관리자용" 뱃지 인라인 배치 — flex + align-items:center + justify-content:center + gap:5px로 "📋 변경이력"과 뱃지 수직 중앙 정렬·좌우 간격 균등. 뱃지는 inline-flex, padding 1px 5px, border-radius 7px, font-size 8.5px, #7c3aed 보라 배경. ③ openChangelog() 최상단에 방어 가드 추가: if(!IS_SUPER_ADMIN){alert("총 관리자 전용 기능입니다.");return;} — 콘솔로 호출해도 차단. ④ 코드 전역에서 "총관리자" → "총 관리자"(공백) 일괄 변경 — 유저 태그(사용자명 뒤 괄호), 사용자관리 페이지 권한 표시, 마이그레이션 가드 얼럿, 변경이력 가드 얼럿 모두 띄워쓰기 적용',done:true},
-  {q:'아 청구서 누르고 아리수받기 눌러도 바뀌는게없어 / 아리수에서받기 위에 청구서추간는 왜있는거야',a:'🔄 청구서 뷰어 버튼 순서·주종 재배치 — 이전엔 "＋ 청구서 추가(큰 파란)"가 위, "🌐 아리수에서 받기(작은 회색)"가 아래였지만, 자동화가 주력이라 뒤바꿈. ① 사이드바 헤더: 🌐 아리수에서 **자동받기** 버튼을 파란 primary로 격상 (background:#0284c7) + 큰 크기로 최상단 배치, 바로 아래에 "＋ 직접 업로드 (PDF·이미지)" 작고 회색 보조 버튼. 자동이 주력, 수동은 폴백. ② 빈 상태 메시지 문구 변경 — "＋ 청구서 추가 버튼으로 PDF·이미지를 올리거나 🌐 아리수 자동수집을 이용하세요" → "🌐 아리수에서 자동받기 버튼으로 가져오거나 ＋ 직접 업로드 가능합니다"로 순서 역전. ③ 우측 빈 뷰어 패널의 메인 CTA도 "＋ 첫 청구서 추가" → "🌐 아리수에서 자동받기"(파란 primary)로 교체, "＋ 직접 업로드"는 투명 아웃라인 2차 버튼. 결론: 아리수 자동받기 버튼이 시각적으로 먼저/크게 잡히고, 수동 업로드는 눈에 띄지 않게 내려감',done:true},
-  {q:'변경이력 글자 내려가서 짤리잖아',a:'📐 📋 변경이력 버튼 레이아웃 재설계 — 좁은 사이드바에서 "📋 변경이력 [총 관리자용]"을 한 줄에 억지로 붙이다보니 "총 관리자용" 뱃지가 줄바꿈되며 잘림. 해결: 버튼을 flex-direction:column으로 바꿔 2단 세로 배치 — 1단 "📋 변경이력"(10.5px), 2단 보라 뱃지 "총 관리자용"(8px). gap:2px로 타이트한 간격, white-space:nowrap으로 각 줄 내부 줄바꿈 방지, padding도 5px 6px로 슬림화. 이제 사이드바 폭과 상관없이 두 요소 모두 잘리지 않고 깔끔하게 표시됨',done:true},
-  {q:'콘솔로그가 먼데 사이트에서 시킨대로 해도 안된다고',a:'🔧 북마클릿에 "눈으로 보이는 실시간 디버그 로그" 내장 — 이전엔 에러 발생시 얼럿만 띄워서 사용자가 F12 콘솔을 열어야 했지만, 이제 아리수 페이지 우하단에 까만 로그 패널(320px, max-height 260px, 스크롤, ×로 닫기 가능)이 자동 생성되어 실행의 모든 단계를 타임스탬프와 함께 컬러로 표시: ① "✅ 북마클릿 실행됨 — 현재 URL: ..." ② "⏳ window.name 확인중..." ③ "ℹ️ window.name 비어있음 (Chrome 88+ 정상)" ④ "✅ window.opener 확인 — 요청중" ⑤ "📤 요청 전송됨" ⑥ "✅ BSN케어 응답 도착 (nonce 일치)" ⑦ "📥 데이터 수신 — 고객번호:..., 고객명:..." ⑧ "⚡ 입력완료 — 조회중" ⑨ "📸 화면 캡처중" ⑩ "✅ BSN케어로 전송됨". 실패시 빨간 로그 + 💡 힌트("BSN케어 탭이 닫혔는지 확인" 등) + 친절한 얼럿(해결방법 번호 매겨 명시). alert 문구도 이모지·줄바꿈·단계별 설명 포함으로 재작성. 이제 사용자가 개발자도구 안 열어도 어디서 막혔는지 한눈에 파악 가능. 북마클릿 URL 길이 15138자 — 모든 주요 브라우저(Chrome/Firefox/Safari/Edge) 북마크 한계 이내 안전',done:true},
-  {q:'에러 없고 까만창있는데 안됨 / 떳다가 바로사라짐',a:'🔄 원인 규명 — 아리수는 조회 버튼 클릭시 AJAX가 아니라 **full page navigation**을 함. 북마클릿이 고객번호 입력+조회 클릭한 순간 페이지가 새로고침되어 까만 로그 패널·상태·setInterval 모두 증발. 3중 해결: ① **sessionStorage 저장** — proceed() 진입 즉시 {wid,custNo,custName,ts}를 "bsn_water_auto" 키로 저장 (아리수 도메인 내 sessionStorage는 같은 탭에서 navigation 건너가도 살아남음). ② **시작시 우선순위 변경** — 부팅 시퀀스를 sessionStorage(10분 이내) → window.name → postMessage 핸드셰이크 순서로 체크. 결과화면에서 💧 재클릭시 sessionStorage hit → 즉시 캡처. ③ **상단 노란 persistent 배너** 추가 — 조회 버튼 클릭 직전에 "💧 결과화면이 뜨면 북마크바의 💧 버튼을 한번 더 클릭하세요 (자동 캡처)" 배너를 화면 상단 전체 폭으로 고정 표시 (#fef3c7 배경 + 주황 보더). ④ 📋 **복사 버튼** 로그 패널에 추가 — 한 번 누르면 전체 로그가 클립보드로 복사(execCommand copy) → 사용자가 채팅에 붙여넣기 가능. ⑤ 캡처 성공시 sessionStorage.removeItem + 배너 자동 제거 → 다음 고객 작업시 깨끗한 상태. 최종 북마클릿 URL 18346자 — Firefox(65535) 포함 모든 브라우저 한도 이내',done:true},
-  {q:'청구서버튼 필요없는거같은데 지구모양 클릭하고 북마크하면되니',a:'🎯 수도요금 행(row) 버튼 단순화 — 이전엔 [📄 청구서(N뱃지)] + [🌐] + [×] 3개였지만, 자동화 플로우가 검증되어 사용자 예상대로 간소화. ① 📄 청구서 뷰어 버튼 **제거** — 대신 메인 버튼을 [🌐 아리수] 파란 primary(#0284c7)로 격상. 클릭 → 아리수 열림 + sessionStorage에 요청 저장 + opener 유지. 아리수 탭에서 💧 한 번 클릭하면 자동으로 조회·캡처·전송·저장. ② 저장된 청구서가 있을 때만 **작은 보라 뱃지 [📄 N]** 인라인 표시 (#f5f3ff 배경, 보라 테두리) — 누르면 기존 뷰어 모달이 뜸 (사이드바 트리에서 전체 라이브러리 탐색 가능). 뱃지는 N=0이면 렌더 안함 → 버튼 1개(🌐)만 보이는 상태가 기본. ③ [×] 삭제 버튼은 유지. 결과: 처음 작업하는 고객은 [🌐 아리수] + [×] 두 버튼만 보이므로 플로우 혼란 제거. 청구서가 쌓이면 자연스럽게 [📄 N] 뱃지가 자라면서 뷰어로 진입 가능',done:true},
-  {q:'한번 클릭하면 내용은 다 들어가는데 전체보기창으로 넘어감 / 한번에 알아서 잘하자',a:'🎯 북마클릿 findBtn 전면 재작성 — 이전 정규식 /조회$/가 "전체조회"까지 매칭해서 폼 제출 대신 전체보기 페이지로 navigate되던 문제. score 기반 탐색기로 교체: ① _bad(el) 필터로 "전체/목록/이전/다음/취소/초기화/Reset/Clear/List/Total/Print/인쇄/닫기" 텍스트 reject, href/onclick에 cgTotal·Total.do·List.do·goTotal·history 포함시 reject. ② 점수: 정확 "조회"/"검색" +100, type=submit +40, fnSearch onclick +30, btn-search 클래스 +15, form 내부 가점 +8, 제일 높은 점수 + 최소 30 요구. ③ 결과 페이지가 어쩌다 cgTotal로 랜드되면 fromStorage URL 검사해서 정기분(NR_cgJungInfo.do)으로 자동 redirect. 결론: 사용자가 [🌐 아리수] 버튼 한 번 → 북마클릿 한 번 → 결과화면에서 💧 한 번, 총 3클릭으로 "입력·조회·캡처·저장" 모두 자동 완료',done:true},
-  {q:'캡쳐까지 잘했는데 bsn케어에서 이미지파일이 안보이네 / 수도청구서 이미지 안보여',a:'🖼 청구서 수신 → 자동 뷰어 오픈 플로우. 이전엔 bsn_water_bill 메시지 수신 후 DB에 저장만 하고 "수도요금 탭 전환 + 토스트"로 끝나서 사용자가 "어디에 저장됐지?" 혼란. 수정: ① 메시지 핸들러에서 sv·rdWater 후 openWaterBillViewer(w.id) 자동 호출 + setTimeout(250ms) _showWaterBillModal(w.id, period)로 방금 받은 기간을 좌측 트리에서 강제 선택·포커스. ② 화면 중앙에 나타나던 큰 녹색 확인 모달 제거 → 상단(top:14px) 작은 토스트(패딩 10x18, 4.5초)로 변경 — 뷰어를 가리지 않음. ③ _renderWaterBillPane의 <img>에 onerror 핸들러 추가 — data URL이 손상되거나 로드 실패시 빨간 박스에 파일명·MIME·데이터 크기 표시. 이제 캡처 성공 → 자동 뷰어 오픈 → 파일이 바로 보임',done:true},
-  {q:'수도청구서 이미지 안보여 직접업로드 버튼은없애 아리수에서 자동받기도 필요없잖아 창 열기전에 아리수 버튼있잖아',a:'🧹 청구서 뷰어 사이드바/빈패널 정리 — 뷰어는 "저장된 청구서 조회"에만 전념. ① 사이드바 상단의 [🌐 아리수에서 자동받기] + [＋ 직접 업로드] 중복 버튼 모두 제거 (수도요금 탭 행에 이미 🌐 버튼 있고, 모든 월별 그룹 헤더에도 [＋ 추가] 있음). 이제 사이드바엔 "👤 고객명 🏢 건물명 · 고객번호"만 간결히 표시. ② 우측 빈 pane에 버튼 대신 안내문 — "이 창을 닫고 수도요금 탭에서 🌐 아리수 버튼을 누르세요" (파란 강조). 결과: 뷰어 안에서는 오직 보기·삭제·다운로드, 수집 액션은 한 곳(수도요금 탭)에만 존재',done:true},
-  {q:'그 이미지 파일을 건물주한테 보낼수있게 파일형태로도 있어야되는데',a:'⬇ 청구서 파일 다운로드 기능 — 수집한 청구서 이미지·PDF를 건물주 전달용으로 로컬에 저장. ① 각 월별 그룹 헤더에 [⬇ 전체 다운로드] 녹색 버튼 추가 — 그 기간의 모든 파일을 400ms 간격으로 순차 저장 (브라우저 다운로드 차단 방지). ② 파일 제목 옆에 [⬇ 파일 저장] 링크 추가 — 개별 저장. ③ _downloadBillFile(f): a요소 + href=data URL + download=파일명으로 즉시 트리거 후 remove. _downloadAllBills(id,period,kind): 해당 고객·기간 파일 배열 순회하며 setTimeout 체이닝. ④ 수도/전기 공통 헬퍼로 구현하여 양쪽 뷰어에서 동일 UX',done:true},
-  {q:'전기도해줘 / 전기요금은 로그인해야만 조회가능? 이메일로 오고있긴한데 수도처럼 조회되면 좋은데',a:'⚡ 전기요금 탭 신설 — 수도요금과 병렬 구조, 단 한전(KEPCO)은 공인증서/간편인증 로그인 필수 + 공개 API 없음이라 아리수식 자동수집 불가. 대신 "이메일로 받은 청구서 PDF 직접 업로드" 워크플로우로 설계. ① 좌측 사이드바에 ⚡ 전기요금 탭 추가 (수도 바로 아래), 오렌지 테마(#f59e0b → #d97706 그라데이션). ② DB.electricBills[]={id,bId,custName,custNo,note,bills:[{period,files:[{data,name,mime}],uploadedAt}]} — 수도와 동일 스키마. ③ CRUD 함수 전체 구현: rdElectric·openElectricModal·saveElectric·delElectric·uploadElectricBill(Append)·_pickElectricBillFiles·delElectricBillPeriod·openElectricBillViewer·_showElectricBillModal·_renderElectricBillPane·_electricToast (~200줄 JS). ④ 뷰어 모달 mo-electric-view — 앰버 그라데이션 헤더 + 사이드바 배경 #fffbeb + 월별 섹션에 ⚡ 이모지. 다운로드 버튼(per-file + 전체)도 수도와 동일 지원. ⑤ _renderers dispatch 테이블에 electric:rdElectric 추가하여 탭 새로고침시 빈화면 버그 방지',done:true},
-  {q:'bsn케어 로고도 조금 달라도 되니 이쁘게 바꿔줘',a:'✨ BSN케어 로고 리디자인 — 기본 색상(네이비 #00249C)은 브랜드 유지하되 평면 단색 → 입체·그라데이션으로 격상. ① 사이드바 로고: 26x26 솔리드 사각 → 30x30 linear-gradient(135°, #1e40af → #00249C → #0a1a5c) + border-radius 5→8px + box-shadow(외부 네이비 글로우 + inset 화이트 하이라이트) + ::before 의사요소로 상단 42% 글로시 반사. "BSN.CARE" 4글자 → "B" 모노그램(13px Archivo Black)으로 굵고 큼직하게. 옆에 .bsn-txt 블록 신설 — 1단 "BSN케어"(14px 800, 케어만 #1e40af 파랑), 2단 "BUILDING · CARE"(9px 회색 자간 .3px). @media(max-width:1100px) 대응 — 26x26·11px로 축소. ② 로그인 화면 로고: 72x72 솔리드 → 76x76 동일 그라데이션 + 18px radius + 깊은 섀도(0 8px 24px) + inset 하이라이트 + 상단 45% 글로시 오버레이. "BSN.CARE" → 큰 "B"(38px) 모노그램. 바로 아래 h2 "BSN케어"(20px 800, 케어 #1e40af 파랑) 추가하여 풀네임 복원. 결과: 평면 로고가 입체감 있는 프로페셔널 마크로 업그레이드',done:true},
-  {q:'안열려 / 기존에 잘쓰던건데 왜막음 / 저기서 테스트하고 나중에 깃허브 업로드 쓸거잖아',a:'🔧 CSP 경고 2건만 제거(file:// 로컬 테스트 플로우는 그대로 유지). ① CSP 메타의 frame-ancestors는 HTTP 응답 헤더 전용이라 <meta>로 주면 "ignored when delivered via <meta>" 경고가 뜸 — 지시어 삭제(어차피 GitHub Pages 서버 헤더에서 처리해도 됨). ② connect-src에 https://cdn.jsdelivr.net 추가 — Supabase JS SDK가 로드 후 비동기로 소스맵 파일을 가져오는데 이게 connect-src에 걸려 빨간 콘솔 에러가 떴었음. 이제 깨끗. ③ 처음엔 "file:// 더블클릭시 안내화면으로 교체" 가드도 넣었다가 사용자가 로컬에서 먼저 테스트한 뒤 깃허브 업로드하는 정식 워크플로우라 방해가 되어 즉시 제거. 결론: 로고 리디자인 + 전기요금 탭 + 파일 다운로드 등 실제 기능은 그대로 유지, CSP 경고만 조용히 정리',done:true},
-  {q:'테스트안하고 자꾸 거짓말할래? 확인하고 완료처리해 / 내가 정상적으로 다운받았는데 파일을 더블클릭해도 비어있음',a:'🚨 진짜 원인 발견 — DOMContentLoaded 핸들러에서 await sbClient.auth.getSession()이 타임아웃 없이 무한 대기. file:// 또는 Edge의 Tracking Prevention이 Supabase 인증 저장소 접근을 막으면 getSession() Promise가 영원히 pending → sb-loading 오버레이(베이지색 "☁️ 데이터 불러오는 중...")가 영구 고정 → 로그인 화면 표시 로직($("login-ov").classList.remove("hide"))까지 도달 못 함 → 사용자 눈엔 "빈화면". 본문 어딘가에 이미 _withTimeout(p,2500ms) 헬퍼가 있었지만 loadFromSupabase()에만 쓰고 초기 DOMContentLoaded엔 누락. 수정: ① DOMContentLoaded의 getSession 호출을 _withTimeout(sbClient.auth.getSession(),2500)으로 교체. _withTimeout이 아직 정의 안 됐을 극단 케이스까지 대비해 Promise.race 인라인 폴백도 이중 보강. ② 타임아웃 or 실패시 catch → sb-loading 오버레이 숨김 → 로그인 화면 표시. 이제 세션 체크가 2.5초 안에 끝나지 않으면 조용히 로그인 화면으로 폴백. ③ 추가로 enterApp의 _renderers dispatch 테이블에 electric:rdElectric 누락됐던 것 추가(전기요금 탭에서 새로고침시 undefined 호출되어 빈화면 뜰 뻔한 버그 예방). 검증: node로 전체 <script> 파싱 0 에러, 4개 getSession() 호출 중 초기 진입 경로 3건 모두 타임아웃 가드 확인',done:true},
-  {q:'전기요금 탭 한전 로그인 글자 지우고 가운데정렬 간격축소 / 수도처럼 맞춰',a:'⚡ 전기요금 탭 레이아웃 수도탭과 통일 — 안내문(한전 로그인 필요...) 삭제, 제목 중앙정렬, wrapper padding을 수도와 동일하게 calc(100vh-52px), 버튼 row padding 4px 0 8px으로 축소. 📧 Gmail 연동 버튼 추가 (Client ID 설정 다이얼로그 stub)',done:true},
-  {q:'로그인창 꾸며줘 / 너무파래 / 처음이랑 다를게없어',a:'🎨 로그인 화면 다크 네이비 리디자인 — 배경 #1a1a2e→#16213e→#0f3460 3단 그라데이션 + SVG 그리드 패턴 + 떠다니는 오브 4개 애니메이션(6~10초 루프). 로그인 박스: glassmorphism(backdrop-blur:20px, 반투명 배경) + slide-up 진입 애니메이션. 상단 짧은 그라데이션 악센트 바(빨강→남색). 버튼 남색 톤(#0f3460→#1a1a2e), 입력필드 반투명 배경',done:true},
-  {q:'start.bat cmd에러 / 로그창 자동으로 안꺼지잖아',a:'🖥 start.bat 수정 — ① 한글 인코딩 오류(cp949 vs UTF-8 충돌) → 모든 텍스트 영문으로 교체. ② start /min으로 최소화만 됐던 서버 창 → PowerShell Start-Process -WindowStyle Hidden으로 완전 숨김. python → py → node → powershell 폴백 순서 유지',done:true},
-  {q:'새로고침하면 캐시때문에 옛날 화면이야',a:'🗑 캐시 방지 — <head>에 Cache-Control: no-cache,no-store,must-revalidate + Pragma: no-cache + Expires: 0 메타 태그 추가. 새로고침 시 항상 최신 파일 로드',done:true},
-  {q:'Edge에서 Tracking Prevention이 localStorage 차단',a:'🛡 _safeStorage 메모리 폴백 — localStorage 접근 시도 후 실패하면 인메모리 객체({getItem,setItem,removeItem})로 자동 전환. Supabase createClient에 storage:_safeStorage 옵션 전달. Edge Tracking Prevention 환경에서도 로그인·세션 유지 가능 (단, 새로고침 시 메모리 데이터 소실 → start.bat으로 localhost 사용 권장)',done:true},
-  {q:'로그인중에서 멈춤 / Supabase 504 Gateway Timeout',a:'⏱ 로그인·데이터 함수 타임아웃 보호 — doLogin의 signInWithPassword에 10초 타임아웃(Promise.race), enterApp 호출에도 10초 타임아웃. sv() 내부: getSession 3초, upsert 5초 타임아웃. 서버 무응답 시 "서버 응답 없음 (N초 초과)" 에러 메시지 표시 후 로딩 해제',done:true},
-  {q:'너가 파일수정할때 내 브라우저가 튕겨',a:'📝 안전한 편집 워크플로우 — index_work.html(임시본)에서 편집 → 문법 검증 → cp로 라이브 index.html에 배포. 편집 중에도 사용자 브라우저 세션 유지',done:true},
-  {q:'수도이미지 검은화면',a:'🖼 수도/전기 이미지 뷰어 blob URL 변환 — 기존에 대용량 data URL을 img.src에 직접 넣어 브라우저가 렌더 실패 → 어두운 배경(#1a1a2e)만 보이던 문제. _dataUrlToBlobUrl()로 blob URL 변환 후 표시, 실패 시 data URL 폴백(onerror → _triedFallback). 수도/전기 뷰어 모두 동일 적용. 콘솔에서 [viewer] img loaded 1912x868 확인됨',done:true},
-  {q:'기존이미지 렌더실패 0.0KB',a:'📂 __IMG_IN_LOCAL__ 플레이스홀더 감지 — Supabase에 이미지 분리저장 후 원본 복원 불가 시 "이미지 원본 데이터 소실" 안내 박스 표시 (노란색). 재캡처 유도 문구 포함. 수도/전기 뷰어 모두 적용',done:true},
-  {q:'새캡처 검은화면',a:'🎥 getDisplayMedia 캡처 타이밍 개선 — video.play() 완료 후 500ms 대기, 캡처된 프레임이 전부 검은색(RGB<5)이면 300ms 간격 최대 8회 재시도. 기존 350ms 고정대기→play이벤트 기반+검증 루프로 교체',done:true},
-  {q:'파란박스 크롭 캡처',a:'✂ 화면캡처 후 파란박스(.box_type1,.bill_box,.tbl_view,#printArea) 영역 자동감지 → 해당 영역만 크롭하여 전송. 못찾으면 가장 큰 테이블로 폴백, 그래도 없으면 전체화면. devicePixelRatio 보정 포함',done:true},
-  {q:'북마클릿 1클릭 fetch',a:'🚀 북마클릿 v3 — fetch()로 폼 POST하여 페이지이동 없이 조회결과 수신. 응답 HTML 파싱→결과영역 추출→오버레이 렌더→getDisplayMedia 캡처→BSN케어 전송까지 💧 1클릭 완결. fetch 실패시 기존 버튼클릭 방식 자동 폴백',done:true},
-  {q:'수도 구분선',a:'📊 수도요금 테이블 구분선 추가 — 각 th·td에 border-right:1px solid var(--ln), 행에 border-top:1px solid var(--ln), 헤더 하단 2px 굵은선. 테이블 가독성 대폭 향상',done:true},
-  {q:'수도 삭제버튼 안보임 / 삭제후 새로고침 필요',a:'🗑 수도청구서 뷰어 삭제버튼(display:none→visible) 복원 + delWater·delWaterBillPeriod를 async+await sv()로 변경하여 실시간 동기화가 삭제 전 데이터로 덮어쓰지 못하게 방어',done:true},
-  {q:'전기 간격 수도처럼',a:'⚡ 전기요금 테이블 레이아웃 → 수도와 동일한 <table> 구조로 전면 교체. border-right/border-top 구분선, thead/tbody, 건물별 rowspan 그룹핑 적용. div 카드 레이아웃 폐기',done:true},
-  {q:'전기는 지메일 불러올꺼라 고객번호 고객명 필요없음',a:'⚡ 전기요금 간소화 — 테이블 컬럼을 건물·메모·청구서·작업 4열로 축소 (고객번호/고객명 컬럼 제거). 헤더 버튼도 📧 Gmail에서 불러오기를 primary 빨간 버튼으로 격상, +수동추가는 작은 보조 버튼으로 강등. 빈 상태 안내도 Gmail 중심으로 변경',done:true},
-  {q:'건축물대장/계약서 안열림, 수정삭제 없음',a:'📂 건축물대장·관리계약서 배지 → 클릭 시 드롭다운 메뉴(열기/수정/삭제) 표시. 기존 우클릭 삭제(발견 어려움) 대체. 관리계약서도 동일 메뉴 추가',done:true},
-  {q:'호실수정 이미지 삭제안됨 (PDF만 삭제됨)',a:'🐛 deleteFromModal()에서 t.data(단일 PDF 필드만) 체크하던 것을 _getDocData()(복수 이미지 contractFiles 포함)로 변경. 이미지 파일도 정상 삭제 가능',done:true},
-  {q:'Gmail 연동 구현',a:'📧 Gmail OAuth 연동 — Google Identity Services(GIS) 동적 로드 + OAuth 2.0 토큰 발급 + Gmail REST API로 한전 메일(cyber@kepco.co.kr) 최근 6개월 검색 + PDF 첨부 자동 추출 + 건물별 자동매칭 저장. 진행상황 모달에서 실시간 로그 표시. Client ID 1회 설정 후 버튼 한 번으로 전자동',done:true},
-  {q:'수도 북마클릿 파싱 에러 수정',a:'🐛 _getWaterBookmarklet() 정규식 이스케이핑 버그 수정 — /^\\\\\\\\//.test() 에서 백슬래시 4개→2개로 수정. 디코딩 후 /^\\\\//.test()가 되어 JS파서가 정규식 종료 후 남은 /를 인식 못하는 문제. 수정 후 15377자 북마클릿 정상 파싱 확인',done:true},
-  {q:'AI 챗봇 추가',a:'🤖 AI 도우미 챗봇 — 우하단 플로팅 버튼(🤖) 클릭 시 채팅 패널 표시. 카테고리별 메뉴(임대차/관리비/수도전기/세금/시설/법률/BSN.CARE) → 30개+ FAQ 로컬 응답. API 불필요',done:true},
-  {q:'수도요금 1클릭 조회 (Edge Function→간편조회)',a:'🌐 수도요금 "조회" 버튼 → 고객번호 클립보드 복사 + 아리수 사이트 새 탭 오픈. 초기엔 Supabase Edge Function 서버프록시 시도했으나 아리수 서버가 서버접근 차단(meta refresh redirect) → 사용자 브라우저에서 직접 조회하는 방식으로 전환. 붙여넣기(Ctrl+V) 후 조회하면 됨',done:true},
-  {q:'수도요금 홀짝월 필터 & 검침일 자동분류',a:'📊 수도요금 테이블에 홀수월/짝수월 필터 추가(미설정 제거, 기본값 홀수월). 청구 데이터에서 홀짝월 자동 판별(수동설정도 가능). 검침일(매 N일)도 자동 감지하여 표기',done:true},
-  {q:'배포방식 Netlify→GitHub Pages 전환',a:'🚀 Netlify 무료 빌드시간(300분/월) 소진 → GitHub Pages로 전환. 정적 HTML 단일파일이라 빌드 불필요, GitHub Pages가 파일 그대로 서빙. _headers(Netlify전용) 삭제, CSP는 기존 meta태그로 충분. 레포 Settings→Pages→main 브랜치 선택만 하면 완료',done:true},
-  {q:'수도요금 조회 시 파일없음 — 실시간 동기화가 로컬 이미지 덮어씀',a:'🐛 수도요금 청구서 캡처 후 이미지가 "파일없음"으로 뜨던 핵심 버그 수정. 원인: Supabase Realtime이 다른 기기의 데이터를 수신할 때 _rtApplyRow()가 DB=row.data로 직접 대입 → 클라우드에는 용량 절약용 __IMG_IN_LOCAL__ 플레이스홀더만 저장되어 있어서, 로컬 IndexedDB에 있던 진짜 이미지가 플레이스홀더로 덮어써짐. 수정: DB=_mergeLocalImages(row.data, DB)로 변경하여 클라우드 데이터를 받아도 로컬 이미지 원본은 보존. 추가로 IndexedDB에 fullDB 재저장 + localStorage에 stripped 버전 재저장 로직 추가하여 새로고침 후에도 이미지 유지',done:true},
-  {q:'확장프로그램 캡처 실패 — captureVisibleTab 권한 에러',a:'🔑 크롬 확장프로그램(arisu-extension) 캡처 실패 수정. ① manifest.json의 host_permissions를 ["https://i121.seoul.go.kr/*", "https://*.seoul.go.kr/*"]에서 ["<all_urls>"]로 확장 — 아리수 페이지가 리다이렉트되는 모든 도메인에서 captureVisibleTab이 작동하도록. ② background.js에 chrome.tabs.update(tabId, {active:true})로 탭 활성화 후 300ms 대기 추가 — 비활성 탭에서 captureVisibleTab이 실패하던 문제 해결. ③ _doCapture() 함수로 최대 3회 재시도(500ms 간격) 구현 — 렌더링 타이밍에 의한 간헐적 실패 방어. 버전 2.2로 업데이트',done:true},
-  {q:'캡처 전체화면 불필요 — 파란박스 안에 청구서만 찍어줘',a:'✂ content.js 캡처 로직을 전체 화면 스크린샷에서 청구서 영역만 추출하는 3단계 방식으로 전면 재작성. ① 1차 DOM 테이블 캡처: 아리수 페이지의 .content_wrap / #content / .sub_content / table 셀렉터로 청구서 영역 탐색 → 테이블 행·셀 텍스트 추출 → canvas에 760px 폭으로 직접 렌더링 (네이비 헤더바 + 고객정보 + 테이블 행 + 구분선 + BSN.CARE 워터마크). 금액은 우측정렬, 헤더행은 파란 배경 강조. ② 2차 captureVisibleTab 폴백: DOM 캡처 실패 시 background.js 경유 화면 캡처. ③ 3차 텍스트 이미지 폴백: 파싱된 금액·사용량·기간 데이터로 최소한의 정보 이미지 생성. 결과: 전체 화면 대신 청구서 내용만 깔끔하게 캡처됨',done:true},
-  {q:'수도요금 탭 상단 설명 너무 길어 — 좌측으로 빼자',a:'📐 수도요금 탭 UI 재구조. ① 처음: 상단 배너에 확장프로그램 설치법 + 사용법 → 아래 건물 목록이 밀려서 스크롤 필요. ② 좌측 154px 패널로 이동 → 공간은 확보됐지만 별도 패널이 시각적으로 분리됨. ③ 최종: 좌측 패널 완전 제거, 테이블 건물명 칸 왼쪽에 사용법 칸(160px, rowspan)으로 통합 배치. 확장프로그램 설치 안내(①②③ 단계) + 사용법(🌐 자동조회, 📄 저장된 청구서 보기)을 테이블 안에 자연스럽게 포함. 글자 크기 11.5px, 색상 진하게(var(--t2)) 조정하여 가독성 확보. 미설치 시 안내는 불필요하여 삭제',done:true},
-  {q:'전체/홀수월/짝수월 필터 버튼 위치 — 고객명 위에',a:'📊 수도요금 필터 버튼(전체/홀수월/짝수월)을 테이블 상단 별도 행에서 고객명 컬럼 바로 위에 배치. thead를 2행 구조로 변경: 1행=필터 버튼(고객명 위에만), 2행=컬럼 헤더(건물/고객번호/고객명/검침/메모/작업). 필터 전환 시 활성 버튼 파란색 강조(rdWater 렌더 시 _waterFilter 상태 반영). water-list에 min-height:calc(100vh-80px) 적용하여 필터 전환 시 화면 크기 유지(행 수 변해도 레이아웃 안 흔들림)',done:true},
-  {q:'수도요금 사용법에서 더블클릭/N 설명 수정',a:'✏ 수도요금 테이블 사용법 텍스트 정리. "📄 N — 저장된 청구서 보기" → "📄 저장된 청구서 보기"로 변경 (N은 실제 버튼에 숫자로 표시되므로 설명에 불필요). "더블클릭 — 정보수정" 항목 삭제 (더블클릭 수정 기능은 있지만 사용법에 굳이 안내할 필요 없음)',done:true},
-  {q:'수도 테이블 헤더 1행 세로 구분선 누락',a:'📏 필터 버튼 행(1행)에서 colspan="3"으로 묶었던 셀을 7개 개별 <th>로 분리하여 2행(컬럼 헤더)과 세로선이 정확히 일치하도록 수정',done:true},
-  {q:'수도 테이블 헤더 색상 통일',a:'🎨 필터 버튼 행(1행)과 컬럼 헤더 행(2행) 모두 background:var(--w2)로 통일. 이전에 1행은 #f8fafc, 2행도 #f8fafc였으나 사용법 셀(var(--w2)=#f5f4f0)과 미세하게 달랐음',done:true},
-  {q:'청구서 버튼 숫자가 기간 수만 세고 실제 파일 수가 아님',a:'🔢 📄 버튼의 카운트를 w.bills.length(기간 수)에서 실제 파일 총 수로 변경. bills 배열을 순회하며 각 기간의 files.length를 합산. 예: 1기간에 3장이면 📄 3으로 표시',done:true},
-  {q:'캡처 이미지가 이상하게 보임 — DOM 텍스트 캔버스 방식 폐기',a:'📸 content.js 캡처 방식 전면 교체. 이전: 테이블 텍스트를 추출해서 canvas에 다시 그림 → 원본과 완전히 다른 이미지. 변경: captureVisibleTab으로 실제 스크린샷 촬영 → 청구서 영역(.box_type1/.bill_box/.tbl_view/#printArea 등) getBoundingClientRect() 좌표로 크롭. devicePixelRatio 보정 포함. 크롭 실패 시 전체 스크린샷 사용, 그것도 실패 시 텍스트 이미지 폴백',done:true},
-  {q:'캡처 중 배너가 스크린샷에 같이 찍힘',a:'🚫 "📸 청구서 캡처 중..." 배너 표시를 제거하고 captureVisibleTab 호출 직전에 기존 배너를 DOM에서 삭제. 스크린샷에 배너가 포함되지 않음. 캡처 완료/전송 성공 후에만 결과 배너 표시',done:true},
-  {q:'청구서 뷰어에 개별 파일 삭제 버튼 없음',a:'🗑 청구서 뷰어에서 각 파일 옆에 "× 삭제" 빨간 버튼 추가. delWaterBillFile(id, period, fileIdx) 함수 구현 — files 배열에서 해당 인덱스만 splice. 파일이 0개가 되면 기간 자체도 자동 삭제. sv() 호출로 즉시 동기화',done:true},
-  {q:'청구서 월별 모아보기로 전면 개편',a:'📅 청구서 뷰어를 개별 고객 보기에서 월별 모아보기로 전면 개편. 좌측=월 목록(기간별 파일수·건수 표시), 우측=선택한 월의 전체 고객 청구서를 건물별로 그룹핑하여 카드형태로 한눈에 표시. 각 카드에 고객명·고객번호·이미지 썸네일·전체저장·삭제 버튼 배치. 이미지 클릭 시 원본 크기 팝업(_openFullImg). 개별 고객 선택 → 기간 선택 → 파일 보기 3단계를 월 선택 → 전체 보기 1단계로 단축. 자동캡처 콜백도 해당 월로 바로 이동하도록 수정',done:true},
-  {q:'전체/홀수/짝수 필터 전환 시 테이블 크기 변동',a:'📐 수도요금 테이블에 table-layout:fixed + colgroup으로 각 컬럼 폭 고정(사용법160/건물90/고객번호100/고객명90/검침60/메모auto/작업130px). min-width:680px 지정. 필터 전환으로 행 수나 고객명 길이가 달라져도 테이블 너비·컬럼 폭이 일정하게 유지됨',done:true},
-  {q:'수도요금 사용법에 아리수 홈페이지 링크 추가',a:'🔗 수도요금 테이블 좌측 사용법 셀 하단에 아리수 홈페이지(https://i121.seoul.go.kr) 바로가기 링크 추가. 새 탭으로 열림',done:true},
-  {q:'사용법을 테이블 밖으로 분리',a:'📐 수도요금 사용법을 테이블 내 rowspan 셀에서 테이블 왼쪽 별도 패널(148px)로 분리. 테이블과 flex로 나란히 배치. 필터 전환 시 행 수가 줄어도 사용법 패널 높이가 테이블에 영향 안 줌. 테이블 colgroup에서 사용법 컬럼 제거, thead에서도 해당 th 제거',done:true},
-  {q:'월별 모아보기 썸네일 그리드 + 방향키 갤러리',a:'🖼 청구서 뷰어 월별 모아보기를 큰 이미지 카드에서 80×80 썸네일 그리드로 변경. 건물번호순 정렬. 썸네일 클릭 시 전체화면 갤러리 열림 — ←→ 방향키로 이전/다음 이미지 이동, 상단 건물·고객 정보 표시, 하단 저장/삭제/닫기 버튼. ESC로 닫기. 전체 이미지를 _billGalleryAll 배열로 관리하여 건물 간 연속 탐색 가능',done:true},
-  {q:'사이드바 탭 베타 뱃지',a:'β 사이드바 탭에 beta:true 속성 추가 시 파란색 β 뱃지 표시. 직원 참고용으로 아직 확정되지 않은 기능임을 표시. 현재 월간보고서/청구서/전기요금에 적용',done:true},
-  {q:'전기+수도 탭 합치기',a:'💧⚡ 수도요금/전기요금 탭을 "수도·전기" 하나로 통합. 좌측=전기요금, 우측=수도요금으로 flex 2분할 레이아웃. pg-water+pg-electric → pg-utility로 통합. PAGES에서 2개 항목을 1개(utility)로 합침. 모든 렌더러 맵·switchTab·lastTab 호환처리 포함',done:true},
-  {q:'확장프로그램 (필수) 표시 + 설치 문구 수정',a:'🔧 사용법 패널 "확장프로그램" 옆에 빨간색 (필수) 표시 추가. 설치 절차를 4단계로 정리: ① 배포파일(zip) 다운받아 압축풀기 → ② chrome://extensions → ③ 개발자 모드 ON → ④ 압축해제된 확장 로드 → 폴더선택',done:true},
-  {q:'사이드바 베타 영역 분리',a:'📊 사이드바 탭을 일반/베타로 분리. β 뱃지 제거 → 대신 가로 구분선 + "BETA" 라벨로 영역 구분. 상단=일반 탭(임대현황·만료일·캘린더 등), 하단=BETA 탭(월간보고서·청구서 등). PAGES 배열의 beta:true 속성으로 제어',done:true},
-  {q:'전기·수도 탭명/아이콘 수정',a:'⚡ "수도·전기" → "전기·수도"로 순서 변경. 이모티콘 💧⚡ 겹침 → ⚡ 하나로 정리. 페이지 헤더도 "⚡💧 전기·수도 요금"으로 통일',done:true},
-  {q:'청구서 저장 시 위치 선택 가능',a:'💾 _downloadBillFile을 showSaveFilePicker(File System Access API)로 업그레이드. 저장 버튼 클릭 시 바탕화면 등 원하는 위치에 직접 저장 가능. API 미지원 브라우저에서는 기존 <a download> 방식으로 폴백',done:true},
-  {q:'갤러리 방향키 순환 제거',a:'🖼 갤러리 ←→ 방향키에서 마지막 사진 → 처음으로 돌아가던 순환 동작 제거. 첫 사진에서 ← 누르면 멈추고, 마지막 사진에서 → 누르면 멈춤',done:true},
-  {q:'청구서 저장 파일 안 열리던 버그 수정',a:'🐛 _downloadBillFile에서 fetch(dataUrl)로 Blob 변환 시 mime 유실로 파일이 깨지던 문제 수정. atob+Uint8Array로 직접 파싱하는 _dataUrlToBlob() 함수 구현. showSaveFilePicker는 다운로드 기록에 안 남음(브라우저 API 특성). 폴백도 Blob URL 방식으로 변경',done:true},
-  {q:'베타 탭 이동 권한 제한',a:'🔒 사이드바 드래그&드롭에서 일반 ↔ 베타 영역 간 탭 이동은 총관리자(IS_SUPER_ADMIN)만 가능. 일반 사용자가 시도하면 alert로 안내. 총관리자가 이동하면 beta 속성도 자동 토글',done:true},
-  {q:'확장프로그램 배포파일(zip) 첨부',a:'📦 arisu-extension 폴더를 arisu-extension.zip으로 압축하여 bsn-github-업로드 폴더에 배치. 사용법 패널에 "⬇ 배포파일 다운로드" 버튼 추가. 직원이 웹에서 바로 zip 다운 → 압축풀기 → 크롬에 로드 가능',done:true},
-  {q:'수도청구서 다운로드 파일명에 월+건물명 포함',a:'📁 _downloadBillFile에 opts{period,bldgName} 파라미터 추가. 갤러리/개별뷰/전체다운로드 모두 "2025-09_건물명.jpg" 형식으로 저장. 기존 파일명 폴백 유지',done:true},
-  {q:'사이드바 탭 아이콘 컬러 이모지로 변경',a:'🎨 PAGES 배열 아이콘 업데이트: ⊟→🏠 임대현황, ⏱→⏰ 만료일, ▦→📅 캘린더, ↺→🔄 고정일정, ◧→📊 월간보고서. 기존 ⚡💧, 📄, 📝는 유지',done:true},
-  {q:'월별 모아보기 가로 나열(건물=컬럼, 이름 상단, 사진 아래)',a:'📐 _renderMonthlyOverview 전면 리팩터: 기존 행(건물명 좌, 사진 우) → 컬럼(건물명 상단 헤더, 사진 세로 나열). 전체 건물이 가로로 흐르며 overflow-x:auto 스크롤. 건물명만 표시(고객정보 제거)',done:true},
-  {q:'검침 홀수/짝수 표시 세로 짤림 방지',a:'📐 수도 테이블 검침 컬럼 white-space:nowrap 적용 + 폭 76px→84px. 홀수월/짝수월 뱃지와 검침일 텍스트가 건물명 길이에 관계없이 가로 유지',done:true},
-  {q:'월별 모아보기 썸네일·글자 축소',a:'📐 건물 컬럼 min-width 120→72px, max-width 220→100px. 건물명 font-size 12→10px, padding 축소. 썸네일 200x150→64x48px. 클릭해서 갤러리로 크게 보는 용도이므로 미리보기는 최소화',done:true},
-  {q:'갤러리 첫/끝 사진에서 화살표 버튼 숨김',a:'🖼 _openBillGallery show() 함수에서 curIdx가 0이면 ◀ 숨김, 마지막이면 ▶ 숨김. 끝에서 더 넘어갈 수 없다는 것을 시각적으로 명확히 표시',done:true},
-  {q:'수도 테이블 메모 컬럼 제거 + 검침→검침일',a:'📐 수도요금 테이블 colgroup에서 메모(auto) 컬럼 삭제, thead·tbody 메모 td 제거. "검침" 헤더를 "검침일"로 변경. 5컬럼 구성: 건물/고객번호/고객명/검침일/작업',done:true},
-  {q:'홀수짝수+검침일 이미지분석 자동반영',a:'✅ 이미 구현됨 확인 — 확장프로그램(content.js)이 아리수 페이지에서 "정기검침일" 숫자와 청구 기간 홀짝을 파싱하여 BSN케어에 전송. index.html의 postMessage 핸들러(line 3301-3302)와 _saveWaterFromProxy(line 3217-3218) 모두 meterDay/meterCycle 자동 저장 로직 포함. 첫 조회 시 1회성으로 반영됨',done:true},
-  {q:'청구서 날짜 표시 4월 형식',a:'📅 _periodLabel() 헬퍼 추가: "2025-04"→"4월" 변환. 월별 모아보기 제목·좌측 목록·뷰어 헤더·저장 토스트에 일괄 적용',done:true},
-  {q:'전기·수도 탭 비율 조정 (수도 넓게)',a:'📐 전기 flex:1→0.85, 수도 flex:1→1.15. 구분선이 전기 쪽으로 이동하여 수도 사용법 패널 좌측선 짤림 해소',done:true},
-  {q:'수도 고객정보 모달 메모칸 삭제 + 검침 자동세팅',a:'🔧 모달에서 메모 textarea 제거(hidden으로 교체). 신규 등록 시 건물 선택하면 defMemoCats의 water 필드에서 "짝수월/홀수월" 파싱하여 검침 주기 select 자동 세팅. 건물 변경 시에도 자동 갱신',done:true},
-  {q:'모달 검침→검침일 + disabled',a:'🔒 수도 고객정보 모달의 "검침" 라벨을 "검침일"로 변경. select에 disabled 속성 추가하여 수동 변경 불가. 자동(건물정보 파싱/확장프로그램)으로만 세팅',done:true},
-  {q:'날짜표시 _periodLabel 전체 적용 + 검침일 건물정보 폴백',a:'📅 _periodLabel("2025-04"→"4월") 적용 누락 부분 전수 수정: 조회결과 모달·프록시 저장·덮어쓰기 confirm·저장완료 토스트·기간표시 등. 검침일: _parseBldgWaterInfo() 함수로 defMemoCats.water에서 "검침일: 홀수월 N일" 패턴 파싱 → meterCycle+meterDay 동시 추출. rdWater() 렌더 시 bills 추론 실패해도 건물정보 폴백으로 자동 표시',done:true},
-  {q:'1장 건물 탭 클릭 시 개별 갤러리 직행 문제 → 멀티뷰 유지',a:'🖼 전체보기에서 1장짜리 건물 탭 누르면 개별 갤러리로 넘어가서 탭이 좌측으로 가던 문제 → 멀티뷰 안에서 1장만 표시하도록 변경. 다운로드 버튼도 "⬇ 저장"으로 간소화',done:false},
-  {q:'수도 테이블 완료/미완료/해당없음 뱃지 + 조회버튼 줄맞춤',a:'📊 해당 월이 아닌 건물은 "해당없음" 회색 뱃지 표시. 완료/미완료/해당없음 모두 width:52px 고정으로 🌐 조회 버튼 세로줄 정렬. 청구서 없는 행에도 📄 0 회색 뱃지 추가하여 줄 고정',done:false},
-  {q:'청구서 폴더보기 (카톡 첨부용)',a:'📁 멀티뷰+개별 갤러리에 "📁 폴더" 버튼 추가. 윈도우 탐색기 스타일 폴더뷰: 모든 건물 청구서를 건물별 구분 + 작은 썸네일로 한 화면에 표시. 드래그 사각형(rubber band)으로 다중 선택, Ctrl+클릭 개별 추가, Ctrl+A 전체 선택. 선택 후 ⬇ 저장 버튼으로 폴더에 일괄 저장',done:false},
-  {q:'개별 갤러리 상단 고객명 제거 + 탭 가운데 정렬',a:'🖼 개별 갤러리 최상단 고객명/번호 정보바 제거. 건물 탭바를 최상단으로 올리고 justify-content:center로 가운데 정렬',done:false},
-  {q:'개별 갤러리 전체보기 버튼 항상 표시',a:'🔗 backFn 없어도 건물에 2장 이상이면 ◀ 전체보기 버튼 표시. backFn 있으면 원래 경로, 없으면 갤러리만 닫기',done:false},
-  {q:'바탕화면 저장 차단 제거 + 다운로드 폴백 개선',a:'💾 showDirectoryPicker에서 startIn 제한 제거(바탕화면 포함 어디든 선택 가능). 시스템 폴더 에러 차단 제거. 폴백: 개별 showSaveFilePicker로 전환',done:false},
-  {q:'사이드바 탭 베타 이동 새로고침 시 유지',a:'💾 탭의 beta 속성을 localStorage(bm_navBeta)에 별도 저장. _applyNavOrder()에서 순서+beta 속성 동시 복원. 베타로 옮긴 탭이 새로고침해도 유지됨',done:false},
-  {q:'폴더 빈영역 클릭 시 창 안닫히게',a:'🖼 폴더뷰 빈 영역 클릭 → 선택 해제만 수행, 창 닫기는 ✕ 버튼과 ESC로만 가능. 드래그 직후 click 이벤트가 선택 초기화하던 버그도 didDrag 플래그로 수정',done:false},
-];
-// ══════════════════════════════════════════════════════
-// AI 챗봇
-// ══════════════════════════════════════════════════════
-let _aiChatOpen=false;
-const _AI_CATS=[
-  {label:'📋 임대차',items:['계약 갱신 절차','보증금 반환','권리금 보호','전대(재임대)','확정일자/대항력','계약서 작성 항목']},
-  {label:'💰 관리비',items:['관리비 정산 방법','관리비 항목 구성','관리비 연체 처리']},
-  {label:'💧 수도/전기',items:['수도요금 분담 기준','전기요금 안분 계산','수도요금 조회(아리수)','전기요금 관리(한전)']},
-  {label:'🏛 세금',items:['부가가치세(임대)','종합소득세(임대소득)','재산세/취득세']},
-  {label:'🔧 시설',items:['수선 의무(누수 등)','소방 점검','승강기 관리','원상복구 기준']},
-  {label:'⚖ 법률',items:['내용증명 활용','소송/분쟁 해결']},
-  {label:'🏠 BSN.CARE',items:['호실 추가 방법','건물 등록','청구서 발행','메모 기능','캘린더/일정','만료일 관리','전체 기능 안내']},
-];
-let _aiCatLevel=0; // 0=카테고리, 1=항목, 2=숨김(대화중)
-function toggleAiChat(){
-  _aiChatOpen=!_aiChatOpen;
-  const p=$('ai-chat-panel');
-  if(p) p.classList.toggle('open',_aiChatOpen);
-  if(_aiChatOpen){ _aiShowCats(); setTimeout(()=>{const q=$('ai-q');if(q)q.focus();},200); }
-}
-function _aiShowCats(){
-  const sg=$('ai-chat-suggest'); if(!sg) return;
-  _aiCatLevel=0;
-  sg.innerHTML=_AI_CATS.map((c,i)=>`<button onclick="_aiShowItems(${i})">${c.label}</button>`).join('');
-}
-function _aiShowItems(ci){
-  const sg=$('ai-chat-suggest'); if(!sg) return;
-  const cat=_AI_CATS[ci]; if(!cat) return;
-  _aiCatLevel=1;
-  sg.innerHTML=`<button onclick="_aiShowCats()" style="background:#f1f5f9;border-color:#cbd5e1;color:#64748b">← 뒤로</button>`+
-    cat.items.map(it=>`<button onclick="aiAsk('${it}')">${it}</button>`).join('');
-}
-function aiAsk(txt){ const q=$('ai-q'); if(q){q.value=txt;} aiSend(); }
-function _aiAddMsg(role,text){
-  const c=$('ai-chat-msgs'); if(!c) return;
-  const d=document.createElement('div');
-  d.className='ai-msg '+(role==='user'?'user':'bot');
-  d.textContent=text;
-  c.appendChild(d);
-  c.scrollTop=c.scrollHeight;
-  return d;
-}
-function aiSend(){
-  const q=$('ai-q'); if(!q) return;
-  const txt=q.value.trim(); if(!txt) return;
-  q.value='';
-  _aiAddMsg('user',txt);
-  const answer=_aiLocalAnswer(txt);
-  _aiAddMsg('bot',answer);
-  // 답변 후 카테고리 다시 표시
-  _aiShowCats();
-  q.focus();
-}
-function _aiLocalAnswer(q){
-  const raw=q;
-  q=q.replace(/\s/g,'').toLowerCase();
-  // ── 건물관리 FAQ (로컬 전용, API 불필요) ──
-  const faq=[
-    // 임대차 계약
-    {k:/임대차.*갱신|계약.*갱신|갱신.*절차|갱신청구/,a:'임대차 계약 갱신 절차:\n\n1. 만료 6개월~1개월 전 갱신 요구\n2. 임차인 계약갱신 청구권 (최초 계약 포함 10년간)\n3. 임대료 인상 상한 5% (상가건물임대차보호법)\n4. 갱신 계약서 작성 + 확정일자\n5. BSN.CARE에서 계약기간 업데이트\n\n※ 임대인이 거절할 수 있는 사유: 3기 차임 연체, 무단 전대, 철거·재건축 등'},
-    {k:/계약서.*작성|임대계약.*필수|계약서.*항목/,a:'임대차 계약서 필수 항목:\n\n• 당사자(임대인/임차인) 인적사항\n• 소재지, 면적, 용도\n• 보증금, 차임(월세), 관리비\n• 계약기간(시작일~만료일)\n• 특약사항(원상복구, 권리금 등)\n• 확정일자 받기 (관할 세무서/주민센터)\n\nBSN.CARE 호실 추가에서 이 정보를 모두 관리할 수 있습니다.'},
-    {k:/보증금.*반환|보증금.*돌려|퇴거.*보증금/,a:'보증금 반환 절차:\n\n1. 임차인 퇴거 및 원상복구 확인\n2. 공과금(수도/전기/가스) 정산\n3. 미납 차임·관리비 공제\n4. 원상복구 비용 공제 (특약 확인)\n5. 잔액 반환 (퇴거일 기준)\n\n※ 반환 지연 시 연 12% 지연이자 발생 가능\n※ 계약서 특약에 반환 시기 명시 권장'},
-    {k:/권리금|권리금.*보호|권리금.*회수/,a:'권리금 보호 (상가건물임대차보호법):\n\n• 임차인은 계약 만료 6개월~3개월 전 신규 임차인 주선 가능\n• 임대인은 정당한 사유 없이 거절 불가\n• 거절 시 임대인이 권리금 배상 책임\n• 환산보증금 초과 시에도 권리금 보호 적용\n• 10년 초과 갱신 거절은 권리금 보호 해당 안 됨\n\n※ 권리금 = 영업권리금 + 시설권리금 + 바닥권리금'},
-    {k:/전대|전전세|임차권.*양도|전대차/,a:'전대(재임대) 관련:\n\n• 임대인 동의 없는 전대 → 계약 해지 사유\n• 전대 동의 받았으면 전대차 계약서 별도 작성\n• 전차인(전대받은 자)은 임대인에게 직접 의무 부담\n• 원 임차인도 임대인에 대한 의무 유지\n\n계약서 특약에 전대 가능 여부를 명확히 기재하세요.'},
-    {k:/확정일자|대항력|우선변제/,a:'확정일자와 대항력:\n\n• 확정일자: 계약서에 날짜 도장 (세무서/주민센터)\n• 대항력: 인도(입주) + 사업자등록 → 다음날 발생\n• 우선변제권: 대항력 + 확정일자 → 보증금 우선 회수\n• 소액임차인: 일정 금액까지 최우선 변제\n\n※ 상가 환산보증금 기준 (서울: 9억원 이하)'},
-    // 관리비
-    {k:/관리비.*정산|정산.*방법|관리비.*계산/,a:'관리비 정산 방법:\n\n1. 공용관리비: 전용면적 비례 배분\n2. 전기/수도: 개별계량 시 실사용량, 공용계량 시 면적비\n3. 공용전기(복도/주차장): 면적비 또는 균등분할\n4. 청소/경비/엘리베이터: 관리규약에 따름\n5. 수선유지비: 적립 후 사용\n\nBSN.CARE 청구서 메뉴에서 자동 안분 계산 가능합니다.'},
-    {k:/관리비.*항목|관리비.*구성|관리비.*포함/,a:'관리비 구성 항목:\n\n[공용부분]\n• 공용전기, 공용수도, 승강기 유지비\n• 청소비, 경비비, 소독비\n• 수선유지비(적립금)\n• 화재보험, 건물보험\n\n[개별부분]\n• 전기, 수도, 가스 (개별계량)\n• 냉난방비 (개별 또는 공용)\n• 통신비, 인터넷\n\n※ 관리비 영수증은 매월 발행이 원칙'},
-    {k:/관리비.*연체|연체.*이자|연체료/,a:'관리비 연체 처리:\n\n• 연체이자: 관리규약에 따라 부과 (통상 연 12~15%)\n• 납부기한 경과 시 독촉장 발송\n• 3개월 이상 연체 시 단전/단수 가능 (사전통보 필수)\n• 장기 연체 시 소액소송 또는 지급명령 신청\n\n※ 연체 기록은 BSN.CARE 메모에 기록해두세요'},
-    // 수도/전기
-    {k:/수도.*분담|수도.*기준|수도.*배분/,a:'수도요금 분담 기준:\n\n1. 개별계량기 설치 → 각 호실 실사용량 기준\n2. 공용계량기만 있을 때 → 면적비 또는 인원비 배분\n3. 공용수도(청소/조경) → 관리비에 포함하여 배분\n\n서울 아리수 요금 조회: i.seoul.go.kr\nBSN.CARE 수도요금 탭에서 고객번호 등록 후 자동수집 가능'},
-    {k:/전기.*안분|전기.*계산|전기.*분담/,a:'전기요금 안분 계산:\n\n1. 총 전기요금 ÷ 총 사용량(kWh) = 단가\n2. 각 호실 사용량 × 단가 = 호실별 요금\n3. 공용전기(복도/주차장): 면적비 배분\n\n※ 한전 고압 계약 시 기본요금도 비례 배분\n※ 계절별 누진제 적용으로 여름·겨울 요금 주의\n\nBSN.CARE 청구서에서 자동 안분 계산 지원'},
-    {k:/수도.*요금|수도.*고지서|아리수/,a:'수도요금 조회/관리:\n\n• 서울 아리수: i.seoul.go.kr (고객번호로 조회)\n• 2개월마다 고지 (격월제)\n• 요금 = 상수도 + 하수도 + 물이용부담금\n• 누수 시 감면 신청 가능 (검침 전후 비교)\n\nBSN.CARE에서 수도요금 탭 → 🌐 자동수집 북마클릿으로 원클릭 저장'},
-    {k:/전기.*요금|한전|전기.*고지서|kepco/,a:'전기요금 관리:\n\n• 한전 사이버지점: cyber.kepco.co.kr\n• 매월 검침·고지\n• 일반용/산업용 요금제 확인\n• 기본요금 + 전력량요금 + 기후환경요금 + 연료비조정\n\nBSN.CARE 전기요금 탭에서 Gmail 연동으로 한전 메일 자동 수집 가능'},
-    // 세금
-    {k:/부가세|부가가치세|vat|세금계산서/,a:'임대 부가가치세:\n\n• 상가 임대료에 10% 부가세 부과\n• 임대인은 세금계산서 발행 의무\n• 분기별 신고 (1/4/7/10월 25일)\n• 간이과세자: 매출 1억 400만원 미만 시 간이과세\n• 주택 임대: 부가세 면제\n\n※ 관리비 중 실비(수도/전기)는 부가세 과세 대상 아님'},
-    {k:/종합소득세|소득세|임대소득/,a:'임대소득 종합소득세:\n\n• 매년 5월 종합소득세 신고\n• 필요경비: 감가상각, 수선비, 보험료, 재산세 등\n• 분리과세: 주택 임대소득 2천만원 이하 시 선택 가능\n• 간편장부 또는 복식부기\n• 세무사 상담 권장 (규모에 따라)\n\n※ BSN.CARE 월간보고서에서 수입 내역 확인 가능'},
-    {k:/재산세|종부세|건물.*세금|취득세/,a:'건물 관련 세금:\n\n• 취득세: 매입 시 1회 (4.6%)\n• 재산세: 매년 7월(건물), 9월(토지)\n• 종합부동산세: 공시가 기준 초과분 (매년 12월)\n• 양도소득세: 매도 시 차익에 과세\n\n※ 공시가격 확인: realtyprice.kr'},
-    // 시설/수선
-    {k:/수선.*의무|수리.*책임|하자.*보수|누수/,a:'수선 의무 (민법 제623조):\n\n• 대수선(지붕, 기둥, 벽체 등): 임대인 부담\n• 소수선(전구, 수도꼭지 등): 임차인 부담\n• 계약서 특약으로 변경 가능\n• 누수: 원인에 따라 책임 구분\n  - 건물 노후/공용배관 → 임대인\n  - 임차인 과실/전용배관 → 임차인\n\n※ 수선 내역은 BSN.CARE 메모에 기록 권장'},
-    {k:/소방.*점검|소방.*의무|화재.*안전/,a:'소방 안전 관리:\n\n• 소방시설 자체점검: 연 1회 이상\n• 소방안전관리자 선임 (일정 규모 이상)\n• 소화기 비치: 각 층, 유효기한 확인\n• 피난안내도 게시 의무\n• 스프링클러/경보기 점검\n\n※ 위반 시 과태료 최대 300만원\n※ 화재보험 가입 권장 (건물+임대인배상)'},
-    {k:/엘리베이터|승강기.*점검|승강기.*검사/,a:'승강기 관리:\n\n• 월 1회 이상 자체점검 (관리업체)\n• 연 1회 정기검사 (한국승강기안전공단)\n• 정밀안전검사: 설치 후 15년, 이후 3년마다\n• 고장 시 즉시 수리 및 이용중지 조치\n• 비용: 관리비에서 승강기 유지비로 배분\n\n※ 미점검 시 과태료 부과'},
-    // 원상복구
-    {k:/원상복구|원상회복|퇴거.*수리/,a:'원상복구 기준:\n\n• 원칙: 임차 당시 상태로 복구\n• 통상적 사용에 의한 마모·변색: 임차인 책임 아님\n• 인테리어 철거: 계약서 특약 확인\n• 벽체 훼손, 구멍 등: 임차인 복구\n• 시설물 추가 설치분: 원칙적으로 철거\n\n※ 입주 시 사진촬영 → 퇴거 시 비교 (분쟁 예방)\n※ 원상복구 범위는 계약서 특약에 구체적으로 명시'},
-    // BSN.CARE 사용법
-    {k:/호실.*추가|방.*추가|임차인.*등록/,a:'BSN.CARE 호실 추가 방법:\n\n1. 좌측 메뉴 "임대현황"\n2. "+ 호실 추가" 버튼 클릭\n3. 건물, 층/호실, 임차인 입력\n4. 계약기간, 보증금, 임대료, 관리비 입력\n5. 담당자 연락처 추가 가능\n6. 저장 → 목록에 바로 반영'},
-    {k:/건물.*추가|건물.*등록/,a:'BSN.CARE 건물 추가:\n\n1. 좌측 "임대현황" 메뉴\n2. "+ 건물 추가" 버튼\n3. 건물명, 주소, 메모 입력\n4. 저장 후 건축물대장·관리계약서 첨부 가능\n\n건물 추가 후 해당 건물에 호실을 등록할 수 있습니다.'},
-    {k:/청구서.*만들|청구서.*발행|인보이스/,a:'BSN.CARE 청구서 발행:\n\n1. 좌측 "청구서" 메뉴\n2. 건물 선택 → 호실·항목 확인\n3. 전기/수도 안분 입력 (자동계산)\n4. 미리보기 확인 후 저장\n\n청구서는 PDF로 출력하거나 공유할 수 있습니다.'},
-    {k:/메모.*사용|메모.*기능/,a:'BSN.CARE 메모 기능:\n\n• 건물 메모: 건물별 관리 사항 기록\n• 개인 메모: 나만 보는 메모\n• 자동 저장 (실시간)\n• 항목 더블클릭 → 수정\n• 우클릭 → 삭제\n• 날짜별·건물별 보기 전환 가능'},
-    {k:/캘린더|일정.*등록|일정.*관리/,a:'BSN.CARE 일정 관리:\n\n• 일정 캘린더: 월별 일정 조회\n• 고정 일정: 반복 일정 등록 (매월 관리비 납부일 등)\n• 만료일 관리: 계약 만료 임박 호실 알림\n• 일정 클릭 시 상세 내용 확인/수정'},
-    {k:/만료.*관리|계약.*만료|만료.*알림/,a:'계약 만료 관리:\n\n1. 좌측 "만료일 관리" 메뉴\n2. 만료 임박 순으로 자동 정렬\n3. 배지에 건수 표시\n4. 갱신/재계약 시 호실 수정에서 날짜 변경\n\n※ 만료 3개월 전부터 갱신 여부 확인 권장'},
-    // 분쟁/법률
-    {k:/내용증명|통보서|법적.*조치/,a:'내용증명 활용:\n\n• 차임 연체 독촉\n• 계약 해지 통보\n• 원상복구 요구\n• 보증금 반환 청구\n\n작성법: 우체국 방문 또는 인터넷우체국(epost.kr)\n비용: 약 3,000~5,000원\n\n※ 내용증명 자체는 법적 강제력 없으나 증거로 활용'},
-    {k:/소송|법원|조정|분쟁.*해결/,a:'임대차 분쟁 해결 절차:\n\n1. 당사자 간 협의\n2. 대한법률구조공단 상담 (132)\n3. 임대차분쟁조정위원회 조정 신청\n4. 소액사건심판 (3,000만원 이하)\n5. 민사소송\n\n※ 조정 신청: 관할 법원 또는 대한상사중재원\n※ 증거자료(계약서, 내용증명, 사진 등) 미리 준비'},
-    // 기타
-    {k:/공실.*관리|빈방.*관리|공실률/,a:'공실 관리 팁:\n\n• 공실 기간 최소화: 만료 2~3개월 전 신규 모집\n• 부동산 중개업소 2~3곳에 의뢰\n• 네이버부동산, 직방 등 온라인 등록\n• 인테리어 정비 (도배, 청소)\n• 임대 조건 시장가 대비 경쟁력 확인\n\nBSN.CARE에서 공실 호실을 별도 표시하여 관리하세요.'},
-    {k:/보험|화재보험|건물보험|배상/,a:'건물 보험 종류:\n\n• 화재보험: 기본 필수 (건물 구조·면적 기준)\n• 임대인배상책임보험: 시설물 하자로 임차인 피해 시\n• 가스사고배상: 가스시설 사고 대비\n• 풍수해보험: 태풍·홍수 피해\n\n※ 보험료는 관리비에 반영 가능\n※ 건물 규모에 따라 의무가입 대상 확인'},
-    {k:/도움말|사용법|help|기능/,a:'BSN.CARE 주요 기능:\n\n🏠 임대현황 — 건물·호실·계약 관리\n⏱ 만료일 관리 — 계약만료 알림\n📅 일정 캘린더 — 월간 일정\n↺ 고정 일정 — 반복 일정\n📊 월간보고서 — 수입 현황\n📄 청구서 — 관리비 자동계산\n💧 수도요금 — 아리수 자동수집\n⚡ 전기요금 — Gmail 연동\n📝 개인메모 — 나만의 메모\n\n질문이 있으면 편하게 물어보세요!'},
-  ];
-  for(const f of faq){ if(f.k.test(q)) return f.a; }
-  // 키워드 부분 매칭
-  const keywords=[
-    {w:['임대','계약','갱신'],i:0},{w:['보증금','반환','퇴거'],i:2},{w:['권리금'],i:3},
-    {w:['관리비','정산'],i:6},{w:['관리비','항목','구성'],i:7},{w:['연체'],i:8},
-    {w:['수도','요금'],i:9},{w:['전기','안분'],i:10},{w:['세금','부가세'],i:12},
-    {w:['소방','점검'],i:16},{w:['엘리베이터','승강기'],i:17},{w:['원상복구'],i:18},
-    {w:['호실','추가'],i:19},{w:['건물','추가'],i:20},{w:['청구서'],i:21},
-    {w:['메모'],i:22},{w:['캘린더','일정'],i:23},{w:['만료'],i:24},
-    {w:['소송','분쟁','조정'],i:26},{w:['공실','빈방'],i:27},{w:['보험'],i:28},
-  ];
-  for(const kw of keywords){
-    if(kw.w.some(w=>q.includes(w))) return faq[kw.i].a;
-  }
-  return '아래 주제에 대해 답변할 수 있습니다:\n\n📋 임대차 — 계약갱신, 보증금반환, 권리금, 전대, 확정일자\n💰 관리비 — 정산방법, 항목구성, 연체처리\n💧 수도/전기 — 요금분담, 안분계산, 자동수집\n🏛 세금 — 부가세, 소득세, 재산세\n🔧 시설 — 수선의무, 소방점검, 승강기, 원상복구\n⚖ 법률 — 내용증명, 분쟁해결, 소송절차\n🏠 BSN.CARE — 호실추가, 건물등록, 청구서, 메모\n\n위 주제 중 궁금한 것을 물어보세요!';
-}
-function _toggleCL(idx,checked){
-  if(!_CHANGELOG[idx]) return;
-  _CHANGELOG[idx].done=checked;
-  var q=document.getElementById('cl-q-'+idx);
-  var item=document.getElementById('cl-item-'+idx);
-  if(q){ q.style.textDecoration=checked?'line-through':''; q.style.color=checked?'#999':''; }
-  if(item){ item.style.background=checked?'#f9fafb':'#fff'; }
-  // localStorage에 체크 상태 저장
-  try{
-    var map={};
-    _CHANGELOG.forEach(function(c,i){ if(c.done) map[i]=true; });
-    localStorage.setItem('bm_changelog_done',JSON.stringify(map));
-  }catch(e){}
-}
-function _loadCLDone(){
-  try{
-    var raw=localStorage.getItem('bm_changelog_done');
-    if(raw){
-      var map=JSON.parse(raw);
-      Object.keys(map).forEach(function(k){ var i=parseInt(k); if(_CHANGELOG[i]) _CHANGELOG[i].done=true; });
-    }
-  }catch(e){}
-}
-function openChangelog(){
-  if(!IS_SUPER_ADMIN){ try{ alert('총 관리자 전용 기능입니다.'); }catch(_){} return; }
-  _loadCLDone(); // localStorage에서 체크 상태 복원
-  const body=$('cl-body'); if(!body) return;
-  $('cl-count').textContent=_CHANGELOG.length+'건';
-  // 최신순(뒤에 추가된 항목이 위로) 정렬 — 번호는 원본 순서 유지
-  const ordered=_CHANGELOG.map((c,i)=>({c,n:i+1})).reverse();
-  body.innerHTML=ordered.map(({c,n})=>{
-    const idx=n-1;
-    const checked=c.done?'checked':'';
-    const lineThru=c.done?'text-decoration:line-through;color:#999':'';
-    const bg=c.done?'#f9fafb':'#fff';
-    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-bottom:1px solid #eee;background:${bg}" id="cl-item-${idx}">
-      <input type="checkbox" ${checked} onchange="_toggleCL(${idx},this.checked)" style="margin-top:2px;flex-shrink:0;width:15px;height:15px;cursor:pointer;accent-color:#16a34a">
-      <span style="color:#9ca3af;font-size:11px;font-weight:600;flex-shrink:0;min-width:20px">${n}.</span>
-      <span onclick="var d=document.getElementById('cl-det-${idx}');if(d){d.style.display=d.style.display==='none'?'block':'none'}" style="flex:1;font-size:12px;line-height:1.5;cursor:pointer;${lineThru}" id="cl-q-${idx}">${esc(c.q)}</span>
-    </div>
-    <div id="cl-det-${idx}" style="display:none;padding:6px 10px 8px 48px;background:#f8fafc;border-bottom:1px solid #e5e7eb;font-size:11px;line-height:1.6;color:#555">${esc(c.a)}</div>`;
-  }).join('');
-  $('mo-changelog').classList.add('on');
-}
-
 function initInvoice(){
   fillSel('inv-bldg');
   const now=new Date();$('inv-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -8346,8 +8059,6 @@ async function enterApp(){
   $('app-main').style.display='flex';
   const roleTag = IS_SUPER_ADMIN ? ' (총 관리자)' : (IS_ADMIN ? ' (관리자)' : '');
   if($('sb-user')) $('sb-user').textContent = CURRENT_USER_NAME + roleTag;
-  // 📋 변경이력 버튼 — 총 관리자만 노출
-  const clBtn=$('cl-btn'); if(clBtn) clBtn.style.display=IS_SUPER_ADMIN?'flex':'none';
   // 캘린더 작성자 표시 갱신
   const caUserBox=$('ca-user-display'); if(caUserBox) caUserBox.textContent = CURRENT_USER_NAME;
   // 실시간 동기화 구독 (다른 사람이 데이터 수정시 배너 알림)
