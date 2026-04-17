@@ -642,12 +642,12 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <aside class="sb">
   <div class="sb-logo" style="justify-content:center"><div class="bsn-txt"><h1 style="font-size:18px">BSN<span style="color:#1e40af">.CARE</span></h1></div></div>
   <nav class="sb-nav" id="nav"></nav>
-  <div class="sb-foot"><div id="sb-dt" style="font-size:10px"></div><div id="sb-user" style="margin-top:4px;color:var(--t3);font-size:10px"></div>
-
+  <div class="sb-foot"><div id="sb-dt" style="font-size:10px"></div>
     <button onclick="doLogout()" style="margin-top:4px;padding:4px 8px;font-size:10px;border:1px solid var(--ln);background:var(--w);border-radius:var(--r);cursor:pointer;width:100%">로그아웃</button>
   </div>
 </aside>
 <main class="main">
+<div id="sb-user" style="position:fixed;top:6px;right:10px;z-index:90;font-size:11px;color:var(--t3);background:var(--w);border:1px solid var(--ln);border-radius:14px;padding:3px 10px;box-shadow:0 1px 4px rgba(0,0,0,.06);pointer-events:auto;display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:6px;height:6px;background:#22c55e;border-radius:50%"></span><span id="sb-user-name"></span></div>
 
 <!-- 임대현황 -->
 <div class="page on" id="pg-lease">
@@ -970,14 +970,15 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
       <div id="admin-all-list"></div>
     </div>
 
-    <div id="admin-migrate-section" style="margin-top:18px;display:none">
-      <div class="sl">데이터 일괄 가져오기 (1회용)</div>
-      <div class="card" style="padding:10px 12px;background:#fffbeb;border:1px solid #fde68a">
-        <div style="font-size:11px;color:#92400e;margin-bottom:8px;line-height:1.5">
-          <b>⚠️ 주의:</b> <code>bm_data.json</code> 파일의 내용으로 현재 DB를 <b>완전히 덮어씁니다</b>. 되돌릴 수 없으니 사전 백업 후 실행하세요.
+    <div style="margin-top:18px">
+      <div class="sl">📁 파일 마이그레이션</div>
+      <div class="card" style="padding:10px 12px;background:#f0f9ff;border:1px solid #bae6fd">
+        <div style="font-size:11px;color:#075985;margin-bottom:8px;line-height:1.5">
+          기존에 로컬(base64)로 저장된 파일(계약서, 건축물대장, 청구서 등)을<br>
+          <b>Supabase Storage</b>로 일괄 업로드합니다. 다른 기기에서도 파일을 열 수 있게 됩니다.
         </div>
-        <button class="btn" onclick="doMigrateOverwrite()" style="font-size:12px;padding:6px 12px;background:#dc2626;color:#fff;border:none">bm_data.json 으로 덮어쓰기</button>
-        <span id="mig-status" style="margin-left:8px;font-size:11px;color:var(--t3)"></span>
+        <button class="btn pri" onclick="_migrateFilesToStorage()" style="font-size:12px;padding:6px 12px" id="btn-migrate-storage">🚀 파일 마이그레이션 실행</button>
+        <span id="migrate-storage-status" style="margin-left:8px;font-size:11px;color:var(--t3)"></span>
       </div>
     </div>
 
@@ -1408,6 +1409,182 @@ async function _uploadFileToStorage(dataUrl, storagePath, fileName, mimeType){
   }
 }
 
+// ── 기존 로컬 파일(base64) → Supabase Storage 일괄 마이그레이션 ──
+// IndexedDB의 fullDB에서 base64 데이터를 찾아 Storage에 업로드 후 storage 경로로 교체
+let _migrating=false;
+async function _migrateFilesToStorage(){
+  if(_migrating){ alert('마이그레이션 진행 중입니다.'); return; }
+  if(!sbClient){ alert('로그인이 필요합니다.'); return; }
+  const btn=$('btn-migrate-storage');
+  const st=$('migrate-storage-status');
+  if(btn) btn.disabled=true;
+  if(st) st.textContent='⏳ IndexedDB에서 데이터 로딩 중...';
+  _migrating=true;
+  let uploaded=0, skipped=0, failed=0, total=0;
+  const log=[];
+  function _updateStatus(msg){ if(st) st.textContent=msg; }
+  try{
+    // IndexedDB에서 이미지 포함 전체 DB 로드
+    const fullDB=await _idbGet('fullDB');
+    const src=fullDB||DB;
+    console.log('[Migration] 시작 — 소스:', fullDB?'IndexedDB fullDB':'메모리 DB', '건물:', (src.buildings||[]).length, '호실:', (src.leases||[]).length);
+    // 헬퍼: base64 data가 유효한지
+    const _isBase64=(d)=>d&&typeof d==='string'&&d.startsWith('data:')&&d.length>100;
+    // 헬퍼: 파일 객체 배열의 base64를 Storage로 업로드
+    async function _migrateFileObj(f, pathPrefix, idx){
+      if(f.storage){ skipped++; return false; } // 이미 Storage에 있음
+      if(!_isBase64(f.data)){ skipped++; return false; }
+      total++;
+      try{
+        const ext=(f.name||'file').split('.').pop()||'bin';
+        const spath=pathPrefix+Date.now()+'_'+idx+'.'+ext;
+        await _stUpload(spath, f.data);
+        f.storage=spath;
+        delete f.data; // base64 제거
+        uploaded++;
+        log.push('✅ '+spath);
+        return true;
+      }catch(e){
+        failed++;
+        log.push('❌ '+pathPrefix+' — '+e.message);
+        return false;
+      }
+    }
+    // 헬퍼: 단일 문자열 base64 필드 마이그레이션
+    async function _migrateSingleField(obj, dataKey, nameKey, mimeKey, filesKey, pathPrefix){
+      const data=obj[dataKey];
+      if(!_isBase64(data)) return false;
+      total++;
+      try{
+        const mime=obj[mimeKey]||'application/octet-stream';
+        const ext=(obj[nameKey]||'file').split('.').pop()||'bin';
+        const spath=pathPrefix+Date.now()+'.'+ext;
+        await _stUpload(spath, data);
+        // 새 파일 객체 배열로 전환
+        if(!obj[filesKey]||!obj[filesKey].length){
+          obj[filesKey]=[{storage:spath, name:obj[nameKey]||'file', mime:mime}];
+        }else{
+          obj[filesKey][0].storage=spath;
+          delete obj[filesKey][0].data;
+        }
+        obj[dataKey]='__IMG_IN_LOCAL__'; // 마커로 교체
+        uploaded++;
+        log.push('✅ '+spath);
+        return true;
+      }catch(e){
+        failed++;
+        log.push('❌ '+pathPrefix+' — '+e.message);
+        return false;
+      }
+    }
+    _updateStatus('⏳ 건축물대장/관리계약서 마이그레이션 중...');
+    // 1) 건축물대장 (buildings.cert / certFiles)
+    for(const b of (src.buildings||[])){
+      const bId=b.id;
+      // cert (단일 base64 문자열)
+      await _migrateSingleField(b,'cert','certName','certMime','certFiles','buildings/'+bId+'/cert/');
+      // certFiles 배열
+      for(let i=0;i<(b.certFiles||[]).length;i++){
+        await _migrateFileObj(b.certFiles[i],'buildings/'+bId+'/cert/',i);
+      }
+      // 관리계약서 (mgmtContract / mgmtContractFiles)
+      await _migrateSingleField(b,'mgmtContract','mgmtContractName','mgmtContractMime','mgmtContractFiles','buildings/'+bId+'/mgmtContract/');
+      for(let i=0;i<(b.mgmtContractFiles||[]).length;i++){
+        await _migrateFileObj(b.mgmtContractFiles[i],'buildings/'+bId+'/mgmtContract/',i);
+      }
+    }
+    _updateStatus('⏳ 임대차계약서 마이그레이션 중...');
+    // 2) 임대차계약서 (leases.contract / contractFiles)
+    for(const l of (src.leases||[])){
+      const lId=l.id;
+      await _migrateSingleField(l,'contract','contractName','contractMime','contractFiles','leases/'+lId+'/contract/');
+      for(let i=0;i<(l.contractFiles||[]).length;i++){
+        await _migrateFileObj(l.contractFiles[i],'leases/'+lId+'/contract/',i);
+      }
+    }
+    _updateStatus('⏳ 수도/전기 청구서 마이그레이션 중...');
+    // 3) 수도/전기 청구서
+    for(const k of ['waterBills','electricBills']){
+      for(const w of (src[k]||[])){
+        for(const bill of (w.bills||[])){
+          for(let i=0;i<(bill.files||[]).length;i++){
+            await _migrateFileObj(bill.files[i], k+'/'+w.id+'/'+bill.period+'/',i);
+          }
+        }
+      }
+    }
+    // 4) 수리사진 (repPhotos)
+    if(src.repPhotos){
+      for(const [rk,rv] of Object.entries(src.repPhotos)){
+        if(_isBase64(rv)){
+          total++;
+          try{
+            const spath='repPhotos/'+rk+'/'+Date.now()+'.jpg';
+            await _stUpload(spath, rv);
+            src.repPhotos[rk]=_stUrl(spath); // URL로 교체
+            uploaded++; log.push('✅ '+spath);
+          }catch(e){ failed++; log.push('❌ repPhotos/'+rk+' — '+e.message); }
+        }
+        if(Array.isArray(rv)){
+          for(let i=0;i<rv.length;i++){
+            if(_isBase64(rv[i])){
+              total++;
+              try{
+                const spath='repPhotos/'+rk+'/'+Date.now()+'_'+i+'.jpg';
+                await _stUpload(spath, rv[i]);
+                rv[i]=_stUrl(spath);
+                uploaded++; log.push('✅ '+spath);
+              }catch(e){ failed++; log.push('❌ repPhotos/'+rk+'['+i+'] — '+e.message); }
+            }
+          }
+        }
+      }
+    }
+    // 마이그레이션 결과를 DB에 반영
+    if(uploaded>0){
+      // src가 fullDB이면 DB에 머지
+      if(fullDB && fullDB!==DB){
+        DB=_mergeLocalImages(DB, fullDB);
+        // buildings, leases의 storage 경로 복사
+        (src.buildings||[]).forEach(sb=>{
+          const db=DB.buildings.find(b=>String(b.id)===String(sb.id));
+          if(!db) return;
+          if(sb.certFiles) db.certFiles=sb.certFiles;
+          if(sb.mgmtContractFiles) db.mgmtContractFiles=sb.mgmtContractFiles;
+        });
+        (src.leases||[]).forEach(sl=>{
+          const dl=DB.leases.find(l=>String(l.id)===String(sl.id));
+          if(!dl) return;
+          if(sl.contractFiles) dl.contractFiles=sl.contractFiles;
+        });
+        ['waterBills','electricBills'].forEach(k=>{
+          (src[k]||[]).forEach(sw=>{
+            const dw=(DB[k]||[]).find(x=>x.id===sw.id);
+            if(!dw) return;
+            (sw.bills||[]).forEach(sb=>{
+              const db=(dw.bills||[]).find(x=>x.period===sb.period);
+              if(db) db.files=sb.files;
+            });
+          });
+        });
+        if(src.repPhotos) DB.repPhotos=src.repPhotos;
+      }
+      sv();
+    }
+    const msg=`마이그레이션 완료!\n\n업로드: ${uploaded}건\n건너뜀(이미 완료): ${skipped}건\n실패: ${failed}건\n\n${uploaded===0&&failed===0?'마이그레이션할 base64 파일이 없습니다.\n(이미 Storage로 전환 완료되었거나, 이 기기에 원본 파일이 없습니다)':failed>0?'실패한 파일은 다시 시도하세요.':'모든 파일이 클라우드에 저장되었습니다.'}`;
+    _updateStatus(uploaded>0?`✅ ${uploaded}건 완료`:'ℹ️ 대상 파일 없음');
+    alert(msg);
+    console.log('[Migration]', msg, '\n', log.join('\n'));
+  }catch(e){
+    _updateStatus('❌ 오류: '+e.message);
+    alert('마이그레이션 오류: '+e.message);
+    console.error('[Migration]',e);
+  }finally{
+    _migrating=false;
+    if(btn) btn.disabled=false;
+  }
+}
+
 // ── 롤링 백업: 데이터 손실 방어. 매번 저장 전·후로 로컬에 최대 5세대 보관
 function _pushRollingBackup(tag){
   try{
@@ -1596,7 +1773,7 @@ function _mergeArrayById(cloudArr, localArr){
 function _mergeDB(cloud, local){
   // 클라우드 기본, 배열은 id 기준 머지 (양쪽 항목 보존)
   var merged=JSON.parse(JSON.stringify(cloud));
-  var arrKeys=['calEvents','leases','expires','fixedEvents','memos','pMemos'];
+  var arrKeys=['calEvents','leases','expires','fixedEvents','fixedSchedules','memos','pMemos'];
   arrKeys.forEach(function(k){
     if(Array.isArray(cloud[k]) || Array.isArray(local[k])){
       merged[k]=_mergeArrayById(cloud[k]||[], local[k]||[]);
@@ -1624,7 +1801,18 @@ async function sv(){
   if(IS_DEMO){ showSaveStatus('🎭 데모 모드 · 저장 안 됨','#b45309'); return; }
   _pushRollingBackup('pre-save');
   // IndexedDB에 이미지 포함 전체 저장 (50MB+) — 메인 저장소
-  try{ _idbPut('fullDB',DB).catch(function(e){console.warn('[sv] IndexedDB 저장 실패',e);}); }catch(e){}
+  // ★ 기존 IndexedDB에 base64 원본이 있으면 __IMG_IN_LOCAL__로 덮어쓰지 않도록 보호
+  try{
+    _idbGet('fullDB').then(function(prev){
+      var toSave=DB;
+      if(prev && typeof prev==='object'){
+        // 기존 fullDB의 이미지를 현재 DB에 복원 후 저장
+        toSave=JSON.parse(JSON.stringify(DB));
+        toSave=_mergeLocalImages(toSave, prev);
+      }
+      _idbPut('fullDB',toSave).catch(function(e){console.warn('[sv] IndexedDB 저장 실패',e);});
+    }).catch(function(){ _idbPut('fullDB',DB).catch(function(){}); });
+  }catch(e){}
   // localStorage는 보조 (용량 초과 시 조용히 무시)
   try{ localStorage.setItem(SK, JSON.stringify(_stripBillImages(DB))); }catch(e){}
   if(!sbClient){ showSaveStatus('💾 로컬 저장됨','var(--t3)'); return; }
@@ -1809,16 +1997,23 @@ function setupPresence(){
         const st=_presenceChannel.presenceState();
         _presenceState={};
         Object.keys(st).forEach(k=>{ const arr=st[k]; if(arr&&arr.length) _presenceState[k]=arr[arr.length-1]; });
+        console.log('[Presence] sync — 접속자:', Object.keys(_presenceState).length+'명');
         _renderPresence();
       })
-      .on('presence',{event:'join'},()=>_renderPresence())
-      .on('presence',{event:'leave'},()=>_renderPresence())
+      .on('presence',{event:'join'},({key})=>{ console.log('[Presence] join:',key); _renderPresence(); })
+      .on('presence',{event:'leave'},({key})=>{ console.log('[Presence] leave:',key); _renderPresence(); })
       .subscribe(async(status)=>{
+        console.log('[Presence] subscribe status:',status);
         if(status==='SUBSCRIBED'){
           await _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:null,at:Date.now()});
+          console.log('[Presence] ✅ 트래킹 시작 — id:',CURRENT_USER_ID,'name:',CURRENT_USER_NAME);
+        }
+        if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
+          console.error('[Presence] ❌ 채널 연결 실패:',status);
+          _presenceChannel=null; // 재시도 가능하게
         }
       });
-  }catch(e){ console.warn('Presence 구독 실패:',e.message); }
+  }catch(e){ console.warn('Presence 구독 실패:',e.message); _presenceChannel=null; }
 }
 async function _pushPresence(ctx){
   _myEditingCtx=ctx;
@@ -2964,22 +3159,7 @@ function _autoMeterDay(w){
   Object.keys(freq).forEach(k=>{ if(freq[k]>bestCnt){ bestCnt=freq[k]; best=parseInt(k); }});
   return best;
 }
-// 1회 마이그레이션: 건물정보 기준으로 meterCycle(홀짝) + meterDay(검침일) 교정
-if(!window._meterMigrated2){
-  window._meterMigrated2=true;
-  try{
-    var _fixed=0;
-    (DB.waterBills||[]).forEach(function(w){
-      var bi=_parseBldgWaterInfo(w.bId);
-      if(!bi) return;
-      // 홀짝 주기: 건물정보가 정확한 기준 — 잘못된 값도 덮어씀
-      if(bi.meterCycle && w.meterCycle!==bi.meterCycle){ w.meterCycle=bi.meterCycle; _fixed++; }
-      // 검침일: 없을 때만 건물정보에서 채움 (이후로는 이미지에서만)
-      if(!w.meterDay && bi.meterDay){ w.meterDay=bi.meterDay; _fixed++; }
-    });
-    if(_fixed){ try{sv();}catch(e){} console.log('[meter 마이그레이션] '+_fixed+'건 보정'); }
-  }catch(e){}
-}
+// (건물메모→수도 마이그레이션 제거됨 — 수도요금에서 직접 입력)
 function rdWater(){
   const list=$('water-list'); if(!list) return;
   const q='';
@@ -2989,18 +3169,8 @@ function rdWater(){
   DB.buildings.forEach(b=>{ grp[b.id]={bldg:b,items:[]}; });
   bills.forEach(w=>{
     if(!grp[w.bId]) return;
-    // meterCycle: 건물정보가 정확한 기준 (항상 우선)
-    var bInfo=_parseBldgWaterInfo(w.bId);
-    if(bInfo&&bInfo.meterCycle){ w.meterCycle=bInfo.meterCycle; }
-    else if(!w.meterCycle){
-      const cycle=_autoMeterCycle(w);
-      if(cycle) w.meterCycle=cycle;
-    }
-    if(!w.meterCycle) w.meterCycle='odd'; // 최종 기본값
-    // 검침일: 이미지(북마클릿) 우선 → 건물정보 텍스트 폴백 (신규건물도 자동 인식)
-    const mDay=_autoMeterDay(w);
-    if(mDay && !w.meterDay){ w.meterDay=mDay; }
-    if(!w.meterDay && bInfo && bInfo.meterDay){ w.meterDay=bInfo.meterDay; }
+    // meterCycle/meterDay: 수동 입력값만 사용 (건물메모 연동 없음)
+    if(!w.meterCycle) w.meterCycle='odd';
     // 필터 적용
     if(_waterFilter==='all'){ grp[w.bId].items.push(w); }
     else if(_waterFilter==='odd'&&w.meterCycle==='odd'){ grp[w.bId].items.push(w); }
@@ -3106,7 +3276,7 @@ function rdWater(){
 }
 let _waterFormSnap='';
 function _snapWater(){
-  return ($('fw-id')?$('fw-id').value:'')+'|'+($('fw-b')?$('fw-b').value:'')+'|'+($('fw-cn')?$('fw-cn').value:'')+'|'+($('fw-mc')?$('fw-mc').value:'')+'|'+($('fw-cm')?$('fw-cm').value:'')+'|'+($('fw-note')?$('fw-note').value:'');
+  return ($('fw-id')?$('fw-id').value:'')+'|'+($('fw-b')?$('fw-b').value:'')+'|'+($('fw-cn')?$('fw-cn').value:'')+'|'+($('fw-mc')?$('fw-mc').value:'')+'|'+($('fw-cm')?$('fw-cm').value:'')+'|'+($('fw-note')?$('fw-note').value:'')+'|'+($('fw-mday')?$('fw-mday').value:'');
 }
 function _saveWaterDraft(){
   try{
@@ -3157,12 +3327,7 @@ function _parseBldgWaterInfo(bId){
   }catch(e){ return null; }
 }
 function _autoFillMeterFromBldg(bId){
-  var info=_parseBldgWaterInfo(bId);
-  var mdayEl=$('fw-mday');
-  if(mdayEl){ mdayEl.textContent=''; mdayEl.dataset.day=''; }
-  if(!info) return;
-  // 홀짝수만 건물정보에서 기본값 세팅 (정기검침일은 청구서에서만)
-  if(info.meterCycle) $('fw-mc').value=info.meterCycle;
+  // 건물메모 연동 제거 — 수도요금 등록 시 직접 입력만 사용
 }
 function openWaterModal(id, bId){
   const w=id?(DB.waterBills||[]).find(x=>x.id===id):null;
@@ -3186,7 +3351,7 @@ function openWaterModal(id, bId){
         <div class="fg" style="margin:0;width:100%;display:flex;align-items:center;gap:8px"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">건물</label><select id="fw-b" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></select></div>
         <div style="margin:0;width:100%;display:flex;align-items:center;gap:8px">
           <div class="fg" style="margin:0;display:flex;align-items:center;gap:8px;flex:1"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">고객번호</label><input id="fw-cn" placeholder="예: 029056246" autocomplete="off" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></div>
-          <div class="fg" style="margin:0;display:flex;align-items:center;gap:6px;flex-shrink:0"><label style="font-size:11.5px;color:var(--t3);white-space:nowrap">검침일</label><select id="fw-mc" style="font-size:12px;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-family:inherit"><option value="odd">홀수월</option><option value="even">짝수월</option></select><span id="fw-mday" style="font-size:10.5px;color:#0369a1;font-weight:600;white-space:nowrap"></span></div>
+          <div class="fg" style="margin:0;display:flex;align-items:center;gap:6px;flex-shrink:0"><label style="font-size:11.5px;color:var(--t3);white-space:nowrap">검침</label><select id="fw-mc" style="font-size:12px;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-family:inherit"><option value="odd">홀수월</option><option value="even">짝수월</option></select><input id="fw-mday" type="number" min="1" max="31" placeholder="일" style="width:42px;font-size:12px;padding:4px 5px;border:1px solid var(--ln);border-radius:var(--r);font-family:inherit;text-align:center"><span style="font-size:11px;color:var(--t3)">일</span></div>
         </div>
         <div class="fg" style="margin:0;width:100%;display:flex;align-items:center;gap:8px"><label style="font-size:11.5px;color:var(--t3);width:72px;flex-shrink:0;text-align:right">고객명</label><input id="fw-cm" placeholder="예: 프로젝트에이스주식회사" autocomplete="off" style="font-size:13px;padding:5px 7px;flex:1;box-sizing:border-box"></div>
         <input type="hidden" id="fw-note" value="">
@@ -3223,14 +3388,11 @@ function openWaterModal(id, bId){
   if(w){
     $('fw-mc').value=w.meterCycle||'odd';
     var mdayEl=$('fw-mday');
-    if(mdayEl){
-      var day=w.meterDay||0;
-      mdayEl.textContent=day?('매 '+day+'일'):'';
-      mdayEl.dataset.day=day||'';
-    }
+    if(mdayEl) mdayEl.value=w.meterDay||'';
   } else {
     // 신규: 건물 정보에서 검침 주기+검침일 자동 파싱
     $('fw-mc').value='odd';
+    if($('fw-mday')) $('fw-mday').value='';
     _autoFillMeterFromBldg(parseInt($('fw-b').value));
   }
   $('fw-cm').value=w?(w.custName||''):'';
@@ -3262,9 +3424,9 @@ function saveWater(){
   const meterCycle=($('fw-mc').value||'');
   const custName=($('fw-cm').value||'').trim();
   const note=($('fw-note').value||'').trim();
-  // 정기검침일: 모달에서 자동감지된 값 또는 기존값
+  // 정기검침일: 수동 입력값
   var mdayEl=$('fw-mday');
-  var meterDay=mdayEl?parseInt(mdayEl.dataset.day)||0:0;
+  var meterDay=mdayEl?parseInt(mdayEl.value)||0:0;
   if(!custNo){ alert('고객번호를 입력하세요.'); return; }
   if(id){
     const i=DB.waterBills.findIndex(x=>x.id===id);
@@ -5666,15 +5828,57 @@ function _getDocData(id, kind){
     return null;
   }
 }
-function viewDoc(id, kind){
-  const doc=_getDocData(id,kind);
+async function viewDoc(id, kind){
+  let doc=_getDocData(id,kind);
+  // 파일이 없거나 __IMG_IN_LOCAL__ 상태이면 IndexedDB에서 복원 시도
+  const _hasValidFile=(d)=>d&&d.files.length&&d.files.some(f=>f.storage||(f.data&&f.data!=='__IMG_IN_LOCAL__'&&f.data.length>30));
+  if(!_hasValidFile(doc)){
+    try{
+      const fullDB=await _idbGet('fullDB');
+      if(fullDB){
+        // IndexedDB의 전체 데이터에서 이미지 복원 시도
+        const _getFromFull=(db,_id,_kind)=>{
+          if(_kind==='cert'){
+            const b=(db.buildings||[]).find(b=>String(b.id)===String(_id));if(!b)return null;
+            if(b.certFiles&&b.certFiles.length)return{files:b.certFiles,label:'건축물대장'};
+            if(b.cert)return{files:[{data:b.cert,name:b.certName||'건축물대장',mime:b.certMime||''}],label:'건축물대장'};
+          }else if(_kind==='contract'){
+            const b=(db.buildings||[]).find(b=>String(b.id)===String(_id));if(!b)return null;
+            if(b.mgmtContractFiles&&b.mgmtContractFiles.length)return{files:b.mgmtContractFiles,label:'관리계약서'};
+            if(b.mgmtContract)return{files:[{data:b.mgmtContract,name:b.mgmtContractName||'관리계약서',mime:b.mgmtContractMime||''}],label:'관리계약서'};
+          }else{
+            const l=(db.leases||[]).find(l=>String(l.id)===String(_id));if(!l)return null;
+            if(l.contractFiles&&l.contractFiles.length)return{files:l.contractFiles,label:'임대차계약서'};
+            if(l.contract)return{files:[{data:l.contract,name:l.contractName||'임대차계약서',mime:l.contractMime||''}],label:'임대차계약서'};
+          }
+          return null;
+        };
+        const idbDoc=_getFromFull(fullDB,id,kind);
+        if(_hasValidFile(idbDoc)){
+          doc=idbDoc;
+          console.log('[viewDoc] IndexedDB에서 파일 데이터 복원 성공');
+          // 메모리 DB에도 복원해두기
+          _mergeLocalImages(DB, fullDB);
+        }
+      }
+    }catch(e){ console.warn('[viewDoc] IDB fallback 실패:',e); }
+  }
   if(!doc||!doc.files.length){ alert('첨부된 파일이 없습니다.'); return; }
   // 파일 URL 해석 헬퍼 (Storage URL 우선, base64 폴백)
-  function _resolveFileUrl(f, fallbackMime){ return f.storage?_stUrl(f.storage):_dataUrlToBlobUrl(f.data, fallbackMime||f.mime||'application/octet-stream'); }
+  function _resolveFileUrl(f, fallbackMime){
+    if(f.storage) return _stUrl(f.storage);
+    if(!f.data || f.data==='__IMG_IN_LOCAL__') return null;
+    return _dataUrlToBlobUrl(f.data, fallbackMime||f.mime||'application/octet-stream');
+  }
+  // 유효한 파일이 하나도 없으면 안내
+  if(!doc.files.some(f=>_resolveFileUrl(f,f.mime)!==null)){
+    alert('파일 원본이 없습니다.\nStorage 전환 이전에 저장된 파일은 재첨부가 필요합니다.');
+    return;
+  }
   // 단일 PDF → 브라우저 네이티브 뷰어로 직접 열기 (가장 안정적)
   if(doc.files.length===1&&(doc.files[0].mime||'').includes('pdf')){
     const blob=_resolveFileUrl(doc.files[0], doc.files[0].mime);
-    if(!blob){ alert('PDF를 열 수 없습니다.'); return; }
+    if(!blob){ alert('파일 원본이 없습니다.\nStorage 전환 이전에 저장된 파일은 재첨부가 필요합니다.'); return; }
     const w=window.open(blob,'_blank');
     if(!w){ const a=document.createElement('a');a.href=blob;a.download=doc.files[0].name||'document.pdf';document.body.appendChild(a);a.click();a.remove(); }
     if(!doc.files[0].storage) setTimeout(()=>{try{URL.revokeObjectURL(blob)}catch(e){}},60000);
@@ -6114,16 +6318,16 @@ document.addEventListener('click',e=>{if(ieTarget&&!$('ie').contains(e.target))c
 function saveExpire(){
   const eid=$('exp-eid').value;
   const o={bId:parseInt($('fe-b').value),type:$('fe-t').value,date:$('fe-d').value,note:$('fe-n').value.trim()};
-  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0)DB.expires[i]={...DB.expires[i],...o,na:false};}
-  else DB.expires.push({id:nid(),...o});
+  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0){DB.expires[i]={...DB.expires[i],...o,na:false,_edit:editStamp()};}}
+  else DB.expires.push({id:nid(),...o,_created:editStamp()});
   sv();closeMo('mo-expire');rdExpire();upBadges();
 }
 // "해당없음" 으로 저장: date=null, na=true
 function saveExpireNA(){
   const eid=$('exp-eid').value;
   const o={bId:parseInt($('fe-b').value),type:$('fe-t').value,date:'',note:'해당없음',na:true};
-  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0)DB.expires[i]={...DB.expires[i],...o};}
-  else DB.expires.push({id:nid(),...o});
+  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0){DB.expires[i]={...DB.expires[i],...o,_edit:editStamp()};}}
+  else DB.expires.push({id:nid(),...o,_created:editStamp()});
   sv();closeMo('mo-expire');rdExpire();upBadges();
 }
 
@@ -6141,6 +6345,7 @@ function rdCal(){
   const myOnly=$('cal-my')?.checked;
   const flt=DB.ui.calFlt;
   let evs=DB.calEvents.filter(e=>{
+    if(e._deleted)return false;
     if(bf!=='all'&&e.bId!=bf)return false;
     if(myOnly&&e.user!=='나')return false;
     if(flt==='todo'&&e.status==='done')return false;
@@ -6161,6 +6366,7 @@ function rdCalRP(bf,myOnly){
   });
   const hadOpen=openUsers.size>0;
   const all=DB.calEvents.filter(e=>{
+    if(e._deleted)return false;
     if(bf&&bf!=='all'&&e.bId!=bf)return false;
     if(myOnly&&e.user!=='나')return false;
     return true;
@@ -6511,8 +6717,8 @@ function moveCalEv(id){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(nd)){alert('YYYY-MM-DD 형식으로 입력');return;}
   e.date=nd;e._edit=editStamp();sv();rdCal();
 }
-function togEvDone(id){const e=DB.calEvents.find(e=>e.id===id);if(!e)return;if(!canEditCalEv(e)){alert('작성자 본인만 체크할 수 있습니다.');return;}e.status=e.status==='done'?'plan':'done';sv();rdCal();}
-function delCalEv(id){const e=DB.calEvents.find(e=>e.id===id);if(!e)return;if(!canEditCalEv(e)){alert('작성자 본인만 삭제할 수 있습니다.');return;}if(!confirm('삭제?'))return;DB.calEvents=DB.calEvents.filter(e=>e.id!==id);sv();rdCal();}
+function togEvDone(id){const e=DB.calEvents.find(e=>e.id===id);if(!e)return;if(!canEditCalEv(e)){alert('작성자 본인만 체크할 수 있습니다.');return;}e.status=e.status==='done'?'plan':'done';e._edit=editStamp();sv();rdCal();}
+function delCalEv(id){const e=DB.calEvents.find(e=>e.id===id);if(!e)return;if(!canEditCalEv(e)){alert('작성자 본인만 삭제할 수 있습니다.');return;}if(!confirm('삭제?'))return;e._deleted=true;e._edit=editStamp();sv();rdCal();}
 
 // ── FIXED ─────────────────────────────────────────────────────────────
 function fixKey(sId,ti){const n=new Date();return`${n.getFullYear()}-${n.getMonth()}-${sId}-${ti}`;}
@@ -6559,6 +6765,7 @@ function rdFixed(){
     });
   }
   const sorted=[...DB.fixedSchedules]
+    .filter(s=>!s._deleted)
     .filter(s=>!sq||(taskMatchMap[s.id]&&taskMatchMap[s.id].size>0))
     .sort((a,b)=>(a.day===99?100:a.day)-(b.day===99?100:b.day));
   // 검색 중엔 매칭된 날짜만, 아니면 1~31+말일 전부 렌더
@@ -6629,19 +6836,35 @@ function moveFixTask(sId,ti){
   const nd=prompt('이동할 날짜 (1~31, 말일=99)',s.day);if(!nd)return;
   const d=parseInt(nd);if(isNaN(d)||(d<1)||(d>31&&d!==99))return alert('1~31 또는 99');
   const task=s.tasks[ti];s.tasks.splice(ti,1);
-  if(!s.tasks.length)DB.fixedSchedules=DB.fixedSchedules.filter(x=>x.id!==sId);
-  const target=DB.fixedSchedules.find(s2=>s2.day===d);
-  if(target){target.tasks.push(task);}else{DB.fixedSchedules.push({id:nid(),day:d,dayLabel:d===99?'말일':d+'일',tasks:[task],special:''});}
+  s._edit=editStamp();
+  if(!s.tasks.length) s._deleted=true;
+  const target=DB.fixedSchedules.find(s2=>!s2._deleted&&s2.day===d);
+  if(target){target.tasks.push(task);target._edit=editStamp();}else{DB.fixedSchedules.push({id:nid(),day:d,dayLabel:d===99?'말일':d+'일',tasks:[task],special:'',_created:editStamp()});}
   sv();rdFixed();
 }
 function saveTaskDirect(sId,ti,el){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
-  // Extract just the task text (strip number prefix and special html)
-  let raw=el.textContent.trim();
+  el.setAttribute('contenteditable','false');
+  // 특이사항 자식 div 제외하고 순수 task 텍스트만 추출
+  let raw='';
+  el.childNodes.forEach(function(n){
+    if(n.nodeType===3) raw+=n.textContent; // 텍스트 노드만
+    else if(n.nodeType===1 && n.tagName==='MARK') raw+=n.textContent; // 검색 하이라이트
+  });
+  raw=raw.trim();
   const numPfx=raw.match(/^\d+\.\s*/);
   if(numPfx)raw=raw.substring(numPfx[0].length);
-  // Remove special text that might have been included
-  if(raw&&raw!==s.tasks[ti]){s.tasks[ti]=raw;DB.fixedHistory.push({sId,user:'나',date:editStamp()});sv();}
+  // 내용을 비우면 해당 업무 삭제
+  if(!raw){
+    if(confirm('내용이 비어있습니다. 이 업무를 삭제할까요?')){
+      s.tasks.splice(ti,1);
+      s._edit=editStamp();
+      if(!s.tasks.length) s._deleted=true;
+      sv();rdFixed();
+    } else { rdFixed(); }
+    return;
+  }
+  if(raw!==s.tasks[ti]){s.tasks[ti]=raw;s._edit=editStamp();DB.fixedHistory.push({sId,user:'나',date:editStamp()});sv();}
 }
 function togFix(sId,ti){const key=fixKey(Number(sId),ti);DB.fixedDone[key]=!DB.fixedDone[key];sv();rdFixed();}
 function resetFixDone(){if(!confirm('이달 완료 체크 초기화?'))return;DB.fixedDone={};sv();rdFixed();}
@@ -6655,8 +6878,17 @@ function saveTaskEdit(sId,ti){
   const ta=$(`fte-${sId}-${ti}`);if(!ta)return;
   const val=ta.value.trim();
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
-  if(val&&val!==s.tasks[ti]){
-    s.tasks[ti]=val;
+  if(!val){
+    if(confirm('내용이 비어있습니다. 이 업무를 삭제할까요?')){
+      s.tasks.splice(ti,1);
+      s._edit=editStamp();
+      if(!s.tasks.length) s._deleted=true;
+      sv();
+    }
+    rdFixed();editingTask=null;return;
+  }
+  if(val!==s.tasks[ti]){
+    s.tasks[ti]=val;s._edit=editStamp();
     DB.fixedHistory.push({sId,user:'나',date:editStamp()});
     sv();
   }
@@ -6715,21 +6947,21 @@ function delSpItem(sId,taskIdx){
     if(/^\d+\)/.test(lt)){collecting=false;}
     if(!collecting)keep.push(l);
   });
-  s.special=keep.join('\n');sv();rdFixed();
+  s.special=keep.join('\n');s._edit=editStamp();sv();rdFixed();
 }
 function delSpecial(sId){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s||!s.special)return;
   if(!confirm('특이사항을 삭제하시겠습니까?'))return;
-  s.special='';sv();rdFixed();
+  s.special='';s._edit=editStamp();sv();rdFixed();
 }
 function editSpecialPrompt(sId){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
   const val=prompt('특이사항 수정 (번호별: 1) 내용\n2) 내용)',s.special||'');
-  if(val===null)return;s.special=val;sv();rdFixed();
+  if(val===null)return;s.special=val;s._edit=editStamp();sv();rdFixed();
 }
 function saveSpecialInline(sId,val){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
-  s.special=val.trim();sv();
+  s.special=val.trim();s._edit=editStamp();sv();
 }
 function addSpContext(sId,taskIdx){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
@@ -6766,16 +6998,17 @@ function addSpContext(sId,taskIdx){
 }
 function addFixedTask(day){
   const task=prompt('업무 내용');if(!task)return;
-  const existing=DB.fixedSchedules.find(s=>s.day===day);
-  if(existing){existing.tasks.push(task);}
-  else{DB.fixedSchedules.push({id:nid(),day,dayLabel:day===99?'말일':day+'일',tasks:[task],special:''});}
+  const existing=DB.fixedSchedules.find(s=>!s._deleted&&s.day===day);
+  if(existing){existing.tasks.push(task);existing._edit=editStamp();}
+  else{DB.fixedSchedules.push({id:nid(),day,dayLabel:day===99?'말일':day+'일',tasks:[task],special:'',_created:editStamp()});}
   sv();rdFixed();
 }
 function delFixTask(sId,ti){
   if(!confirm('이 업무를 삭제하시겠습니까?'))return;
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
   s.tasks.splice(ti,1);
-  if(!s.tasks.length)DB.fixedSchedules=DB.fixedSchedules.filter(x=>x.id!==sId);
+  s._edit=editStamp();
+  if(!s.tasks.length){ s._deleted=true; }
   sv();rdFixed();
 }
 
@@ -8076,7 +8309,7 @@ async function enterDemoMode(){
   $('pending-ov')?.classList.add('hide');
   $('rejected-ov')?.classList.add('hide');
   $('app-main').style.display='flex';
-  if($('sb-user')) $('sb-user').textContent='방문자 (데모)';
+  if($('sb-user-name')) $('sb-user-name').textContent='방문자 (데모)';
   DB=buildDemoDB();
   const _lastTab=buildNav(); fillSel('ca-bldg',true);
   const caDate=$('ca-date'); if(caDate) caDate.value=fd(new Date());
@@ -8219,7 +8452,7 @@ async function enterApp(){
   $('rejected-ov')?.classList.add('hide');
   $('app-main').style.display='flex';
   const roleTag = IS_SUPER_ADMIN ? ' (총 관리자)' : (IS_ADMIN ? ' (관리자)' : '');
-  if($('sb-user')) $('sb-user').textContent = CURRENT_USER_NAME + roleTag;
+  if($('sb-user-name')) $('sb-user-name').textContent = CURRENT_USER_NAME + roleTag;
   // 캘린더 작성자 표시 갱신
   const caUserBox=$('ca-user-display'); if(caUserBox) caUserBox.textContent = CURRENT_USER_NAME;
   // 실시간 동기화 구독 (다른 사람이 데이터 수정시 배너 알림)
