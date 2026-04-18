@@ -998,7 +998,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <!-- 수도요금 -->
 <!-- 수도+전기 통합 -->
 <div class="page" id="pg-utility">
-  <div class="ph" style="padding:6px 10px 4px;gap:4px"><h2>⚡💧 전기·수도 요금</h2></div>
+  <div class="ph" style="padding:2px 10px 2px;gap:4px"></div>
   <div style="display:flex;gap:0;height:calc(100vh - 42px);overflow:hidden">
     <!-- 좌: 전기 -->
     <div style="flex:0.85;min-width:0;border-right:1px solid var(--ln);overflow-y:auto;padding:4px 10px 20px">
@@ -1713,11 +1713,18 @@ function _mergeLocalImages(cloud, local){
         (cw.bills||[]).forEach(function(cb){
           var lb=(lw.bills||[]).find(function(x){return x.period===cb.period;});
           if(!lb) return;
-          (cb.files||[]).forEach(function(cf,i){
-            if(cf.data==='__IMG_IN_LOCAL__' && lb.files && lb.files[i] && lb.files[i].data!=='__IMG_IN_LOCAL__'){
-              cf.data=lb.files[i].data;
-            }
-          });
+          // ★ 클라우드에 files가 없거나 마커뿐인데, 로컬에 실제 이미지가 있으면 통째로 복원
+          var cbHasReal=cb.files&&cb.files.some(function(f){return f.data&&f.data.length>100&&f.data!=='__IMG_IN_LOCAL__';});
+          var lbHasReal=lb.files&&lb.files.some(function(f){return f.data&&f.data.length>100&&f.data!=='__IMG_IN_LOCAL__';});
+          if(!cbHasReal && lbHasReal){
+            cb.files=JSON.parse(JSON.stringify(lb.files));
+          } else {
+            (cb.files||[]).forEach(function(cf,i){
+              if(cf.data==='__IMG_IN_LOCAL__' && lb.files && lb.files[i] && lb.files[i].data!=='__IMG_IN_LOCAL__'){
+                cf.data=lb.files[i].data;
+              }
+            });
+          }
         });
       });
     });
@@ -1785,8 +1792,25 @@ function _mergeDB(cloud, local){
       var lw=(local[k]||[]).find(function(x){return x.id===w.id;});
       if(cw&&lw&&Array.isArray(cw.bills)&&Array.isArray(lw.bills)){
         var bmap={};
-        cw.bills.forEach(function(b){ if(b.period) bmap[b.period]=b; });
-        lw.bills.forEach(function(b){ if(b.period&&!bmap[b.period]) bmap[b.period]=b; });
+        cw.bills.forEach(function(b){ if(b.period) bmap[b.period]=JSON.parse(JSON.stringify(b)); });
+        lw.bills.forEach(function(b){
+          if(!b.period) return;
+          var existing=bmap[b.period];
+          if(!existing){
+            // 클라우드에 없는 period → 로컬 추가
+            bmap[b.period]=JSON.parse(JSON.stringify(b));
+          } else {
+            // ★ 같은 period: 로컬에 이미지(files)가 있으면 로컬 우선
+            var localHasFiles=b.files&&b.files.length>0&&b.files.some(function(f){return f.data&&f.data.length>100;});
+            var cloudHasFiles=existing.files&&existing.files.length>0&&existing.files.some(function(f){return f.data&&f.data.length>100;});
+            if(localHasFiles && !cloudHasFiles){
+              bmap[b.period]=JSON.parse(JSON.stringify(b));
+            } else if(localHasFiles && cloudHasFiles){
+              // 양쪽 다 이미지 있으면 로컬 files를 클라우드에 복사
+              existing.files=JSON.parse(JSON.stringify(b.files));
+            }
+          }
+        });
         w.bills=Object.values(bmap);
       }
     });
@@ -1916,11 +1940,21 @@ function _rtShowToast(msg){
 }
 function _rtApplyRow(row){
   if(!row||!row.data) return;
+  // ★ 캡처 진행 중이면 realtime 반영 차단 (캡처 이미지 유실 방지)
+  if(_kepcoCapRunning && _kepcoCapDone>0){
+    console.log('[RT] ⛔ 캡처 진행 중 — realtime 반영 차단');
+    return;
+  }
   _pushRollingBackup('pre-remote-apply');
   // ★ 클라우드↔로컬 머지 (양쪽 항목 보존) + 이미지 복원
   var _localSnap=JSON.parse(JSON.stringify(DB));
   DB=_mergeDB(row.data, _localSnap);
   DB=_mergeLocalImages(DB, _localSnap);
+  // ★ IndexedDB에서도 이미지 복원 (로컬 스냅에 없는 이미지 보호)
+  _idbGet('fullDB').then(function(idbFull){
+    if(idbFull) DB=_mergeLocalImages(DB, idbFull);
+    try{ _idbPut('fullDB',DB).catch(function(e){console.warn('[rt] idb err',e);}); }catch(e){}
+  }).catch(function(){});
   // IndexedDB에도 이미지 포함 전체 저장 (로컬 이미지 유실 방지)
   try{ _idbPut('fullDB',DB).catch(function(e){console.warn('[rt] idb err',e);}); }catch(e){}
   try{ localStorage.setItem(SK, JSON.stringify(_stripBillImages(DB))); }catch(_){}
@@ -1963,6 +1997,9 @@ function setupRealtimeSync(){
         if(!row || !row.data) return;
         // 내가 방금 저장한 것은 무시
         if(row.updated_by && CURRENT_USER_ID && row.updated_by===CURRENT_USER_ID) return;
+        // ★ 캡처 중이거나 캡처 저장 직후면 realtime 무시
+        if(_kepcoCapRunning){ console.log('[RT] ⛔ 캡처 중 — realtime 무시'); return; }
+        if(window._capSaving && (Date.now()-window._capSaving)<5000){ console.log('[RT] ⛔ 캡처 저장 직후 — realtime 무시'); return; }
         clearTimeout(_rtDebounce);
         _rtDebounce = setTimeout(()=>{
           // 🔒 모달 열려있으면 큐에 저장 (덮어쓰기 = 최신 것만 유지)
@@ -5283,7 +5320,7 @@ async function _kepcoAutoFetchAddresses(){
       }
     }
     // 팝업 닫기 (확장이 이미 닫았을 수 있음) + BSN 탭 포커스 복귀
-    try{ if(w && !w.closed) w.close(); }catch(e){}
+    try{ if(w) w.close(); }catch(e){}
     try{ window.focus(); }catch(e){}
     if(addrData && addrData.addr){
       // 주소로 건물 매칭
@@ -5471,7 +5508,7 @@ function rdElectric(){
   _leftPanel+='<div style="border-top:1px dashed var(--ln);padding-top:8px;margin-top:2px">';
   _leftPanel+='<div style="font-size:10px;color:#94a3b8;margin-bottom:5px;letter-spacing:.5px">도구</div>';
   /* 미지정 고객 배치 — 청구서 폴더 탭에서 접근하도록 변경 */
-  _leftPanel+='<button onclick="_showBillDiagnostic()" style="display:block;width:100%;padding:5px 8px;margin-bottom:4px;font-size:10.5px;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:5px;cursor:pointer">🔍 누락 조사</button>';
+  _leftPanel+='<button onclick="_showBillDiagnostic()" style="display:block;width:100%;padding:5px 8px;margin-bottom:4px;font-size:10.5px;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:5px;cursor:pointer">🔍 누락 체크</button>';
   if(window._lastGmailResult||DB._lastGmailResult){
     _leftPanel+='<button onclick="_showLastGmailResult()" style="display:block;width:100%;padding:5px 8px;font-size:10.5px;font-weight:600;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;border-radius:5px;cursor:pointer">📋 마지막 결과</button>';
   }
@@ -5499,17 +5536,26 @@ function rdElectric(){
     var _elEmpty=_elGrpArr.filter(function(g){return g.items.length===0;});
     _elHas.forEach(g=>{
       const b=g.bldg, items=g.items;
-      // 최근 청구 금액 합산
-      var latestTotal=0;
+      // 최근 청구: 가장 최신 기간의 전층 합계
+      var allPeriods={};
       items.forEach(e=>{
-        var lb=(e.bills||[]).sort(function(a,b){return(b.period||'').localeCompare(a.period||'')})[0];
-        if(lb) latestTotal+=(Number(lb.amount)||0);
+        (e.bills||[]).forEach(function(bl){
+          var p=bl.period||''; var amt=parseInt(String(bl.amount).replace(/,/g,''))||0;
+          if(p&&amt>0){
+            if(!allPeriods[p]) allPeriods[p]=0;
+            allPeriods[p]+=amt;
+          }
+        });
       });
+      var pKeys=Object.keys(allPeriods).sort(function(a,b){return b.localeCompare(a);});
+      var latestPeriod=pKeys[0]||'';
+      var latestTotal=allPeriods[latestPeriod]||0;
       var totalFmt=latestTotal?latestTotal.toLocaleString()+'원':'—';
+      var periodTag=latestPeriod?(' <span style="font-size:10px;color:var(--t3);font-weight:400">'+latestPeriod.replace(/^(\d{4})-(\d{2})$/,function(_,y,m){return y.substring(2)+'.'+m;})+'</span>'):'';
       html+='<tr onclick="_openElBldgViewer('+b.id+')" style="border-top:1px solid var(--ln);cursor:pointer;background:var(--w)" title="클릭: 청구서 보기">';
       html+='<td style="padding:10px 14px;font-weight:700;font-size:13px;text-align:left"><span style="font-size:10px;margin-right:6px;color:var(--t3)">▶</span>'+esc(b.name)+'</td>';
       html+='<td style="padding:10px 14px;font-size:12px;color:var(--t2)">'+items.length+'</td>';
-      html+='<td style="padding:10px 14px;font-size:12px;color:#d97706;font-weight:600">'+totalFmt+'</td>';
+      html+='<td style="padding:10px 14px;font-size:12px;color:#d97706;font-weight:600">'+totalFmt+periodTag+'</td>';
       html+='</tr>';
     });
     if(noBldgItems.length){
@@ -6008,15 +6054,13 @@ async function _gmailStartImport(clientId, filterYear){
     if(_noAddrTargets.length>0){
       console.log('[KEPCO] 미지정 중 KEPCO 주소 수집 가능: '+_noAddrTargets.length+'건 (미지정 배치 → KEPCO 주소 가져오기 버튼 사용)');
     }
-    _gmailImporting=false;
-    _hideGmailBanner();
-    if(window._gmailBeforeUnload) window.removeEventListener('beforeunload', window._gmailBeforeUnload);
   }catch(err){
-    _gmailImporting=false;
-    _hideGmailBanner();
-    if(window._gmailBeforeUnload) window.removeEventListener('beforeunload', window._gmailBeforeUnload);
     console.error('[Gmail Import]', err);
     setBody('<div style="text-align:center;padding:20px;color:#dc2626"><div style="font-size:32px;margin-bottom:10px">⚠️</div><b>오류 발생</b><div style="margin-top:8px;font-size:12px;color:var(--t2);word-break:break-all">'+esc(err.message)+'</div><div style="margin-top:12px;font-size:11.5px;color:var(--t3)">Client ID 또는 OAuth 동의 화면 설정을 확인해주세요.<br><button class="btn sm" onclick="_showGmailSetupModal()" style="margin-top:6px">설정 열기</button></div></div>');
+  }finally{
+    _gmailImporting=false;
+    _hideGmailBanner();
+    if(window._gmailBeforeUnload) window.removeEventListener('beforeunload', window._gmailBeforeUnload);
   }
 }
 // MIME parts 재귀 탐색
@@ -6090,7 +6134,7 @@ async function _gmailSaveExtracted(extracted){
       existing.files=(existing.files||[]).concat([fileObj]);
       existing.uploadedAt=Date.now();
     } else {
-      DB.electricBills[wi].bills.push({period:period, files:[fileObj], uploadedAt:Date.now(), source:'gmail'});
+      DB.electricBills[wi].bills.push({period:period, files:[fileObj], uploadedAt:Date.now(), source:'gmail', sourceUser:CURRENT_USER_NAME||'나'});
     }
     total++;
     items.push({period:period, filename:ex.filename, bldgName:bldgName});
@@ -6500,7 +6544,7 @@ function _gmailSaveKepcoData(extracted){
       if(!linkCust.bills) linkCust.bills=[];
       linkCust.bills.push({
         period:ex.period, amount:0, amountFmt:'', usage:'', dueDate:'', addr:ex.addr||'', floor:ex.floor||'',
-        kepcoLink:ex.kepcoLink, source:'gmail', mailDate:ex.date||'', uploadedAt:Date.now(), files:[]
+        kepcoLink:ex.kepcoLink, source:'gmail', sourceUser:CURRENT_USER_NAME||'나', mailDate:ex.date||'', uploadedAt:Date.now(), files:[]
       });
       total++;
       var lBldg=bldgs.find(function(bb){return bb.id===linkCust.bId;});
@@ -6658,6 +6702,7 @@ function _gmailSaveKepcoData(extracted){
       floor:ex.floor||'',
       kepcoLink:ex.kepcoLink||'',
       source:'gmail',
+      sourceUser:CURRENT_USER_NAME||'나',
       mailDate:ex.date||'',
       billType:billType,
       uploadedAt:Date.now(),
@@ -6776,6 +6821,16 @@ function _gmailSaveKepcoData(extracted){
 // ── 한전 청구서 자동 캡처 (window.open + 확장프로그램 + captureVisibleTab 2구간) ──
 var _kepcoCapQueue=[], _kepcoCapRunning=false, _kepcoCapDone=0, _kepcoCapTotal=0;
 var _kepcoCapLastKey=''; // 중복 카운트 방지
+// ★ 캡처 중 새로고침/탭닫기 방지
+window.addEventListener('beforeunload', function(e){
+  if(_kepcoCapRunning && _kepcoCapDone>0){
+    // 마지막으로 IndexedDB에 즉시 저장 시도
+    try{ _idbPut('fullDB', DB); }catch(ex){}
+    e.preventDefault();
+    e.returnValue='캡처 진행 중입니다. 나가면 진행 중인 캡처가 중단됩니다.';
+    return e.returnValue;
+  }
+});
 // localStorage 폴링 (확장프로그램이 ISOLATED world에서 localStorage에 저장)
 setInterval(function(){
   var raw=localStorage.getItem('bsn_kepco_captured');
@@ -6796,8 +6851,32 @@ window.addEventListener('message', function(evt){
   var period=evt.data.period||'';
   var images=evt.data.images||[];
   if(!images.length&&evt.data.dataUrl) images=[{zone:'full',dataUrl:evt.data.dataUrl}];
-  if(!images.length||!custNo) return;
+  if(!images.length) return;
+  // ★ 큐에서 현재 캡처 중인 항목의 custNo/period를 우선 사용 (한전 페이지 추출보다 정확)
+  if(window._kepcoCapCurrent){
+    var cur=window._kepcoCapCurrent;
+    if(cur.custNo && cur.custNo!==custNo){
+      console.log('[KEPCO-CAP] ⚠ custNo 불일치! 한전='+custNo+' BSN큐='+cur.custNo+' → BSN큐 사용');
+      custNo=cur.custNo;
+    }
+    if(cur.period && cur.period!==period && cur.period.length>=7){
+      console.log('[KEPCO-CAP] ⚠ period 불일치! 한전='+period+' BSN큐='+cur.period+' → BSN큐 사용');
+      period=cur.period;
+    }
+  }
+  if(!custNo) return;
   console.log('[KEPCO-CAP] Received: custNo='+custNo+' period='+period+' images='+images.length);
+  // ★ 이미지 품질 검증
+  var imgData=images[0]&&images[0].dataUrl||'';
+  var imgSize=imgData.length;
+  var _capWarning='';
+  if(imgSize<5000){ _capWarning='⚠ 캡처 이미지가 너무 작습니다 ('+Math.round(imgSize/1024)+'KB) — 빈 화면이 캡처되었을 수 있습니다'; }
+  else if(imgSize<20000){ _capWarning='⚠ 캡처 이미지가 작습니다 ('+Math.round(imgSize/1024)+'KB) — 확인 필요'; }
+  if(_capWarning){
+    console.warn('[KEPCO-CAP] '+_capWarning);
+    if(!window._kepcoCapBadList) window._kepcoCapBadList=[];
+    window._kepcoCapBadList.push({custNo:custNo, period:period, size:imgSize, warning:_capWarning});
+  }
   _saveCapdBill(custNo, period, images);
   // 같은 청구서의 2번째 이미지이면 카운트 중복 방지
   var key=custNo+'_'+period;
@@ -6806,21 +6885,43 @@ window.addEventListener('message', function(evt){
     _kepcoCapDone++;
     if(window._kepcoCapTimeout){ clearTimeout(window._kepcoCapTimeout); window._kepcoCapTimeout=null; }
     _updateCapProgress();
+    // ★ 실시간 미리보기 추가
+    var preview=$('kepco-cap-preview');
+    if(preview && images.length>0){
+      var bldgs=DB.buildings||[];
+      var eEntry=(DB.electricBills||[]).find(function(e){return e.custNo===custNo;});
+      var bldgName='(미지정)';
+      if(eEntry && eEntry.bId){ var _b=bldgs.find(function(b){return b.id===eEntry.bId;}); if(_b) bldgName=_b.name; }
+      var floorLabel=eEntry?_elFloorLabel(eEntry):'';
+      var thumbUrl=images[0].dataUrl||'';
+      var card=document.createElement('div');
+      card.style.cssText='display:flex;align-items:center;gap:10px;padding:8px;margin-bottom:6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;animation:fadeIn .3s';
+      card.innerHTML='<img src="'+thumbUrl+'" style="width:90px;height:auto;max-height:70px;object-fit:contain;border-radius:4px;border:1px solid #ddd;flex-shrink:0">'
+        +'<div style="flex:1;text-align:left;min-width:0">'
+        +'<div style="font-size:12px;font-weight:700;color:#1e40af">'+esc(period)+(floorLabel?' <span style="font-weight:500;color:#6b7280;font-size:11px">'+esc(floorLabel)+'</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(bldgName)+'</div>'
+        +''
+        +'</div>'
+        +'<div style="font-size:16px;flex-shrink:0">'+(_capWarning?'⚠️':'✅')+'</div>';
+      if(_capWarning) card.style.background='#fef2f2';
+      preview.insertBefore(card, preview.firstChild);
+      preview.scrollTop=0;
+    }
     // ★ 캡처 완료 토스트 알림
-    _showToast('✅ '+period+' 청구서 캡처 완료! ('+_kepcoCapDone+'/'+_kepcoCapTotal+')','ok');
+    _showToast((_capWarning?'⚠ ':'✅ ')+period+' 청구서 캡처'+(_capWarning?' — 확인 필요':' 완료!')+' ('+_kepcoCapDone+'/'+_kepcoCapTotal+')', _capWarning?'error':'ok');
     // ★ 단건 캡처 후 패널 즉시 갱신
     if(_kepcoCapTotal===1 && _kepcoCapDone>=_kepcoCapTotal){
       _kepcoCapRunning=false;
       // 열려있는 전기요금 모달의 패널 갱신
-      var eEntry=(DB.electricBills||[]).find(function(e){return e.custNo===custNo;});
-      if(eEntry){
-        var eBill=(eEntry.bills||[]).find(function(b){return b.period===period;});
+      var eEntry2=(DB.electricBills||[]).find(function(e){return e.custNo===custNo;});
+      if(eEntry2){
+        var eBill=(eEntry2.bills||[]).find(function(b){return b.period===period;});
         var _pane=$('ev-pane');
-        if(eBill&&_pane) _renderElectricBillPane(_pane, eBill.files||[], eEntry.id, period, eBill);
+        if(eBill&&_pane) _renderElectricBillPane(_pane, eBill.files||[], eEntry2.id, period, eBill);
       }
     }
-    // 2번째 이미지 수신 대기 후 다음 처리 (1.5초)
-    setTimeout(_processNextKepcoCapture, 1500);
+    // 2번째 이미지 수신 대기 후 다음 처리 (3초 — BSN 포커스 복귀 + 미리보기 확인 시간)
+    setTimeout(_processNextKepcoCapture, 3000);
   }
 });
 function _saveCapdBill(custNo, period, images){
@@ -6840,7 +6941,17 @@ function _saveCapdBill(custNo, period, images){
             var capExt=capMime==='image/jpeg'?'.jpg':'.png';
             e.bills[j].files.push({data:img.dataUrl, name:'kepco_'+period+'_'+zone+capExt, mime:capMime});
           }
-          try{sv();}catch(ex){}
+          // ★ IndexedDB 즉시 저장 + 전체 저장(클라우드 포함)
+          try{
+            _idbPut('fullDB', DB).then(function(){
+              console.log('[CAP-SAVE] ✅ IndexedDB 즉시 저장: '+custNo+' '+period);
+            }).catch(function(err){
+              console.warn('[CAP-SAVE] IndexedDB 실패:', err);
+            });
+          }catch(ex){}
+          // ★ 내가 저장하는 중 — realtime 무시 플래그
+          window._capSaving = Date.now();
+          try{ sv(); }catch(ex){}
           return;
         }
       }
@@ -6848,14 +6959,50 @@ function _saveCapdBill(custNo, period, images){
   }
 }
 function _updateCapProgress(){
+  _kepcoCapUpdateMini();
   var prog=$('kepco-cap-prog');
-  if(!prog) return;
   if(_kepcoCapDone>=_kepcoCapTotal){
-    prog.innerHTML='<div style="font-size:24px;margin-bottom:8px">✅</div><b>'+_kepcoCapDone+'건 캡처 완료!</b>';
     _kepcoCapRunning=false;
+    _kepcoCapRemoveMini();
+    // ★ BSN 창 원래 크기로 복귀
+    if(window._kepcoOrigWindow){
+      try{ chrome.runtime.sendMessage({type:'KEPCO_RESTORE_WINDOW', origW:window._kepcoOrigWindow.w, origH:window._kepcoOrigWindow.h, origLeft:window._kepcoOrigWindow.x, origTop:window._kepcoOrigWindow.y}); }catch(e){}
+      window._kepcoOrigWindow=null;
+    }
     rdElectric();
+    // ★ 전체 캡처 완료 시 클라우드 동기화
+    try{sv();}catch(ex){}
+    // 모달이 열려있으면 완료 표시, 최소화 상태면 토스트로 알림
+    // ★ 품질 불량 건 확인
+    var badList=window._kepcoCapBadList||[];
+    var badHtml='';
+    if(badList.length>0){
+      badHtml='<div style="margin-top:10px;padding:8px 12px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;text-align:left;font-size:11px">';
+      badHtml+='<div style="font-weight:700;color:#dc2626;margin-bottom:4px">⚠ 품질 확인 필요 ('+badList.length+'건)</div>';
+      badList.forEach(function(b){
+        var eEntry=(DB.electricBills||[]).find(function(e){return e.custNo===b.custNo;});
+        var bldgName='';
+        if(eEntry&&eEntry.bId){var _b=(DB.buildings||[]).find(function(bb){return bb.id===eEntry.bId;});if(_b)bldgName=_b.name;}
+        var kepcoLink='';
+        if(eEntry){var bill=(eEntry.bills||[]).find(function(bb){return bb.period===b.period;});if(bill)kepcoLink=bill.kepcoLink||'';}
+        badHtml+='<div style="padding:3px 0;border-bottom:1px solid #fee2e2">'+esc(b.period)+' '+esc(bldgName)+' <span style="color:#999">('+Math.round(b.size/1024)+'KB)</span>';
+        if(kepcoLink) badHtml+=' <button onclick="_captureSingleBill(\''+esc(b.custNo)+'\',\''+esc(b.period)+'\',\''+esc(kepcoLink)+'\')" style="font-size:10px;padding:1px 6px;background:#dc2626;color:#fff;border:none;border-radius:3px;cursor:pointer">재캡처</button>';
+        badHtml+='</div>';
+      });
+      badHtml+='</div>';
+      window._kepcoCapBadList=[];
+    }
+    if(prog){
+      prog.innerHTML='<div style="font-size:24px;margin-bottom:8px">✅</div><b>'+_kepcoCapDone+'건 캡처 완료!</b>'+badHtml;
+    }
+    var mo=$('mo-kepco-cap');
+    if(!mo || !mo.classList.contains('on')){
+      _showToast(badList.length?'⚠ '+_kepcoCapDone+'건 캡처 완료 ('+badList.length+'건 확인 필요)':'✅ '+_kepcoCapDone+'건 캡처 완료!', badList.length?'error':'ok');
+      // 완료 시 모달 자동으로 다시 보여주기
+      if(mo) mo.classList.add('on');
+    }
   } else {
-    prog.innerHTML='<div class="mv-spinner"></div><div style="margin-top:8px">'+_kepcoCapDone+' / '+_kepcoCapTotal+' 처리 완료<br><span style="font-size:11px;color:var(--t3)">한전 사이트 탭이 자동으로 열립니다. 닫지 마세요.</span></div>';
+    if(prog) prog.innerHTML='<div class="mv-spinner"></div><div style="margin-top:8px">'+_kepcoCapDone+' / '+_kepcoCapTotal+' 처리 완료<br><span style="font-size:11px;color:var(--t3)">한전 사이트 탭이 자동으로 열립니다. 닫지 마세요.</span></div>';
   }
 }
 function _processNextKepcoCapture(){
@@ -6865,18 +7012,30 @@ function _processNextKepcoCapture(){
     return;
   }
   var item=_kepcoCapQueue.shift();
+  window._kepcoCapCurrent=item; // ★ 현재 캡처 중인 항목 저장
   console.log('[KEPCO-CAP] Opening: custNo='+item.custNo+' period='+item.period);
-  // KEPCO 페이지를 새 창으로 열기 (window.opener로 postMessage 가능)
-  var win=window.open(item.kepcoLink, '_bsn_kepco_cap');
+  // ★ 이전 KEPCO 캡처 창이 남아있으면 먼저 닫기
+  if(window._kepcoCapWin){ try{window._kepcoCapWin.close();}catch(e){} window._kepcoCapWin=null; }
+  // KEPCO 페이지를 오른쪽 절반에 새 창으로 열기 (고정 위치)
+  var halfW=window._kepcoSplitHalfW||Math.floor(screen.availWidth/2);
+  var capH=screen.availHeight||1080;
+  // ★ 매번 고유 이름으로 열어서 위치 고정
+  var winName='_bsn_kepco_cap_'+Date.now();
+  var win=window.open(item.kepcoLink, winName, 'width='+halfW+',height='+capH+',left='+halfW+',top=0,scrollbars=yes');
   if(!win){
     alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.');
     _kepcoCapRunning=false;
     return;
   }
+  window._kepcoCapWin=win;
+  // ★ 위치 재확인 (일부 브라우저에서 open 시 위치 무시되는 경우 보정)
+  setTimeout(function(){
+    try{ win.moveTo(halfW, 0); win.resizeTo(halfW, capH); }catch(e){}
+  }, 300);
   // 타임아웃: 45초 안에 캡처 안 되면 다음으로
   window._kepcoCapTimeout=setTimeout(function(){
     console.warn('[KEPCO-CAP] Timeout for custNo='+item.custNo);
-    try{win.close();}catch(e){}
+    try{win.close();}catch(e){} window._kepcoCapWin=null;
     _processNextKepcoCapture();
   }, 45000);
 }
@@ -6920,14 +7079,14 @@ function _showGmailFailed(){
   document.body.appendChild(mo);
   mo.classList.add('on');
 }
-// ── 누락 조사: 건물별 청구서 현황 + 미파싱 메일 ──
+// ── 누락 체크: 건물별 청구서 현황 + 미파싱 메일 ──
 function _showBillDiagnostic(){
   var bldgs=DB.buildings||[];
   var ebs=DB.electricBills||[];
   var failed=DB._gmailFailed||[];
   // 건물별 고객수, 최근 청구기간 집계
   var bMap={};
-  bldgs.forEach(function(b){ bMap[b.id]={name:b.name, custCount:0, periods:[], custNos:[]}; });
+  bldgs.forEach(function(b){ bMap[b.id]={name:b.name, custCount:0, periods:[], custNos:[], periodCnt:{}, periodImg:{}, emails:{}}; });
   var unmatchedList=[];
   ebs.forEach(function(eb){
     var bid=eb.bId;
@@ -6938,7 +7097,15 @@ function _showBillDiagnostic(){
     bMap[bid].custCount++;
     if(eb.custNo) bMap[bid].custNos.push(eb.custNo);
     (eb.bills||[]).forEach(function(b){
-      if(b.period && bMap[bid].periods.indexOf(b.period)<0) bMap[bid].periods.push(b.period);
+      if(b.period){
+        if(bMap[bid].periods.indexOf(b.period)<0) bMap[bid].periods.push(b.period);
+        bMap[bid].periodCnt[b.period]=(bMap[bid].periodCnt[b.period]||0)+1;
+        // 캡처 이미지 유무 집계
+        var hasImg=b.files&&b.files.length>0&&b.files.some(function(f){return f.data&&f.data.length>1000&&f.data!=='__IMG_IN_LOCAL__';});
+        if(hasImg) bMap[bid].periodImg[b.period]=(bMap[bid].periodImg[b.period]||0)+1;
+        // 불러오기한 이메일 집계
+        if(b.sourceUser) bMap[bid].emails[b.sourceUser]=true;
+      }
     });
   });
   // 최근 6개월 기간 목록
@@ -6951,7 +7118,7 @@ function _showBillDiagnostic(){
   var mo=document.createElement('div'); mo.className='ov on'; mo.id='mo-bill-diag';
   function _closeDiag(){ var el=document.getElementById('mo-bill-diag'); if(el) el.remove(); }
   var html='<div class="modal" style="width:min(700px,96vw);padding:0;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">';
-  html+='<div class="mo-hd" style="padding:12px 16px;background:#fef3c7;border-bottom:1px solid #fcd34d"><h3 style="font-size:14px;margin:0;color:#92400e">🔍 청구서 누락 조사</h3><button onclick="(document.getElementById(\'mo-bill-diag\')||{}).remove?document.getElementById(\'mo-bill-diag\').remove():0" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1;background:none;border:none;cursor:pointer">×</button></div>';
+  html+='<div class="mo-hd" style="padding:12px 16px;background:#fef3c7;border-bottom:1px solid #fcd34d"><h3 style="font-size:14px;margin:0;color:#92400e">🔍 청구서 누락 체크</h3><button onclick="(document.getElementById(\'mo-bill-diag\')||{}).remove?document.getElementById(\'mo-bill-diag\').remove():0" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1;background:none;border:none;cursor:pointer">×</button></div>';
   html+='<div style="padding:12px 16px;overflow-y:auto;flex:1">';
   // linkOnly 통계
   var linkOnlyBills=0, linkOnlyMatched=0;
@@ -6966,7 +7133,8 @@ function _showBillDiagnostic(){
   if(linkOnlyBills) html+='<br>링크only 청구서: <b>'+linkOnlyBills+'</b>건 (건물매칭 '+linkOnlyMatched+' / 미지정 '+(linkOnlyBills-linkOnlyMatched)+')';
   html+='</div>';
   // 건물별 현황 테이블
-  html+='<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--t1)">건물별 청구서 현황</div>';
+  html+='<div style="font-size:12px;font-weight:700;margin-bottom:4px;color:var(--t1)">건물별 청구서 현황</div>';
+  html+='<div style="font-size:10.5px;color:#6b7280;margin-bottom:8px">✅ 수신된 청구서 캡처 완료 &nbsp; <span style="color:#f59e0b">3/5</span> 미캡처 &nbsp; <span style="color:#dc2626">✕</span> 미수신</div>';
   html+='<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:12px">';
   html+='<tr style="background:#f8fafc"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left">건물</th><th style="padding:4px 6px;border:1px solid #e5e7eb">고객수</th>';
   recentPeriods.forEach(function(p){ html+='<th style="padding:4px 6px;border:1px solid #e5e7eb;font-size:10px">'+p.substring(2)+'</th>'; });
@@ -6976,11 +7144,20 @@ function _showBillDiagnostic(){
     var noBills=info.custCount===0;
     var rowBg=noBills?'background:#fef2f2':'';
     html+='<tr style="'+rowBg+'">';
-    html+='<td style="padding:4px 6px;border:1px solid #e5e7eb;font-weight:600">'+esc(b.name)+'</td>';
+    var userList=Object.keys(info.emails||{});
+    var userTag=userList.length?' <span style="font-size:9px;color:#6b7280;font-weight:400">'+esc(userList.join(', '))+'</span>':'';
+    html+='<td style="padding:4px 6px;border:1px solid #e5e7eb;font-weight:600;white-space:nowrap">'+esc(b.name)+userTag+'</td>';
     html+='<td style="padding:4px 6px;border:1px solid #e5e7eb;text-align:center'+(noBills?';color:#dc2626;font-weight:700':'')+'">'+(noBills?'⚠ 0':info.custCount)+'</td>';
     recentPeriods.forEach(function(p){
-      var has=info.periods.indexOf(p)>=0;
-      html+='<td style="padding:4px 6px;border:1px solid #e5e7eb;text-align:center;font-size:12px">'+(has?'✅':'<span style="color:#dc2626">✕</span>')+'</td>';
+      var cnt=info.periodCnt[p]||0;
+      var imgCnt=info.periodImg[p]||0;
+      var total=info.custCount;
+      var cell;
+      if(total===0){ cell='<span style="color:#9ca3af">-</span>'; }
+      else if(cnt>0 && imgCnt>=cnt){ cell='<span title="수신 '+cnt+'/'+total+'">✅</span>'; }
+      else if(cnt>0){ cell='<span style="color:#f59e0b" title="메일 '+cnt+'/'+total+' 캡처 '+imgCnt+'">'+cnt+'/'+total+'</span>'; }
+      else { cell='<span style="color:#dc2626">✕</span>'; }
+      html+='<td style="padding:4px 6px;border:1px solid #e5e7eb;text-align:center;font-size:12px">'+cell+'</td>';
     });
     html+='</tr>';
   });
@@ -7019,12 +7196,6 @@ function _showBillDiagnostic(){
     });
     html+='</div>';
   }
-  // 안내
-  html+='<div style="font-size:11px;color:#6b7280;line-height:1.6;padding:8px;background:#f8fafc;border-radius:6px">';
-  html+='<b>누락 원인 확인법:</b><br>';
-  html+='• 건물에 고객수 0 → 미지정 고객 중 해당 건물의 전기고객이 있는지 확인<br>';
-  html+='• 특정 월 ✕ → 해당 월 메일이 Gmail에 없거나 미파싱 목록에 있을 수 있음<br>';
-  html+='• 미파싱 메일 = 한전 이외 메일이거나 새 형식일 수 있음</div>';
   html+='</div>';
   html+='<div class="mo-ft" style="padding:10px 16px 14px"><button class="btn" onclick="var el=document.getElementById(\'mo-bill-diag\');if(el)el.remove()" style="margin-left:auto">닫기</button></div></div>';
   mo.innerHTML=html;
@@ -7060,17 +7231,27 @@ function _startKepcoBillCapture(){
   var allLinks=[];
   var yearAll={};   // 전체 청구서 수
   var yearLink={};  // kepcoLink 있는 수
+  var bldgs=DB.buildings||[];
   (DB.electricBills||[]).forEach(function(e){
+    var bldg=bldgs.find(function(bb){return bb.id===e.bId;});
+    var bName=bldg?bldg.name:'';
+    // 건물 이름에서 숫자 접두사 추출 (예: "25.G.1빌딩" → 25)
+    var bSort=bName.match(/^(\d+)/)?parseInt(bName.match(/^(\d+)/)[1]):9999;
     (e.bills||[]).forEach(function(b){
       var yr=(b.period||'').substring(0,4);
       if(!yr) return;
       yearAll[yr]=(yearAll[yr]||0)+1;
       if(b.kepcoLink){
-        var hasImg=b.files&&b.files.length>0;
-        allLinks.push({ kepcoLink:b.kepcoLink, custNo:e.custNo, period:b.period, year:yr, hasImg:hasImg });
+        var hasImg=b.files&&b.files.length>0&&b.files.some(function(f){return f.data&&f.data.length>1000&&f.data!=='__IMG_IN_LOCAL__';});
+        allLinks.push({ kepcoLink:b.kepcoLink, custNo:e.custNo, period:b.period, year:yr, hasImg:hasImg, bSort:bSort, bName:bName });
         yearLink[yr]=(yearLink[yr]||0)+1;
       }
     });
+  });
+  // ★ 정렬: 건물번호 오름차순 → 같은 건물 내 최신(period 내림) 우선
+  allLinks.sort(function(a,b){
+    if(a.bSort!==b.bSort) return a.bSort-b.bSort;
+    return (b.period||'').localeCompare(a.period||'');
   });
   // 년도 선택 모달 — DB에 있는 모든 년도 표시
   var curYr=new Date().getFullYear();
@@ -7167,6 +7348,14 @@ function _showNoLinkBills(){
 function _kepcoCapByYear(yr){
   closeMo('mo-kepco-yr');
   var allYrLinks=(yr==='all')?window._kepcoAllLinks:window._kepcoAllLinks.filter(function(l){return l.year===yr;});
+  // ★ DB에서 실시간 hasImg 재체크 (중단 후 재시작 시 이미 캡처된 건 반영)
+  allYrLinks.forEach(function(l){
+    var eb=(DB.electricBills||[]).find(function(e){return e.custNo===l.custNo;});
+    if(eb){
+      var bill=(eb.bills||[]).find(function(b){return b.period===l.period;});
+      l.hasImg=!!(bill && bill.files && bill.files.length>0 && bill.files.some(function(f){return f.data&&f.data.length>1000&&f.data!=='__IMG_IN_LOCAL__';}));
+    }
+  });
   // 이미 이미지 있는 건은 제외
   var links=allYrLinks.filter(function(l){return !l.hasImg;});
   var skipped=allYrLinks.length-links.length;
@@ -7179,8 +7368,8 @@ function _kepcoCapByYear(yr){
   var mo=$('mo-kepco-cap');
   if(!mo){
     mo=document.createElement('div'); mo.id='mo-kepco-cap'; mo.className='ov';
-    mo.innerHTML='<div class="modal" style="width:min(460px,92vw);padding:0"><div class="mo-hd" style="padding:12px 16px"><h3 style="font-size:14px;margin:0">📸 청구서 자동 캡처</h3><button onclick="_kepcoCapStop();closeMo(\'mo-kepco-cap\')" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1">×</button></div><div style="padding:16px 20px;text-align:center" id="kepco-cap-prog"></div><div class="mo-ft" style="padding:10px 16px 14px"><button class="btn del" onclick="_kepcoCapStop();closeMo(\'mo-kepco-cap\')">중지</button></div></div>';
-    mo.addEventListener('click',function(ev){ if(ev.target===mo){ _kepcoCapStop(); closeMo('mo-kepco-cap'); }});
+    mo.innerHTML='<div class="modal" style="width:min(560px,94vw);padding:0"><div class="mo-hd" style="padding:12px 16px"><h3 style="font-size:14px;margin:0">📸 청구서 자동 캡처</h3><button onclick="_kepcoCapMinimize()" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1" title="최소화 (캡처는 계속됩니다)">−</button></div><div style="padding:16px 20px;text-align:center" id="kepco-cap-prog"></div><div id="kepco-cap-preview" style="padding:0 16px 8px;max-height:50vh;overflow-y:auto"></div><div class="mo-ft" style="padding:10px 16px 14px;gap:8px;display:flex;justify-content:flex-end"><button class="btn" onclick="_kepcoCapMinimize()" style="padding:6px 14px">최소화</button><button class="btn del" onclick="_kepcoCapStop();closeMo(\'mo-kepco-cap\');_kepcoCapRemoveMini();">중지</button></div></div>';
+    mo.addEventListener('click',function(ev){ if(ev.target===mo) _kepcoCapMinimize(); });
     document.body.appendChild(mo);
   }
   _kepcoCapQueue=links.slice();
@@ -7188,13 +7377,73 @@ function _kepcoCapByYear(yr){
   _kepcoCapDone=0;
   _kepcoCapRunning=true;
   _updateCapProgress();
+  var _cpv=$('kepco-cap-preview'); if(_cpv) _cpv.innerHTML='';
   mo.classList.add('on');
-  _processNextKepcoCapture();
+  // ★ 화면 분할: BSN 왼쪽, 한전 오른쪽
+  window._kepcoOrigWindow={w:window.outerWidth,h:window.outerHeight,x:window.screenX,y:window.screenY};
+  try{
+    chrome.runtime.sendMessage({type:'KEPCO_ARRANGE_SPLIT', screenW:screen.availWidth, screenH:screen.availHeight}, function(r){
+      if(chrome.runtime.lastError||!r) console.warn('[CAP] split arrange failed');
+      else window._kepcoSplitHalfW=r.halfW||Math.floor(screen.availWidth/2);
+      _processNextKepcoCapture();
+    });
+  }catch(e){ window._kepcoSplitHalfW=Math.floor(screen.availWidth/2); _processNextKepcoCapture(); }
 }
 function _kepcoCapStop(){
   _kepcoCapQueue=[];
+  var wasDone=_kepcoCapDone;
   _kepcoCapRunning=false;
   if(window._kepcoCapTimeout) clearTimeout(window._kepcoCapTimeout);
+  // ★ 이전 KEPCO 캡처 창 닫기
+  if(window._kepcoCapWin){ try{window._kepcoCapWin.close();}catch(e){} window._kepcoCapWin=null; }
+  // ★ 중지 시 캡처된 데이터 즉시 저장 (IndexedDB + 클라우드)
+  if(wasDone>0){
+    window._capSaving = Date.now();
+    try{
+      _idbPut('fullDB', DB).then(function(){
+        console.log('[CAP-STOP] ✅ 중지 시 IndexedDB 저장 완료 ('+wasDone+'건)');
+      }).catch(function(err){ console.warn('[CAP-STOP] 저장 실패:', err); });
+    }catch(ex){}
+    try{ sv(); }catch(ex){}
+    _showToast('💾 '+wasDone+'건 캡처 저장 완료','ok');
+  }
+  // ★ BSN 창 원래 크기로 복귀
+  if(window._kepcoOrigWindow){
+    try{
+      chrome.runtime.sendMessage({type:'KEPCO_RESTORE_WINDOW', origW:window._kepcoOrigWindow.w, origH:window._kepcoOrigWindow.h, origLeft:window._kepcoOrigWindow.x, origTop:window._kepcoOrigWindow.y});
+    }catch(e){}
+    window._kepcoOrigWindow=null;
+  }
+  // ★ 전기요금 탭 갱신 (캡처된 건 반영)
+  if(wasDone>0) rdElectric();
+}
+// ★ 캡처 모달 최소화/복원 (캡처는 백그라운드에서 계속)
+function _kepcoCapMinimize(){
+  var mo=$('mo-kepco-cap');
+  if(mo) mo.classList.remove('on');
+  // 미니 위젯 표시
+  if(!$('kepco-cap-mini')){
+    var mini=document.createElement('div');
+    mini.id='kepco-cap-mini';
+    mini.style.cssText='position:fixed;bottom:16px;right:16px;background:#1e40af;color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px;animation:fadeIn .3s';
+    mini.innerHTML='<span class="mv-spinner" style="width:14px;height:14px;border-width:2px"></span><span id="kepco-mini-text">📸 캡처 중 '+_kepcoCapDone+'/'+_kepcoCapTotal+'</span>';
+    mini.onclick=function(){ _kepcoCapRestore(); };
+    document.body.appendChild(mini);
+  }
+}
+function _kepcoCapRestore(){
+  var mo=$('mo-kepco-cap');
+  if(mo) mo.classList.add('on');
+  _kepcoCapRemoveMini();
+}
+function _kepcoCapRemoveMini(){
+  var mini=$('kepco-cap-mini');
+  if(mini) mini.remove();
+}
+// ★ 미니 위젯 텍스트 갱신 (캡처 진행 시)
+function _kepcoCapUpdateMini(){
+  var txt=$('kepco-mini-text');
+  if(txt) txt.textContent='📸 캡처 중 '+_kepcoCapDone+'/'+_kepcoCapTotal;
 }
 // ★ 단건 캡처: 개별 청구서에서 바로 캡처
 function _captureSingleBill(custNo, period, kepcoLink){
@@ -7280,6 +7529,18 @@ function openElectricBillViewer(id){
   if(!e){ alert('고객정보를 찾을 수 없습니다.'); return; }
   _showElectricBillModal(id, null);
 }
+// ★ 층 라벨 → 정렬용 숫자 (지하=-N, 공용=-100, 옥탑=100, 일반=N층)
+function _elFloorSortKey(label){
+  if(/공용|전체|표시없음/.test(label)) return -100;
+  var m;
+  m=label.match(/지하\s*(\d+)/); if(m) return -parseInt(m[1]);
+  if(/지하|지층/.test(label)) return -1;
+  m=label.match(/(\d+)층/); if(m) return parseInt(m[1]);
+  m=label.match(/(\d+)호/); if(m) return Math.floor(parseInt(m[1])/100); // 201호→2층
+  if(/옥탑|PH|펜트/i.test(label)) return 100;
+  if(/M층/i.test(label)) return 99;
+  return 50; // 기타
+}
 function _elFloorLabel(e){
   var n=e.note||e.custName||'';
   if(/공용/.test(n)) return '공용';
@@ -7298,73 +7559,60 @@ function _elFloorLabel(e){
   // 주소 끝부분에서 쉼표 뒤 내용
   m=n.match(/,\s*([^,]+)$/); if(m&&m[1].trim()) return m[1].trim();
   // 못찾으면
-  return '표시없음(공용,전체)';
+  return '표시 없음';
 }
 function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
   var html='';
   if(curGrp){
-    var allBills=[];
+    var byPeriod={};
     curGrp.custs.forEach(function(e){
-      (e.bills||[]).forEach(function(b){ allBills.push({cust:e, bill:b}); });
+      (e.bills||[]).forEach(function(b){
+        var p=b.period||'';
+        if(!byPeriod[p]) byPeriod[p]=[];
+        byPeriod[p].push({cust:e, bill:b});
+      });
     });
-    allBills.sort(function(a,b){ return(b.bill.period||'').localeCompare(a.bill.period||''); });
+    var periods=Object.keys(byPeriod).sort(function(a,b){return b.localeCompare(a);});
     var byYear={};
-    allBills.forEach(function(it){
-      var yr=(it.bill.period||'').substring(0,4)||'기타';
+    periods.forEach(function(p){
+      var yr=p.substring(0,4)||'기타';
       if(!byYear[yr]) byYear[yr]=[];
-      byYear[yr].push(it);
+      byYear[yr].push(p);
     });
     var years=Object.keys(byYear).sort(function(a,b){return b.localeCompare(a);});
-    var selectedYear=selectedPeriod?(selectedPeriod||'').substring(0,4):'';
-    var selectedMonth=selectedPeriod?(selectedPeriod||'').substring(5,7):'';
-    // 선택 없으면 최신 연도/월 자동
-    if(!selectedYear&&years.length){ selectedYear=years[0]; }
+    var selectedYear=selectedPeriod?(selectedPeriod||'').substring(0,4):(years[0]||'');
+    // 당월 기간 (현재 년-월)
+    var nowP=curYear+'-'+String(new Date().getMonth()+1).padStart(2,'0');
     years.forEach(function(yr){
-      var isOpenYear=(yr===curYear)||(yr===selectedYear);
-      var yrBills=byYear[yr];
-      var yrTotal=0; yrBills.forEach(function(it){ yrTotal+=(Number(it.bill.amount)||0); });
-      html+='<div class="ev-yr-hd" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ev-arr\').textContent=this.nextElementSibling.style.display===\'none\'?\'▶\':\'▼\'" style="padding:8px 12px;background:#fff;border-top:1px solid #fcd34d;font-size:12px;font-weight:700;color:var(--t1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">';
-      html+='<span><span class="ev-arr">'+(isOpenYear?'▼':'▶')+'</span> '+esc(yr)+'년 <span style="font-size:10px;color:var(--t3);font-weight:400">'+yrBills.length+'건</span></span>';
-      html+='<span style="font-size:10px;color:#d97706;font-weight:600">'+yrTotal.toLocaleString()+'원</span></div>';
-      html+='<div style="display:'+(isOpenYear?'block':'none')+'">';
-      var byMonth2={};
-      yrBills.forEach(function(it){
-        var mm=(it.bill.period||'').substring(5,7)||'00';
-        if(!byMonth2[mm]) byMonth2[mm]=[];
-        byMonth2[mm].push(it);
-      });
-      var months2=Object.keys(byMonth2).sort(function(a,b){return b.localeCompare(a);});
-      months2.forEach(function(mm){
-        var mBills=byMonth2[mm];
-        var isOpenMonth=(yr===selectedYear&&mm===selectedMonth)||(yr===curYear&&mm===String(new Date().getMonth()+1).padStart(2,'0'));
-        var mTotal=0; mBills.forEach(function(it){ mTotal+=(Number(it.bill.amount)||0); });
-        if(mBills.length>1){
-          html+='<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ev-marr\').textContent=this.nextElementSibling.style.display===\'none\'?\'▸\':\'▾\'" style="padding:5px 10px 5px 20px;background:#fef9e7;border-top:1px solid #fde68a;font-size:11px;color:#92400e;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">';
-          html+='<span><span class="ev-marr">'+(isOpenMonth?'▾':'▸')+'</span> '+parseInt(mm)+'월 <span style="color:#b45309;font-size:10px">'+mBills.length+'건</span></span>';
-          html+='<span style="font-size:10px;color:#d97706">'+mTotal.toLocaleString()+'원</span></div>';
-          html+='<div style="display:'+(isOpenMonth?'block':'none')+'">';
-          mBills.forEach(function(it){
-            var active=(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod);
-            var bd=active?'background:#fef3c7;border-left:3px solid #f59e0b;font-weight:700':'border-left:3px solid transparent';
-            var amt=it.bill.amountFmt||(it.bill.amount?Number(it.bill.amount).toLocaleString()+'원':'');
-            var floor=_elFloorLabel(it.cust);
-            var typeTag=it.bill.billType?'<span style="font-size:9px;color:#7c3aed;margin-left:3px">['+it.bill.billType+']</span>':'';
-            html+='<div style="padding:5px 10px 5px 30px;border-top:1px solid #fde68a;cursor:pointer;'+bd+'" onclick="_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')">';
-            html+='<div style="font-size:11px;color:var(--t1);display:flex;justify-content:space-between;align-items:center"><span>'+esc(floor)+(active?' ◀':'')+'</span><span><b style="color:#d97706;font-size:10.5px">'+esc(amt)+'</b>'+typeTag+'</span></div>';
-            html+='</div>';
-          });
-          html+='</div>';
-        } else {
-          var it=mBills[0];
+      var isOpen=(yr===selectedYear)||(yr===curYear);
+      var yrPeriods=byYear[yr];
+      html+='<div style="padding:7px 10px;border-bottom:1px solid #fde68a;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'span\').textContent=this.nextElementSibling.style.display===\'none\'?\'▸\':\'▾\'">';
+      html+='<span style="font-size:10px;color:#94a3b8;margin-right:4px">'+(isOpen?'▾':'▸')+'</span>';
+      html+='<span style="font-size:12px;font-weight:700;color:var(--t1);flex:1">'+yr+'년</span>';
+      html+='<span style="font-size:10px;color:#94a3b8">'+yrPeriods.length+'개월</span>';
+      html+='</div>';
+      html+='<div style="'+(isOpen?'':'display:none')+'">';
+      yrPeriods.forEach(function(p){
+        var items=byPeriod[p];
+        var mm=p.substring(5,7);
+        var mTotal=0; items.forEach(function(it){ mTotal+=(Number(it.bill.amount)||0); });
+        items.sort(function(a,b){ return _elFloorSortKey(_elFloorLabel(a.cust)) - _elFloorSortKey(_elFloorLabel(b.cust)); });
+        var isActivePeriod=false;
+        items.forEach(function(it){ if(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod) isActivePeriod=true; });
+        // 당월이면 펼침, 아니면 접기
+        var isCurMonth=(p===nowP)||(selectedPeriod&&p===selectedPeriod);
+        html+='<div style="border-bottom:1px solid #fde68a">';
+        html+='<div onclick="var nx=this.nextElementSibling;nx.style.display=nx.style.display===\'none\'?\'block\':\'none\'" style="padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #f59e0b;'+(isActivePeriod?'background:#fef3c7;border-left:3px solid #f59e0b':'background:#fffdf5;border-left:3px solid transparent')+'">';
+        html+='<span style="font-size:13px;color:#92400e;font-weight:700">'+parseInt(mm)+'월 <span style="font-size:10px;color:#9ca3af;font-weight:400">'+items.length+'건</span></span><span style="font-size:10px;color:#d97706;font-weight:600">'+mTotal.toLocaleString()+'원</span></div>';
+        html+='<div style="'+(isCurMonth?'':'display:none')+'">';
+        items.forEach(function(it){
           var active=(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod);
-          var bd=active?'background:#fef3c7;border-left:3px solid #f59e0b;font-weight:700':'border-left:3px solid transparent';
+          var flr=_elFloorLabel(it.cust);
           var amt=it.bill.amountFmt||(it.bill.amount?Number(it.bill.amount).toLocaleString()+'원':'');
-          var floor=_elFloorLabel(it.cust);
-          var typeTag=it.bill.billType?'<span style="font-size:9px;color:#7c3aed;margin-left:3px">['+it.bill.billType+']</span>':'';
-          html+='<div style="padding:6px 10px;border-top:1px solid #fde68a;cursor:pointer;'+bd+'" onclick="_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')">';
-          html+='<div style="font-size:11.5px;color:var(--t1);display:flex;justify-content:space-between;align-items:center"><span>'+parseInt(mm)+'월 <span style="color:#6b7280;font-size:10px">'+esc(floor)+'</span>'+(active?' ◀':'')+'</span><span><b style="color:#d97706;font-size:11px">'+esc(amt)+'</b>'+typeTag+'</span></div>';
-          html+='</div>';
-        }
+          html+='<div onclick="event.stopPropagation();_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')" style="padding:4px 8px 4px 14px;font-size:11px;color:var(--t2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;'+(active?'background:#fbbf24;color:#fff;font-weight:700':'')+'">';
+          html+='<span>'+esc(flr)+'</span><span style="font-size:10px;color:'+(active?'#fff':'#b45309')+'">'+esc(amt)+'</span></div>';
+        });
+        html+='</div></div>';
       });
       html+='</div>';
     });
@@ -7392,48 +7640,37 @@ function _showElectricBillModal(id, selectedPeriod){
   let mo=$('mo-electric-view');
   if(!mo){
     mo=document.createElement('div'); mo.id='mo-electric-view'; mo.className='ov';
-    mo.innerHTML='<div class="modal" style="width:min(1200px,98vw);height:min(98vh,1200px);padding:0;display:flex;flex-direction:column;overflow:hidden">'+
-      '<div class="mo-hd" style="padding:10px 16px 8px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-bottom:none"><h3 id="ev-t" style="font-size:14px;margin:0;line-height:1.3;color:#fff">⚡ 전기요금</h3><button onclick="closeMo(\'mo-electric-view\')" style="color:#fff;font-size:22px;padding:0 10px;min-width:34px;min-height:34px;line-height:1;background:transparent;border:none">×</button></div>'+
-      '<div id="ev-tabs" style="display:flex;gap:0;overflow-x:auto;background:#fffbeb;border-bottom:2px solid #fcd34d;padding:0 8px;flex-shrink:0"></div>'+
+    mo.innerHTML='<div class="modal" style="width:min(1200px,98vw);height:98vh;padding:0;display:flex;flex-direction:column;overflow:hidden">'+
+      '<div class="mo-hd" style="padding:6px 16px 4px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-bottom:none"><h3 id="ev-t" style="font-size:13px;margin:0;line-height:1.3;color:#fff">⚡ 전기요금</h3><button onclick="closeMo(\'mo-electric-view\')" style="color:#fff;font-size:22px;padding:0 10px;min-width:34px;min-height:34px;line-height:1;background:transparent;border:none">×</button></div>'+
       '<div style="display:flex;flex:1;min-height:0">'+
-      '<div id="ev-list" style="width:220px;flex-shrink:0;border-right:1px solid var(--ln);overflow:auto;background:#fffbeb"></div>'+
-      '<div id="ev-pane" style="flex:1;min-width:0;overflow:auto;background:#1a1a2e"></div>'+
+      '<div id="ev-tabs" style="width:100px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:#fffbeb"></div>'+
+      '<div id="ev-list" style="width:150px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:#fffbeb"></div>'+
+      '<div id="ev-pane" style="flex:1;min-width:0;overflow:hidden;background:#1a1a2e;position:relative"></div>'+
       '</div></div>';
     mo.addEventListener('click',function(ev){ if(ev.target===mo) closeMo('mo-electric-view'); });
     document.body.appendChild(mo);
   }
-  // 상단 건물 탭 — 고객 있는 건물 먼저, 없는 건물 뒤, 미지정 맨 마지막
+  // 좌측1: 건물 리스트 (세로)
   var tabsEl=$('ev-tabs'); var tabHtml='';
   var sortedGrps=Object.values(bldgGrp).sort(function(a,b){
-    // 미지정(bId=0)이면서 고객 있는 경우 맨 앞
     var aUnm=(a.bId===0 && a.custs.length>0)?1:0;
     var bUnm=(b.bId===0 && b.custs.length>0)?1:0;
-    if(aUnm!==bUnm) return bUnm-aUnm; // 미지정 먼저
-    // 미지정(bId=0)이면서 고객 없는 경우 맨 뒤
+    if(aUnm!==bUnm) return bUnm-aUnm;
     if(a.bId===0) return 1; if(b.bId===0) return -1;
-    // 고객 있는 건물 먼저
     var ac=a.custs.length>0?0:1, bc=b.custs.length>0?0:1;
     if(ac!==bc) return ac-bc;
-    // 같으면 이름순
     return (a.bldg?a.bldg.name:'').localeCompare(b.bldg?b.bldg.name:'');
   });
   sortedGrps.forEach(function(g){
+    if(g.custs.length===0 && g.bId!==0) return; // 고객 없는 건물 숨김
     var bName=g.bldg?g.bldg.name:'(미지정)';
     var isActive=(String(g.bId)===String(focusBId));
-    var isEmpty=g.custs.length===0;
     var isUnmatched=(g.bId===0 && g.custs.length>0);
-    var style;
-    if(isUnmatched){
-      style=isActive?'background:#fef2f2;color:#dc2626;border-bottom:2px solid #dc2626;font-weight:700':'background:#fef2f2;color:#dc2626;border-bottom:2px solid #fca5a5;font-weight:600';
-    } else if(isActive){
-      style='background:#fff;color:#92400e;border-bottom:2px solid #f59e0b;font-weight:700';
-    } else if(isEmpty){
-      style='background:transparent;color:#ccc;border-bottom:2px solid transparent;font-size:10px;opacity:.4';
-    } else {
-      style='background:transparent;color:var(--t2);border-bottom:2px solid transparent';
-    }
+    var bg=isActive?(isUnmatched?'background:#fef2f2;border-left:3px solid #dc2626':'background:#fff;border-left:3px solid #f59e0b'):(isUnmatched?'background:#fef2f2;border-left:3px solid transparent':'border-left:3px solid transparent');
+    var clr=isUnmatched?'color:#dc2626':'color:'+(isActive?'#92400e':'var(--t2)');
+    var fw=isActive?'font-weight:700':'font-weight:400';
     var tabClick=isUnmatched?'_openUnmatchedAssignModal()':'_evSwitchBldg('+g.bId+')';
-    tabHtml+='<button onclick="'+tabClick+'" style="padding:8px 14px;font-size:12px;border:none;cursor:pointer;white-space:nowrap;'+style+'">'+esc(bName)+' <span style="font-size:10px;color:'+(isUnmatched?'#dc2626':'var(--t3)')+';">('+g.custs.length+')</span></button>';
+    tabHtml+='<div onclick="'+tabClick+'" style="padding:8px 8px;border-bottom:1px solid #fde68a;cursor:pointer;'+bg+';'+clr+';'+fw+';font-size:12px;line-height:1.3;word-break:keep-all">'+esc(bName)+'<div style="font-size:10px;color:'+(isUnmatched?'#dc2626':'#9ca3af')+';margin-top:1px">'+g.custs.length+'건</div></div>';
   });
   tabsEl.innerHTML=tabHtml;
   // 선택된 건물의 고객 리스트 (좌측)
@@ -7481,6 +7718,19 @@ function _renderElectricBillPane(pane, files, id, period, billData){
   var _custNo='', _custEntry=null;
   (DB.electricBills||[]).forEach(function(e){if(e.id===id){ _custNo=e.custNo||''; _custEntry=e; }});
   var _floorLabel=_custEntry?_elFloorLabel(_custEntry):'';
+  // 같은 건물 + 같은 기간의 층 목록 (휠 전환용)
+  var _samePeriodCusts=[];
+  if(_custEntry&&period){
+    var _bId=_custEntry.bId||0;
+    (DB.electricBills||[]).forEach(function(e){
+      if((e.bId||0)===_bId){
+        var bl=(e.bills||[]).find(function(b){return b.period===period;});
+        if(bl) _samePeriodCusts.push({cust:e, bill:bl});
+      }
+    });
+    _samePeriodCusts.sort(function(a,b){ return _elFloorSortKey(_elFloorLabel(a.cust)) - _elFloorSortKey(_elFloorLabel(b.cust)); });
+  }
+  var _curIdx=_samePeriodCusts.findIndex(function(x){return x.cust.id===id;});
   pane.innerHTML='';
   if(!files.length){
     var cardHtml='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 20px;text-align:center">';
@@ -7496,89 +7746,118 @@ function _renderElectricBillPane(pane, files, id, period, billData){
     pane.innerHTML=cardHtml;
     return;
   }
+  // 키보드 방향키로 같은 월 층 전환
+  function _evNavFloor(dir){
+    if(_samePeriodCusts.length<2) return;
+    var ni=_curIdx+dir;
+    if(ni<0||ni>=_samePeriodCusts.length) return;
+    _showElectricBillModal(_samePeriodCusts[ni].cust.id, period);
+  }
+  if(window._evKeyNav) document.removeEventListener('keydown',window._evKeyNav);
+  window._evKeyNav=function(ev){
+    if(!$('mo-electric-view')||!$('mo-electric-view').classList.contains('on')) return;
+    if(ev.key==='ArrowUp'){ev.preventDefault();_evNavFloor(-1);}
+    else if(ev.key==='ArrowDown'){ev.preventDefault();_evNavFloor(1);}
+  };
+  document.addEventListener('keydown',window._evKeyNav);
+  // 헤더
   const head=document.createElement('div');
-  head.style.cssText='position:sticky;top:0;z-index:5;padding:8px 14px;background:rgba(17,24,39,.92);color:#e5e7eb;font-size:12px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px);gap:6px;flex-wrap:wrap';
-  head.innerHTML='<div>⚡ '+esc(_floorLabel)+' · '+esc(period||'')+' · '+files.length+'장</div><div style="display:flex;gap:5px"><button class="btn sm" style="padding:4px 10px;font-size:11px;background:#16a34a;color:#fff;border:none;font-weight:600" onclick="_downloadAllBills('+id+',\''+esc(period||'')+'\',\'electric\')">⬇ '+esc(period||'')+' 전체 저장</button></div>';
+  head.style.cssText='position:absolute;top:0;left:0;right:0;z-index:5;padding:4px 10px;background:rgba(17,24,39,.75);color:#e5e7eb;font-size:11px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px);gap:4px;min-height:28px';
+  head.innerHTML='<span>⚡ '+esc(_floorLabel)+(_samePeriodCusts.length>1?' <span style="color:#fbbf24;font-size:10px">'+(_curIdx+1)+'/'+_samePeriodCusts.length+' ↑↓</span>':'')+'</span>'
+    +'<span style="display:flex;gap:4px;align-items:center">'
+    +'<button id="ev-zoom-reset" style="padding:2px 6px;font-size:10px;background:#475569;color:#fff;border:none;border-radius:3px;cursor:pointer;display:none" title="원본 크기">100%</button>'
+    +'<button style="padding:2px 8px;font-size:10px;background:#16a34a;color:#fff;border:none;border-radius:3px;cursor:pointer" onclick="_downloadAllBills('+id+',\''+esc(period||'')+'\',\'electric\')">⬇ 저장</button>'
+    +'<button style="padding:2px 6px;font-size:10px;background:#dc2626;color:#fff;border:none;border-radius:3px;cursor:pointer" onclick="_deleteElectricBillFile('+id+',\''+esc(period||'')+'\',0)">✕</button>'
+    +'</span>';
   pane.appendChild(head);
-  files.forEach((f,idx)=>{
-    const div=document.createElement('div');
-    div.style.cssText='padding:12px;text-align:center;position:relative';
-    const lbl=document.createElement('div');
-    lbl.style.cssText='font-size:11px;color:#9ca3af;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:10px';
-    const nameSpan=document.createElement('span');
-    nameSpan.textContent=(idx+1)+' / '+files.length+' — '+(f.name||'');
-    lbl.appendChild(nameSpan);
-    const isPlaceholder=(!f.storage && (!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:'))));
-    if(!isPlaceholder){
-      const dlBtn=document.createElement('button');
-      dlBtn.textContent='⬇ 저장';
-      dlBtn.style.cssText='padding:3px 10px;font-size:10.5px;background:#059669;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600';
-      dlBtn.onclick=(function(_f,_id,_period){return function(e){e.stopPropagation();_downloadBillFile(_f,{period:_period,bldgName:''});};})(f,id,period);
-      lbl.appendChild(dlBtn);
-    }
-    // 개별 삭제 버튼
-    const delBtn=document.createElement('button');
-    delBtn.textContent='✕';
-    delBtn.title='이 파일 삭제';
-    delBtn.style.cssText='padding:2px 7px;font-size:11px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;line-height:1';
-    delBtn.onclick=(function(_id,_period,_idx){return function(e){e.stopPropagation();_deleteElectricBillFile(_id,_period,_idx);};})(id,period,idx);
-    lbl.appendChild(delBtn);
-    div.appendChild(lbl);
-    if(isPlaceholder){
-      const box=document.createElement('div');
-      box.style.cssText='padding:24px 20px;background:#fef3c7;color:#92400e;border-radius:8px;font-size:13px;line-height:1.7;max-width:420px;margin:0 auto;text-align:center';
-      box.innerHTML='<div style="font-size:28px;margin-bottom:8px">📂</div><b>이미지 원본 데이터 소실</b><br><span style="font-size:12px">클라우드 동기화 과정에서 이미지가 분리 저장되었으나<br>원본을 복원할 수 없습니다.</span><br><br><span style="font-size:12px;color:#78716c">다시 업로드하거나 🌐 아리수에서 <b>재캡처</b>하세요.</span>';
-      div.appendChild(box);
-      pane.appendChild(div);
-      return;
-    }
-    const mime=(f.mime||'').toLowerCase();
-    const isPdf=mime.includes('pdf')||/\.pdf$/i.test(f.name||'');
-    const isHtml=mime.includes('html')||/\.html$/i.test(f.name||'');
-    // ★ Storage URL 또는 base64 둘 다 지원
-    var eFileUrl=f.storage?_stUrl(f.storage):null;
-    if(isPdf||isHtml){
-      const iframe=document.createElement('iframe');
-      if(isHtml&&f.data&&typeof f.data==='string'&&f.data.startsWith('data:text/html')){
-        // HTML data URL → blob URL로 변환
-        try{
-          var b64=f.data.split(',')[1]||'';
-          var htmlStr=decodeURIComponent(escape(atob(b64)));
-          var hBlob=new Blob([htmlStr],{type:'text/html'});
-          var hUrl=URL.createObjectURL(hBlob);
-          window._electricBillBlobs.push(hUrl);
-          iframe.src=hUrl;
-        }catch(e){ iframe.srcdoc=f.data||''; }
-      } else {
-        var blob=eFileUrl||_dataUrlToBlobUrl(f.data, f.mime||'application/pdf');
-        if(blob && !eFileUrl) window._electricBillBlobs.push(blob);
-        iframe.src=blob||f.data||'';
-      }
-      iframe.style.cssText='width:100%;height:82vh;border:none;background:#fff;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.3)';
-      div.appendChild(iframe);
+  // 이미지 줌/패닝 영역
+  var f=files[0]; // 첫 번째 파일
+  if(!f){ return; }
+  var isPlaceholder=(!f.storage && (!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:'))));
+  if(isPlaceholder){
+    pane.innerHTML+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 20px;text-align:center"><div style="font-size:28px;margin-bottom:8px">📂</div><div style="color:#92400e;font-size:13px"><b>이미지 원본 데이터 소실</b><br><span style="font-size:12px">다시 업로드하거나 ⚡ 한전에서 <b>재캡처</b>하세요.</span></div></div>';
+    return;
+  }
+  var _mime=(f.mime||'').toLowerCase();
+  var isPdf=_mime.includes('pdf')||/\.pdf$/i.test(f.name||'');
+  var isHtml=_mime.includes('html')||/\.html$/i.test(f.name||'');
+  var eFileUrl=f.storage?_stUrl(f.storage):null;
+  if(isPdf||isHtml){
+    var iframe=document.createElement('iframe');
+    if(isHtml&&f.data&&typeof f.data==='string'&&f.data.startsWith('data:text/html')){
+      try{ var b64=f.data.split(',')[1]||''; var htmlStr=decodeURIComponent(escape(atob(b64))); var hBlob=new Blob([htmlStr],{type:'text/html'}); var hUrl=URL.createObjectURL(hBlob); window._electricBillBlobs.push(hUrl); iframe.src=hUrl; }catch(e){ iframe.srcdoc=f.data||''; }
     } else {
-      const img=document.createElement('img');
-      img.style.cssText='max-width:100%;height:auto;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.3);background:#fff;min-height:60px;display:block;margin:0 auto';
-      img.onerror=function(){
-        if(!img._triedFallback && f.data && typeof f.data==='string' && f.data.startsWith('data:')){
-          img._triedFallback=true; img.src=f.data; return;
-        }
-        const errBox=document.createElement('div');
-        errBox.style.cssText='padding:20px;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:12.5px;line-height:1.6';
-        errBox.innerHTML='❌ 이미지 렌더 실패<br><span style="font-size:11px">mime: '+(f.mime||'?')+(f.storage?' · Storage: '+f.storage:'')+'</span>';
-        img.replaceWith(errBox);
-      };
-      if(eFileUrl){ img.src=eFileUrl; }
-      else {
-        var eImgBlob=null;
-        try{ eImgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){}
-        if(eImgBlob){ window._electricBillBlobs.push(eImgBlob); img.src=eImgBlob; }
-        else { img.src=f.data||''; }
-      }
-      div.appendChild(img);
+      var blob=eFileUrl||_dataUrlToBlobUrl(f.data, f.mime||'application/pdf');
+      if(blob && !eFileUrl) window._electricBillBlobs.push(blob);
+      iframe.src=blob||f.data||'';
     }
-    pane.appendChild(div);
-  });
+    iframe.style.cssText='width:100%;height:100%;border:none;background:#fff;position:absolute;top:0;left:0';
+    pane.appendChild(iframe);
+  } else {
+    // 줌/패닝 가능한 이미지 뷰어
+    var _zoom=1, _panX=0, _panY=0, _dragging=false, _dragSX=0, _dragSY=0, _dragPX=0, _dragPY=0;
+    var imgWrap=document.createElement('div');
+    imgWrap.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;cursor:grab;display:flex;align-items:center;justify-content:center';
+    var img=document.createElement('img');
+    img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;transition:transform .1s ease;user-select:none;-webkit-user-drag:none;pointer-events:none';
+    img.draggable=false;
+    img.onerror=function(){
+      if(!img._triedFallback && f.data && typeof f.data==='string' && f.data.startsWith('data:')){ img._triedFallback=true; img.src=f.data; return; }
+      imgWrap.innerHTML='<div style="padding:20px;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:12.5px">❌ 이미지 렌더 실패</div>';
+    };
+    if(eFileUrl){ img.src=eFileUrl; }
+    else { var eImgBlob=null; try{ eImgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){} if(eImgBlob){ window._electricBillBlobs.push(eImgBlob); img.src=eImgBlob; } else { img.src=f.data||''; } }
+    imgWrap.appendChild(img);
+    pane.appendChild(imgWrap);
+    function _applyTransform(){
+      img.style.transform='scale('+_zoom+') translate('+_panX+'px,'+_panY+'px)';
+      var resetBtn=$('ev-zoom-reset');
+      if(resetBtn){ resetBtn.style.display=(_zoom!==1)?'':'none'; resetBtn.textContent=Math.round(_zoom*100)+'%'; }
+    }
+    // 휠 줌 (Ctrl+휠 또는 그냥 휠)
+    imgWrap.addEventListener('wheel',function(ev){
+      ev.preventDefault();
+      var delta=ev.deltaY>0?-0.15:0.15;
+      var newZoom=Math.max(0.5, Math.min(10, _zoom+delta*_zoom));
+      // 줌 중심점 보정
+      var rect=imgWrap.getBoundingClientRect();
+      var mx=(ev.clientX-rect.left)/rect.width-0.5;
+      var my=(ev.clientY-rect.top)/rect.height-0.5;
+      var zoomRatio=newZoom/_zoom;
+      _panX=_panX-(mx*rect.width*(zoomRatio-1))/_zoom;
+      _panY=_panY-(my*rect.height*(zoomRatio-1))/_zoom;
+      _zoom=newZoom;
+      img.style.transition='none';
+      _applyTransform();
+    },{passive:false});
+    // 드래그 패닝
+    imgWrap.addEventListener('mousedown',function(ev){
+      if(ev.button!==0) return;
+      _dragging=true; _dragSX=ev.clientX; _dragSY=ev.clientY; _dragPX=_panX; _dragPY=_panY;
+      imgWrap.style.cursor='grabbing';
+      ev.preventDefault();
+    });
+    document.addEventListener('mousemove',function(ev){
+      if(!_dragging) return;
+      _panX=_dragPX+(ev.clientX-_dragSX)/_zoom;
+      _panY=_dragPY+(ev.clientY-_dragSY)/_zoom;
+      img.style.transition='none';
+      _applyTransform();
+    });
+    document.addEventListener('mouseup',function(){
+      if(!_dragging) return;
+      _dragging=false; imgWrap.style.cursor='grab';
+    });
+    // 더블클릭: 줌 리셋
+    imgWrap.addEventListener('dblclick',function(){
+      _zoom=1; _panX=0; _panY=0;
+      img.style.transition='transform .3s ease';
+      _applyTransform();
+    });
+    // 줌 리셋 버튼
+    var resetBtn=$('ev-zoom-reset');
+    if(resetBtn) resetBtn.onclick=function(){ _zoom=1; _panX=0; _panY=0; img.style.transition='transform .3s ease'; _applyTransform(); };
+  }
 }
 
 // ── 서류 첨부 ──
@@ -7733,7 +8012,7 @@ async function viewDoc(id, kind){
           doc=idbDoc;
           console.log('[viewDoc] IndexedDB에서 파일 데이터 복원 성공');
           // 메모리 DB에도 복원해두기
-          _mergeLocalImages(DB, fullDB);
+          DB=_mergeLocalImages(DB, fullDB);
         }
       }
     }catch(e){ console.warn('[viewDoc] IDB fallback 실패:',e); }
@@ -10496,6 +10775,14 @@ async function enterApp(){
   // 3) 클라우드 DB 로드 — 백그라운드로 (await 하지 않아서 즉시 렌더 유지)
   // 모달 열려있으면 내가 수정중이니 원격 덮어쓰기 금지 (realtime과 같은 원칙)
   (async()=>{
+    // ★ IndexedDB 로드가 완료될 때까지 대기 (이미지 데이터 보존 보장)
+    if(!_idbLoaded){
+      for(var _w=0;_w<20;_w++){ // 최대 2초 대기
+        await new Promise(function(r){setTimeout(r,100);});
+        if(_idbLoaded) break;
+      }
+      if(_idbLoaded) console.log('[enterApp] IndexedDB 로드 대기 후 완료');
+    }
     const cloud=await loadFromSupabase();
     if(cloud){
       // 모달 열려있으면 내가 수정중이니 반영 보류
@@ -10505,9 +10792,14 @@ async function enterApp(){
       const cloudJSON=JSON.stringify(cloud);
       if(localJSON!==cloudJSON){
         // cloud↔local 배열 머지 (양쪽 항목 보존) + 이미지 복원
+        // ★ IndexedDB에서 복원된 이미지를 포함한 현재 DB 사용
         var _localDB=JSON.parse(JSON.stringify(DB));
+        // ★ IndexedDB의 fullDB도 직접 가져와서 이미지 보존
+        var _idbFull=null;
+        try{ _idbFull=await _idbGet('fullDB'); }catch(e){}
         DB=_mergeDB(cloud, _localDB);
         DB=_mergeLocalImages(DB, _localDB);
+        if(_idbFull) DB=_mergeLocalImages(DB, _idbFull);
         // UI 초기화 상태는 유지
         if(!DB.ui) DB.ui={};
         DB.ui.leaseF='all';
