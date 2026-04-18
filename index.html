@@ -5123,7 +5123,7 @@ function _renderWaterBillPane(pane, files, id, period, billObj){
     if(isPlaceholder){
       const box=document.createElement('div');
       box.style.cssText='padding:24px 20px;background:#fef3c7;color:#92400e;border-radius:8px;font-size:13px;line-height:1.7;max-width:420px;margin:0 auto;text-align:center';
-      box.innerHTML='<div style="font-size:28px;margin-bottom:8px">📂</div><b>이미지 원본 데이터 소실</b><br><span style="font-size:12px">클라우드 동기화 과정에서 이미지가 분리 저장되었으나<br>원본을 복원할 수 없습니다.</span><br><br><span style="font-size:12px;color:#78716c">🌐 아리수에서 <b>다시 캡처</b>하면 정상 저장됩니다.</span>';
+      box.innerHTML='<div style="font-size:28px;margin-bottom:8px">📂</div><b>이미지가 이 기기에 없음</b><br><span style="font-size:12px">원본 이미지가 있는 PC에서 접속하면 자동으로 클라우드에 업로드됩니다.</span><br><br><button onclick="_migrateFilesToStorage()" style="padding:6px 16px;font-size:12px;background:#0284c7;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600">🚀 지금 마이그레이션 실행</button><br><span style="font-size:11px;color:#78716c;margin-top:6px;display:inline-block">또는 🌐 아리수에서 다시 캡처</span>';
       div.appendChild(box);
       pane.appendChild(div);
       return;
@@ -8101,12 +8101,12 @@ function _renderElectricBillPane(pane, files, id, period, billData){
     +'<button style="padding:4px 8px;font-size:12px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="_deleteElectricBillFile('+id+',\''+esc(period||'')+'\',0)">✕</button>'
     +'</span>';
   pane.appendChild(head);
-  // 이미지 줌/패닝 영역
-  var f=files[0]; // 첫 번째 파일
+  // 이미지 줌/패닝 영역 — storage가 있는 파일 우선
+  var f=files.find(function(x){return x.storage;})||files[0];
   if(!f){ return; }
   var isPlaceholder=(!f.storage && (!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:'))));
   if(isPlaceholder){
-    pane.innerHTML+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 20px;text-align:center"><div style="font-size:28px;margin-bottom:8px">📂</div><div style="color:#92400e;font-size:13px"><b>이미지 원본 데이터 소실</b><br><span style="font-size:12px">다시 업로드하거나 ⚡ 한전에서 <b>재캡처</b>하세요.</span></div></div>';
+    pane.innerHTML+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 20px;text-align:center"><div style="font-size:28px;margin-bottom:8px">📂</div><div style="color:#92400e;font-size:13px"><b>이미지가 이 기기에 없음</b><br><span style="font-size:12px">원본 이미지가 있는 PC에서 접속하면 자동으로 클라우드에 업로드됩니다.</span><br><br><button onclick="_migrateFilesToStorage()" style="padding:6px 16px;font-size:12px;background:#f59e0b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600">🚀 지금 마이그레이션 실행</button><br><span style="font-size:11px;color:#78716c;margin-top:6px;display:inline-block">또는 다시 업로드 / ⚡ 한전에서 재캡처</span></div></div>';
     return;
   }
   var _mime=(f.mime||'').toLowerCase();
@@ -11179,6 +11179,25 @@ async function enterApp(){
 
   // 4) 관리자면 대기 건수 배지 갱신
   refreshAdminBadge();
+
+  // 5) 로컬 base64 이미지가 Storage에 없으면 자동 마이그레이션 (백그라운드)
+  setTimeout(function(){
+    if(_migrating) return;
+    var hasLocal=false;
+    ['waterBills','electricBills'].forEach(function(k){
+      (DB[k]||[]).forEach(function(w){
+        (w.bills||[]).forEach(function(b){
+          (b.files||[]).forEach(function(f){
+            if(!f.storage && f.data && typeof f.data==='string' && f.data.startsWith('data:') && f.data.length>100) hasLocal=true;
+          });
+        });
+      });
+    });
+    if(hasLocal){
+      console.log('[AutoMigrate] 로컬 base64 파일 발견 → 자동 마이그레이션 시작');
+      _migrateFilesToStorage();
+    }
+  }, 5000);
 }
 
 // ── 로그인/회원가입 탭 전환 ───────────────────────────────────
