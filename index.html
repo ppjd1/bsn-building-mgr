@@ -1409,9 +1409,9 @@ async function _uploadFileToStorage(dataUrl, storagePath, fileName, mimeType){
 // ── 기존 로컬 파일(base64) → Supabase Storage 일괄 마이그레이션 ──
 // IndexedDB의 fullDB에서 base64 데이터를 찾아 Storage에 업로드 후 storage 경로로 교체
 let _migrating=false;
-async function _migrateFilesToStorage(){
-  if(_migrating){ alert('마이그레이션 진행 중입니다.'); return; }
-  if(!sbClient){ alert('로그인이 필요합니다.'); return; }
+async function _migrateFilesToStorage(silent){
+  if(_migrating){ if(!silent) alert('마이그레이션 진행 중입니다.'); return; }
+  if(!sbClient){ if(!silent) alert('로그인이 필요합니다.'); return; }
   const btn=$('btn-migrate-storage');
   const st=$('migrate-storage-status');
   if(btn) btn.disabled=true;
@@ -1570,11 +1570,15 @@ async function _migrateFilesToStorage(){
     }
     const msg=`마이그레이션 완료!\n\n업로드: ${uploaded}건\n건너뜀(이미 완료): ${skipped}건\n실패: ${failed}건\n\n${uploaded===0&&failed===0?'마이그레이션할 base64 파일이 없습니다.\n(이미 Storage로 전환 완료되었거나, 이 기기에 원본 파일이 없습니다)':failed>0?'실패한 파일은 다시 시도하세요.':'모든 파일이 클라우드에 저장되었습니다.'}`;
     _updateStatus(uploaded>0?`✅ ${uploaded}건 완료`:'ℹ️ 대상 파일 없음');
-    alert(msg);
+    if(!silent) alert(msg);
     console.log('[Migration]', msg, '\n', log.join('\n'));
+    // IndexedDB fullDB도 갱신하여 재실행 방지
+    if(uploaded>0){
+      try{ await _idbSet('fullDB', JSON.parse(JSON.stringify(DB))); console.log('[Migration] IndexedDB fullDB 갱신 완료'); }catch(e2){ console.warn('[Migration] IndexedDB 갱신 실패',e2); }
+    }
   }catch(e){
     _updateStatus('❌ 오류: '+e.message);
-    alert('마이그레이션 오류: '+e.message);
+    if(!silent) alert('마이그레이션 오류: '+e.message);
     console.error('[Migration]',e);
   }finally{
     _migrating=false;
@@ -7907,8 +7911,8 @@ function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
         items.sort(function(a,b){ return _elFloorSortKey(_elFloorLabel(a.cust)) - _elFloorSortKey(_elFloorLabel(b.cust)); });
         var isActivePeriod=false;
         items.forEach(function(it){ if(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod) isActivePeriod=true; });
-        // 당월이면 펼침, 아니면 접기
-        var isCurMonth=(p===nowP)||(selectedPeriod&&p===selectedPeriod);
+        // 선택된 월이면 펼침, 없으면 당월만 펼침
+        var isCurMonth=selectedPeriod?(p===selectedPeriod):(p===nowP);
         html+='<div style="border-bottom:1px solid #fde68a">';
         html+='<div onclick="var nx=this.nextElementSibling;nx.style.display=nx.style.display===\'none\'?\'block\':\'none\'" style="padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #f59e0b;'+(isActivePeriod?'background:#fef3c7;border-left:3px solid #f59e0b':'background:#fffdf5;border-left:3px solid transparent')+'">';
         html+='<span style="font-size:14px;color:#92400e;font-weight:700">'+parseInt(mm)+'월 <span style="font-size:11px;color:#9ca3af;font-weight:400">'+items.length+'건</span></span><span style="font-size:11px;color:#d97706;font-weight:600">'+mTotal.toLocaleString()+'원</span></div>';
@@ -7969,6 +7973,8 @@ function _showElectricBillModal(id, selectedPeriod){
     if(ac!==bc) return ac-bc;
     return (a.bldg?a.bldg.name:'').localeCompare(b.bldg?b.bldg.name:'');
   });
+  // 건물 전환용: 고객 있는 건물만 필터링하여 저장
+  window._evBldgList=sortedGrps.filter(function(g){return g.custs.length>0;});
   sortedGrps.forEach(function(g){
     if(g.custs.length===0 && g.bId!==0) return; // 고객 없는 건물 숨김
     var bName=g.bldg?g.bldg.name:'(미지정)';
@@ -7978,7 +7984,7 @@ function _showElectricBillModal(id, selectedPeriod){
     var clr=isUnmatched?'color:#dc2626':'color:'+(isActive?'#92400e':'var(--t2)');
     var fw=isActive?'font-weight:700':'font-weight:400';
     var tabClick=isUnmatched?'_openUnmatchedAssignModal()':'_evSwitchBldg('+g.bId+')';
-    tabHtml+='<div onclick="'+tabClick+'" style="padding:8px 8px;border-bottom:1px solid #fde68a;cursor:pointer;'+bg+';'+clr+';'+fw+';font-size:13px;line-height:1.3;word-break:keep-all">'+esc(bName)+(isUnmatched?'<div style="font-size:10px;color:#dc2626;margin-top:1px">'+g.custs.length+'건</div>':'')+'</div>';
+    tabHtml+='<div data-bid="'+g.bId+'" onclick="'+tabClick+'" style="padding:8px 8px;border-bottom:1px solid #fde68a;cursor:pointer;'+bg+';'+clr+';'+fw+';font-size:13px;line-height:1.3;word-break:keep-all">'+esc(bName)+(isUnmatched?'<div style="font-size:10px;color:#dc2626;margin-top:1px">'+g.custs.length+'건</div>':'')+'</div>';
   });
   tabsEl.innerHTML=tabHtml;
   // 선택된 건물의 고객 리스트 (좌측)
@@ -7992,12 +7998,18 @@ function _showElectricBillModal(id, selectedPeriod){
     curBill=(focusE.bills||[]).find(function(b){return b.period===selectedPeriod;});
   }
   if(!curBill&&focusE){
-    var sorted=(focusE.bills||[]).slice().sort(function(a,b){return(b.period||'').localeCompare(a.period||'');});
-    curBill=sorted[0];
+    // 당월 우선, 없으면 최신 월
+    var nowP2=curYear+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+    var curMonthBill=(focusE.bills||[]).find(function(b){return b.period===nowP2;});
+    if(curMonthBill){
+      curBill=curMonthBill;
+    } else {
+      var sorted=(focusE.bills||[]).slice().sort(function(a,b){return(b.period||'').localeCompare(a.period||'');});
+      curBill=sorted[0];
+    }
     // 자동선택된 period를 반영하여 사이드바 활성 표시 갱신
-    if(curBill&&!selectedPeriod){
+    if(curBill){
       selectedPeriod=curBill.period;
-      // 사이드바 다시 그리기 (활성 표시 반영)
       _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl);
     }
   }
@@ -8061,6 +8073,71 @@ function _renderElectricBillPane(pane, files, id, period, billData){
     _samePeriodCusts.sort(function(a,b){ return _elFloorSortKey(_elFloorLabel(a.cust)) - _elFloorSortKey(_elFloorLabel(b.cust)); });
   }
   var _curIdx=_samePeriodCusts.findIndex(function(x){return x.cust.id===id;});
+  // 키보드: ↑↓ 층 전환 (건물탭 모드면 건물 전환), ← 건물탭으로, → 청구서로
+  if(!window._evNavMode) window._evNavMode='floor';
+  window._evCurBId=_custEntry?(_custEntry.bId||0):0;
+  // 건물탭 하이라이트
+  function _evHighlightBldgTab(bId){
+    var tabs=$('ev-tabs'); if(!tabs) return;
+    var items=tabs.querySelectorAll('[data-bid]');
+    items.forEach(function(el){
+      var isCur=String(el.getAttribute('data-bid'))===String(bId);
+      el.style.outline=isCur?'2px solid #f59e0b':'none';
+      el.style.outlineOffset=isCur?'-2px':'0';
+    });
+  }
+  function _evClearHighlight(){
+    var tabs=$('ev-tabs'); if(!tabs) return;
+    tabs.querySelectorAll('[data-bid]').forEach(function(el){ el.style.outline='none'; });
+  }
+  if(window._evKeyNav) document.removeEventListener('keydown',window._evKeyNav);
+  window._evKeyNav=function(ev){
+    if(!$('mo-electric-view')||!$('mo-electric-view').classList.contains('on')) return;
+    var bl=window._evBldgList||[];
+    if(ev.key==='ArrowLeft'){
+      ev.preventDefault();
+      // 건물탭 모드 진입
+      window._evNavMode='bldg';
+      _evHighlightBldgTab(window._evCurBId);
+      return;
+    }
+    if(ev.key==='ArrowRight'){
+      ev.preventDefault();
+      // 청구서 모드 복귀
+      window._evNavMode='floor';
+      _evClearHighlight();
+      return;
+    }
+    if(ev.key==='ArrowUp'||ev.key==='ArrowDown'){
+      ev.preventDefault();
+      var dir=ev.key==='ArrowUp'?-1:1;
+      if(window._evNavMode==='bldg'){
+        // 건물 전환 — 항상 당월 기준
+        if(bl.length<2) return;
+        var ci=bl.findIndex(function(g){return g.bId===window._evCurBId;});
+        if(ci<0) return;
+        var ni=ci+dir;
+        if(ni<0||ni>=bl.length) return;
+        var nextGrp=bl[ni];
+        var nowP3=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+        var nextCust=nextGrp.custs.find(function(e){return(e.bills||[]).some(function(b){return b.period===nowP3;});});
+        if(!nextCust) nextCust=nextGrp.custs[0];
+        if(nextCust){
+          window._evNavMode='bldg';
+          _showElectricBillModal(nextCust.id, nowP3);
+          setTimeout(function(){ _evHighlightBldgTab(nextGrp.bId); },50);
+        }
+      } else {
+        // 층 전환
+        if(_samePeriodCusts.length<2) return;
+        var ni2=_curIdx+dir;
+        if(ni2<0||ni2>=_samePeriodCusts.length) return;
+        _showElectricBillModal(_samePeriodCusts[ni2].cust.id, period);
+      }
+    }
+  };
+  document.addEventListener('keydown',window._evKeyNav);
+  // 빈 파일 — 키보드는 위에서 등록 완료, 빈 안내만 표시
   pane.innerHTML='';
   if(!files.length){
     var cardHtml='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 20px;text-align:center">';
@@ -8076,24 +8153,16 @@ function _renderElectricBillPane(pane, files, id, period, billData){
     pane.innerHTML=cardHtml;
     return;
   }
-  // 키보드 방향키로 같은 월 층 전환
-  function _evNavFloor(dir){
-    if(_samePeriodCusts.length<2) return;
-    var ni=_curIdx+dir;
-    if(ni<0||ni>=_samePeriodCusts.length) return;
-    _showElectricBillModal(_samePeriodCusts[ni].cust.id, period);
-  }
-  if(window._evKeyNav) document.removeEventListener('keydown',window._evKeyNav);
-  window._evKeyNav=function(ev){
-    if(!$('mo-electric-view')||!$('mo-electric-view').classList.contains('on')) return;
-    if(ev.key==='ArrowUp'){ev.preventDefault();_evNavFloor(-1);}
-    else if(ev.key==='ArrowDown'){ev.preventDefault();_evNavFloor(1);}
-  };
-  document.addEventListener('keydown',window._evKeyNav);
   // 헤더
   const head=document.createElement('div');
   head.style.cssText='position:absolute;bottom:0;left:0;right:0;z-index:5;padding:5px 12px;background:rgba(17,24,39,.65);color:#e5e7eb;font-size:12px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px);gap:6px;min-height:32px';
-  head.innerHTML='<span>⚡ '+esc(_floorLabel)+(_samePeriodCusts.length>1?' <span style="color:#fbbf24;font-size:11px">'+(_curIdx+1)+'/'+_samePeriodCusts.length+' ↑↓</span>':'')+'</span>'
+  var _evBldgName=(function(){var b=(DB.buildings||[]).find(function(x){return _custEntry&&x.id===_custEntry.bId});return b?b.name:'';})();
+  var _evBldgCount=(window._evBldgList||[]).length;
+  var _evBldgIdx=(window._evBldgList||[]).findIndex(function(g){return _custEntry&&g.bId===(_custEntry.bId||0);});
+  var _isBldgMode=(window._evNavMode==='bldg');
+  head.innerHTML='<span>⚡ '+esc(_evBldgName)+' '+esc(_floorLabel)
+    +(_samePeriodCusts.length>1?' <span style="color:#fbbf24;font-size:11px">↑↓ '+(_curIdx+1)+'/'+_samePeriodCusts.length+'층</span>':'')
+    +'</span>'
     +'<span style="display:flex;gap:6px;align-items:center">'
     +'<button id="ev-zoom-reset" style="padding:4px 10px;font-size:12px;background:#475569;color:#fff;border:none;border-radius:4px;cursor:pointer;display:none" title="원본 크기">100%</button>'
     +'<button style="padding:4px 12px;font-size:12px;background:#0e639c;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="_downloadAllBills('+id+',\''+esc(period||'')+'\',\'electric\')">⬇ 저장</button>'
@@ -11180,24 +11249,27 @@ async function enterApp(){
   // 4) 관리자면 대기 건수 배지 갱신
   refreshAdminBadge();
 
-  // 5) 로컬 base64 이미지가 Storage에 없으면 자동 마이그레이션 (백그라운드)
-  setTimeout(function(){
-    if(_migrating) return;
-    var hasLocal=false;
-    ['waterBills','electricBills'].forEach(function(k){
-      (DB[k]||[]).forEach(function(w){
-        (w.bills||[]).forEach(function(b){
-          (b.files||[]).forEach(function(f){
-            if(!f.storage && f.data && typeof f.data==='string' && f.data.startsWith('data:') && f.data.length>100) hasLocal=true;
+  // 5) 로컬 base64 이미지가 Storage에 없으면 자동 마이그레이션 (세션당 1회)
+  if(!window._autoMigrateDone){
+    setTimeout(function(){
+      if(_migrating||window._autoMigrateDone) return;
+      var hasLocal=false;
+      ['waterBills','electricBills'].forEach(function(k){
+        (DB[k]||[]).forEach(function(w){
+          (w.bills||[]).forEach(function(b){
+            (b.files||[]).forEach(function(f){
+              if(!f.storage && f.data && typeof f.data==='string' && f.data.startsWith('data:') && f.data.length>100) hasLocal=true;
+            });
           });
         });
       });
-    });
-    if(hasLocal){
-      console.log('[AutoMigrate] 로컬 base64 파일 발견 → 자동 마이그레이션 시작');
-      _migrateFilesToStorage();
-    }
-  }, 5000);
+      if(hasLocal){
+        console.log('[AutoMigrate] 로컬 base64 파일 발견 → 자동 마이그레이션 시작');
+        window._autoMigrateDone=true;
+        _migrateFilesToStorage(true); // silent=true
+      }
+    }, 5000);
+  }
 }
 
 // ── 로그인/회원가입 탭 전환 ───────────────────────────────────
