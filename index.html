@@ -3242,6 +3242,7 @@ function rdWater(){
   html+='<a href="https://i121.seoul.go.kr" target="_blank" style="color:var(--bl);font-size:11px;text-decoration:none;font-weight:600">🔗 아리수 홈페이지</a>';
   html+='<hr style="border:none;border-top:1px solid var(--ln);margin:8px 0">';
   html+='<button onclick="_showWaterBillModal(null)" style="display:block;width:100%;padding:10px 8px;font-size:13px;font-weight:700;background:#0284c7;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(2,132,199,.3)">📂 청구서 폴더</button>';
+  html+='<button onclick="_fetchWaterBulk()" style="display:block;width:100%;padding:10px 8px;font-size:13px;font-weight:700;background:#059669;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(5,150,105,.3);margin-top:6px">🌐 일괄조회</button>';
   html+='</div>';
   // 우측: 테이블
   html+='<table style="border-collapse:collapse;font-size:13px;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);overflow:hidden;text-align:center;width:auto;max-width:100%;min-width:540px;table-layout:fixed;box-shadow:0 1px 2px rgba(0,0,0,.03)">';
@@ -3553,6 +3554,46 @@ function openWaterSite(url, id){
   try{ window.open(target,'_blank','noopener'); }catch(_){ location.href=target; }
   if(info) _waterToast('📋 고객번호 복사됨 · '+info);
   else _waterToast('🌐 아리수 요금조회 열림');
+}
+// ── 수도요금 일괄조회 ──
+function _fetchWaterBulk(){
+  var bills=DB.waterBills||[];
+  var curMonth=new Date().toISOString().slice(0,7);
+  var curMon=parseInt(curMonth.split('-')[1]);
+  // 현재 필터에 맞는 고객만 (or 전체)
+  var targets=bills.filter(function(w){
+    if(!w.custNo) return false;
+    if(_waterFilter==='odd' && w.meterCycle!=='odd') return false;
+    if(_waterFilter==='even' && w.meterCycle!=='even') return false;
+    if(_waterFilter==='all'){
+      // 당월 해당하는 고객만
+      var isMyMonth=(w.meterCycle==='even')?(curMon%2===0):(w.meterCycle==='odd')?(curMon%2===1):true;
+      if(!isMyMonth) return false;
+    }
+    return true;
+  });
+  // 이미 당월 청구서가 있는 고객은 제외
+  targets=targets.filter(function(w){
+    var hasCur=false;
+    if(w.bills&&w.bills.length){ w.bills.forEach(function(b){ if(b.period===curMonth&&b.files&&b.files.length) hasCur=true; }); }
+    return !hasCur;
+  });
+  if(!targets.length){ _waterToast('📋 일괄조회 대상이 없습니다 (당월 해당 고객이 모두 조회 완료)','#059669'); return; }
+  if(!confirm('당월('+curMonth+') 대상 '+targets.length+'건을 일괄조회합니다.\n\n각 고객마다 새 탭이 열리며 자동조회됩니다.\n계속하시겠습니까?')) return;
+  var idx=0;
+  _waterToast('🌐 일괄조회 시작 — '+targets.length+'건','#0284c7');
+  function _next(){
+    if(idx>=targets.length){
+      _waterToast('✅ 일괄조회 완료 ('+targets.length+'건)','#059669');
+      return;
+    }
+    var w=targets[idx];
+    _waterToast('🌐 조회 중 '+(idx+1)+'/'+targets.length+' — '+w.custNo,'#0284c7');
+    fetchWaterBill(w.id);
+    idx++;
+    setTimeout(_next, 2500);
+  }
+  _next();
 }
 // 요금조회 바로가기 + 자동입력
 // 브라우저 보안(Same-Origin Policy)상 다른 도메인 폼을 JS로 직접 채울 수 없어서
@@ -7588,8 +7629,8 @@ function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
       var yrPeriods=byYear[yr];
       html+='<div style="padding:7px 10px;border-bottom:1px solid #fde68a;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'span\').textContent=this.nextElementSibling.style.display===\'none\'?\'▸\':\'▾\'">';
       html+='<span style="font-size:10px;color:#94a3b8;margin-right:4px">'+(isOpen?'▾':'▸')+'</span>';
-      html+='<span style="font-size:12px;font-weight:700;color:var(--t1);flex:1">'+yr+'년</span>';
-      html+='<span style="font-size:10px;color:#94a3b8">'+yrPeriods.length+'개월</span>';
+      html+='<span style="font-size:13px;font-weight:700;color:var(--t1);flex:1">'+yr+'년</span>';
+      html+='<span style="font-size:11px;color:#94a3b8">'+yrPeriods.length+'개월</span>';
       html+='</div>';
       html+='<div style="'+(isOpen?'':'display:none')+'">';
       yrPeriods.forEach(function(p){
@@ -7603,14 +7644,14 @@ function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
         var isCurMonth=(p===nowP)||(selectedPeriod&&p===selectedPeriod);
         html+='<div style="border-bottom:1px solid #fde68a">';
         html+='<div onclick="var nx=this.nextElementSibling;nx.style.display=nx.style.display===\'none\'?\'block\':\'none\'" style="padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #f59e0b;'+(isActivePeriod?'background:#fef3c7;border-left:3px solid #f59e0b':'background:#fffdf5;border-left:3px solid transparent')+'">';
-        html+='<span style="font-size:13px;color:#92400e;font-weight:700">'+parseInt(mm)+'월 <span style="font-size:10px;color:#9ca3af;font-weight:400">'+items.length+'건</span></span><span style="font-size:10px;color:#d97706;font-weight:600">'+mTotal.toLocaleString()+'원</span></div>';
+        html+='<span style="font-size:14px;color:#92400e;font-weight:700">'+parseInt(mm)+'월 <span style="font-size:11px;color:#9ca3af;font-weight:400">'+items.length+'건</span></span><span style="font-size:11px;color:#d97706;font-weight:600">'+mTotal.toLocaleString()+'원</span></div>';
         html+='<div style="'+(isCurMonth?'':'display:none')+'">';
         items.forEach(function(it){
           var active=(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod);
           var flr=_elFloorLabel(it.cust);
           var amt=it.bill.amountFmt||(it.bill.amount?Number(it.bill.amount).toLocaleString()+'원':'');
-          html+='<div onclick="event.stopPropagation();_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')" style="padding:4px 8px 4px 14px;font-size:11px;color:var(--t2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;'+(active?'background:#fbbf24;color:#fff;font-weight:700':'')+'">';
-          html+='<span>'+esc(flr)+'</span><span style="font-size:10px;color:'+(active?'#fff':'#b45309')+'">'+esc(amt)+'</span></div>';
+          html+='<div onclick="event.stopPropagation();_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')" style="padding:5px 8px 5px 14px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;'+(active?'background:#fbbf24;color:#fff;font-weight:700':'')+'">';
+          html+='<span>'+esc(flr)+'</span><span style="font-size:11px;color:'+(active?'#fff':'#b45309')+'">'+esc(amt)+'</span></div>';
         });
         html+='</div></div>';
       });
@@ -7640,8 +7681,8 @@ function _showElectricBillModal(id, selectedPeriod){
   let mo=$('mo-electric-view');
   if(!mo){
     mo=document.createElement('div'); mo.id='mo-electric-view'; mo.className='ov';
-    mo.innerHTML='<div class="modal" style="width:min(1200px,98vw);height:98vh;padding:0;display:flex;flex-direction:column;overflow:hidden">'+
-      '<div class="mo-hd" style="padding:6px 16px 4px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-bottom:none"><h3 id="ev-t" style="font-size:13px;margin:0;line-height:1.3;color:#fff">⚡ 전기요금</h3><button onclick="closeMo(\'mo-electric-view\')" style="color:#fff;font-size:22px;padding:0 10px;min-width:34px;min-height:34px;line-height:1;background:transparent;border:none">×</button></div>'+
+    mo.innerHTML='<div class="modal" style="width:min(960px,95vw);height:calc(100vh - 12px);max-height:calc(100vh - 12px);padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:6px 6px 0 0;margin:6px auto 0">'+
+      '<div class="mo-hd" style="padding:2px 12px 2px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-bottom:none;min-height:24px"><h3 id="ev-t" style="font-size:12px;margin:0;line-height:1.2;color:#fff">⚡ 전기요금</h3><button onclick="closeMo(\'mo-electric-view\')" style="color:#fff;font-size:18px;padding:0 8px;min-width:28px;min-height:28px;line-height:1;background:transparent;border:none">×</button></div>'+
       '<div style="display:flex;flex:1;min-height:0">'+
       '<div id="ev-tabs" style="width:100px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:#fffbeb"></div>'+
       '<div id="ev-list" style="width:150px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:#fffbeb"></div>'+
@@ -7670,7 +7711,7 @@ function _showElectricBillModal(id, selectedPeriod){
     var clr=isUnmatched?'color:#dc2626':'color:'+(isActive?'#92400e':'var(--t2)');
     var fw=isActive?'font-weight:700':'font-weight:400';
     var tabClick=isUnmatched?'_openUnmatchedAssignModal()':'_evSwitchBldg('+g.bId+')';
-    tabHtml+='<div onclick="'+tabClick+'" style="padding:8px 8px;border-bottom:1px solid #fde68a;cursor:pointer;'+bg+';'+clr+';'+fw+';font-size:12px;line-height:1.3;word-break:keep-all">'+esc(bName)+'<div style="font-size:10px;color:'+(isUnmatched?'#dc2626':'#9ca3af')+';margin-top:1px">'+g.custs.length+'건</div></div>';
+    tabHtml+='<div onclick="'+tabClick+'" style="padding:8px 8px;border-bottom:1px solid #fde68a;cursor:pointer;'+bg+';'+clr+';'+fw+';font-size:13px;line-height:1.3;word-break:keep-all">'+esc(bName)+'<div style="font-size:11px;color:'+(isUnmatched?'#dc2626':'#9ca3af')+';margin-top:1px">'+g.custs.length+'건</div></div>';
   });
   tabsEl.innerHTML=tabHtml;
   // 선택된 건물의 고객 리스트 (좌측)
@@ -7707,9 +7748,29 @@ function _showElectricBillModal(id, selectedPeriod){
   mo.classList.add('on');
 }
 function _evSwitchBldg(bId){
-  // 해당 건물의 첫 고객 찾기
   var cust=(DB.electricBills||[]).find(function(e){return(e.bId||0)==bId;});
   _showElectricBillModal(cust?cust.id:0, null);
+}
+function _evDownloadMonth(period){
+  if(!period) return;
+  var allFiles=[];
+  var bldgs=DB.buildings||[];
+  (DB.electricBills||[]).forEach(function(e){
+    var bl=(e.bills||[]).find(function(b){return b.period===period;});
+    if(!bl||!bl.files||!bl.files.length) return;
+    var bldg=bldgs.find(function(b){return b.id===e.bId;});
+    var bName=bldg?bldg.name:'미지정';
+    var flr=_elFloorLabel(e);
+    bl.files.forEach(function(f,i){
+      var isPlaceholder=(!f.storage && (!f.data || f.data==='__IMG_IN_LOCAL__' || (typeof f.data==='string' && f.data.length<30 && !f.data.startsWith('data:'))));
+      if(isPlaceholder) return;
+      var ext=((f.name||'').split('.').pop()||'jpg').toLowerCase();
+      if(!['jpg','png','pdf'].includes(ext)) ext='jpg';
+      allFiles.push({f:f, name:period+'_'+bName+'_'+flr+'_'+(i+1)+'.'+ext});
+    });
+  });
+  if(!allFiles.length){ alert('해당 월에 다운로드할 청구서가 없습니다.'); return; }
+  _saveBillsToDesktop(allFiles);
 }
 function _renderElectricBillPane(pane, files, id, period, billData){
   if(window._electricBillBlobs){ window._electricBillBlobs.forEach(u=>{try{URL.revokeObjectURL(u)}catch(e){}}); }
@@ -7762,12 +7823,13 @@ function _renderElectricBillPane(pane, files, id, period, billData){
   document.addEventListener('keydown',window._evKeyNav);
   // 헤더
   const head=document.createElement('div');
-  head.style.cssText='position:absolute;top:0;left:0;right:0;z-index:5;padding:4px 10px;background:rgba(17,24,39,.75);color:#e5e7eb;font-size:11px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px);gap:4px;min-height:28px';
-  head.innerHTML='<span>⚡ '+esc(_floorLabel)+(_samePeriodCusts.length>1?' <span style="color:#fbbf24;font-size:10px">'+(_curIdx+1)+'/'+_samePeriodCusts.length+' ↑↓</span>':'')+'</span>'
-    +'<span style="display:flex;gap:4px;align-items:center">'
-    +'<button id="ev-zoom-reset" style="padding:2px 6px;font-size:10px;background:#475569;color:#fff;border:none;border-radius:3px;cursor:pointer;display:none" title="원본 크기">100%</button>'
-    +'<button style="padding:2px 8px;font-size:10px;background:#16a34a;color:#fff;border:none;border-radius:3px;cursor:pointer" onclick="_downloadAllBills('+id+',\''+esc(period||'')+'\',\'electric\')">⬇ 저장</button>'
-    +'<button style="padding:2px 6px;font-size:10px;background:#dc2626;color:#fff;border:none;border-radius:3px;cursor:pointer" onclick="_deleteElectricBillFile('+id+',\''+esc(period||'')+'\',0)">✕</button>'
+  head.style.cssText='position:absolute;bottom:0;left:0;right:0;z-index:5;padding:5px 12px;background:rgba(17,24,39,.65);color:#e5e7eb;font-size:12px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px);gap:6px;min-height:32px';
+  head.innerHTML='<span>⚡ '+esc(_floorLabel)+(_samePeriodCusts.length>1?' <span style="color:#fbbf24;font-size:11px">'+(_curIdx+1)+'/'+_samePeriodCusts.length+' ↑↓</span>':'')+'</span>'
+    +'<span style="display:flex;gap:6px;align-items:center">'
+    +'<button id="ev-zoom-reset" style="padding:4px 10px;font-size:12px;background:#475569;color:#fff;border:none;border-radius:4px;cursor:pointer;display:none" title="원본 크기">100%</button>'
+    +'<button style="padding:4px 12px;font-size:12px;background:#0e639c;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="_downloadAllBills('+id+',\''+esc(period||'')+'\',\'electric\')">⬇ 저장</button>'
+    +'<button style="padding:4px 12px;font-size:12px;background:#16a34a;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="_evDownloadMonth(\''+esc(period||'')+'\')">⬇ 전체 다운로드</button>'
+    +'<button style="padding:4px 8px;font-size:12px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="_deleteElectricBillFile('+id+',\''+esc(period||'')+'\',0)">✕</button>'
     +'</span>';
   pane.appendChild(head);
   // 이미지 줌/패닝 영역
@@ -7797,35 +7859,50 @@ function _renderElectricBillPane(pane, files, id, period, billData){
     // 줌/패닝 가능한 이미지 뷰어
     var _zoom=1, _panX=0, _panY=0, _dragging=false, _dragSX=0, _dragSY=0, _dragPX=0, _dragPY=0;
     var imgWrap=document.createElement('div');
-    imgWrap.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;cursor:grab;display:flex;align-items:center;justify-content:center';
+    imgWrap.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;cursor:grab';
     var img=document.createElement('img');
-    img.style.cssText='max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;transition:transform .1s ease;user-select:none;-webkit-user-drag:none;pointer-events:none';
+    img.style.cssText='user-select:none;-webkit-user-drag:none;pointer-events:none;position:absolute;top:0;left:0';
     img.draggable=false;
     img.onerror=function(){
       if(!img._triedFallback && f.data && typeof f.data==='string' && f.data.startsWith('data:')){ img._triedFallback=true; img.src=f.data; return; }
       imgWrap.innerHTML='<div style="padding:20px;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:12.5px">❌ 이미지 렌더 실패</div>';
+    };
+    // 이미지 로드 후 가로폭에 맞게 자동확대 (상단 고정)
+    img.onload=function(){
+      var wrapW=imgWrap.clientWidth;
+      var natW=img.naturalWidth;
+      if(natW>0&&wrapW>0){
+        // 가로폭 75% — 브라우저110% 기준
+        _zoom=(wrapW/natW)*0.75;
+        if(_zoom<0.3) _zoom=0.3;
+        _panX=0; _panY=0;
+        img.style.transition='none';
+        _applyTransform();
+      }
     };
     if(eFileUrl){ img.src=eFileUrl; }
     else { var eImgBlob=null; try{ eImgBlob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){} if(eImgBlob){ window._electricBillBlobs.push(eImgBlob); img.src=eImgBlob; } else { img.src=f.data||''; } }
     imgWrap.appendChild(img);
     pane.appendChild(imgWrap);
     function _applyTransform(){
-      img.style.transform='scale('+_zoom+') translate('+_panX+'px,'+_panY+'px)';
+      img.style.width=(img.naturalWidth||100)*_zoom+'px';
+      img.style.left=_panX+'px';
+      img.style.top=_panY+'px';
       var resetBtn=$('ev-zoom-reset');
-      if(resetBtn){ resetBtn.style.display=(_zoom!==1)?'':'none'; resetBtn.textContent=Math.round(_zoom*100)+'%'; }
+      if(resetBtn){ resetBtn.style.display=''; resetBtn.textContent=Math.round(_zoom*100)+'%'; }
     }
-    // 휠 줌 (Ctrl+휠 또는 그냥 휠)
+    // 휠 줌 (마우스 위치 기준)
     imgWrap.addEventListener('wheel',function(ev){
       ev.preventDefault();
-      var delta=ev.deltaY>0?-0.15:0.15;
+      var delta=ev.deltaY>0?-0.12:0.12;
       var newZoom=Math.max(0.5, Math.min(10, _zoom+delta*_zoom));
-      // 줌 중심점 보정
+      // 마우스 위치 기준 줌
       var rect=imgWrap.getBoundingClientRect();
-      var mx=(ev.clientX-rect.left)/rect.width-0.5;
-      var my=(ev.clientY-rect.top)/rect.height-0.5;
-      var zoomRatio=newZoom/_zoom;
-      _panX=_panX-(mx*rect.width*(zoomRatio-1))/_zoom;
-      _panY=_panY-(my*rect.height*(zoomRatio-1))/_zoom;
+      var mx=ev.clientX-rect.left;
+      var my=ev.clientY-rect.top;
+      var ratio=newZoom/_zoom;
+      _panX=mx-ratio*(mx-_panX);
+      _panY=my-ratio*(my-_panY);
       _zoom=newZoom;
       img.style.transition='none';
       _applyTransform();
@@ -7839,8 +7916,8 @@ function _renderElectricBillPane(pane, files, id, period, billData){
     });
     document.addEventListener('mousemove',function(ev){
       if(!_dragging) return;
-      _panX=_dragPX+(ev.clientX-_dragSX)/_zoom;
-      _panY=_dragPY+(ev.clientY-_dragSY)/_zoom;
+      _panX=_dragPX+(ev.clientX-_dragSX);
+      _panY=_dragPY+(ev.clientY-_dragSY);
       img.style.transition='none';
       _applyTransform();
     });
@@ -7848,15 +7925,27 @@ function _renderElectricBillPane(pane, files, id, period, billData){
       if(!_dragging) return;
       _dragging=false; imgWrap.style.cursor='grab';
     });
-    // 더블클릭: 줌 리셋
+    // 더블클릭: 원래 가로맞춤으로 리셋
     imgWrap.addEventListener('dblclick',function(){
-      _zoom=1; _panX=0; _panY=0;
+      var wrapW=imgWrap.clientWidth;
+      var natW=img.naturalWidth||wrapW;
+      _zoom=natW>0?wrapW/natW:1;
+      if(_zoom<1) _zoom=1;
+      _panX=0; _panY=0;
       img.style.transition='transform .3s ease';
       _applyTransform();
     });
     // 줌 리셋 버튼
     var resetBtn=$('ev-zoom-reset');
-    if(resetBtn) resetBtn.onclick=function(){ _zoom=1; _panX=0; _panY=0; img.style.transition='transform .3s ease'; _applyTransform(); };
+    if(resetBtn) resetBtn.onclick=function(){
+      var wrapW=imgWrap.clientWidth;
+      var natW=img.naturalWidth||wrapW;
+      _zoom=natW>0?wrapW/natW:1;
+      if(_zoom<1) _zoom=1;
+      _panX=0; _panY=0;
+      img.style.transition='transform .3s ease';
+      _applyTransform();
+    };
   }
 }
 
