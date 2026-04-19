@@ -27,23 +27,25 @@
 html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--t1);font-size:13px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .app{display:flex;height:100vh;overflow:hidden}
 
-/* SIDEBAR */
-.sb{width:134px;min-width:134px;background:var(--w);border-right:1px solid var(--ln);display:flex;flex-direction:column}
-.sb-logo{padding:11px 11px 9px;border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:8px}
+/* SIDEBAR — 아이콘 그리드 2열 */
+.sb{width:100px;min-width:100px;background:var(--w);border-right:1px solid var(--ln);display:flex;flex-direction:column}
+.sb-logo{padding:10px;border-bottom:1px solid var(--ln);display:flex;justify-content:center}
 .sb-logo .bsn-mark{flex-shrink:0;width:30px;height:30px;background:linear-gradient(135deg,#1e40af 0%,#00249C 55%,#0a1a5c 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;line-height:1;letter-spacing:-.5px;font-family:'Archivo Black','Arial Black',sans-serif;box-shadow:0 2px 6px rgba(0,36,156,.28),inset 0 1px 0 rgba(255,255,255,.18);position:relative;overflow:hidden}
 .sb-logo .bsn-mark::before{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0));border-radius:8px 8px 40% 40%;pointer-events:none}
 .sb-logo .bsn-mark span{position:relative;z-index:1}
-.sb-logo .bsn-txt{display:flex;flex-direction:column;line-height:1;min-width:0}
-.sb-logo h1{font-size:14px;font-weight:800;line-height:1.1;letter-spacing:-.4px;background:linear-gradient(135deg,#0a1a5c 0%,#00249C 45%,#1e40af 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#00249C}
-.sb-logo h1 span{-webkit-text-fill-color:#1e40af !important;background:none}
-.sb-logo small{font-size:9px;color:var(--t4);font-family:'Pretendard',sans-serif;letter-spacing:.3px;margin-top:2px;font-weight:500}
-.sb-nav{flex:1;padding:4px 0;overflow-y:auto;display:flex;flex-direction:column}
-.sb-nav .nb[data-id="admin"]{margin-top:auto;border-top:1px solid var(--ln);padding-top:10px;padding-bottom:10px;color:var(--t3)}
-.nb{width:100%;background:none;border:none;border-left:2px solid transparent;padding:8px 0 8px 12px;text-align:left;font-size:13px;font-family:inherit;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.1s;white-space:nowrap}
+.sb-logo .bsn-txt{display:none}
+.sb-nav{flex:1;padding:6px 4px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:2px;align-content:start}
+.sb-nav .nb-admin-wrap{grid-column:1/-1;margin-top:auto;border-top:1px solid var(--ln);padding-top:4px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border:none;background:transparent;cursor:pointer;border-radius:6px;transition:.15s;font-family:inherit;color:var(--t2);font-size:8px;font-weight:500;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;width:100%}
 .nb:hover{background:var(--w2);color:var(--t1)}
-.nb.on{background:var(--bl2);color:var(--bl);border-left-color:var(--bl);font-weight:500}
-.nbadge{margin-left:6px;background:var(--rd2);color:var(--rd);font-size:11px;font-weight:700;padding:1px 5px;border-radius:8px;font-family:'Pretendard',sans-serif;font-variant-numeric:tabular-nums}
-.sb-foot{padding:9px 12px;border-top:1px solid var(--ln);font-size:10px;color:var(--t4);font-family:'Pretendard',sans-serif;line-height:1.4}
+.nb.on{background:var(--bl2);color:var(--bl);font-weight:600}
+.nb .nb-ico{font-size:20px;line-height:1;text-align:center;display:block;width:100%}
+.nb .nb-lbl{font-size:11.5px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nbadge{position:absolute;top:2px;right:2px;background:var(--rd2);color:var(--rd);font-size:8px;font-weight:700;padding:0 3px;border-radius:6px;font-family:'Pretendard',sans-serif;font-variant-numeric:tabular-nums;line-height:1.4}
+.nb-sep{grid-column:1/-1;border-top:1px solid var(--ln);margin:3px 0}
+.nb-memo-btn{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;border:none;background:#fef3c7;cursor:pointer;border-radius:6px;font-family:inherit;color:#92400e;font-size:10px;font-weight:600;margin:2px 0}
+.nb-memo-btn:hover{background:#fde68a}
+.sb-foot{padding:6px;border-top:1px solid var(--ln);font-size:8px;color:var(--t4);font-family:'Pretendard',sans-serif;line-height:1.3;text-align:center}
 
 /* MAIN */
 .main{flex:1;overflow:hidden;display:flex;flex-direction:column}
@@ -255,8 +257,8 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 /* ========= REPORT ========= */
 .rep-bld-tabs{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px}
 .rep-mnav{display:flex;align-items:center;gap:5px;margin-bottom:8px}
-.rep-mnav button{background:none;border:1px solid var(--ln);border-radius:var(--r);padding:2px 7px;cursor:pointer;font-size:12px;color:var(--t2)}
-.rep-mnav span{font-size:12px;font-weight:700;min-width:72px;text-align:center}
+.rep-mnav button{background:none;border:1px solid var(--ln);border-radius:var(--r);padding:4px 10px;cursor:pointer;font-size:15px;color:var(--t2)}
+.rep-mnav span{font-size:16px;font-weight:700;min-width:90px;text-align:center}
 .cf-tbl{width:100%;border-collapse:collapse;font-size:12px}
 .cf-tbl th{background:var(--w2);padding:1px 3px;font-size:10px;font-weight:600;color:var(--t3);border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);text-align:left}
 .cf-tbl th:last-child{border-right:none}
@@ -447,7 +449,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 .sb-list-item:hover{background:var(--w2)}
 .sb-list-item.on{background:var(--bl2);color:var(--bl);font-weight:600}
 /* 임대현황: 글자 작게 · 폭은 넓게 */
-#lease-bldg-sb .sb-list-item{font-size:11.5px;padding:6px 8px;line-height:1.3}
+#lease-bldg-sb .sb-list-item{font-size:11.5px;padding:5px 8px;line-height:1.25;white-space:nowrap}
 /* 캘린더: zoom:1.15 보정해서 월간보고서 시각사이즈와 동일하게 */
 #cal-bldg-f .sb-list-item{font-size:11px;padding:6px 8px;line-height:1.3}
 /* paytype badge */
@@ -552,6 +554,16 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   .sb,.ph,.cal-add-row,.btn-row,.frow,.ie,.ov,.login-ov{display:none!important}
   .main,.page{overflow:visible!important}
   .tw{max-height:none!important}
+  @page{size:landscape;margin:8mm}
+  .card{page-break-inside:avoid;break-inside:avoid;margin-bottom:6px}
+  .cf-annual-card{page-break-inside:auto;break-inside:auto}
+  .cf-annual-card table{font-size:8px!important}
+  .cf-annual-card td,.cf-annual-card th{padding:1px 2px!important}
+  .photo-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important}
+  .photo-grid img{width:100%!important;height:100%!important;object-fit:cover!important}
+  .photo-add-btn,.photo-del{display:none!important}
+  .photo-cap{display:block!important}
+  input[placeholder="사진 설명 입력"]{display:none!important}
 }
 /* ── AI 챗봇 ── */
 #ai-chat-fab{position:fixed;bottom:20px;right:20px;z-index:9990;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e40af,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 14px rgba(30,64,175,.35);display:flex;align-items:center;justify-content:center;transition:.2s;color:#fff;font-size:24px}
@@ -796,6 +808,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
       </div>
       <label class="lbl" for="login-pw">비밀번호</label>
       <input type="password" id="login-pw" autocomplete="current-password">
+      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#94a3b8;cursor:pointer;user-select:none;margin:-6px 0 10px 2px;text-align:left"><input type="checkbox" id="login-auto" style="margin:0;cursor:pointer;width:13px;height:13px"> 자동 로그인</label>
       <button onclick="doLogin()" id="login-btn">로그인</button>
       <div class="login-err" id="login-err"></div>
     </div>
@@ -839,10 +852,11 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 </div>
 <div class="app" style="display:none" id="app-main">
 <aside class="sb">
-  <div class="sb-logo" style="justify-content:center"><div class="bsn-txt"><h1 style="font-size:18px">BSN<span style="color:#1e40af">.CARE</span></h1></div></div>
+  <div class="sb-logo" onclick="location.reload()" style="cursor:pointer" title="새로고침"><span style="font-size:13px;font-weight:800;letter-spacing:-.3px;color:#00249C;font-family:'Archivo Black','Arial Black',sans-serif;line-height:1">BSN<span style="color:#1e40af;font-weight:700">.CARE</span></span></div>
   <nav class="sb-nav" id="nav"></nav>
-  <div class="sb-foot"><div id="sb-dt" style="font-size:10px"></div>
-    <button onclick="doLogout()" style="margin-top:4px;padding:4px 8px;font-size:10px;border:1px solid var(--ln);background:var(--w);border-radius:var(--r);cursor:pointer;width:100%">로그아웃</button>
+  <div class="sb-foot">
+    <button class="nb" data-id="admin" onclick="gp('admin',this)" id="sb-admin-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:3px;padding:4px;border:1px solid var(--ln);background:var(--w2);border-radius:4px;cursor:pointer;font-size:9px;font-family:inherit;color:var(--t3);font-weight:500;position:relative;margin-bottom:4px">✓ 관리<span class="nbadge" id="nb-ad" style="position:static;margin-left:2px">0</span></button>
+    <button onclick="doLogout()" style="padding:3px;font-size:9px;border:1px solid var(--ln);background:var(--w);border-radius:var(--r);cursor:pointer;width:100%;color:var(--t3);font-family:inherit">로그아웃</button>
   </div>
 </aside>
 <main class="main">
@@ -853,13 +867,12 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>임대 현황</h2>
     <input id="lease-search" placeholder="검색..." oninput="rdLease()" style="padding:3px 7px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;width:150px">
   </div>
-  <div class="split-layout" style="grid-template-columns:170px 1fr">
+  <div class="split-layout" style="grid-template-columns:auto 1fr">
     <!-- 건물 사이드바 -->
     <div class="split-left">
-      <div style="padding:5px 7px;border-bottom:1px solid var(--ln);display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-        <button class="btn pri sm" onclick="openMo('mo-lease')" style="justify-content:center">+ 호실 추가</button>
-        <button class="btn sm" onclick="openMo('mo-bldg')" style="justify-content:center">+ 건물 추가</button>
-        <button class="btn sm" onclick="_bulkAddrLookup()" style="justify-content:center;font-size:10px;color:#3b82f6;border-color:#93c5fd">🔍 주소 일괄 보완</button>
+      <div style="padding:4px 7px;border-bottom:1px solid var(--ln);display:flex;gap:4px;flex-shrink:0">
+        <button class="btn pri sm" onclick="openMo('mo-lease')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 호실</button>
+        <button class="btn sm" onclick="openMo('mo-bldg')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 건물</button>
       </div>
       <div class="sb-items" id="lease-bldg-sb"></div>
     </div>
@@ -1046,9 +1059,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 
 <!-- 월간보고서 -->
 <div class="page" id="pg-report">
-  <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>월간 운영 보고서</h2>
-    <button class="btn sm" onclick="printReport()" style="margin-left:auto">🖨 PDF 출력</button>
-  </div>
+  <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>월간 운영 보고서</h2></div>
   <div style="height:calc(100vh - 56px)">
     <div style="display:grid;grid-template-columns:152px 1fr;height:100%">
       <div class="split-left">
@@ -1058,10 +1069,12 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
         <div class="sb-items" id="rep-bldg-list"></div>
       </div>
       <div style="overflow-y:auto;padding:4px 4px">
-        <div class="rep-mnav" style="margin-bottom:6px">
+        <div class="rep-mnav" style="margin-bottom:6px;display:flex;align-items:center">
           <button onclick="repPrev()">‹</button>
           <span id="rep-lbl"></span>
           <button onclick="repNext()">›</button>
+          <button class="btn sm" onclick="printAllReports()" style="margin-left:auto" id="rep-all-btn" title="선택 월 전체 건물 보고서 PDF">📑 전체 PDF</button>
+          <button class="btn sm" onclick="printReport()" style="margin-left:4px">🖨 PDF 출력</button>
         </div>
         <div id="rep-content" style="zoom:1.15"></div>
       </div>
@@ -1527,6 +1540,9 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
         <div class="fr r2"><div class="fg"><label>건물명</label><input id="fb-n" placeholder="예: 37.신규빌딩"></div><div class="fg"><label>주소 <button type="button" onclick="_searchAddr()" style="font-size:10px;padding:2px 8px;margin-left:4px;background:#3b82f6;color:#fff;border:none;border-radius:3px;cursor:pointer">🔍 주소검색</button></label><input id="fb-a" placeholder="주소검색 버튼으로 입력" readonly style="background:#f8fafc;cursor:pointer" onclick="_searchAddr()"><input type="hidden" id="fb-a-road"><input type="hidden" id="fb-a-jibun"></div></div>
         <div class="fr r2"><div class="fg"><label>건물관리 시작일</label><input type="date" id="fb-bms" lang="en" data-native="1"></div><div class="fg"><label>건물관리 만료일</label><input type="date" id="fb-bme" lang="en" data-native="1"></div></div>
         <div class="fg"><label>건물관리 관리비 (월)</label><input type="text" inputmode="numeric" id="fb-bmf" oninput="fmtMoneyInput(this)" placeholder="예: 500,000"></div>
+        <div style="border-top:1px solid var(--ln);margin:8px 0 4px;padding-top:6px"><span style="font-size:11px;font-weight:600;color:var(--t3)">건물 일반현황 (보고서용)</span></div>
+        <div class="fr r2"><div class="fg"><label>연면적</label><input id="fb-area" placeholder="예: 1,234.56㎡"></div><div class="fg"><label>규모</label><input id="fb-floors" placeholder="예: 지하1층/지상5층"></div></div>
+        <div class="fg"><label>주차</label><input id="fb-parking" placeholder="예: 자주식 20대"></div>
       </div>
       <div class="bl-right" style="flex:1;display:flex;flex-direction:column;background:#f8fafc;border:1px solid var(--ln);border-radius:var(--r);min-width:0;overflow:hidden">
         <div style="display:flex;border-bottom:1px solid var(--ln);background:var(--w);flex-shrink:0">
@@ -1560,21 +1576,23 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   </div>
 </div>
 <div class="ov" id="mo-bmemo">
-  <div class="modal" style="width:min(1080px,96vw);height:90vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
-    <div class="mo-hd" style="padding:14px 18px;background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;border-radius:8px 8px 0 0;border-bottom:none">
-      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
-        <span style="font-size:20px">🏢</span>
-        <div style="min-width:0">
-          <h3 id="bmemo-title" style="color:#fff;font-size:15px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">건물 메모</h3>
-          <div id="bmemo-sub" style="font-size:11px;opacity:.85;margin-top:2px;font-family:'Pretendard',sans-serif"></div>
+  <div class="modal" style="width:min(1080px,96vw);height:90vh;display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:12px">
+    <div class="mo-hd" style="padding:12px 18px;background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;border-radius:12px 12px 0 0;border-bottom:none">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <span style="font-size:18px">🏢</span>
+        <div style="min-width:0;flex:1">
+          <h3 id="bmemo-title" style="color:#fff;font-size:16px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">건물 메모</h3>
+          <div id="bmemo-sub" style="font-size:11px;opacity:.7;margin-top:1px;font-family:'Pretendard',sans-serif"></div>
         </div>
       </div>
-      <button onclick="closeMo('mo-bmemo')" style="color:#fff;font-size:22px;background:transparent;border:none;cursor:pointer;padding:0 4px">×</button>
+      <button onclick="closeMo('mo-bmemo')" style="color:#fff;font-size:20px;background:transparent;border:none;cursor:pointer;padding:0 6px;opacity:.8">✕</button>
     </div>
-    <div id="bmemo-tabs" style="display:flex;overflow-x:auto;background:var(--w);border-bottom:1px solid var(--ln);padding:0 12px;flex-shrink:0;gap:0"></div>
-    <div id="bmemo-body" style="flex:1;overflow-y:auto;padding:12px 16px 16px;background:var(--w2);display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;align-content:start"></div>
-    <div class="mo-ft" style="padding:10px 14px;background:var(--w);border-top:1px solid var(--ln);margin:0">
-      <span id="bmemo-saved" style="font-size:11px;color:var(--t3);margin-right:auto"></span>
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div id="bmemo-side" style="width:150px;flex-shrink:0;overflow-y:auto;background:#f1f5f9;border-right:1px solid var(--ln);padding:0;display:flex;flex-direction:column"></div>
+      <div id="bmemo-body" style="flex:1;overflow-y:auto;padding:14px 18px 18px;background:#f8f9fb;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start"></div>
+    </div>
+    <div class="mo-ft" style="padding:10px 16px;background:var(--w);border-top:1px solid var(--ln);margin:0;display:flex;align-items:center;gap:8px">
+      <span id="bmemo-saved" style="font-size:11px;color:#16a34a;margin-right:auto;font-weight:500"></span>
       <button class="btn" onclick="addBMemoCat()" style="font-size:12px">+ 항목 추가</button>
       <button class="btn pri" onclick="closeMo('mo-bmemo')" style="font-size:12px">닫기</button>
     </div>
@@ -1582,24 +1600,23 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 </div>
 
 <div class="ov" id="mo-bmemo-all">
-  <div class="modal" style="width:min(1280px,98vw);max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
-    <div class="mo-hd" style="padding:14px 18px;background:linear-gradient(135deg,#92400e,#f59e0b);color:#fff;border-radius:8px 8px 0 0;border-bottom:none">
-      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
-        <span style="font-size:20px">🗂</span>
-        <div style="min-width:0">
-          <h3 style="color:#fff;font-size:15px;margin:0">전체 건물 메모 · 몰아보기</h3>
-          <div style="font-size:11px;opacity:.85;margin-top:2px;font-family:'Pretendard',sans-serif">비밀번호·CCTV·소방 등 모든 건물 정보를 한눈에</div>
-        </div>
+  <div class="modal" style="width:min(1280px,98vw);max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:12px">
+    <div class="mo-hd" style="padding:14px 20px;background:linear-gradient(135deg,#78350f,#d97706);color:#fff;border-radius:12px 12px 0 0;border-bottom:none">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <span style="font-size:18px">🗂</span>
+        <h3 style="color:#fff;font-size:16px;margin:0;font-weight:700">건물 메모 전체보기</h3>
       </div>
-      <button onclick="closeMo('mo-bmemo-all')" style="color:#fff;font-size:22px;background:transparent;border:none;cursor:pointer;padding:0 4px">×</button>
+      <button onclick="closeMo('mo-bmemo-all')" style="color:#fff;font-size:20px;background:transparent;border:none;cursor:pointer;padding:0 6px;opacity:.8">✕</button>
     </div>
-    <div style="padding:8px 14px;background:var(--w2);border-bottom:1px solid var(--ln);display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0">
-      <button onclick="closeMo('mo-bmemo-all');var fb=DB.buildings[0];if(fb)openBMemo(fb.id);" style="border:1px solid #fbbf24;background:#fef3c7;cursor:pointer;padding:4px 10px;font-size:11px;border-radius:4px;color:#92400e;font-weight:600;font-family:inherit;white-space:nowrap;flex-shrink:0">📝 개별보기</button>
-      <div id="bmemo-all-cat-filter" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"></div>
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div style="width:145px;min-width:145px;background:#fffbeb;border-right:1px solid #fde68a;display:flex;flex-direction:column;overflow-y:auto;padding:6px 0">
+        <button onclick="closeMo('mo-bmemo-all');var fb=DB.buildings[0];if(fb)openBMemo(fb.id);" style="border:none;background:#eff6ff;cursor:pointer;padding:8px 10px;font-size:11px;color:#1e40af;font-weight:600;font-family:inherit;text-align:left;border-bottom:1px solid #fde68a;margin:0 0 4px">🏢 개별보기</button>
+        <div id="bmemo-all-cat-filter" style="display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px"></div>
+      </div>
+      <div id="bmemo-all-body" style="flex:1;overflow:auto;background:var(--w)"></div>
     </div>
-    <div id="bmemo-all-body" style="flex:1;overflow:auto;background:var(--w)"></div>
-    <div class="mo-ft" style="padding:8px 14px;background:var(--w);border-top:1px solid var(--ln);margin:0">
-      <span style="font-size:11px;color:var(--t3);margin-right:auto">💡 상단 📝개별보기 → 건물별 메모로 전환</span>
+    <div class="mo-ft" style="padding:10px 16px;background:var(--w);border-top:1px solid var(--ln);margin:0;display:flex;align-items:center">
+      <span style="font-size:11px;color:var(--t3);margin-right:auto">건물명 클릭 → 개별 메모 편집</span>
       <button class="btn pri" onclick="closeMo('mo-bmemo-all')" style="font-size:12px">닫기</button>
     </div>
   </div>
@@ -2656,7 +2673,7 @@ calEvents:[],
 memos:{},
 memoCats:defMemoCats,
 reports:[],
-repPhotos:{},
+repPhotos:{},repPhotoCaptions:{},
 ui:{calY:new Date().getFullYear(),calM:new Date().getMonth(),selBldg:null,selMemoCat:null,memoView:'byCategory',memoColW:150,memoRowH:{},leaseF:'all',calBldgF:'all',calView:'month',calFlt:'all',repBldgId:null,repY:new Date().getFullYear(),repM:new Date().getMonth()+1},
 };}
 
@@ -2851,7 +2868,7 @@ const PAGES=[
   {id:'invoice',ico:'📄',label:'청구서',beta:true},
   {id:'utility',ico:'⚡💧',label:'전기·수도'},
   {id:'pmemo',ico:'📝',label:'개인메모'},
-  {id:'inspect',ico:'🔍',label:'건물 점검'},
+  {id:'inspect',ico:'🔧',label:'건물 점검'},
 ];
 // 사용자가 드래그로 정한 사이드탭 순서 (localStorage: bm_navOrder)
 function _loadNavOrder(){
@@ -2892,33 +2909,45 @@ function buildNav(){
   _applyNavOrder();
   const pages=PAGES.slice();
   pages.push({id:'admin',ico:'✓',label:'사용자 관리'});
-  // 새로고침 후 마지막 탭 복원 (없으면 lease)
-  let lastTab='lease';
-  try{ var t=localStorage.getItem('bm_lastTab'); if(t==='water'||t==='electric') t='utility'; if(t && (t==='admin' || pages.find(p=>p.id===t))) lastTab=t; }catch(_){}
   // 일반 탭 / 베타 탭 분리
   const normalPages=pages.filter(p=>!p.beta && p.id!=='admin');
+  // 항상 첫 번째 탭으로 시작 (사용자가 순서 바꾸면 그 순서의 첫번째)
+  let lastTab=(normalPages[0]&&normalPages[0].id)||'lease';
   const betaPages=pages.filter(p=>p.beta);
   const adminPage=pages.find(p=>p.id==='admin');
   function _navBtn(p){
     const isAdmin=p.id==='admin';
-    return `<button class="nb${p.id===lastTab?' on':''}" data-id="${p.id}" onclick="gp('${p.id}',this)"${isAdmin?'':' draggable="true" ondragstart="_navDragStart(event)" ondragover="_navDragOver(event)" ondragleave="_navDragLeave(event)" ondrop="_navDrop(event)" ondragend="_navDragEnd(event)" title="드래그해서 순서 변경"'}>
-      <span style="font-size:${p.ico.length>2?'9':'12'}px;width:${p.ico.length>2?'20':'14'}px;text-align:center;flex-shrink:0">${p.ico}</span>${p.label}
+    const shortLabel={'임대현황':'임대','만료일 관리':'만료일','일정 캘린더':'캘린더','고정 일정':'고정일정','월간보고서':'보고서','전기·수도':'전기수도','개인메모':'메모','건물 점검':'건물점검','사용자 관리':'관리'}[p.label]||p.label;
+    return `<button class="nb${p.id===lastTab?' on':''}" data-id="${p.id}" onclick="gp('${p.id}',this)" style="position:relative"${isAdmin?'':' draggable="true" ondragstart="_navDragStart(event)" ondragover="_navDragOver(event)" ondragleave="_navDragLeave(event)" ondrop="_navDrop(event)" ondragend="_navDragEnd(event)" title="'+p.label+'"'}>
+      <span class="nb-ico"${p.id==='utility'?' style="font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:0px"':''}>${p.id==='utility'?'<span style="line-height:1">⚡</span><span style="line-height:1;margin-left:-5px">💧</span>':p.ico}</span><span class="nb-lbl">${shortLabel}</span>
       ${p.id==='expire'?'<span class="nbadge" id="nb-ex">0</span>':''}
       ${p.id==='admin'?'<span class="nbadge" id="nb-ad">0</span>':''}
     </button>`;
   }
   let navHtml=normalPages.map(_navBtn).join('');
   if(betaPages.length){
-    navHtml+='<div style="border-top:1px solid var(--ln);margin:6px 12px 2px;padding-top:4px"><span style="font-size:9px;color:var(--t4);font-weight:600;letter-spacing:.5px;padding-left:2px">BETA</span></div>';
+    navHtml+='<div class="nb-sep"></div>';
     navHtml+=betaPages.map(_navBtn).join('');
   }
-  if(adminPage) navHtml+=_navBtn(adminPage);
+  // ★ 건물메모 바로가기
+  navHtml+='<div class="nb-sep"></div>';
+  navHtml+='<button class="nb-memo-btn" onclick="var fb=DB.buildings[0];if(fb)openBMemo(fb.id);else openAllBMemo();" title="건물 메모">🗂 건물메모</button>';
   $('nav').innerHTML=navHtml;
+  // ★ 관리 버튼은 sb-foot에 렌더
+  if(adminPage){
+    const adEl=$('sb-admin-btn');
+    if(adEl) adEl.outerHTML=`<button class="nb${adminPage.id===lastTab?' on':''}" data-id="admin" onclick="gp('admin',this)" id="sb-admin-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:3px;padding:4px;border:1px solid var(--ln);background:var(--w2);border-radius:4px;cursor:pointer;font-size:9px;font-family:inherit;color:var(--t3);font-weight:500;position:relative">✓ 관리<span class="nbadge" id="nb-ad" style="position:static;margin-left:2px">0</span></button>`;
+  }
   // 초기 페이지 활성화 (렌더는 enterApp 에서)
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   const initPg=$('pg-'+lastTab); if(initPg) initPg.classList.add('on');
   const now=new Date();
-  $('sb-dt').textContent=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+  if($('sb-dt')) $('sb-dt').textContent=`${now.getMonth()+1}.${now.getDate()}`;
+  // 앱 로드 시 전기 청구서 중복 자동 제거
+  try{
+    var dd=_deduplicateElectricBills(true);
+    if(dd.custMerged||dd.billDeduped) console.log('[Init] 중복제거: 고객병합='+dd.custMerged+', 청구서중복='+dd.billDeduped+', '+dd.before+'→'+dd.after+'건');
+  }catch(e){}
   upBadges();
   return lastTab;
 }
@@ -3042,7 +3071,7 @@ function openMo(id){
   fillSel('fc-b',true);
   if(id==='mo-lease'){$('lease-eid').value='';$('mo-lease-t').textContent='호실 추가';['fl-f','fl-t','fl-s','fl-e','fl-pd','fl-ph','fl-em','fl-n','fl-rfs','fl-rfe'].forEach(i=>$(i)&&($(i).value=''));['fl-d','fl-r','fl-m'].forEach(i=>$(i)&&($(i).value=''));$('fl-pt').value='선불';loadContactsFromString('');if($('fl-rsch-wrap'))$('fl-rsch-wrap').innerHTML='';if($('fl-rf-none')){$('fl-rf-none').checked=false;toggleRfNone();}if($('fl-rsch-none')){$('fl-rsch-none').checked=false;toggleRschNone();}const db=$('lease-del-btn');if(db)db.style.display='none';setTimeout(()=>{switchDocTab('lease');_leaseFormSnap=_snapLeaseForm();},50);}
   if(id==='mo-expire'){$('exp-eid').value='';$('mo-exp-t').textContent='만료일 추가';$('fe-d').value='';$('fe-n').value='';}
-  if(id==='mo-bldg'){$('fb-id').value='';$('mo-bldg-t').textContent='건물 추가';['fb-n','fb-a','fb-bms','fb-bme','fb-bmf'].forEach(i=>$(i)&&($(i).value=''));$('fb-a-road').value='';$('fb-a-jibun').value='';const bs=$('bldg-save-btn');if(bs)bs.textContent='추가';const bd=$('bldg-del-btn');if(bd)bd.style.display='none';setTimeout(()=>{ switchBldgDocTab('cert'); _bldgFormSnap=_snapBldgForm(); },50);}
+  if(id==='mo-bldg'){$('fb-id').value='';$('mo-bldg-t').textContent='건물 추가';['fb-n','fb-a','fb-bms','fb-bme','fb-bmf','fb-area','fb-floors','fb-parking'].forEach(i=>$(i)&&($(i).value=''));$('fb-a-road').value='';$('fb-a-jibun').value='';const bs=$('bldg-save-btn');if(bs)bs.textContent='추가';const bd=$('bldg-del-btn');if(bd)bd.style.display='none';setTimeout(()=>{ switchBldgDocTab('cert'); _bldgFormSnap=_snapBldgForm(); },50);}
   if(id==='mo-report'){openRepModal();return;}
   $(id).classList.add('on');
 }
@@ -3075,7 +3104,7 @@ function _snapLeaseForm(){
   return base+'||SCH:'+schSnap+'||CT:'+ctSnap+'||RFN:'+rfN+'||RSN:'+rsN;
 }
 function _snapBldgForm(){
-  const ids=['fb-n','fb-a','fb-bms','fb-bme','fb-bmf'];
+  const ids=['fb-n','fb-a','fb-bms','fb-bme','fb-bmf','fb-area','fb-floors','fb-parking'];
   return ids.map(i=>$(i)?$(i).value:'').join('|');
 }
 function closeMo(id){
@@ -3135,7 +3164,7 @@ function rdLease(){
     });
   }
   const sbEl=$('lease-bldg-sb');
-  if(sbEl){sbEl.innerHTML=`<div class="sb-list-item${f==='all'?' on':''}" onclick="setLF('all')" style="display:flex;align-items:center;gap:4px;padding-right:4px"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">전체</span><button onclick="event.stopPropagation();openAllBMemo()" title="전체 건물 메모 한눈에 보기 (비밀번호·CCTV 등 몰아보기)" style="border:1px solid var(--ln);background:var(--w2);cursor:pointer;padding:2px 5px;font-size:10px;flex-shrink:0;border-radius:4px;color:var(--t2);font-weight:500;line-height:1.2" onmouseover="this.style.background='#fef3c7';this.style.borderColor='#fbbf24';this.style.color='#92400e'" onmouseout="this.style.background='var(--w2)';this.style.borderColor='var(--ln)';this.style.color='var(--t2)'">🗂몰아보기</button></div>`+DB.buildings.map(b=>`<div class="sb-list-item${f==b.id?' on':''}" onclick="setLF(${b.id})" oncontextmenu="event.preventDefault();delBldg(${b.id})" style="display:flex;align-items:center;gap:4px;padding-right:4px"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><button onclick="event.stopPropagation();openBMemo(${b.id})" title="건물 메모 열기 (비밀번호·CCTV·소방 등 건물별 정보)" style="border:1px solid var(--ln);background:var(--w2);cursor:pointer;padding:2px 5px;font-size:10px;flex-shrink:0;border-radius:4px;color:var(--t2);font-weight:500;line-height:1.2" onmouseover="this.style.background='#dbeafe';this.style.borderColor='#60a5fa';this.style.color='#1d4ed8'" onmouseout="this.style.background='var(--w2)';this.style.borderColor='var(--ln)';this.style.color='var(--t2)'">📝메모</button></div>`).join('');}
+  if(sbEl){sbEl.innerHTML=`<div class="sb-list-item${f==='all'?' on':''}" onclick="setLF('all')"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">전체</span></div>`+DB.buildings.map(b=>`<div class="sb-list-item${f==b.id?' on':''}" onclick="setLF(${b.id})" oncontextmenu="event.preventDefault();delBldg(${b.id})"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span></div>`).join('');}
   $('lease-alerts').innerHTML='';
   const grp={};rows.forEach(l=>{if(!grp[l.bId])grp[l.bId]=[];grp[l.bId].push(l);});
   // 호실 없는 건물도 포함 (공실 표시)
@@ -3674,7 +3703,6 @@ function rdWater(){
   html+='④ 확장 로드 → 폴더선택';
   html+='<hr style="border:none;border-top:1px solid var(--ln);margin:6px 0">';
   html+='<div style="font-weight:700;color:var(--bl);font-size:11.5px;margin-bottom:3px">사용법</div>';
-  html+='<button onclick="_showTutorial(\'water\')" style="display:block;width:100%;padding:6px 8px;font-size:11px;font-weight:600;background:#eff6ff;color:#0284c7;border:1px solid #bfdbfe;border-radius:5px;cursor:pointer;margin-bottom:4px">▶ 사용법 보기</button>';
   html+='<b style="color:var(--t1)">🌐 조회</b> — 자동조회<br>';
   html+='<span style="font-size:10.5px">&gt; 고객번호입력+조회+캡처 자동</span>';
   html+='<hr style="border:none;border-top:1px solid var(--ln);margin:6px 0">';
@@ -5935,149 +5963,6 @@ function _learnBldgAddr(bId, eb){
     console.log('[BLDG-LEARN] '+bldg.name+' ← '+addr);
   }
 }
-// ── 🎬 이미지 기반 튜토리얼 시스템 ──
-// 튜토리얼 이미지를 Canvas로 동적 생성
-function _genTutorialImg(step,title,icon,color,subItems){
-  var c=document.createElement('canvas');c.width=600;c.height=380;
-  var ctx=c.getContext('2d');
-  // 배경 그라디언트
-  var g=ctx.createLinearGradient(0,0,600,380);
-  g.addColorStop(0,color);g.addColorStop(1,color==='#0284c7'?'#0ea5e9':'#d97706');
-  ctx.fillStyle=g;ctx.fillRect(0,0,600,380);
-  // 장식 원
-  ctx.globalAlpha=0.08;ctx.fillStyle='#fff';
-  ctx.beginPath();ctx.arc(500,60,120,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(80,320,80,0,Math.PI*2);ctx.fill();
-  ctx.globalAlpha=1;
-  // 아이콘
-  ctx.font='48px sans-serif';ctx.textAlign='center';ctx.fillText(icon,300,70);
-  // 단계 배지
-  ctx.fillStyle='rgba(255,255,255,0.2)';
-  _roundRect(ctx,230,90,140,44,22);ctx.fill();
-  ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif';ctx.textAlign='center';
-  ctx.fillText('STEP '+step,300,119);
-  // 제목
-  ctx.font='bold 26px sans-serif';ctx.fillStyle='#fff';
-  ctx.fillText(title,300,175);
-  // 하위 항목
-  if(subItems&&subItems.length){
-    ctx.font='16px sans-serif';ctx.fillStyle='rgba(255,255,255,0.9)';ctx.textAlign='center';
-    for(var i=0;i<subItems.length;i++){
-      ctx.fillText(subItems[i],300,220+i*30);
-    }
-  }
-  // 하단 바
-  ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(0,360,600,20);
-  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px sans-serif';ctx.textAlign='center';
-  ctx.fillText('BSN 관리 시스템',300,374);
-  return c.toDataURL('image/png');
-}
-function _roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);}
-var _tutorialImgCache={};
-function _getTutorialImg(type,idx){
-  var key=type+'_'+idx;
-  if(_tutorialImgCache[key]) return _tutorialImgCache[key];
-  var defs={water:[
-    {s:'1',t:'확장프로그램 설치',ic:'📦',sub:['zip 다운로드 후 압축 풀기','chrome://extensions 이동','개발자 모드 ON → 폴더 선택']},
-    {s:'2',t:'설치 완료 확인',ic:'✅',sub:['확장프로그램 목록에 표시됨','활성화 상태 확인']},
-    {s:'3',t:'일괄조회 버튼 클릭',ic:'🌐',sub:['좌측 패널에서','\"🌐 일괄조회\" 버튼 클릭']},
-    {s:'4',t:'일괄조회 진행중',ic:'⏳',sub:['각 고객 탭이 자동 열림','순차 조회 (2.5초 간격)']},
-    {s:'5',t:'일괄조회 완료',ic:'🎉',sub:['모든 건물 청구서 수집 완료','청구서 폴더에서 확인']},
-    {s:'6',t:'뷰어에서 확인',ic:'🔍',sub:['월→건물 선택 | 이미지 줌/팬','←→ 이미지 전환 | 📋 전체보기']}
-  ],electric:[
-    {s:'1',t:'확장프로그램 설치',ic:'📦',sub:['zip 다운로드 후 압축 풀기','chrome://extensions 이동','개발자 모드 ON → 폴더 선택']},
-    {s:'2',t:'설치 완료 확인',ic:'✅',sub:['확장프로그램 목록에 표시됨','활성화 상태 확인']},
-    {s:'3',t:'Gmail 불러오기 클릭',ic:'📧',sub:['\"📧 Gmail에서 불러오기\" 클릭','한전 청구 이메일 자동 수집']},
-    {s:'4',t:'Gmail 불러오는 중',ic:'⏳',sub:['한전 청구서 첨부파일 수집중','건물·층별 자동 매칭']},
-    {s:'5',t:'불러오기 완료',ic:'🎉',sub:['건물별·층별 자동 매칭 완료','저장 완료']},
-    {s:'6',t:'뷰어에서 확인',ic:'🔍',sub:['건물탭 ↑↓ 전환 | 줌/팬 지원','층별 전환 가능']}
-  ]};
-  var d=defs[type]&&defs[type][idx];if(!d) return '';
-  var color=type==='water'?'#0284c7':'#d97706';
-  _tutorialImgCache[key]=_genTutorialImg(d.s,d.t,d.ic,color,d.sub);
-  return _tutorialImgCache[key];
-}
-var _tutorialImages={
-  water:[
-    {idx:0, note:'① zip 다운로드 후 압축 풀기 → ② chrome://extensions → ③ 개발자 모드 ON → ④ 폴더 선택'},
-    {idx:1, note:'확장프로그램이 활성화되면 설치 완료'},
-    {idx:2, note:'좌측 패널의 "🌐 일괄조회" 버튼을 클릭'},
-    {idx:3, note:'자동으로 각 고객 탭이 열리며 순차 조회됩니다 (2.5초 간격)'},
-    {idx:4, note:'완료! 청구서 폴더에서 모든 건물의 청구서를 확인할 수 있습니다'},
-    {idx:5, note:'좌측: 월→건물 선택 | 우측: 이미지 줌/팬 | ←→ 이미지 전환 | 📋전체로 전체보기'}
-  ],
-  electric:[
-    {idx:0, note:'① zip 다운로드 후 압축 풀기 → ② chrome://extensions → ③ 개발자 모드 ON → ④ 폴더 선택'},
-    {idx:1, note:'확장프로그램이 활성화되면 설치 완료'},
-    {idx:2, note:'"📧 Gmail에서 불러오기" 클릭 → 한전 청구 이메일 자동 수집'},
-    {idx:3, note:'Gmail에서 한전 청구서 첨부파일을 자동으로 건물·층별 매칭'},
-    {idx:4, note:'완료! 건물별·층별로 자동 매칭되어 저장됩니다'},
-    {idx:5, note:'← 건물탭 → ↑↓ 건물전환 | → 복귀 | ↑↓ 층 전환 | 줌/팬 지원'}
-  ]
-};
-function _showTutorial(type){
-  var frames=_tutorialImages[type]; if(!frames||!frames.length) return;
-  var curFrame=0, timer=null;
-  var accent=type==='water'?'#0284c7':'#f59e0b';
-  var accentBg=type==='water'?'linear-gradient(135deg,#0284c7,#0ea5e9)':'linear-gradient(135deg,#f59e0b,#d97706)';
-  var icon=type==='water'?'💧':'⚡';
-  var mo=document.createElement('div');
-  mo.className='ov on'; mo.style.cssText='z-index:9999';
-  mo.innerHTML='<div class="modal" style="width:min(640px,94vw);padding:0;border-radius:12px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.3)">'+
-    '<div style="background:'+accentBg+';padding:10px 16px;display:flex;align-items:center;justify-content:space-between">'+
-    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">'+icon+'</span><span style="color:#fff;font-weight:700;font-size:14px">사용법 가이드</span></div>'+
-    '<button id="tu-close" style="color:#fff;font-size:20px;background:none;border:none;cursor:pointer;padding:0 4px;line-height:1">×</button></div>'+
-    '<div id="tu-body" style="background:#0f172a;min-height:320px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden"></div>'+
-    '<div style="padding:10px 16px;background:#fff;border-top:1px solid #e2e8f0">'+
-    '<div id="tu-note" style="font-size:13px;color:#334155;line-height:1.6;margin-bottom:10px;min-height:20px"></div>'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
-    '<div style="display:flex;align-items:center;gap:6px">'+
-    '<button id="tu-prev" style="padding:6px 14px;font-size:12px;background:#e2e8f0;color:#475569;border:none;border-radius:5px;cursor:pointer;font-weight:600">◀</button>'+
-    '<button id="tu-next" style="padding:6px 14px;font-size:12px;background:#e2e8f0;color:#475569;border:none;border-radius:5px;cursor:pointer;font-weight:600">▶</button></div>'+
-    '<div id="tu-dots" style="display:flex;gap:5px;align-items:center"></div>'+
-    '<div id="tu-counter" style="font-size:11px;color:#94a3b8"></div></div></div></div>';
-  document.body.appendChild(mo);
-  // CSS
-  if(!document.getElementById('tu-anim-css')){
-    var st=document.createElement('style');st.id='tu-anim-css';
-    st.textContent='@keyframes tuFadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}'+
-      '.tu-fade{animation:tuFadeIn .35s ease-out}'+
-      '@keyframes tuBar{from{width:0}to{width:100%}}'+
-      '.tu-bar{animation:tuBar 4s linear forwards}';
-    document.head.appendChild(st);
-  }
-  var body=mo.querySelector('#tu-body');
-  var noteEl=mo.querySelector('#tu-note');
-  function render(){
-    var fr=frames[curFrame];
-    var imgUrl=_getTutorialImg(type,fr.idx);
-    body.innerHTML='<img class="tu-fade" src="'+imgUrl+'" style="max-width:100%;max-height:400px;object-fit:contain;display:block">';
-    noteEl.innerHTML='<span style="color:'+accent+';font-weight:700">'+(curFrame+1)+'.</span> '+esc(fr.note);
-    // dots
-    var dots=mo.querySelector('#tu-dots');
-    if(dots){
-      var dh='';
-      frames.forEach(function(_,i){ dh+='<div style="width:'+(i===curFrame?'18px':'6px')+';height:6px;border-radius:3px;background:'+(i===curFrame?accent:'#cbd5e1')+';transition:all .3s;cursor:pointer" onclick=""></div>'; });
-      dots.innerHTML=dh;
-      dots.querySelectorAll('div').forEach(function(d,i){
-        d.onclick=function(){ curFrame=i; render(); };
-      });
-    }
-    var counter=mo.querySelector('#tu-counter');
-    if(counter) counter.textContent=(curFrame+1)+' / '+frames.length;
-    // ◀▶ 버튼 활성/비활성
-    var prevBtn=mo.querySelector('#tu-prev'), nextBtn=mo.querySelector('#tu-next');
-    if(prevBtn) prevBtn.style.opacity=curFrame===0?'0.4':'1';
-    if(nextBtn) nextBtn.style.opacity=curFrame===frames.length-1?'0.4':'1';
-  }
-  function next(){ if(curFrame<frames.length-1){ curFrame++; render(); } }
-  function prev(){ if(curFrame>0){ curFrame--; render(); } }
-  mo.querySelector('#tu-close').onclick=function(){ mo.remove(); };
-  mo.addEventListener('click',function(e){ if(e.target===mo){ mo.remove(); }});
-  mo.querySelector('#tu-prev').onclick=function(){ prev(); };
-  mo.querySelector('#tu-next').onclick=function(){ next(); };
-  render();
-}
 // ── ⚡ 전기요금: 한전 로그인 강제 → 이메일 첨부 업로드 플로우 ──
 // DB.electricBills[] = [{id, bId, custName, custNo('선택'), note, bills:[{period:"YYYY-MM", files:[{data,name,mime}], uploadedAt}]}]
 function _electricToast(msg,color){ try{ showSaveStatus(msg, color||'#f59e0b'); }catch(e){ console.log(msg); } }
@@ -6379,7 +6264,6 @@ function rdElectric(){
   _leftPanel+='④ 확장 로드 → 폴더선택';
   _leftPanel+='<hr style="border:none;border-top:1px solid var(--ln);margin:6px 0">';
   _leftPanel+='<div style="font-weight:700;color:#d97706;font-size:11.5px;margin-bottom:3px">사용법</div>';
-  _leftPanel+='<button onclick="_showTutorial(\'electric\')" style="display:block;width:100%;padding:6px 8px;font-size:11px;font-weight:600;background:#fffbeb;color:#d97706;border:1px solid #fde68a;border-radius:5px;cursor:pointer;margin-bottom:4px">▶ 사용법 보기</button>';
   _leftPanel+='<b style="color:var(--t1)">📧 Gmail 불러오기</b><br>';
   _leftPanel+='<span style="font-size:10.5px">&gt; 한전 청구메일 자동수집</span><br>';
   _leftPanel+='<b style="color:var(--t1)">📸 청구서 캡처</b><br>';
@@ -6392,6 +6276,28 @@ function rdElectric(){
   _leftPanel+='<div style="font-size:10px;color:#94a3b8;margin-bottom:5px;letter-spacing:.5px">도구</div>';
   /* 미지정 고객 배치 — 청구서 폴더 탭에서 접근하도록 변경 */
   _leftPanel+='<button onclick="_showBillDiagnostic()" style="display:block;width:100%;padding:5px 8px;margin-bottom:4px;font-size:10.5px;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:5px;cursor:pointer">🔍 누락 체크</button>';
+  var _nlCnt=0;(DB.electricBills||[]).forEach(function(e){(e.bills||[]).forEach(function(b){if(!b.kepcoLink)_nlCnt++;});});
+  var _lastNl=DB._lastNoLinkBills||[];
+  // _lastNoLinkBills가 없으면 현재 DB에서 재생성
+  if(_lastNl.length===0 && (DB.electricBills||[]).length>0){
+    var _bldgs2=DB.buildings||[];
+    (DB.electricBills||[]).forEach(function(e){
+      var bldg=_bldgs2.find(function(bb){return bb.id===e.bId;});
+      var bName=bldg?bldg.name:'(미지정)';
+      (e.bills||[]).forEach(function(b){
+        if(!b.kepcoLink){
+          _lastNl.push({custNo:e.custNo,custName:e.custName||'',bldgName:bName,period:b.period,amount:b.amountFmt||(b.amount?b.amount.toLocaleString()+'원':'0원'),mailDate:b.mailDate||''});
+        }
+      });
+    });
+    if(_lastNl.length>0){ DB._lastNoLinkBills=_lastNl; }
+  }
+  if(_nlCnt>0){
+    _leftPanel+='<button onclick="_showNoLinkBills()" style="display:block;width:100%;padding:5px 8px;margin-bottom:4px;font-size:10.5px;font-weight:600;background:#fff7ed;color:#c2410c;border:1px solid #fb923c;border-radius:5px;cursor:pointer">🔗 링크없음 '+_nlCnt+'건</button>';
+  }
+  if(_lastNl.length>0){
+    _leftPanel+='<button onclick="_showNoLinkBillsPre(DB._lastNoLinkBills)" style="display:block;width:100%;padding:5px 8px;margin-bottom:4px;font-size:10.5px;font-weight:600;background:#f0fdf4;color:#166534;border:1px solid #86efac;border-radius:5px;cursor:pointer">🔗 링크없음(원본) '+_lastNl.length+'건</button>';
+  }
   if(window._lastGmailResult||DB._lastGmailResult){
     _leftPanel+='<button onclick="_showLastGmailResult()" style="display:block;width:100%;padding:5px 8px;font-size:10.5px;font-weight:600;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;border-radius:5px;cursor:pointer">📋 마지막 결과</button>';
   }
@@ -6862,7 +6768,7 @@ async function _gmailStartImport(clientId, filterYear){
       unmatchedTag+=' | ';
       if(_umNoInfo.length>0) unmatchedTag+='<span style="color:#dc2626">확인불가 '+_umNoInfo.length+'명</span> ';
       if(_umHasInfo.length>0) unmatchedTag+='<span style="color:#1d4ed8">미지정 '+_umHasInfo.length+'명</span>';
-      unmatchedTag+=' <span style="color:#64748b;font-size:10.5px">· 청구서 폴더에서 배치</span>';
+      unmatchedTag+=' <span style="color:#64748b;font-size:10.5px">← 건물배정 필요</span>';
     }
     var displayTotal=saved.total+saved.dupSkipped;
     var custCount=(DB.electricBills||[]).length;
@@ -6872,7 +6778,11 @@ async function _gmailStartImport(clientId, filterYear){
     var skipTag=skippedNonBill>0?' | <span style="color:#94a3b8">비청구서 '+skippedNonBill+'건 제외</span>':'';
     var dupTag=(saved.dupSkipped||0)>0?' | <span style="color:#64748b">중복 '+saved.dupSkipped+'건</span>':'';
     var imgTag2=(saved.imgSkipped||0)>0?' | <span style="color:#64748b">캡쳐완료 '+saved.imgSkipped+'건</span>':'';
-    let resHtml='<div style="padding:6px"><div style="font-size:10px;color:#999;text-align:right;margin-bottom:4px">'+esc(whoName)+' · 불러오기: '+nowStr+'</div><div style="font-size:13px;color:var(--t2);margin-bottom:6px;padding:6px 8px;background:var(--bg2);border-radius:4px;line-height:1.6">📧 메일 '+newMsgs.length+'건 → 신규 '+saved.total+'건'+dupTag+imgTag2+skipTag+failTag+unmatchedTag+'<div style="font-size:10.5px;color:#64748b;margin-top:3px">현재 DB: 고객 '+custCount+'명 · 청구서 '+billCount+'건</div></div>';
+    var _linkCount=0;
+    (DB.electricBills||[]).forEach(function(eb){(eb.bills||[]).forEach(function(b){if(b.kepcoLink)_linkCount++;});});
+    var _noLinkCount=billCount-_linkCount;
+    var noLinkTag=_noLinkCount>0?' | <span style="color:#e65100;cursor:pointer;text-decoration:underline" onclick="_showNoLinkBills()" title="클릭: 상세보기">⚠ 링크없음 '+_noLinkCount+'건</span>':'';
+    let resHtml='<div style="padding:6px"><div style="font-size:10px;color:#999;text-align:right;margin-bottom:4px">'+esc(whoName)+' · 불러오기: '+nowStr+'</div><div style="font-size:13px;color:var(--t2);margin-bottom:6px;padding:6px 8px;background:var(--bg2);border-radius:4px;line-height:1.6">📧 메일 '+newMsgs.length+'건 → 신규 '+saved.total+'건'+dupTag+imgTag2+skipTag+failTag+noLinkTag+unmatchedTag+'</div>';
     if(saved.total>0){
       resHtml+='<div style="font-size:15px;font-weight:700;color:#16a34a;margin-bottom:10px">✅ 신규 '+saved.total+'건 저장 완료</div>';
     } else {
@@ -6881,13 +6791,13 @@ async function _gmailStartImport(clientId, filterYear){
     // ★ 문제 항목 먼저 (위에 표시)
     // 청구서 없는 건물 경고
     if(saved.missingBldgs&&saved.missingBldgs.length>0){
-      resHtml+='<div style="margin-bottom:8px;padding:8px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px">';
+      resHtml+='<div style="margin-bottom:8px;padding:6px 8px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px">';
       resHtml+='<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:4px">⚠ 청구서 없는 건물 '+saved.missingBldgs.length+'개</div>';
       resHtml+='<div style="font-size:11px;color:#991b1b;line-height:1.6">'+saved.missingBldgs.map(function(n){return esc(n);}).join(', ')+'</div>';
       resHtml+='</div>';
     }
     if(failedMails.length>0){
-      resHtml+='<div style="margin-bottom:8px;padding:8px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px">';
+      resHtml+='<div style="margin-bottom:8px;padding:6px 8px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px">';
       resHtml+='<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:6px">⚠ 추출 실패 '+failedMails.length+'건</div>';
       resHtml+='<div style="font-size:11px;color:#991b1b;max-height:120px;overflow-y:auto;line-height:1.6">';
       failedMails.forEach(function(f){
@@ -6895,10 +6805,10 @@ async function _gmailStartImport(clientId, filterYear){
       });
       resHtml+='</div></div>';
     }
-    // 중복/스킵 상세 목록
+    // 중복/스킵 상세 목록 (접이식)
     if(saved.dupItems&&saved.dupItems.length>0){
-      resHtml+='<div style="margin-bottom:8px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">';
-      resHtml+='<div style="font-size:11.5px;color:#64748b;cursor:pointer;font-weight:600" onclick="var el=this.nextElementSibling;el.style.display=el.style.display===\'none\'?\'block\':\'none\'">🔄 중복 '+(saved.dupSkipped+(saved.imgSkipped||0))+'건 <span style="font-size:10px">(클릭하여 접기/펼치기)</span></div>';
+      resHtml+='<details style="margin-bottom:8px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">';
+      resHtml+='<summary style="cursor:pointer;font-size:11.5px;color:#64748b;font-weight:600;user-select:none">🔄 중복 '+(saved.dupSkipped+(saved.imgSkipped||0))+'건 ▸</summary>';
       resHtml+='<div style="margin-top:6px;max-height:300px;overflow-y:auto">';
       resHtml+='<table style="width:100%;border-collapse:collapse;font-size:10.5px">';
       resHtml+='<thead><tr style="background:#e2e8f0;font-size:10px;color:#475569"><th style="padding:3px 5px;text-align:left">고객번호</th><th style="padding:3px 5px;text-align:left">기간</th><th style="padding:3px 5px;text-align:left">금액(새)</th><th style="padding:3px 5px;text-align:left">건물</th><th style="padding:3px 5px;text-align:left">상태</th><th style="padding:3px 5px;text-align:left">메일제목</th><th style="padding:3px 5px;text-align:left">메일일시</th></tr></thead><tbody>';
@@ -6914,20 +6824,42 @@ async function _gmailStartImport(clientId, filterYear){
         resHtml+='<td style="padding:3px 5px;font-size:9.5px;color:#64748b">'+esc((d.date||'').substring(0,16))+'</td>';
         resHtml+='</tr>';
       });
-      resHtml+='</tbody></table></div></div>';
+      resHtml+='</tbody></table></div></details>';
     }
-    // ★ 일반 항목 목록 (맨 아래)
-    resHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.7;max-height:260px;overflow-y:auto">';
+    // ★ 일반 항목 목록 (접이식)
+    resHtml+='<details style="margin-bottom:8px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px"><summary style="cursor:pointer;font-size:11.5px;color:#64748b;font-weight:600;user-select:none">📋 상세 목록 ('+saved.items.length+'건) ▸</summary>';
+    resHtml+='<div style="font-size:11px;color:var(--t2);line-height:1.6;max-height:300px;overflow-y:auto;overflow-x:hidden;margin-top:6px">';
     saved.items.forEach(function(it){
-      resHtml+='<div style="padding:4px 0;border-bottom:1px solid var(--ln2)">⚡ <b>'+esc(it.period)+'</b> / <b>'+esc(it.amount)+'</b> → <span style="color:#2563eb">'+esc(it.bldgName||'미분류')+'</span>'+(it.floor?' <span style="color:#6b7280;font-size:11px">'+esc(it.floor)+'</span>':'')+(it.addr?' <span style="color:var(--t4);font-size:10px">'+esc(it.addr)+'</span>':'')+'</div>';
+      resHtml+='<div style="padding:3px 0;border-bottom:1px solid var(--ln2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">⚡ <b>'+esc(it.period)+'</b> / <b>'+esc(it.amount)+'</b> → <span style="color:#2563eb">'+esc(it.bldgName||'미분류')+'</span>'+(it.floor?' <span style="color:#6b7280;font-size:10px">'+esc(it.floor)+'</span>':'')+(it.addr?' <span style="color:var(--t4);font-size:9.5px">'+esc(it.addr)+'</span>':'')+'</div>';
     });
-    resHtml+='</div></div>';
+    resHtml+='</div></details></div>';
+    // ★ 중복 제거 전에 링크없는 청구서 목록 수집
+    var _preNoLinks=[];
+    var _bldgs=DB.buildings||[];
+    (DB.electricBills||[]).forEach(function(e){
+      var bldg=_bldgs.find(function(bb){return bb.id===e.bId;});
+      var bName=bldg?bldg.name:'(미지정)';
+      (e.bills||[]).forEach(function(b){
+        if(!b.kepcoLink){
+          _preNoLinks.push({custNo:e.custNo,custName:e.custName||'',bldgName:bName,period:b.period,amount:b.amountFmt||(b.amount?b.amount.toLocaleString()+'원':'0원'),mailDate:b.mailDate||''});
+        }
+      });
+    });
+    if(_preNoLinks.length>0){ DB._lastNoLinkBills=_preNoLinks; }
     // 결과를 DB에 저장 → 새로고침 후에도 다시보기 가능
     window._lastGmailResult=resHtml;
     DB._lastGmailResult=resHtml;
-    try{sv();}catch(e){}
     setBody(resHtml);
+    // ★ 자동 중복 제거 (중복 있으면 상세 팝업)
+    var dd=_deduplicateElectricBills();
+    if(dd.custMerged||dd.billDeduped) console.log('[Gmail] 중복제거: 고객병합='+dd.custMerged+', 청구서중복='+dd.billDeduped+', '+dd.before+'→'+dd.after+'건');
+    // ★ 중복 제거 후 최종 저장 (_lastNoLinkBills 포함)
+    try{sv();}catch(e){}
     rdElectric();
+    // ★ 링크없는 청구서가 있었으면 팝업
+    if(_preNoLinks.length>0){
+      setTimeout(function(){ _showNoLinkBillsPre(_preNoLinks); },800);
+    }
     // ★ 미지정 중 주소 없는 KEPCO 링크 고객이 있으면 안내 표시
     var _noAddrTargets=(DB.electricBills||[]).filter(function(eb){
       if(eb.bId && eb.bId>0) return false;
@@ -7925,12 +7857,58 @@ function _processNextKepcoCapture(){
 function _showLastGmailResult(){
   var res=window._lastGmailResult||DB._lastGmailResult;
   if(!res){ alert('저장된 결과가 없습니다. Gmail 불러오기를 먼저 실행해주세요.'); return; }
+  // 캐시된 결과 정리: '현재 DB' 줄 제거, 텍스트 변환, details 스타일 통일
+  res=res.replace(/<div style="font-size:10\.5px;color:#64748b;margin-top:3px">현재 DB[^<]*<\/div>/g,'');
+  res=res.replace(/청구서 폴더에서 배치/g,'건물배정 필요');
+  // 모든 details 태그 스타일 통일
+  res=res.replace(/<details style="[^"]*">/g,'<details style="margin-bottom:8px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">');
+  res=res.replace(/<summary style="[^"]*">/g,'<summary style="cursor:pointer;font-size:11.5px;color:#64748b;font-weight:600;user-select:none">');
+  // 경고 박스 padding도 통일
+  res=res.replace(/padding:8px;background:#fef2f2/g,'padding:6px 8px;background:#fef2f2');
+  // 이전 결과에 details 태그 없으면 자동 변환
+  if(res.indexOf('<details')<0){
+    // 1) 중복 목록 접기
+    var dupDiv=res.indexOf('onclick="var el=this.nextElementSibling');
+    if(dupDiv>0){
+      var dupStart=res.lastIndexOf('<div style="margin-bottom:8px;padding:6px 8px;background:#f8fafc',dupDiv);
+      var dupEnd=res.indexOf('</div></div></div>',dupDiv);
+      if(dupStart>0&&dupEnd>0){
+        dupEnd+=18;
+        var dupPart=res.substring(dupStart,dupEnd);
+        var dupCount=(dupPart.match(/<tr style/g)||[]).length;
+        var dupLabel=dupPart.match(/중복 (\d+)건/);
+        var dupText=dupLabel?dupLabel[0]:'중복';
+        var innerTable=dupPart.substring(dupPart.indexOf('<div style="margin-top:6px'));
+        var dupWrapped='<details style="margin-bottom:8px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px"><summary style="cursor:pointer;font-size:11.5px;color:#64748b;font-weight:600;user-select:none">🔄 '+dupText+' ▸</summary>'+innerTable+'</details>';
+        res=res.substring(0,dupStart)+dupWrapped+res.substring(dupEnd);
+      }
+    }
+    // 2) 상세 목록 접기
+    var cutIdx=res.lastIndexOf('<div style="font-size:12px;color:var(--t2);line-height:1.7;max-height:');
+    if(cutIdx>0){
+      var endDiv=res.indexOf('</div></div>',cutIdx);
+      if(endDiv<0) endDiv=res.length;
+      var listPart=res.substring(cutIdx,endDiv+12);
+      var count=(listPart.match(/⚡/g)||[]).length;
+      var wrapped='<details style="margin-bottom:8px;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px"><summary style="cursor:pointer;font-size:11.5px;color:#64748b;font-weight:600;user-select:none">📋 상세 목록 ('+count+'건) ▸</summary>'+listPart+'</details></div>';
+      res=res.substring(0,cutIdx)+wrapped;
+    }
+  }
   var old=document.getElementById('mo-gmail-result');
   if(old) old.remove();
   var mo=document.createElement('div'); mo.id='mo-gmail-result';
   mo.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
   mo.onclick=function(e){if(e.target===mo) mo.remove();};
   mo.innerHTML='<div style="background:#fff;border-radius:12px;width:min(620px,94vw);max-height:85vh;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.2)"><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e5e7eb"><b style="font-size:14px">📋 마지막 불러오기 결과</b><button onclick="document.getElementById(\'mo-gmail-result\').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#999">✕</button></div><div style="padding:10px 14px;max-height:calc(85vh - 50px);overflow-y:auto">'+res+'</div></div>';
+  // DOM 보정: details가 padding:6px div 바깥에 있으면 안으로 이동
+  var scrollArea=mo.querySelector('div > div:last-child');
+  var padDiv=scrollArea.querySelector('div[style*="padding:6px"]');
+  if(padDiv){
+    var stray=[];
+    var sib=padDiv.nextElementSibling;
+    while(sib){ stray.push(sib); sib=sib.nextElementSibling; }
+    stray.forEach(function(s){ padDiv.appendChild(s); });
+  }
   document.body.appendChild(mo);
 }
 function _showGmailFailed(){
@@ -8109,6 +8087,136 @@ function _kepcoRescanLinks(){
   try{sv();}catch(e){}
   openGmailElectricImport();
 }
+function _deduplicateElectricBills(skipConfirm){
+  var bills=DB.electricBills||[];
+  if(!bills.length) return {custMerged:0,billDeduped:0,before:0,after:0,dupDetails:[]};
+  var beforeTotal=0;
+  bills.forEach(function(e){beforeTotal+=(e.bills||[]).length;});
+  // 1) 고객 병합: 같은 custNo → 하나로 합침
+  var custMap={};
+  var custMerged=0;
+  var keep=[];
+  var custMergeDetails=[];
+  bills.forEach(function(e){
+    var key=e.custNo?(e.custNo.replace(/^0+/,'')||e.custNo):'__no_'+e.id;
+    if(!custMap[key]){
+      custMap[key]=e;
+      keep.push(e);
+    } else {
+      var target=custMap[key];
+      if(!target.bills) target.bills=[];
+      (e.bills||[]).forEach(function(b){ target.bills.push(b); });
+      if((!target.bId||target.bId===0)&&e.bId) target.bId=e.bId;
+      if(!target.custName&&e.custName) target.custName=e.custName;
+      if(!target.note&&e.note) target.note=e.note;
+      if(e._urlCustIds){
+        if(!target._urlCustIds) target._urlCustIds=[];
+        e._urlCustIds.forEach(function(u){ if(target._urlCustIds.indexOf(u)<0) target._urlCustIds.push(u); });
+      }
+      custMergeDetails.push({custNo:e.custNo,custName:e.custName||target.custName||'',billCount:(e.bills||[]).length});
+      custMerged++;
+    }
+  });
+  // 2) 각 고객 내 bills 중복 제거: 같은 period+amount
+  var billDeduped=0;
+  var dupDetails=[];
+  var bldgs=DB.buildings||[];
+  keep.forEach(function(e){
+    if(!e.bills||e.bills.length<2) return;
+    var bldg=bldgs.find(function(bb){return bb.id===e.bId;});
+    var bName=bldg?bldg.name:'(미지정)';
+    var seen={};
+    var unique=[];
+    e.bills.forEach(function(b){
+      var amt=parseInt(String(b.amount||0).toString().replace(/,/g,''))||0;
+      var key=(b.period||'')+'_'+amt;
+      if(!seen[key]){
+        seen[key]=b;
+        unique.push(b);
+      } else {
+        var orig=seen[key];
+        // 중복 상세정보 수집
+        dupDetails.push({
+          custNo:e.custNo, bldgName:bName, period:b.period,
+          amount:b.amountFmt||(amt?amt.toLocaleString()+'원':'0원'),
+          kept:{kepcoLink:!!orig.kepcoLink, mailDate:orig.mailDate||'', source:orig.source||''},
+          removed:{kepcoLink:!!b.kepcoLink, mailDate:b.mailDate||'', source:b.source||''}
+        });
+        if(!orig.kepcoLink&&b.kepcoLink) orig.kepcoLink=b.kepcoLink;
+        if(b.files&&b.files.length){
+          if(!orig.files) orig.files=[];
+          b.files.forEach(function(f){
+            var dup2=orig.files.some(function(of){return of.name===f.name;});
+            if(!dup2) orig.files.push(f);
+          });
+        }
+        billDeduped++;
+      }
+    });
+    e.bills=unique;
+  });
+  // ★ 중복이 있으면 팝업으로 보여주기 (skipConfirm이 아닐 때)
+  if((custMerged||billDeduped) && !skipConfirm){
+    _showDedupDetails(custMergeDetails, dupDetails, beforeTotal, keep);
+  }
+  DB.electricBills=keep;
+  var afterTotal=0;
+  keep.forEach(function(e){afterTotal+=(e.bills||[]).length;});
+  if(custMerged||billDeduped) sv();
+  return {custMerged:custMerged,billDeduped:billDeduped,before:beforeTotal,after:afterTotal,dupDetails:dupDetails};
+}
+function _showDedupDetails(custMerges, billDups, beforeTotal, keep){
+  var afterTotal=0;
+  keep.forEach(function(e){afterTotal+=(e.bills||[]).length;});
+  var html='<div style="max-height:65vh;overflow-y:auto;padding:4px 0">';
+  // 요약
+  html+='<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;margin-bottom:10px;font-size:12px">'
+    +'청구서 <b>'+beforeTotal+'</b>건 → <b>'+afterTotal+'</b>건 (<span style="color:#dc2626">'+( beforeTotal-afterTotal)+'건 중복 제거</span>)'
+    +'</div>';
+  // 고객 병합
+  if(custMerges.length>0){
+    html+='<div style="font-size:12px;font-weight:700;margin-bottom:4px;color:#1e40af">고객 병합 (같은 고객번호) — '+custMerges.length+'건</div>';
+    html+='<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:12px">';
+    html+='<tr style="background:#f5f5f5"><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd">고객번호</th><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd">고객명</th><th style="padding:4px 8px;text-align:right;border-bottom:1px solid #ddd">청구서수</th></tr>';
+    custMerges.forEach(function(c){
+      html+='<tr><td style="padding:4px 8px;border-bottom:1px solid #eee;font-family:monospace">'+esc(c.custNo||'')+'</td><td style="padding:4px 8px;border-bottom:1px solid #eee">'+esc(c.custName)+'</td><td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">'+c.billCount+'</td></tr>';
+    });
+    html+='</table>';
+  }
+  // 청구서 중복
+  if(billDups.length>0){
+    html+='<div style="font-size:12px;font-weight:700;margin-bottom:4px;color:#b45309">청구서 중복 (같은 청구월+금액) — '+billDups.length+'건</div>';
+    html+='<table style="width:100%;font-size:11px;border-collapse:collapse">';
+    html+='<tr style="background:#f5f5f5"><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd">고객번호</th><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd">건물</th><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd">청구월</th><th style="padding:4px 8px;text-align:right;border-bottom:1px solid #ddd">금액</th><th style="padding:4px 8px;text-align:center;border-bottom:1px solid #ddd">유지(링크)</th><th style="padding:4px 8px;text-align:center;border-bottom:1px solid #ddd">제거(링크)</th></tr>';
+    billDups.forEach(function(d){
+      html+='<tr>'
+        +'<td style="padding:4px 8px;border-bottom:1px solid #eee;font-family:monospace">'+esc(d.custNo||'')+'</td>'
+        +'<td style="padding:4px 8px;border-bottom:1px solid #eee">'+esc(d.bldgName)+'</td>'
+        +'<td style="padding:4px 8px;border-bottom:1px solid #eee">'+esc(d.period)+'</td>'
+        +'<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">'+esc(d.amount)+'</td>'
+        +'<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center;color:'+(d.kept.kepcoLink?'#16a34a':'#dc2626')+'">'+(d.kept.kepcoLink?'✅ 있음':'❌ 없음')+'</td>'
+        +'<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center;color:'+(d.removed.kepcoLink?'#16a34a':'#dc2626')+'">'+(d.removed.kepcoLink?'✅ 있음':'❌ 없음')+'</td>'
+        +'</tr>';
+    });
+    html+='</table>';
+  }
+  html+='</div>';
+  html+='<div style="margin-top:8px;font-size:11px;color:#64748b">중복 청구서는 자동 병합됩니다. 링크/캡처 데이터는 유지됩니다.</div>';
+  var mo=document.createElement('div'); mo.className='ov on'; mo.id='mo-dedup-detail';
+  mo.innerHTML='<div class="modal" style="width:min(600px,94vw);padding:0"><div class="mo-hd" style="padding:12px 16px"><h3 style="font-size:14px;margin:0">🔍 중복 청구서 확인 ('+( billDups.length+custMerges.length)+'건)</h3><button onclick="closeMo(\'mo-dedup-detail\')" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1">×</button></div><div style="padding:8px 16px 16px">'+html+'</div></div>';
+  mo.addEventListener('click',function(ev){ if(ev.target===mo) closeMo('mo-dedup-detail'); });
+  var old=$('mo-dedup-detail'); if(old) old.remove();
+  document.body.appendChild(mo);
+}
+function _runDedup(){
+  var r=_deduplicateElectricBills();
+  if(!r.custMerged&&!r.billDeduped){
+    alert('중복 없음 (청구서 '+r.before+'건)');
+  } else {
+    alert('중복 제거 완료!\n\n고객 병합: '+r.custMerged+'건\n청구서 중복제거: '+r.billDeduped+'건\n\n'+r.before+'건 → '+r.after+'건');
+    if(typeof rdElectric==='function') rdElectric();
+  }
+}
 function _startKepcoBillCapture(){
   // 년도별 전체 청구서 + 캡처가능(kepcoLink) 집계
   var allLinks=[];
@@ -8226,6 +8334,46 @@ function _showNoLinkBills(){
   mo.innerHTML='<div class="modal" style="width:min(520px,92vw);padding:0"><div class="mo-hd" style="padding:12px 16px"><h3 style="font-size:14px;margin:0">🔗 링크없는 청구서 ('+noLinks.length+'건)</h3><button onclick="closeMo(\'mo-nolink-bills\')" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1">×</button></div><div style="padding:8px 16px 16px">'+html+'<div style="margin-top:10px;font-size:11px;color:#999">메일 본문에 한전 링크가 없는 청구서입니다. Gmail 재불러오기로도 해결되지 않으면 수동 캡처가 필요합니다.</div></div></div>';
   mo.addEventListener('click',function(ev){ if(ev.target===mo) closeMo('mo-nolink-bills'); });
   var old=$('mo-nolink-bills'); if(old) old.remove();
+  document.body.appendChild(mo);
+}
+function _showNoLinkBillsPre(noLinks){
+  if(!noLinks||!noLinks.length) return;
+  // 중복제거 후 DB에서 실제로 아직 링크없는 건만 체크
+  var stillNoLink=0;
+  (DB.electricBills||[]).forEach(function(e){(e.bills||[]).forEach(function(b){if(!b.kepcoLink)stillNoLink++;});});
+  var html='<div style="max-height:60vh;overflow-y:auto;padding:4px 0">';
+  if(stillNoLink===0){
+    html+='<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;margin-bottom:10px;font-size:12px">'
+      +'✅ 아래 '+noLinks.length+'건은 <b>같은 청구서의 링크있는 버전과 병합</b>되어 모두 캡처 가능합니다.</div>';
+  } else {
+    html+='<div style="padding:8px 12px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;margin-bottom:10px;font-size:12px">'
+      +'⚠ 링크없는 청구서 '+stillNoLink+'건이 남아있습니다. 수동 캡처가 필요할 수 있습니다.</div>';
+  }
+  html+='<div style="font-size:11px;font-weight:600;margin-bottom:4px;color:#b45309">메일에서 링크없이 들어온 청구서 — '+noLinks.length+'건</div>';
+  html+='<table style="width:100%;font-size:11px;border-collapse:collapse">';
+  html+='<tr style="background:#f5f5f5;position:sticky;top:0"><th style="padding:5px 8px;text-align:left;border-bottom:1px solid #ddd">고객번호</th><th style="padding:5px 8px;text-align:left;border-bottom:1px solid #ddd">건물</th><th style="padding:5px 8px;text-align:left;border-bottom:1px solid #ddd">청구월</th><th style="padding:5px 8px;text-align:right;border-bottom:1px solid #ddd">금액</th><th style="padding:5px 8px;text-align:left;border-bottom:1px solid #ddd">메일일자</th><th style="padding:5px 8px;text-align:center;border-bottom:1px solid #ddd">병합</th></tr>';
+  noLinks.forEach(function(n){
+    // 현재 DB에서 해당 청구서가 링크를 가지게 됐는지 확인
+    var merged=false;
+    (DB.electricBills||[]).forEach(function(e){
+      if(e.custNo&&n.custNo&&e.custNo.replace(/^0+/,'')===n.custNo.replace(/^0+/,'')){
+        (e.bills||[]).forEach(function(b){ if(b.period===n.period&&b.kepcoLink) merged=true; });
+      }
+    });
+    html+='<tr style="'+(merged?'background:#f0fdf4':'background:#fef2f2')+'">'
+      +'<td style="padding:4px 8px;border-bottom:1px solid #eee;font-family:monospace">'+esc(n.custNo||'')+'</td>'
+      +'<td style="padding:4px 8px;border-bottom:1px solid #eee">'+esc(n.bldgName)+'</td>'
+      +'<td style="padding:4px 8px;border-bottom:1px solid #eee">'+esc(n.period)+'</td>'
+      +'<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">'+esc(n.amount)+'</td>'
+      +'<td style="padding:4px 8px;border-bottom:1px solid #eee">'+esc(n.mailDate?n.mailDate.substring(0,10):'')+'</td>'
+      +'<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">'+(merged?'<span style="color:#16a34a">✅ 링크병합</span>':'<span style="color:#dc2626">❌ 링크없음</span>')+'</td>'
+      +'</tr>';
+  });
+  html+='</table></div>';
+  var mo=document.createElement('div'); mo.className='ov on'; mo.id='mo-nolink-pre';
+  mo.innerHTML='<div class="modal" style="width:min(600px,94vw);padding:0"><div class="mo-hd" style="padding:12px 16px"><h3 style="font-size:14px;margin:0">🔗 링크없는 청구서 확인 ('+noLinks.length+'건)</h3><button onclick="closeMo(\'mo-nolink-pre\')" style="font-size:22px;padding:2px 10px;min-width:34px;min-height:34px;line-height:1">×</button></div><div style="padding:8px 16px 16px">'+html+'</div></div>';
+  mo.addEventListener('click',function(ev){ if(ev.target===mo) closeMo('mo-nolink-pre'); });
+  var old=$('mo-nolink-pre'); if(old) old.remove();
   document.body.appendChild(mo);
 }
 function _kepcoCapByYear(yr){
@@ -8444,6 +8592,17 @@ function _elFloorLabel(e){
   // 못찾으면
   return '표시 없음';
 }
+// ★ 펼침 상태 추적: 월 전환 시 유지
+if(!window._evExpandedPeriods) window._evExpandedPeriods=new Set();
+function _evSaveExpandedPeriods(){
+  // ev-list 내 현재 펼쳐진 월들의 period를 저장
+  var listEl=document.getElementById('ev-list'); if(!listEl) return;
+  var set=new Set();
+  listEl.querySelectorAll('div[data-period]').forEach(function(el){
+    if(el.style.display!=='none') set.add(el.getAttribute('data-period'));
+  });
+  window._evExpandedPeriods=set;
+}
 function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
   var html='';
   if(curGrp){
@@ -8482,17 +8641,18 @@ function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
         items.sort(function(a,b){ return _elFloorSortKey(_elFloorLabel(a.cust)) - _elFloorSortKey(_elFloorLabel(b.cust)); });
         var isActivePeriod=false;
         items.forEach(function(it){ if(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod) isActivePeriod=true; });
-        // 선택된 월이면 펼침, 없으면 당월만 펼침
-        var isCurMonth=selectedPeriod?(p===selectedPeriod):(p===nowP);
+        // ★ 펼침 상태: 이전에 펼쳐둔 월이 있으면 유지, 없으면 선택된 월 또는 당월
+        var hasTracked=(window._evExpandedPeriods&&window._evExpandedPeriods.size>0);
+        var isCurMonth=hasTracked?window._evExpandedPeriods.has(p):(selectedPeriod?(p===selectedPeriod):(p===nowP));
         html+='<div style="border-bottom:1px solid #fde68a">';
-        html+='<div onclick="var nx=this.nextElementSibling;nx.style.display=nx.style.display===\'none\'?\'block\':\'none\'" style="padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #f59e0b;'+(isActivePeriod?'background:#fef3c7;border-left:3px solid #f59e0b':'background:#fffdf5;border-left:3px solid transparent')+'">';
+        html+='<div onclick="var nx=this.nextElementSibling;if(nx.style.display===\'none\'){nx.style.display=\'block\';nx.setAttribute(\'data-period\',nx.getAttribute(\'data-period\'));}else{nx.style.display=\'none\';}window._evExpandedPeriods=window._evExpandedPeriods||new Set();if(nx.style.display!==\'none\')window._evExpandedPeriods.add(nx.getAttribute(\'data-period\'));else window._evExpandedPeriods.delete(nx.getAttribute(\'data-period\'));" style="padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #f59e0b;'+(isActivePeriod?'background:#fef3c7;border-left:3px solid #f59e0b':'background:#fffdf5;border-left:3px solid transparent')+'">';
         html+='<span style="font-size:14px;color:#92400e;font-weight:700">'+parseInt(mm)+'월 <span style="font-size:11px;color:#9ca3af;font-weight:400">'+items.length+'건</span></span><span style="font-size:11px;color:#d97706;font-weight:600">'+mTotal.toLocaleString()+'원</span></div>';
-        html+='<div style="'+(isCurMonth?'':'display:none')+'">';
+        html+='<div data-period="'+p+'" style="'+(isCurMonth?'':'display:none')+'">';
         items.forEach(function(it){
           var active=(focusE&&it.cust.id===focusE.id&&it.bill.period===selectedPeriod);
           var flr=_elFloorLabel(it.cust);
           var amt=it.bill.amountFmt||(it.bill.amount?Number(it.bill.amount).toLocaleString()+'원':'');
-          html+='<div onclick="event.stopPropagation();_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')" style="padding:5px 8px 5px 14px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;'+(active?'background:#fbbf24;color:#fff;font-weight:700':'')+'">';
+          html+='<div onclick="event.stopPropagation();_evSaveExpandedPeriods();_showElectricBillModal('+it.cust.id+',\''+esc(it.bill.period)+'\')" style="padding:5px 8px 5px 14px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;'+(active?'background:#fbbf24;color:#fff;font-weight:700':'')+'">';
           html+='<span>'+esc(flr)+'</span><span style="font-size:11px;color:'+(active?'#fff':'#b45309')+'">'+esc(amt)+'</span></div>';
         });
         html+='</div></div>';
@@ -8598,6 +8758,8 @@ function _showElectricBillModal(id, selectedPeriod){
   mo.classList.add('on');
 }
 function _evSwitchBldg(bId){
+  // ★ 건물 전환 시 펼침 상태 초기화 (최신월만 펼침)
+  window._evExpandedPeriods=new Set();
   var cust=(DB.electricBills||[]).find(function(e){return(e.bId||0)==bId;});
   _showElectricBillModal(cust?cust.id:0, null);
 }
@@ -9406,7 +9568,7 @@ function saveBldg(){
   const eid=$('fb-id').value;
   const roadAddr=$('fb-a-road').value.trim();
   const jibunAddr=$('fb-a-jibun').value.trim();
-  const o={name:n,addr:$('fb-a').value.trim(),roadAddr:roadAddr,jibunAddr:jibunAddr,bmStart:$('fb-bms').value||'',bmEnd:$('fb-bme').value||'',bmFee:parseMoney($('fb-bmf').value)||0};
+  const o={name:n,addr:$('fb-a').value.trim(),roadAddr:roadAddr,jibunAddr:jibunAddr,bmStart:$('fb-bms').value||'',bmEnd:$('fb-bme').value||'',bmFee:parseMoney($('fb-bmf').value)||0,area:$('fb-area').value.trim(),floors:$('fb-floors').value.trim(),parking:$('fb-parking').value.trim()};
   // altAddrs에 도로명/지번 둘 다 추가
   if(eid){
     const i=DB.buildings.findIndex(b=>b.id==eid);
@@ -9431,6 +9593,7 @@ function editBldg(id){
   $('fb-id').value=b.id;$('mo-bldg-t').textContent='건물 수정';
   $('fb-n').value=b.name||'';$('fb-a').value=b.addr||'';$('fb-a-road').value=b.roadAddr||'';$('fb-a-jibun').value=b.jibunAddr||'';
   $('fb-bms').value=rfFull(b.bmStart)||'';$('fb-bme').value=rfFull(b.bmEnd)||'';$('fb-bmf').value=b.bmFee?fmtMoney(b.bmFee):'';
+  $('fb-area').value=b.area||'';$('fb-floors').value=b.floors||'';$('fb-parking').value=b.parking||'';
   const bs=$('bldg-save-btn');if(bs)bs.textContent='저장';
   const bd=$('bldg-del-btn');if(bd)bd.style.display='inline-block';
   $('mo-bldg').classList.add('on');
@@ -10431,56 +10594,52 @@ function rdAllBMemo(){
   // 카테고리 필터 칩
   const catFilterEl=$('bmemo-all-cat-filter');
   if(catFilterEl){
-    const mkChip=(k,lbl)=>`<button onclick="setAllBMemoCatFilter('${esc(k)}')" style="border:1px solid ${_bmemoAllCatFilter===k?'var(--bl)':'var(--ln)'};background:${_bmemoAllCatFilter===k?'var(--bl)':'var(--w)'};color:${_bmemoAllCatFilter===k?'#fff':'var(--t2)'};cursor:pointer;padding:3px 8px;font-size:11px;border-radius:12px;font-family:inherit">${esc(lbl)}</button>`;
+    const mkChip=(k,lbl)=>{const on=_bmemoAllCatFilter===k;const cIco2={all:'📋',password:'🔐',cctv:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PGxpbmUgeDE9JzE3JyB5MT0nMycgeDI9JzE3JyB5Mj0nOCcgc3Ryb2tlPScjOWNhM2FmJyBzdHJva2Utd2lkdGg9JzIuNScgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJy8+PHJlY3QgeD0nNCcgeT0nOCcgd2lkdGg9JzE2JyBoZWlnaHQ9JzknIHJ4PSc0LjUnIGZpbGw9JyNlNWU3ZWInIHN0cm9rZT0nIzZiNzI4MCcgc3Ryb2tlLXdpZHRoPScuOCcvPjxjaXJjbGUgY3g9JzknIGN5PScxMi41JyByPSczJyBmaWxsPScjMzc0MTUxJyBzdHJva2U9JyM2YjcyODAnIHN0cm9rZS13aWR0aD0nLjUnLz48Y2lyY2xlIGN4PSc5JyBjeT0nMTIuNScgcj0nMS41JyBmaWxsPScjNjQ3NDhiJy8+PGNpcmNsZSBjeD0nOScgY3k9JzEyLjUnIHI9Jy42JyBmaWxsPScjZDFkNWRiJy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',fire:'🧯',elevator:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHJlY3QgeD0nMicgeT0nNCcgd2lkdGg9JzIwJyBoZWlnaHQ9JzE4JyByeD0nMicgZmlsbD0nIzhiOWNiNycgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9JzEnLz48cmVjdCB4PSc0JyB5PSc2JyB3aWR0aD0nNycgaGVpZ2h0PScxNCcgcng9Jy41JyBmaWxsPScjYzVkMmUwJyBzdHJva2U9JyM0YTU1NjgnIHN0cm9rZS13aWR0aD0nLjgnLz48cmVjdCB4PScxMycgeT0nNicgd2lkdGg9JzcnIGhlaWdodD0nMTQnIHJ4PScuNScgZmlsbD0nI2M1ZDJlMCcgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9Jy44Jy8+PGNpcmNsZSBjeD0nMTEuNScgY3k9JzEzJyByPScuNycgZmlsbD0nIzRhNTU2OCcvPjxjaXJjbGUgY3g9JzEyLjUnIGN5PScxMycgcj0nLjcnIGZpbGw9JyM0YTU1NjgnLz48cG9seWdvbiBwb2ludHM9JzcsMyA1LjUsNSA4LjUsNScgZmlsbD0nIzRhNTU2OCcvPjxwb2x5Z29uIHBvaW50cz0nMTcsNSAxNS41LDMgMTguNSwzJyBmaWxsPScjNGE1NTY4Jy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',water:'💧',electric:'⚡',parking:'🚗',insurance:'📋',etc:'📌',contact:'📞'}[k]||'•';return `<button onclick="setAllBMemoCatFilter('${esc(k)}')" style="border:none;background:${on?'#fef3c7':'transparent'};color:${on?'#92400e':'var(--t2)'};cursor:pointer;padding:5px 6px;font-size:10px;border-radius:6px;font-family:inherit;font-weight:${on?600:400};transition:.12s;display:flex;align-items:center;gap:3px;text-align:left;white-space:nowrap;border:${on?'1px solid #d97706':'1px solid transparent'}" onmouseover="if(!${on})this.style.background='#fef9e7'" onmouseout="if(!${on})this.style.background='transparent'"><span style="font-size:11px">${cIco2}</span>${esc(lbl)}</button>`;};
     catFilterEl.innerHTML=mkChip('all','전체')+MC.map(c=>mkChip(c.key,c.label)).join('');
   }
   const cats=MC.filter(c=>_bmemoAllCatFilter==='all'||c.key===_bmemoAllCatFilter);
-  const ico={password:'🔐',cctv:'📹',fire:'🚨',elevator:'🛗',water:'💧',electric:'⚡',parking:'🅿️',insurance:'📋',etc:'📌',contact:'📞'};
+  const ico={password:'🔐',cctv:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PGxpbmUgeDE9JzE3JyB5MT0nMycgeDI9JzE3JyB5Mj0nOCcgc3Ryb2tlPScjOWNhM2FmJyBzdHJva2Utd2lkdGg9JzIuNScgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJy8+PHJlY3QgeD0nNCcgeT0nOCcgd2lkdGg9JzE2JyBoZWlnaHQ9JzknIHJ4PSc0LjUnIGZpbGw9JyNlNWU3ZWInIHN0cm9rZT0nIzZiNzI4MCcgc3Ryb2tlLXdpZHRoPScuOCcvPjxjaXJjbGUgY3g9JzknIGN5PScxMi41JyByPSczJyBmaWxsPScjMzc0MTUxJyBzdHJva2U9JyM2YjcyODAnIHN0cm9rZS13aWR0aD0nLjUnLz48Y2lyY2xlIGN4PSc5JyBjeT0nMTIuNScgcj0nMS41JyBmaWxsPScjNjQ3NDhiJy8+PGNpcmNsZSBjeD0nOScgY3k9JzEyLjUnIHI9Jy42JyBmaWxsPScjZDFkNWRiJy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',fire:'🧯',elevator:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHJlY3QgeD0nMicgeT0nNCcgd2lkdGg9JzIwJyBoZWlnaHQ9JzE4JyByeD0nMicgZmlsbD0nIzhiOWNiNycgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9JzEnLz48cmVjdCB4PSc0JyB5PSc2JyB3aWR0aD0nNycgaGVpZ2h0PScxNCcgcng9Jy41JyBmaWxsPScjYzVkMmUwJyBzdHJva2U9JyM0YTU1NjgnIHN0cm9rZS13aWR0aD0nLjgnLz48cmVjdCB4PScxMycgeT0nNicgd2lkdGg9JzcnIGhlaWdodD0nMTQnIHJ4PScuNScgZmlsbD0nI2M1ZDJlMCcgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9Jy44Jy8+PGNpcmNsZSBjeD0nMTEuNScgY3k9JzEzJyByPScuNycgZmlsbD0nIzRhNTU2OCcvPjxjaXJjbGUgY3g9JzEyLjUnIGN5PScxMycgcj0nLjcnIGZpbGw9JyM0YTU1NjgnLz48cG9seWdvbiBwb2ludHM9JzcsMyA1LjUsNSA4LjUsNScgZmlsbD0nIzRhNTU2OCcvPjxwb2x5Z29uIHBvaW50cz0nMTcsNSAxNS41LDMgMTguNSwzJyBmaWxsPScjNGE1NTY4Jy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',water:'💧',electric:'⚡',parking:'🚗',insurance:'📋',etc:'📌',contact:'📞'};
   const bldgs=DB.buildings.slice();
   if(!bldgs.length){ body.innerHTML='<div style="padding:40px;text-align:center;color:var(--t4);font-size:13px">표시할 건물이 없습니다.</div>'; return; }
-  // 테이블: 좌측 sticky 건물명 컬럼 + 각 카테고리 컬럼
   const mgrLabel={fire:'소방안전관리자',elevator:'승강기 안전관리자'};
-  let html='<table style="border-collapse:separate;border-spacing:0;width:100%;font-size:12px;font-family:\'Pretendard\',sans-serif;table-layout:fixed">';
-  // thead
-  html+='<thead><tr>';
-  html+='<th style="position:sticky;top:0;left:0;z-index:3;background:#f5f7fb;border-bottom:2px solid var(--ln);border-right:1px solid var(--ln);padding:8px 10px;text-align:left;font-weight:600;color:var(--t1);width:140px;font-size:11px">건물</th>';
-  cats.forEach(c=>{
-    const cIco=ico[c.key]||'•';
-    html+=`<th style="position:sticky;top:0;z-index:2;background:#f5f7fb;border-bottom:2px solid var(--ln);border-right:1px solid var(--ln);padding:8px 10px;text-align:left;font-weight:600;color:var(--t1);min-width:160px;font-size:11px"><span style="margin-right:4px">${cIco}</span>${esc(c.label)}</th>`;
-  });
-  html+='</tr></thead><tbody>';
+  let html='';
   bldgs.forEach((b,bi)=>{
     const bc=(DB.memoCats&&DB.memoCats[b.id])||{};
-    const bgRow=bi%2===0?'var(--w)':'#fafbfc';
-    html+=`<tr>`;
-    html+=`<td style="position:sticky;left:0;z-index:1;background:${bgRow};border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);padding:8px 10px;font-weight:600;color:var(--t1)">${hl(b.name)}</td>`;
-    cats.forEach(c=>{
-      const v=bc[c.key]||'';
-      const mgrFixed=mgrLabel[c.key];
-      const mgrVal=bc['_mgr_'+c.key]||'';
-      let inner='';
-      if(mgrFixed && mgrVal){
-        inner+=`<div style="font-size:10px;color:var(--t3);margin-bottom:3px"><span style="color:var(--t4)">${esc(mgrFixed)}:</span> ${hl(mgrVal)}</div>`;
-      }
-      if(c.key==='contact'){
-        const contacts=parseBMemoContacts(v);
-        if(contacts.length){
-          inner+=contacts.map(ct=>`<div style="line-height:1.4">${hl(ct.name||'')} ${ct.phone?`<span style="color:var(--t2)">${hl(ct.phone)}</span>`:''}</div>`).join('');
-        }else if(!mgrVal){
-          inner+='<span style="color:var(--t4);font-style:italic">—</span>';
+    // 해당 건물에 내용이 있는 카테고리만 표시
+    const hasCats=cats.filter(c=>{const v=bc[c.key]||'';const mgr=bc['_mgr_'+c.key]||'';return v.trim()||mgr;});
+    html+=`<div style="border:1px solid var(--ln);border-radius:8px;margin:8px 12px;background:#fff;overflow:hidden">`;
+    html+=`<div onclick="closeMo('mo-bmemo-all');openBMemo(${b.id})" style="padding:10px 14px;background:${bi%2===0?'#f8fafc':'#f1f5f9'};border-bottom:1px solid var(--ln);cursor:pointer;display:flex;align-items:center;gap:8px" title="개별 메모 편집">
+      <span style="font-weight:700;font-size:13px;color:var(--bl)">${hl(b.name)}</span>
+      <span style="font-size:11px;color:var(--t3)">${hl(b.addr||'')}</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--t4)">✏️ 편집</span>
+    </div>`;
+    if(!hasCats.length){
+      html+=`<div style="padding:12px 14px;color:var(--t4);font-size:12px;font-style:italic">등록된 메모 없음</div>`;
+    }else{
+      html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;padding:10px 14px">`;
+      hasCats.forEach(c=>{
+        const v=bc[c.key]||'';
+        const cIco=ico[c.key]||'•';
+        const mgrFixed=mgrLabel[c.key];
+        const mgrVal=bc['_mgr_'+c.key]||'';
+        let inner='';
+        if(mgrFixed&&mgrVal) inner+=`<div style="font-size:12px;color:var(--t3);margin-bottom:3px">${esc(mgrFixed)}: <span style="color:var(--t1);font-weight:600">${hl(mgrVal)}</span></div>`;
+        if(c.key==='contact'){
+          const contacts=parseBMemoContacts(v);
+          if(contacts.length) inner+=contacts.map(ct=>`<div style="font-size:12.5px;line-height:1.6">${hl(ct.name||'')} <span style="color:var(--bl);font-weight:500">${hl(ct.phone||'')}</span></div>`).join('');
+        }else if(v.trim()){
+          inner+=`<div style="font-size:12.5px;white-space:pre-wrap;line-height:1.6;word-break:break-word;color:#334155">${hl(v)}</div>`;
         }
-      }else{
-        if(v.trim()){
-          inner+=`<div style="white-space:pre-wrap;line-height:1.4;word-break:break-word">${hl(v)}</div>`;
-        }else if(!mgrVal){
-          inner+='<span style="color:var(--t4);font-style:italic">—</span>';
-        }
-      }
-      html+=`<td style="background:${bgRow};border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);padding:8px 10px;vertical-align:top">${inner}</td>`;
-    });
-    html+='</tr>';
+        html+=`<div style="padding:10px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:6px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #f1f5f9;padding-bottom:5px"><span style="font-size:14px">${cIco}</span>${esc(c.label)}</div>
+          ${inner}
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
   });
-  html+='</tbody></table>';
+  if(!html) html='<div style="padding:40px;text-align:center;color:var(--t4)">데이터 없음</div>';
   body.innerHTML=html;
 }
 function setAllBMemoCatFilter(k){ _bmemoAllCatFilter=k; rdAllBMemo(); }
@@ -10493,14 +10652,8 @@ function openBMemo(bId){
   if(typeof startEditing==='function' && !startEditing('bmemo',bId,(b.name||'건물')+' 메모')) return;
   $('bmemo-title').textContent=b.name;
   $('bmemo-sub').textContent=b.addr||'';
-  // 건물 탭 렌더
-  const tabs=$('bmemo-tabs');
-  if(tabs){
-    tabs.innerHTML=`<button type="button" onclick="closeMo('mo-bmemo');openAllBMemo()" style="padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;border:0;border-bottom:2px solid transparent;background:#fef3c7;color:#92400e;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:.15s;border-radius:4px 4px 0 0">🗂 전체</button>`+DB.buildings.map(bb=>{
-      const on=bb.id===bId;
-      return `<button type="button" data-bid="${bb.id}" onclick="switchBMemo(${bb.id})" style="padding:8px 14px;font-size:12px;font-weight:${on?700:500};cursor:pointer;border:0;border-bottom:${on?'2px solid var(--bl)':'2px solid transparent'};background:${on?'var(--w)':'transparent'};color:${on?'var(--bl)':'var(--t2)'};white-space:nowrap;flex-shrink:0;font-family:inherit;transition:.15s">${esc(bb.name)}</button>`;
-    }).join('');
-  }
+  // 사이드바 건물 목록
+  _renderBMemoSide(bId);
   rdBMemo();
   $('mo-bmemo').classList.add('on');
 }
@@ -10510,19 +10663,18 @@ function switchBMemo(bId){
   if(!b) return;
   $('bmemo-title').textContent=b.name;
   $('bmemo-sub').textContent=b.addr||'';
-  // 탭 활성 상태 갱신
-  const tabs=$('bmemo-tabs');
-  if(tabs){
-    const btns=tabs.querySelectorAll('button[data-bid]');
-    btns.forEach(btn=>{
-      const on=parseInt(btn.dataset.bid)===bId;
-      btn.style.fontWeight=on?700:500;
-      btn.style.borderBottom=on?'2px solid var(--bl)':'2px solid transparent';
-      btn.style.background=on?'var(--w)':'transparent';
-      btn.style.color=on?'var(--bl)':'var(--t2)';
-    });
-  }
+  _renderBMemoSide(bId);
   rdBMemo();
+}
+function _renderBMemoSide(activeBId){
+  const side=$('bmemo-side'); if(!side) return;
+  side.innerHTML=`<button onclick="closeMo('mo-bmemo');openAllBMemo()" style="padding:9px 10px;font-size:11.5px;font-weight:700;border:none;background:#fef3c7;color:#92400e;cursor:pointer;font-family:inherit;text-align:center;width:100%;border-bottom:2px solid #f59e0b;flex-shrink:0" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">📋 전체 모아보기</button>`+
+    DB.buildings.map(bb=>{
+      const on=bb.id===activeBId;
+      return `<button data-bid="${bb.id}" onclick="switchBMemo(${bb.id})" style="padding:8px 10px;font-size:12px;border:none;cursor:pointer;text-align:left;font-family:inherit;background:${on?'#fff':'transparent'};color:${on?'var(--bl)':'var(--t2)'};font-weight:${on?700:400};border-left:${on?'3px solid var(--bl)':'3px solid transparent'};transition:.12s" onmouseover="if(!this.dataset.bid||+this.dataset.bid!==${activeBId})this.style.background='#e8ecf1'" onmouseout="if(!this.dataset.bid||+this.dataset.bid!==${activeBId})this.style.background='${on?'#fff':'transparent'}'">${esc(bb.name)}</button>`;
+    }).join('');
+  // 활성 건물 스크롤
+  setTimeout(()=>{const ac=side.querySelector('button[data-bid="'+activeBId+'"]');if(ac)ac.scrollIntoView({block:'nearest'});},50);
 }
 function rdBMemo(){
   const bId=_bmemoCurBId; if(!bId) return;
@@ -10532,7 +10684,7 @@ function rdBMemo(){
   if(!body) return;
   if(!MC.length){ body.innerHTML='<div style="padding:24px;text-align:center;color:var(--t3);font-size:12px">항목이 없습니다. 아래 "+ 항목 추가" 버튼으로 추가하세요.</div>'; return; }
   // 아이콘 매핑
-  const ico={password:'🔐',cctv:'📹',fire:'🚨',elevator:'🛗',water:'💧',electric:'⚡',parking:'🅿️',insurance:'📋',etc:'📌',contact:'📞'};
+  const ico={password:'🔐',cctv:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PGxpbmUgeDE9JzE3JyB5MT0nMycgeDI9JzE3JyB5Mj0nOCcgc3Ryb2tlPScjOWNhM2FmJyBzdHJva2Utd2lkdGg9JzIuNScgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJy8+PHJlY3QgeD0nNCcgeT0nOCcgd2lkdGg9JzE2JyBoZWlnaHQ9JzknIHJ4PSc0LjUnIGZpbGw9JyNlNWU3ZWInIHN0cm9rZT0nIzZiNzI4MCcgc3Ryb2tlLXdpZHRoPScuOCcvPjxjaXJjbGUgY3g9JzknIGN5PScxMi41JyByPSczJyBmaWxsPScjMzc0MTUxJyBzdHJva2U9JyM2YjcyODAnIHN0cm9rZS13aWR0aD0nLjUnLz48Y2lyY2xlIGN4PSc5JyBjeT0nMTIuNScgcj0nMS41JyBmaWxsPScjNjQ3NDhiJy8+PGNpcmNsZSBjeD0nOScgY3k9JzEyLjUnIHI9Jy42JyBmaWxsPScjZDFkNWRiJy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',fire:'🧯',elevator:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHJlY3QgeD0nMicgeT0nNCcgd2lkdGg9JzIwJyBoZWlnaHQ9JzE4JyByeD0nMicgZmlsbD0nIzhiOWNiNycgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9JzEnLz48cmVjdCB4PSc0JyB5PSc2JyB3aWR0aD0nNycgaGVpZ2h0PScxNCcgcng9Jy41JyBmaWxsPScjYzVkMmUwJyBzdHJva2U9JyM0YTU1NjgnIHN0cm9rZS13aWR0aD0nLjgnLz48cmVjdCB4PScxMycgeT0nNicgd2lkdGg9JzcnIGhlaWdodD0nMTQnIHJ4PScuNScgZmlsbD0nI2M1ZDJlMCcgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9Jy44Jy8+PGNpcmNsZSBjeD0nMTEuNScgY3k9JzEzJyByPScuNycgZmlsbD0nIzRhNTU2OCcvPjxjaXJjbGUgY3g9JzEyLjUnIGN5PScxMycgcj0nLjcnIGZpbGw9JyM0YTU1NjgnLz48cG9seWdvbiBwb2ludHM9JzcsMyA1LjUsNSA4LjUsNScgZmlsbD0nIzRhNTU2OCcvPjxwb2x5Z29uIHBvaW50cz0nMTcsNSAxNS41LDMgMTguNSwzJyBmaWxsPScjNGE1NTY4Jy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',water:'💧',electric:'⚡',parking:'🚗',insurance:'📋',etc:'📌',contact:'📞'};
   const mgrLabel={fire:'소방안전관리자',elevator:'승강기 안전관리자'};
   body.innerHTML=MC.map((c,mcIdx)=>{
     const v=cats[c.key]||'';
@@ -10860,6 +11012,8 @@ function rdReport(){
     bldgList.innerHTML=DB.buildings.map(b=>`<div class="sb-list-item${rb===b.id?' on':''}" data-n="${b.name.toLowerCase()}" onclick="setRB(${b.id})">${b.name}</div>`).join('');
   }
   $('rep-lbl').textContent=`${DB.ui.repY}년 ${DB.ui.repM}월`;
+  var allBtn=$('rep-all-btn');
+  if(allBtn) allBtn.textContent='📑 '+DB.ui.repY+'년 '+DB.ui.repM+'월 전체 PDF';
   if(!rb){$('rep-content').innerHTML='<div class="empty">건물을 선택하세요</div>';return;}
   const ls=DB.leases.filter(l=>l.bId===rb&&l.tenant&&l.tenant!=='직영');
   const rep=DB.reports.find(r=>r.bId===rb&&r.year===DB.ui.repY&&r.month===DB.ui.repM);
@@ -10869,40 +11023,65 @@ function rdReport(){
     if(isRentFreeMonth(l,DB.ui.repY,DB.ui.repM)) return s;
     return s+(rateFor(l,DB.ui.repY,DB.ui.repM).rent||0);
   },0),tM=ls.reduce((s,l)=>s+(rateFor(l,DB.ui.repY,DB.ui.repM).mgmt||0),0);
-  // Lease table
-  // 건물 표지
+  // 건물 정보
   const bObj=DB.buildings.find(b=>b.id===rb);
   const bAddr=bObj?bObj.addr:'';
+  const bName=bld.replace(/^\d+\./,'');
   const coverPhoto=DB.repPhotos['cover_'+rb]||null;
-  let html=`<div class="card" style="margin-bottom:8px;display:grid;grid-template-columns:1fr 1fr;height:160px;overflow:hidden" ondragover="event.preventDefault();this.style.outline='2px solid var(--bl)'" ondragleave="this.style.outline=''" ondrop="event.preventDefault();this.style.outline='';dropCoverPhoto(event,${rb})">
+  const sy=DB.ui.repY%100;
+
+  // ── 보고서 상단 수정 바 ──
+  let html=`<div style="display:flex;gap:4px;margin-bottom:6px;align-items:center;flex-wrap:wrap">
+    <button class="btn pri sm" onclick="openRepModal()" style="font-size:11px;padding:5px 12px;background:#3b82f6;border-color:#3b82f6">✏️ 보고서 수정</button>
+    <button class="btn sm" onclick="addRepItem(${rep?rep.id:0},'income')" style="font-size:10px;padding:4px 8px">+ 수입항목</button>
+    <button class="btn sm" onclick="addRepItem(${rep?rep.id:0},'cost')" style="font-size:10px;padding:4px 8px">+ 비용항목</button>
+    <span style="font-size:10px;color:var(--t3);margin-left:auto">💡 금액 더블클릭 → 바로 수정</span>
+  </div>`;
+
+  // ── 표지 (가로) ──
+  html+=`<div class="card" style="margin-bottom:8px;display:grid;grid-template-columns:1fr 1fr;height:180px;overflow:hidden;aspect-ratio:297/210" ondragover="event.preventDefault();this.style.outline='2px solid var(--bl)'" ondragleave="this.style.outline=''" ondrop="event.preventDefault();this.style.outline='';dropCoverPhoto(event,${rb})">
     <div style="background:var(--w2);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="addCoverPhoto(${rb})">
       ${coverPhoto?`<img src="${coverPhoto}" style="width:100%;height:100%;object-fit:contain">`:`<div style="text-align:center;color:var(--t4);font-size:11px">건물 표지 사진<br>클릭 또는 드래그</div>`}
     </div>
     <div style="padding:20px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
       <div style="font-size:10px;color:var(--t3);margin-bottom:4px">${bAddr}</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px">${bld.replace(/^\d+\./,'')}</div>
-      <div style="font-size:13px;color:var(--bl);font-weight:600">${DB.ui.repY}년 ${DB.ui.repM}월</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:2px">월간 운영 보고서</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">${bName}</div>
+      <div style="font-size:14px;color:var(--bl);font-weight:600">${sy}년 ${DB.ui.repM}월 월간운영보고서</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">(BSN)</div>
     </div>
   </div>`;
-  html+=`<div class="card" style="margin-bottom:8px" ondblclick="openRepModal()" title="더블클릭 수정"><div class="card-hd"><strong>${bld} — 임대차 현황</strong></div>
-    <table class="cf-tbl" style="font-size:11px"><thead><tr><th style="padding:2px 4px">층</th><th style="padding:2px 4px">임차인</th><th style="padding:2px 4px">계약기간</th><th class="right">임대료</th><th class="right">관리비</th><th class="right">합계(VAT포함)</th></tr></thead>
+
+  // ── 1. 일반현황 (가로 2열) ──
+  html+=`<div class="card" style="margin-bottom:8px"><div class="card-hd"><strong>1. 일반현황</strong></div>
+    <table class="cf-tbl" style="font-size:11px">
+    <tr><td style="width:80px;font-weight:600;background:var(--w2)">물건명</td><td>${bName}</td>
+        <td style="width:80px;font-weight:600;background:var(--w2)">주소</td><td>${bAddr||'-'}</td></tr>
+    <tr><td style="font-weight:600;background:var(--w2)">연면적</td><td>${bObj&&bObj.area||'-'}</td>
+        <td style="font-weight:600;background:var(--w2)">규모</td><td>${bObj&&bObj.floors||'-'}</td></tr>
+    <tr><td style="font-weight:600;background:var(--w2)">주차</td><td>${bObj&&bObj.parking||'-'}</td>
+        <td style="font-weight:600;background:var(--w2)">준공</td><td>${bObj&&bObj.builtYear||'-'}</td></tr>
+    </table></div>`;
+
+  if(!rep){
+    // 보고서 없을 때: 임대차현황만 표시
+    const tDep0=ls.reduce((s,l)=>s+(l.deposit||0),0);
+    html+=`<div class="card" style="margin-bottom:8px" ondblclick="openRepModal()" title="더블클릭 수정"><div class="card-hd"><strong>3. 임대차현황</strong> <span style="font-size:10px;color:var(--t3)">[금액단위: 원, VAT별도]</span></div>
+    <table class="cf-tbl" style="font-size:11px"><thead><tr><th style="padding:2px 4px">층</th><th style="padding:2px 4px">임차인</th><th style="padding:2px 4px">계약기간</th><th class="right">월세</th><th class="right">관리비</th><th class="right">월세+관리비</th><th class="right">보증금</th><th style="padding:2px 4px">비고</th></tr></thead>
     <tbody>${ls.map(l=>{
       const rf=isRentFreeMonth(l,DB.ui.repY,DB.ui.repM);
       const rt=rateFor(l,DB.ui.repY,DB.ui.repM);
       const rentBase=rt.rent||0, mgmtBase=rt.mgmt||0;
-      const rent=rf?0:rentBase;
-      const vat=Math.round((rent+mgmtBase)*1.1);
       const bumped=(l.rentSchedule||[]).length>0 && (rentBase!==(l.rent||0)||mgmtBase!==(l.mgmt||0));
-      return`<tr${rf?' style="background:#fffbeb"':bumped?' style="background:#f0f9ff"':''}><td>${l.floor}</td><td><strong>${l.tenant}</strong>${rf?` <span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;font-weight:600">렌트프리</span>`:bumped?` <span style="font-size:9px;background:#e0f2fe;color:#075985;padding:1px 4px;border-radius:3px;font-weight:600">인상반영</span>`:''}</td>
-      <td class="mono" style="font-size:11px">${fdS(l.start)} ~ ${fdS(l.end)}</td>
-      <td class="mono right"${rf?' style="color:#b45309;font-weight:600"':''}>${rf?'렌트프리':fm(rentBase)}</td><td class="mono right">${fm(mgmtBase)}</td>
-      <td class="mono right" style="font-weight:600">${fm(vat)}</td>
+      const note=rf?'렌트프리':bumped?'인상반영':'';
+      return`<tr${rf?' style="background:#fffbeb"':bumped?' style="background:#f0f9ff"':''}><td>${l.floor}</td><td><strong>${l.tenant}</strong></td>
+      <td class="mono" style="font-size:10px">${fdS(l.start)}~${fdS(l.end)}</td>
+      <td class="mono right"${rf?' style="color:#b45309"':''}>${rf?'0':fm(rentBase)}</td><td class="mono right">${fm(mgmtBase)}</td>
+      <td class="mono right" style="font-weight:600">${fm(rentBase+mgmtBase)}</td>
+      <td class="mono right">${fm(l.deposit||0)}</td>
+      <td style="font-size:10px;color:${rf?'#92400e':bumped?'#075985':'var(--t3)'}">${note}</td>
       </tr>`;}).join('')}
-    <tr class="tfoot"><td colspan="3">합 계</td><td class="right">${fm(tR)}</td><td class="right">${fm(tM)}</td><td class="right">${fm(Math.round((tR+tM)*1.1))}</td></tr>
+    <tr class="tfoot"><td colspan="3">합 계</td><td class="right">${fm(tR)}</td><td class="right">${fm(tM)}</td><td class="right">${fm(tR+tM)}</td><td class="right">${fm(tDep0)}</td><td></td></tr>
     </tbody></table></div>`;
-
-  if(!rep){
     let prevY=DB.ui.repY,prevM=DB.ui.repM-1;if(prevM<1){prevM=12;prevY--;}
     const hasPrev=DB.reports.some(r=>r.bId===rb&&r.year===prevY&&r.month===prevM);
     html+=`<div class="card"><div class="card-bd empty">
@@ -10913,47 +11092,117 @@ function rdReport(){
     $('rep-content').innerHTML=html;return;
   }
 
+  // ── 공통 데이터 ──
   const cs=[rep.c1,rep.c2,rep.c3,rep.c4,rep.c5,rep.c6,rep.c7,rep.c8,rep.c9,rep.c10,rep.c11,rep.c12,rep.c13,rep.c14,rep.c15];
   const cNames=['자산관리수수료','소방안전관리자','전기안전관리자','주차관리','주차기유지보수','승강기유지관리','미화관리','화재보험(장기월납)','분리수거','건물유지수선비','저수조 청소','정화조 청소','전기요금(전체)','수도요금(전체)',rep.c15n||'기타비용'];
   const income=(rep.ri1||0)+(rep.ri2||0);
   const costs=cs.reduce((s,v)=>s+(v||0),0);
-  const op=income-costs;
+  const totalExtra=(rep.extraItems||[]).filter(x=>x.type==='income').reduce((s,x)=>s+(x.amt||0),0);
+  const totalExtraCost=(rep.extraItems||[]).filter(x=>x.type==='cost').reduce((s,x)=>s+(x.amt||0),0);
+  const totalIncome=income+totalExtra;
+  const totalCost=costs+totalExtraCost;
+  const op=totalIncome-totalCost;
+  const allLs=DB.leases.filter(l=>l.bId===rb);
+  const occupied=allLs.filter(l=>l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실');
+  const vacant=allLs.filter(l=>!l.tenant||l.tenant==='공실');
 
-  html+=`<div class="card"><div class="card-hd"><strong>Cash Flow — ${DB.ui.repY}년 ${DB.ui.repM}월</strong></div>
-    <table class="cf-tbl"><thead><tr><th>구분</th><th>항목</th><th class="right">금액 (원)</th></tr></thead><tbody>
-    <tr class="cat-row"><td colspan="2">수 입</td><td style="text-align:right"><button class="btn sm" onclick="addRepItem(${rep.id},'income')" style="font-size:8px;padding:0 4px">+</button></td></tr>
-    <tr><td></td><td>임대수입</td><td class="right mono" ondblclick="inlineRepEdit(this,${rep.id},'ri1',${rep.ri1||0})">${fm(rep.ri1||0)}</td></tr>
-    <tr><td></td><td>일반관리비</td><td class="right mono" ondblclick="inlineRepEdit(this,${rep.id},'ri2',${rep.ri2||0})">${fm(rep.ri2||0)}</td></tr>
-    ${(rep.extraItems||[]).filter(x=>x.type==='income').map(x=>`<tr><td></td><td>${x.name}</td><td class="right mono">${fm(x.amt)}</td></tr>`).join('')}
-    <tr class="total-row"><td colspan="2">수입 계</td><td class="right mono" style="color:var(--gn)">${fm(income+(rep.extraItems||[]).filter(x=>x.type==='income').reduce((s,x)=>s+(x.amt||0),0))}</td></tr>
-    <tr class="cat-row"><td colspan="2">고정 비용</td><td style="text-align:right"><button class="btn sm" onclick="addRepItem(${rep.id},'cost')" style="font-size:8px;padding:0 4px">+</button></td></tr>
-    ${cs.map((v,i)=>v?`<tr><td></td><td>${cNames[i]}</td><td class="right mono">${fm(v)}</td></tr>`:'').join('')}
-    ${(rep.extraItems||[]).filter(x=>x.type==='cost').map(x=>`<tr><td></td><td>${x.name}</td><td class="right mono">${fm(x.amt)}</td></tr>`).join('')}
-    <tr class="total-row"><td colspan="2">비용 계</td><td class="right mono" style="color:var(--rd)">${fm(costs+(rep.extraItems||[]).filter(x=>x.type==='cost').reduce((s,x)=>s+(x.amt||0),0))}</td></tr>
-    <tr class="total-row" style="font-size:13px"><td colspan="2"><strong>운영수익</strong></td><td class="right mono"><strong style="color:${op>=0?'var(--gn)':'var(--rd)'}">${fm(op)}</strong></td></tr>
+  // ── 2. 운영현황 요약 (엑셀 양식: 좌=CF요약, 우=임대현황) ──
+  const _newLease=ls.filter(l=>{const s=l.start;if(!s)return false;const sm=parseInt(s.slice(5,7)),sy=parseInt(s.slice(0,4));return sy===DB.ui.repY&&sm===DB.ui.repM;}).length;
+  const _endLease=ls.filter(l=>{const e=l.end;if(!e)return false;const em=parseInt(e.slice(5,7)),ey=parseInt(e.slice(0,4));return ey===DB.ui.repY&&em===DB.ui.repM;}).length;
+  const _renewLease=ls.filter(l=>(l.renewCount||0)>0).length;
+  html+=`<div class="card" style="margin-bottom:8px"><div class="card-hd"><strong>2. 운영현황 요약</strong> <span style="font-size:10px;color:var(--t3)">[금액단위: 원, VAT별도]</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+      <div style="border-right:1px solid var(--ln);padding:8px 12px">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px">1. Cash Flow 요약</div>
+        <table class="cf-tbl" style="font-size:12px;width:100%">
+          <colgroup><col style="width:90px"><col></colgroup>
+          <tbody>
+          <tr style="height:32px"><td style="font-weight:600;padding:4px 6px">총수입</td><td class="right mono" style="font-size:13px;color:var(--gn);padding:4px 6px"><strong>${fm(totalIncome)}</strong></td></tr>
+          <tr style="height:8px"><td colspan="2"></td></tr>
+          <tr style="height:32px"><td style="font-weight:600;padding:4px 6px">총비용</td><td class="right mono" style="font-size:13px;color:var(--rd);padding:4px 6px"><strong>${fm(totalCost)}</strong></td></tr>
+          <tr style="height:8px"><td colspan="2"></td></tr>
+          <tr style="height:32px;border-top:2px solid var(--t1)"><td style="font-weight:700;padding:4px 6px;font-size:13px">운영수익</td><td class="right mono" style="font-size:14px;padding:4px 6px"><strong style="color:${op>=0?'var(--gn)':'var(--rd)'}">${fm(op)}</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:8px 12px">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px">2. 임대현황 요약</div>
+        <table class="cf-tbl" style="font-size:12px;width:100%">
+          <colgroup><col style="width:80px"><col></colgroup>
+          <tbody>
+          <tr style="height:28px"><td style="font-weight:600;padding:4px 6px">임대섹터</td><td class="mono" style="font-size:14px;font-weight:700;padding:4px 6px">${allLs.length}</td></tr>
+          </tbody>
+        </table>
+        <table class="cf-tbl" style="font-size:11px;width:100%;margin-top:8px">
+          <thead><tr><th style="text-align:center;padding:4px 2px">신규임대</th><th style="text-align:center;padding:4px 2px">계약종료</th><th style="text-align:center;padding:4px 2px">임대중</th><th style="text-align:center;padding:4px 2px">재계약</th></tr></thead>
+          <tbody><tr>
+            <td class="mono" style="text-align:center;font-size:12px;padding:6px 2px">${_newLease}/${allLs.length}</td>
+            <td class="mono" style="text-align:center;font-size:12px;padding:6px 2px">${_endLease}/${allLs.length}</td>
+            <td class="mono" style="text-align:center;font-size:12px;padding:6px 2px;color:var(--gn);font-weight:700">${occupied.length}/${allLs.length}</td>
+            <td class="mono" style="text-align:center;font-size:12px;padding:6px 2px">${_renewLease}/${allLs.length}</td>
+          </tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div style="padding:4px 8px;font-size:11px;font-weight:700;background:var(--w2);border-bottom:1px solid var(--ln);border-top:1px solid var(--ln)">3. 시설유지 / 보수 요약</div>
+      <div id="rep-maint-bd" style="cursor:pointer;min-height:40px;padding:6px 8px" ondblclick="startMaintEdit(${rep.id},this)">
+      ${rep.maint?`<table class="cf-tbl" style="font-size:11px"><thead><tr><th style="width:60%">내용</th><th>비고</th></tr></thead><tbody>${rep.maint.split('\n').filter(Boolean).map(l=>{
+        const isHead=l.startsWith('>')||/^\d{2}\.\d{2}/.test(l);
+        if(isHead){
+          const parts=l.replace(/^>/,'').split('|');
+          return`<tr><td style="font-weight:600;white-space:pre-wrap">${parts[0].trim()}</td><td style="font-size:10px;color:var(--t3)">${parts[1]?parts[1].trim():''}</td></tr>`;
+        }
+        return`<tr><td style="padding-left:12px;white-space:pre-wrap">${l}</td><td></td></tr>`;
+      }).join('')}</tbody></table>`:'<div class="empty">더블클릭하여 입력 (날짜별 내용 | 비고)</div>'}
+      ${rep._maintEdit?'<div class="edit-stamp" style="text-align:right;padding:2px 4px;font-size:9px">'+rep._maintEdit+'</div>':''}
+      </div>
+    </div>
+  </div>`;
+
+  // ── 3. 임대차현황 ──
+  const tDep=ls.reduce((s,l)=>s+(l.deposit||0),0);
+  html+=`<div class="card" style="margin-bottom:8px" ondblclick="openRepModal()" title="더블클릭 수정"><div class="card-hd"><strong>3. 임대차현황</strong> <span style="font-size:10px;color:var(--t3)">[금액단위: 원, VAT별도]</span></div>
+    <table class="cf-tbl" style="font-size:11px"><thead><tr><th style="padding:2px 4px">층</th><th style="padding:2px 4px">임차인</th><th style="padding:2px 4px">계약기간</th><th class="right">월세</th><th class="right">관리비</th><th class="right">월세+관리비</th><th class="right">보증금</th><th style="padding:2px 4px">비고</th></tr></thead>
+    <tbody>${ls.map(l=>{
+      const rf=isRentFreeMonth(l,DB.ui.repY,DB.ui.repM);
+      const rt=rateFor(l,DB.ui.repY,DB.ui.repM);
+      const rentBase=rt.rent||0, mgmtBase=rt.mgmt||0;
+      const bumped=(l.rentSchedule||[]).length>0 && (rentBase!==(l.rent||0)||mgmtBase!==(l.mgmt||0));
+      const note=rf?'렌트프리':bumped?'인상반영':'';
+      return`<tr${rf?' style="background:#fffbeb"':bumped?' style="background:#f0f9ff"':''}><td>${l.floor}</td><td><strong>${l.tenant}</strong></td>
+      <td class="mono" style="font-size:10px">${fdS(l.start)}~${fdS(l.end)}</td>
+      <td class="mono right"${rf?' style="color:#b45309"':''}>${rf?'0':fm(rentBase)}</td><td class="mono right">${fm(mgmtBase)}</td>
+      <td class="mono right" style="font-weight:600">${fm(rentBase+mgmtBase)}</td>
+      <td class="mono right">${fm(l.deposit||0)}</td>
+      <td style="font-size:10px;color:${rf?'#92400e':bumped?'#075985':'var(--t3)'}">${note}</td>
+      </tr>`;}).join('')}
+    <tr class="tfoot"><td colspan="3">합 계</td><td class="right">${fm(tR)}</td><td class="right">${fm(tM)}</td><td class="right">${fm(tR+tM)}</td><td class="right">${fm(tDep)}</td><td></td></tr>
     </tbody></table></div>`;
 
-  // Income tracking — 빠른계좌/입금여부 삭제, 입금일 숫자, 즉시반영
-  html+=`<div class="card"><div class="card-hd"><strong>입금 현황</strong></div>
-    <table class="cf-tbl"><thead><tr><th>층</th><th>임차인</th><th class="right">청구액(VAT포함)</th><th class="right">입금액</th><th class="right">입금일</th></tr></thead><tbody>
+  // ── 4. 입금현황 및 연체현황 (통합) ──
+  html+=`<div class="card" style="margin-bottom:8px"><div class="card-hd"><strong>4. 입금현황 및 연체현황</strong></div>
+    <div style="font-size:11px;font-weight:700;padding:4px 8px;background:var(--w2);border-bottom:1px solid var(--ln)">입금 현황</div>
+    <table class="cf-tbl" style="font-size:11px"><thead><tr><th>층</th><th>임차인</th><th class="right">월세</th><th class="right">관리비</th><th class="right">청구액(VAT포함)</th><th class="right">입금액</th><th>입금일</th></tr></thead><tbody>
     ${ls.map(l=>{
       const rf=isRentFreeMonth(l,DB.ui.repY,DB.ui.repM);
       const rt=rateFor(l,DB.ui.repY,DB.ui.repM);
       const rent=rf?0:(rt.rent||0);
-      const vat=Math.round((rent+(rt.mgmt||0))*1.1);
+      const mgmt=rt.mgmt||0;
+      const vat=Math.round((rent+mgmt)*1.1);
       const inc=(rep.idata||{})[l.id]||{};
       const hasMoney=inc.amt&&Number(inc.amt)>0;
       return`<tr${rf?' style="background:#fffbeb"':hasMoney?' style="color:var(--gn)"':''}>
       <td>${l.floor}</td><td><strong>${l.tenant}</strong>${rf?` <span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;font-weight:600">렌트프리</span>`:''}</td>
-      <td class="right mono"${rf?' style="color:#b45309;font-weight:600"':''}>${rf&&!l.mgmt?'렌트프리':fm(vat)}</td>
+      <td class="right mono">${rf?'0':fm(rent)}</td>
+      <td class="right mono">${fm(mgmt)}</td>
+      <td class="right mono" style="font-weight:600">${rf&&!mgmt?'렌트프리':fm(vat)}</td>
       <td style="padding:0"><input class="cf-inp" value="${inc.amt||''}" placeholder="0" style="width:100%;text-align:right;padding:2px 4px" oninput="setAmtLive(${rep.id},${l.id},this.value)"></td>
-      <td style="padding:0"><input class="cf-inp" value="${inc.dt||''}" placeholder="일" style="width:100%;text-align:center;padding:2px 4px" oninput="setDtLive(${rep.id},${l.id},this.value)"></td>
+      <td style="padding:0"><input class="cf-inp" value="${inc.dt||''}" placeholder="일" style="width:60px;text-align:center;padding:2px 4px" oninput="setDtLive(${rep.id},${l.id},this.value)"></td>
     </tr>`}).join('')}
-    </tbody></table></div>`;
-
-  // 연체현황 — 보증금, 년간미납, 차감후
-  html+=`<div class="card"><div class="card-hd"><strong>연체 현황</strong></div>
-    <table class="cf-tbl"><thead><tr><th>층</th><th>임차인</th><th class="right">청구액</th><th class="right">입금액</th><th class="right">미납액</th><th class="right">보증금</th><th class="right">차액</th></tr></thead><tbody>
+    </tbody></table>
+    <div style="font-size:11px;font-weight:700;padding:4px 8px;background:var(--w2);border-bottom:1px solid var(--ln);border-top:1px solid var(--ln);margin-top:4px">연체 현황</div>
+    <table class="cf-tbl" style="font-size:11px"><thead><tr><th>층</th><th>임차인</th><th class="right">청구액</th><th class="right">입금액</th><th class="right">미납액</th><th class="right">보증금</th><th class="right">차액</th></tr></thead><tbody>
     ${ls.map(l=>{
       const rf=isRentFreeMonth(l,DB.ui.repY,DB.ui.repM);
       const rt=rateFor(l,DB.ui.repY,DB.ui.repM);
@@ -10961,7 +11210,6 @@ function rdReport(){
       const vat=Math.round((rent+(rt.mgmt||0))*1.1);
       const inc=(rep.idata||{})[l.id]||{};
       const paid=parseInt(inc.amt)||0;
-      // 이전달까지의 누적 미납액 계산 (각 월별 렌트프리 적용)
       let prevUnpaid=0;
       DB.reports.filter(r2=>r2.bId===rb&&(r2.year<DB.ui.repY||(r2.year===DB.ui.repY&&r2.month<DB.ui.repM))).forEach(pr=>{
         const prInc=(pr.idata||{})[l.id]||{};
@@ -10984,22 +11232,120 @@ function rdReport(){
     }).join('')||`<tr><td colspan="7" class="empty" style="color:var(--gn)">미납 없음</td></tr>`}
     </tbody></table></div>`;
 
-  // 특이사항 (시설유지/보수 통합) — 더블클릭 수정, 추가버튼
-  html+=`<div class="card"><div class="card-hd"><strong>특이사항</strong></div>
-    <div class="card-bd" id="rep-maint-bd" style="cursor:pointer;min-height:40px" ondblclick="startMaintEdit(${rep.id},this)">
-    ${rep.maint?rep.maint.split('\n').filter(Boolean).map(l=>{
-      const isHead=l.startsWith('>')||/^\d{2}\.\d{2}/.test(l);
-      return isHead?`<div style="padding:5px 0 2px;font-weight:600;font-size:12px;border-top:1px solid var(--ln);margin-top:4px">${l.replace(/^>/,'')}</div>`
-        :`<div style="padding:2px 0 2px 12px;font-size:12px;color:var(--t2)">${l}</div>`;
-    }).join(''):'<div class="empty">더블클릭하여 입력</div>'}
-    ${rep._maintEdit?'<div class="edit-stamp" style="text-align:right;padding:2px 4px">'+rep._maintEdit+'</div>':''}
-    </div></div>`;
+  // ── 5. 관리성비용 현황 (xlsx 양식: 구분/내역/금액/세액/합계/비고) ──
+  html+=`<div class="card" style="margin-bottom:8px"><div class="card-hd"><strong>5. 관리성비용 현황</strong> <span style="font-size:10px;color:var(--t3)">[금액단위: 원]</span>
+    <button class="btn sm" onclick="addRepItem(${rep.id},'cost')" style="font-size:9px;margin-left:8px">+ 비용항목</button>
+    <button class="btn sm" onclick="addRepItem(${rep.id},'income')" style="font-size:9px;margin-left:4px">+ 수입항목</button></div>
+    <table class="cf-tbl" style="font-size:11px"><thead><tr><th style="width:90px">구분</th><th>내역</th><th class="right">금액</th><th class="right">세액(VAT)</th><th class="right">합계</th><th style="width:100px">비고</th></tr></thead><tbody>
+    <tr class="cat-row"><td colspan="5" style="font-weight:700">수 입</td><td></td></tr>
+    <tr><td>임대수입</td><td>임대수입</td><td class="right mono" ondblclick="inlineRepEdit(this,${rep.id},'ri1',${rep.ri1||0})">${fm(rep.ri1||0)}</td><td class="right mono">${fm(Math.round((rep.ri1||0)*0.1))}</td><td class="right mono">${fm(Math.round((rep.ri1||0)*1.1))}</td><td></td></tr>
+    <tr><td>관리비</td><td>일반관리비</td><td class="right mono" ondblclick="inlineRepEdit(this,${rep.id},'ri2',${rep.ri2||0})">${fm(rep.ri2||0)}</td><td class="right mono">${fm(Math.round((rep.ri2||0)*0.1))}</td><td class="right mono">${fm(Math.round((rep.ri2||0)*1.1))}</td><td></td></tr>
+    ${(rep.extraItems||[]).filter(x=>x.type==='income').map(x=>`<tr><td>기타수입</td><td>${x.name}</td><td class="right mono">${fm(x.amt)}</td><td class="right mono">${fm(Math.round((x.amt||0)*0.1))}</td><td class="right mono">${fm(Math.round((x.amt||0)*1.1))}</td><td></td></tr>`).join('')}
+    <tr class="total-row"><td colspan="2">수입 계</td><td class="right mono" style="color:var(--gn)">${fm(totalIncome)}</td><td class="right mono">${fm(Math.round(totalIncome*0.1))}</td><td class="right mono" style="color:var(--gn)">${fm(Math.round(totalIncome*1.1))}</td><td></td></tr>
+    <tr class="cat-row"><td colspan="5" style="font-weight:700">비 용</td><td></td></tr>
+    ${cs.map((v,i)=>v?`<tr><td>${i<1?'인건비':i<3?'안전관리':i<9?'설비유지보수':i<12?'기타':'공과금'}</td><td>${cNames[i]}</td><td class="right mono">${fm(v)}</td><td class="right mono">${fm(Math.round(v*0.1))}</td><td class="right mono">${fm(Math.round(v*1.1))}</td><td></td></tr>`:'').join('')}
+    ${(rep.extraItems||[]).filter(x=>x.type==='cost').map(x=>`<tr><td>기타비용</td><td>${x.name}</td><td class="right mono">${fm(x.amt)}</td><td class="right mono">${fm(Math.round((x.amt||0)*0.1))}</td><td class="right mono">${fm(Math.round((x.amt||0)*1.1))}</td><td></td></tr>`).join('')}
+    <tr class="total-row"><td colspan="2">비용 계</td><td class="right mono" style="color:var(--rd)">${fm(totalCost)}</td><td class="right mono">${fm(Math.round(totalCost*0.1))}</td><td class="right mono" style="color:var(--rd)">${fm(Math.round(totalCost*1.1))}</td><td></td></tr>
+    <tr class="total-row" style="font-size:13px"><td colspan="2"><strong>운영수익</strong></td><td class="right mono"><strong style="color:${op>=0?'var(--gn)':'var(--rd)'}">${fm(op)}</strong></td><td></td><td class="right mono"><strong style="color:${op>=0?'var(--gn)':'var(--rd)'}">${fm(Math.round(op*1.1))}</strong></td><td></td></tr>
+    </tbody></table></div>`;
 
-  if(rep.tn)html+=`<div class="card"><div class="card-hd"><strong>임대차 특이사항</strong></div><table class="cf-tbl"><tbody>${rep.tn.split('\n').filter(Boolean).map(l=>{const[fl,...rest]=l.split(':');return`<tr><td style="width:90px;font-weight:500">${fl}</td><td>${rest.join(':')}</td></tr>`;}).join('')}</tbody></table></div>`;
+  // ── 5-1. CF-연간실행 (연 12개월 데이터) ──
+  const cfMonths=[];
+  for(let m=1;m<=12;m++){
+    const mr=DB.reports.find(r=>r.bId===rb&&r.year===DB.ui.repY&&r.month===m);
+    if(mr){
+      cfMonths.push({
+        month:m,
+        ri1:mr.ri1||0,
+        ri2:mr.ri2||0,
+        c1:mr.c1||0,c2:mr.c2||0,c3:mr.c3||0,c4:mr.c4||0,c5:mr.c5||0,c6:mr.c6||0,c7:mr.c7||0,c8:mr.c8||0,c9:mr.c9||0,
+        c10:mr.c10||0,c11:mr.c11||0,c12:mr.c12||0,c13:mr.c13||0,c14:mr.c14||0,c15:mr.c15||0,
+        extraItems:mr.extraItems||[]
+      });
+    }else{
+      cfMonths.push({month:m,ri1:0,ri2:0,c1:0,c2:0,c3:0,c4:0,c5:0,c6:0,c7:0,c8:0,c9:0,c10:0,c11:0,c12:0,c13:0,c14:0,c15:0,extraItems:[]});
+    }
+  }
+  const cfCols=(m)=>cfMonths[m-1];
+  const cfCalc=(accessor)=>cfMonths.map(m=>accessor(m)||0);
 
+  // 행별 계산 함수
+  const cfRow=(label,accessor,isBold)=>{
+    const vals=cfMonths.map(m=>accessor(m)||0);
+    const sum=vals.reduce((s,v)=>s+v,0);
+    const cellsHtml=vals.map(v=>v===0?'<td class="right" style="color:var(--t4);padding:1px 3px">-</td>':'<td class="right mono" style="font-size:9px;padding:1px 3px">'+fm(v)+'</td>').join('');
+    const fw=isBold?'font-weight:700;':'';
+    const bg=isBold?'background:var(--w2);':'';
+    return'<tr style="'+bg+'"><td style="padding:1px 4px;font-size:9px;white-space:nowrap;'+fw+'">'+label+'</td>'+cellsHtml+'<td class="right mono" style="font-weight:700;font-size:9px;padding:1px 3px;border-left:1px solid var(--ln)">'+fm(sum)+'</td></tr>';
+  };
+
+  html+=`<div class="card cf-annual-card" style="margin-bottom:8px"><div class="card-hd" style="padding:4px 10px"><strong style="font-size:12px">5-1. CF-연간실행</strong> <span style="font-size:10px;color:var(--t3)">[${DB.ui.repY}년 전체]</span></div>
+    <div style="overflow-x:auto">
+    <table class="cf-tbl" style="font-size:9px;min-width:700px"><thead><tr style="background:var(--w2)">
+      <th style="width:100px;text-align:left;padding:1px 4px;font-size:9px">내용</th>
+      ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>`<th class="right" style="padding:1px 3px;font-size:8px">${m}월</th>`).join('')}
+      <th class="right" style="padding:1px 3px;font-weight:700;border-left:1px solid var(--ln);font-size:8px">합계</th>
+    </tr></thead><tbody>
+    <tr style="background:#fafafa"><td colspan="14" style="padding:1px 4px;font-weight:700;font-size:10px">수입</td></tr>
+    ${cfRow('임대수입',(m)=>m.ri1)}
+    ${cfRow('관리비',(m)=>m.ri2)}
+    ${cfRow('임대수입 계',(m)=>m.ri1+m.ri2,true)}
+    ${cfRow('수입 계',(m)=>m.ri1+m.ri2,true)}
+    <tr style="background:#fafafa"><td colspan="14" style="padding:1px 4px;font-weight:700;font-size:10px">비용</td></tr>
+    ${cfRow('자산관리수수료',(m)=>m.c1)}
+    ${cfRow('소방안전관리자',(m)=>m.c2)}
+    ${cfRow('화재보험(장기월납)',(m)=>m.c8)}
+    ${cfRow('전기안전관리자',(m)=>m.c3)}
+    ${cfRow('주차관리',(m)=>m.c4)}
+    ${cfRow('주차기유지보수',(m)=>m.c5)}
+    ${cfRow('승강기유지관리',(m)=>m.c6)}
+    ${cfRow('분리수거',(m)=>m.c9)}
+    ${cfRow('미화관리',(m)=>m.c7)}
+    ${cfRow('인건비 계',(m)=>m.c1+m.c2+m.c3+m.c4+m.c5+m.c6+m.c7+m.c8+m.c9,true)}
+    ${cfRow('건물유지수선비',(m)=>m.c10)}
+    ${cfRow('저수조 청소',(m)=>m.c11)}
+    ${cfRow('정화조 청소',(m)=>m.c12)}
+    ${cfRow('수선비 계',(m)=>m.c10+m.c11+m.c12,true)}
+    ${cfRow('전기요금(전체)',(m)=>m.c13)}
+    ${cfRow('수도요금(전체)',(m)=>m.c14)}
+    ${cfRow('공과금 계',(m)=>m.c13+m.c14,true)}
+    ${cfRow('기타비용',(m)=>m.c15+(m.extraItems.filter(x=>x.type==='cost').reduce((s,x)=>s+(x.amt||0),0)))}
+    ${cfRow('운영비용 계',(m)=>m.c1+m.c2+m.c3+m.c4+m.c5+m.c6+m.c7+m.c8+m.c9+m.c10+m.c11+m.c12+m.c13+m.c14+m.c15+(m.extraItems.filter(x=>x.type==='cost').reduce((s,x)=>s+(x.amt||0),0)),true)}
+    ${cfRow('상각전 운영수익',(m)=>(m.ri1+m.ri2)-(m.c1+m.c2+m.c3+m.c4+m.c5+m.c6+m.c7+m.c8+m.c9+m.c10+m.c11+m.c12+m.c13+m.c14+m.c15+(m.extraItems.filter(x=>x.type==='cost').reduce((s,x)=>s+(x.amt||0),0))),true)}
+    ${cfRow('순 운영수익(세전)',(m)=>(m.ri1+m.ri2)-(m.c1+m.c2+m.c3+m.c4+m.c5+m.c6+m.c7+m.c8+m.c9+m.c10+m.c11+m.c12+m.c13+m.c14+m.c15+(m.extraItems.filter(x=>x.type==='cost').reduce((s,x)=>s+(x.amt||0),0))),true)}
+    </tbody></table></div></div>`;
+
+  // ── 임대차 특이사항 (있으면 표시) ──
+  if(rep.tn)html+=`<div class="card" style="margin-bottom:8px"><div class="card-hd"><strong>임대차 관련 특이사항</strong></div><table class="cf-tbl" style="font-size:11px"><tbody>${rep.tn.split('\n').filter(Boolean).map(l=>{const[fl,...rest]=l.split(':');return`<tr><td style="width:90px;font-weight:500">${fl}</td><td>${rest.join(':')}</td></tr>`;}).join('')}</tbody></table></div>`;
+
+  // ── 6. 첨부 사진 (4열 × 2행, 각 사진 아래 캡션) ──
   const photos=DB.repPhotos[rep.id]||[];
-  html+=`<div class="card"><div class="card-hd"><strong>첨부 사진</strong><button class="btn sm" onclick="addPhoto(${rep.id})">+ 사진</button></div>
-    <div class="photo-row" id="photo-drop-${rep.id}" ondragover="event.preventDefault();this.style.background='var(--bl2)'" ondragleave="this.style.background=''" ondrop="event.preventDefault();this.style.background='';dropPhoto(event,${rep.id})">${photos.map((p,pi)=>`<div class="photo-item" onclick="viewImg('${p}')"><img src="${p}"><button class="photo-del" onclick="event.stopPropagation();delPhoto(${rep.id},${pi})">×</button></div>`).join('')}<div class="photo-add-btn" onclick="addPhoto(${rep.id})"><span style="font-size:20px">+</span>사진 추가<br><span style="font-size:9px">드래그 가능</span></div></div></div>`;
+  const captions=DB.repPhotoCaptions&&DB.repPhotoCaptions[rep.id]||{};
+  // 사진을 8장 단위로 페이지 분리
+  const mkPhotoCell=(p,i,cap)=>`<div style="display:flex;flex-direction:column;gap:4px">
+    <div style="position:relative;aspect-ratio:4/3;border-radius:6px;overflow:hidden;border:1px solid var(--ln);cursor:pointer;background:#f5f5f5" onclick="viewImg('${p}')">
+      <img src="${p}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="event.stopPropagation();delPhoto(${rep.id},${i})" class="photo-del" style="position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:20px;text-align:center;padding:0">×</button>
+    </div>
+    <input type="text" value="${esc(cap)}" placeholder="사진 설명 입력" onblur="savePhotoCaption(${rep.id},${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()" style="width:100%;box-sizing:border-box;border:1px solid var(--ln);border-radius:4px;padding:3px 6px;font-size:10px;font-family:'Pretendard',sans-serif;text-align:center;color:var(--t2)">
+    <span class="photo-cap" style="display:none">${esc(cap)}</span>
+  </div>`;
+  const addBtn=`<div style="display:flex;flex-direction:column;gap:4px">
+    <div class="photo-add-btn" onclick="addPhoto(${rep.id})" style="aspect-ratio:4/3;border:2px dashed var(--ln);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fafafa;transition:.15s" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--ln)'">
+      <span style="font-size:22px;color:var(--t3)">+</span><span style="font-size:10px;color:var(--t4)">사진 추가</span>
+    </div><div style="height:22px"></div>
+  </div>`;
+  const totalPages=Math.max(1,Math.ceil(photos.length/8));
+  for(let pg=0;pg<totalPages;pg++){
+    const start=pg*8, end=Math.min(start+8,photos.length);
+    let gridHtml='';
+    for(let i=start;i<end;i++) gridHtml+=mkPhotoCell(photos[i],i,captions[i]||'');
+    if(pg===totalPages-1 && photos.length%8!==0) gridHtml+=addBtn;
+    else if(photos.length===0) gridHtml+=addBtn;
+    const pageLabel=totalPages>1?` (${pg+1}/${totalPages})`:'';
+    html+=`<div class="card" style="margin-bottom:8px"><div class="card-hd"><strong>6. 첨부 사진${pageLabel}</strong><span style="font-size:10px;color:var(--t3);margin-left:8px">${photos.length}장</span>${pg===0?`<button class="btn sm" onclick="addPhoto(${rep.id})" style="margin-left:auto;font-size:10px">+ 사진</button>`:''}</div>
+      <div class="${pg===0?'photo-grid':''}" ${pg===0?`id="photo-drop-${rep.id}" ondragover="event.preventDefault();this.style.background='var(--bl2)'" ondragleave="this.style.background=''" ondrop="event.preventDefault();this.style.background='';dropPhoto(event,${rep.id})"`:''}style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:4px 0">${gridHtml}</div></div>`;
+  }
 
   $('rep-content').innerHTML=html;
 }
@@ -11142,7 +11488,11 @@ function dropPhoto(evt,rId){
   });
 }
 function addPhoto(rId){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;inp.onchange=()=>{Array.from(inp.files).forEach(f=>{const r=new FileReader();r.onload=e=>{if(!DB.repPhotos[rId])DB.repPhotos[rId]=[];DB.repPhotos[rId].push(e.target.result);sv();rdReport();};r.readAsDataURL(f);});};inp.click();}
-function delPhoto(rId,idx){if(!confirm('삭제?'))return;DB.repPhotos[rId].splice(idx,1);sv();rdReport();}
+function delPhoto(rId,idx){if(!confirm('삭제?'))return;DB.repPhotos[rId].splice(idx,1);
+  // 캡션도 재정렬
+  if(DB.repPhotoCaptions&&DB.repPhotoCaptions[rId]){var c=DB.repPhotoCaptions[rId];var nc={};Object.keys(c).forEach(function(k){var ki=parseInt(k);if(ki<idx)nc[ki]=c[ki];else if(ki>idx)nc[ki-1]=c[ki];});DB.repPhotoCaptions[rId]=nc;}
+  sv();rdReport();}
+function savePhotoCaption(rId,idx,val){if(!DB.repPhotoCaptions)DB.repPhotoCaptions={};if(!DB.repPhotoCaptions[rId])DB.repPhotoCaptions[rId]={};DB.repPhotoCaptions[rId][idx]=val.trim();sv();}
 function viewImg(src){$('imgfull-img').src=src;$('imgfull').classList.add('on');}
 
 function printReport(){
@@ -11159,17 +11509,266 @@ function printReport(){
     +'.card{margin-bottom:10px;border:1px solid #ccc;border-radius:4px;overflow:hidden}'
     +'.card-hd{padding:6px 10px;background:#f5f5f5;border-bottom:1px solid #ccc;font-weight:700}'
     +'.card-bd{padding:8px 10px}'
-    +'.photo-row{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important}'
-    +'.photo-item{width:auto!important;height:auto!important;aspect-ratio:4/3}'
-    +'.photo-item img{width:100%!important;height:100%!important;object-fit:cover}'
-    +'.photo-add-btn,.photo-del,.btn{display:none!important}'
-    +'@media print{@page{margin:10mm}}'
+    +'.card{page-break-inside:avoid;break-inside:avoid}'
+    +'.cf-annual-card{page-break-inside:auto;break-inside:auto}'
+    +'.cf-annual-card table{font-size:8px!important}'
+    +'.cf-annual-card td,.cf-annual-card th{padding:1px 2px!important}'
+    +'.cf-tbl{width:100%;border-collapse:collapse}'
+    +'.cf-tbl th,.cf-tbl td{padding:4px 6px;border-bottom:1px solid #ddd}'
+    +'.cf-tbl .cat-row td{background:#f5f5f5;font-weight:600}'
+    +'.cf-tbl .total-row td{background:#f5f5f5;font-weight:700;border-top:1px solid #bbb}'
+    +'.cf-tbl .tfoot td{background:#f5f5f5;font-weight:600}'
+    +'.mono{font-family:monospace}.right{text-align:right}'
+    +'.photo-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important}'
+    +'.photo-grid>div{page-break-inside:avoid}'
+    +'.photo-grid img{width:100%!important;height:100%!important;object-fit:cover!important;aspect-ratio:4/3}'
+    +'.photo-add-btn,.photo-del,.btn,.cf-inp,input[placeholder="사진 설명 입력"]{display:none!important}'
+    +'.photo-cap{display:block!important;font-size:9px;text-align:center;color:#555;margin-top:2px}'
+    +'.empty{display:none}'
+    +'@media print{@page{size:landscape;margin:8mm}}'
     +'<\/style><\/head><body>');
-  w.document.write('<h3>'+bn(rb)+' — '+DB.ui.repY+'년 '+DB.ui.repM+'월 운영보고서</h3>');
+  w.document.write('<h3>'+bs(rb)+', '+(DB.ui.repY%100)+'년'+DB.ui.repM+'월 월간운영보고서 (BSN)</h3>');
   w.document.write(content.innerHTML);
   w.document.write('<\/body><\/html>');
   w.document.close();
   setTimeout(()=>{w.print();},400);
+}
+function _loadScript(url){
+  return new Promise(function(ok,fail){
+    var s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=fail;document.head.appendChild(s);
+  });
+}
+function _ensureHtml2Pdf(){
+  if(window.html2pdf) return Promise.resolve(true);
+  var urls=[
+    'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+    'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js',
+    'https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'
+  ];
+  var i=0;
+  function tryNext(){
+    if(i>=urls.length) return Promise.resolve(false);
+    return _loadScript(urls[i]).then(function(){
+      return !!window.html2pdf;
+    }).catch(function(){ i++; return tryNext(); });
+  }
+  return tryNext();
+}
+function printAllReports(){
+  const y=DB.ui.repY, m=DB.ui.repM;
+  const sy=y%100;
+  const bldgs=DB.buildings||[];
+  if(!bldgs.length){alert('건물이 없습니다');return;}
+  const origBldg=DB.ui.repBldgId;
+  var pages=[];
+  bldgs.forEach(function(b){
+    DB.ui.repBldgId=b.id;
+    rdReport();
+    var content=$('rep-content');
+    if(!content) return;
+    var h=content.innerHTML;
+    if(!h||h.indexOf('건물을 선택하세요')>=0) return;
+    var cleanName=b.name.replace(/^\d+\./,'');
+    pages.push({name:cleanName, html:h});
+  });
+  DB.ui.repBldgId=origBldg;
+  rdReport();
+  if(!pages.length){alert(sy+'년 '+m+'월 보고서가 있는 건물이 없습니다');return;}
+  var btn=$('rep-all-btn');
+  var origText=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ PDF 준비중...';}
+  var css=':root{--bg:#f2f1ed;--w:#fff;--w2:#f5f4f0;--w3:#eae9e2;--ln:#deddd4;--ln2:#c0bfb8;--t1:#15150e;--t2:#50504a;--t3:#8e8e88;--t4:#bcbcb0;--bl:#1a5fa0;--bl2:#e8f0fa;--gn:#136630;--gn2:#e4f3ea;--rd:#8a1515;--rd2:#fde8e8;--am:#7a4400;--am2:#fef1d8;--bg2:#faf9f7}'
+    +'body{font-family:"Malgun Gothic","맑은 고딕",sans-serif;font-size:12px;margin:14px;color:#222}'
+    +'table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:11px}'
+    +'th,td{border:1px solid #ccc;padding:5px 8px}'
+    +'th{background:#f5f5f5;font-weight:600}'
+    +'.card{margin-bottom:10px;border:1px solid #ccc;border-radius:4px;overflow:hidden}'
+    +'.card-hd{padding:6px 10px;background:#f5f5f5;border-bottom:1px solid #ccc;font-weight:700}'
+    +'.card-bd{padding:8px 10px}'
+    +'.cf-tbl{width:100%;border-collapse:collapse;font-size:12px}'
+    +'.cf-tbl th{background:var(--w2);padding:4px 6px;font-size:10px;font-weight:600;color:var(--t3);border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);text-align:left}'
+    +'.cf-tbl th:last-child{border-right:none}'
+    +'.cf-tbl td{padding:4px 6px;border-bottom:1px solid var(--ln);border-right:1px solid var(--ln)}'
+    +'.cf-tbl td:last-child{border-right:none}'
+    +'.cf-tbl .cat-row td{background:var(--w2);font-weight:600;font-size:11px;color:var(--t2)}'
+    +'.cf-tbl .total-row td{background:var(--w2);font-weight:700;border-top:1px solid var(--ln2)}'
+    +'.cf-tbl .tfoot td{background:var(--w2);font-weight:600;border-top:1px solid var(--ln2)}'
+    +'.card{page-break-inside:avoid;break-inside:avoid}'
+    +'.photo-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important}'
+    +'.photo-grid>div{page-break-inside:avoid}'
+    +'.photo-grid img{width:100%!important;height:100%!important;object-fit:cover!important;aspect-ratio:4/3}'
+    +'.photo-add-btn,.photo-del,.btn,.cf-inp,input[placeholder="사진 설명 입력"]{display:none!important}'
+    +'.photo-cap{display:block!important;font-size:9px;text-align:center;color:#555;margin-top:2px}'
+    +'.mono{font-family:monospace}.right{text-align:right}'
+    +'.empty{display:none}'
+    +'@media print{@page{size:landscape;margin:8mm}}';
+  // ★ 1순위: html2pdf.js CDN → 진짜 PDF 자동 다운로드
+  _ensureHtml2Pdf().then(function(ok){
+    if(ok) return _pdfAutoDownload(pages,sy,m,css,btn,origText);
+    // ★ 2순위: File System API → 폴더 선택 후 HTML 파일 자동 저장
+    if(window.showDirectoryPicker) return _fsDirSave(pages,sy,m,css,btn,origText);
+    // ★ 3순위: 개별 인쇄창
+    _printSequential(pages,sy,m,css,btn,origText);
+  });
+}
+function _pdfAutoDownload(pages,sy,m,css,btn,origText){
+  // ★ 폴더 선택 → PDF를 원하는 폴더에 저장
+  if(window.showDirectoryPicker){
+    if(btn){btn.textContent='⏳ 저장 폴더 선택...';}
+    window.showDirectoryPicker({mode:'readwrite'}).then(function(dirHandle){
+      _pdfToDir(pages,sy,m,css,btn,origText,dirHandle);
+    }).catch(function(e){
+      if(btn){btn.disabled=false;btn.textContent=origText;}
+      if(e.name==='AbortError') return;
+      // 폴더 선택 실패 → 다운로드 폴더에 저장
+      _pdfToDownloads(pages,sy,m,css,btn,origText);
+    });
+  } else {
+    // showDirectoryPicker 미지원 → 다운로드 폴더
+    _pdfToDownloads(pages,sy,m,css,btn,origText);
+  }
+}
+function _pdfToDir(pages,sy,m,css,btn,origText,dirHandle){
+  var idx=0;
+  function genNext(){
+    if(idx>=pages.length){
+      if(btn){btn.disabled=false;btn.textContent=origText;}
+      showSaveStatus(pages.length+'개 건물 PDF 저장 완료','#059669');
+      return;
+    }
+    var p=pages[idx];
+    if(btn){btn.textContent='⏳ PDF '+(idx+1)+'/'+pages.length+' '+p.name;}
+    // iframe으로 독립된 문서 생성 → html2pdf 캡처
+    var iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;left:0;top:0;width:210mm;height:100vh;border:none;z-index:99999;background:#fff';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>'+css+'</style></head><body style="margin:14px;font-family:Malgun Gothic,sans-serif;font-size:12px;color:#222;background:#fff">'
+      +'<h3 style="margin-bottom:12px">'+p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN)</h3>'
+      +p.html+'</body></html>');
+    doc.close();
+    var fileName=p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN).pdf';
+    // iframe 렌더링 대기 후 캡처
+    setTimeout(function(){
+      html2pdf().set({
+        margin:8, image:{type:'jpeg',quality:0.92},
+        html2canvas:{scale:2,useCORS:true,logging:false,scrollY:0},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+        pagebreak:{mode:['avoid-all','css','legacy']}
+      }).from(doc.body).outputPdf('blob').then(function(blob){
+        document.body.removeChild(iframe);
+        return dirHandle.getFileHandle(fileName,{create:true}).then(function(fh){
+          return fh.createWritable();
+        }).then(function(wr){
+          return wr.write(blob).then(function(){return wr.close();});
+        });
+      }).then(function(){
+        idx++;
+        setTimeout(genNext,300);
+      }).catch(function(e){
+        console.error('PDF 저장 실패:',p.name,e);
+        if(iframe.parentNode) document.body.removeChild(iframe);
+        idx++;
+        setTimeout(genNext,300);
+      });
+    },500);
+  }
+  genNext();
+}
+function _pdfToDownloads(pages,sy,m,css,btn,origText){
+  var idx=0;
+  function genNext(){
+    if(idx>=pages.length){
+      if(btn){btn.disabled=false;btn.textContent=origText;}
+      showSaveStatus(pages.length+'개 건물 PDF 다운로드 완료','#059669');
+      return;
+    }
+    var p=pages[idx];
+    if(btn){btn.textContent='⏳ PDF '+(idx+1)+'/'+pages.length+' '+p.name;}
+    var iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;left:0;top:0;width:210mm;height:100vh;border:none;z-index:99999;background:#fff';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>'+css+'</style></head><body style="margin:14px;font-family:Malgun Gothic,sans-serif;font-size:12px;color:#222;background:#fff">'
+      +'<h3 style="margin-bottom:12px">'+p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN)</h3>'
+      +p.html+'</body></html>');
+    doc.close();
+    var fileName=p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN).pdf';
+    setTimeout(function(){
+      html2pdf().set({
+        margin:8, filename:fileName, image:{type:'jpeg',quality:0.92},
+        html2canvas:{scale:2,useCORS:true,logging:false,scrollY:0},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+        pagebreak:{mode:['avoid-all','css','legacy']}
+      }).from(doc.body).save().then(function(){
+        document.body.removeChild(iframe);
+        idx++;
+        setTimeout(genNext,300);
+      }).catch(function(e){
+        console.error('PDF 생성 실패:',p.name,e);
+        if(iframe.parentNode) document.body.removeChild(iframe);
+        idx++;
+        setTimeout(genNext,300);
+      });
+    },500);
+  }
+  genNext();
+}
+function _fsDirSave(pages,sy,m,css,btn,origText){
+  if(btn){btn.textContent='⏳ 폴더 선택...';}
+  window.showDirectoryPicker({mode:'readwrite'}).then(function(dirHandle){
+    var saved=0;
+    function saveNext(i){
+      if(i>=pages.length){
+        if(btn){btn.disabled=false;btn.textContent=origText;}
+        showSaveStatus(saved+'개 건물 보고서 저장 완료','#059669');
+        return;
+      }
+      var p=pages[i];
+      if(btn){btn.textContent='⏳ '+(i+1)+'/'+pages.length+' '+p.name;}
+      var fileName=p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN).html';
+      var fullHtml='<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">'
+        +'<title>'+p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN)<\/title>'
+        +'<style>'+css+'<\/style><\/head><body>'
+        +'<h3 style="margin-bottom:12px">'+p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN)<\/h3>'
+        +p.html+'<\/body><\/html>';
+      dirHandle.getFileHandle(fileName,{create:true}).then(function(fh){
+        return fh.createWritable();
+      }).then(function(wr){
+        return wr.write(fullHtml).then(function(){return wr.close();});
+      }).then(function(){ saved++; saveNext(i+1);
+      }).catch(function(e){ console.error('저장실패:'+fileName,e); saveNext(i+1); });
+    }
+    saveNext(0);
+  }).catch(function(e){
+    if(btn){btn.disabled=false;btn.textContent=origText;}
+    if(e.name==='AbortError') return;
+    // 폴더 선택 실패 → 인쇄창 폴백
+    _printSequential(pages,sy,m,css,btn,origText);
+  });
+}
+function _printSequential(pages,sy,m,css,btn,origText){
+  var idx=0;
+  function nextBldg(){
+    if(idx>=pages.length){
+      if(btn){btn.disabled=false;btn.textContent=origText;}
+      showSaveStatus(pages.length+'개 건물 PDF 완료','#059669');
+      return;
+    }
+    var p=pages[idx];
+    if(btn){btn.disabled=true;btn.textContent='⏳ '+(idx+1)+'/'+pages.length+' '+p.name;}
+    var w=window.open('','_blank');
+    w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>'+p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN)</title>'
+      +'<style>'+css+'<\/style><\/head><body>'
+      +'<h3>'+p.name+', '+sy+'년'+m+'월 월간운영보고서 (BSN)</h3>'+p.html
+      +'<\/body><\/html>');
+    w.document.close();
+    w.onafterprint=function(){ w.close(); idx++; setTimeout(nextBldg,300); };
+    setTimeout(function(){ w.print(); },400);
+  }
+  nextBldg();
 }
 // ── INVOICE ───────────────────────────────────────────────────────────
 let invItems=[];
@@ -11531,6 +12130,15 @@ async function doLogin(){
     const {data,error}=await Promise.race([loginPromise,timeout]);
     if(error)throw error;
     rememberEmail(id);
+    // 자동로그인 저장
+    try{
+      const autoChk=$('login-auto');
+      if(autoChk&&autoChk.checked){
+        localStorage.setItem('bsn_auto_login',JSON.stringify({e:id,p:btoa(unescape(encodeURIComponent(pw)))}));
+      } else {
+        localStorage.removeItem('bsn_auto_login');
+      }
+    }catch(_){}
     const enterPromise=enterApp();
     const enterTimeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('앱 로딩 시간 초과. 새로고침 후 다시 시도하세요.')),10000));
     await Promise.race([enterPromise,enterTimeout]);
@@ -11667,13 +12275,14 @@ function buildDemoDB(){
       ];
     })(),
     reports:[],
-    repPhotos:{},
+    repPhotos:{},repPhotoCaptions:{},
     expAdjustments:[],
     invoiceTargets:[],
     ui:{calY:today.getFullYear(),calM:today.getMonth(),selBldg:null,selMemoCat:null,memoView:'byCategory',memoColW:150,memoRowH:{},leaseF:'all',calBldgF:'all',calView:'month',calFlt:'all',repBldgId:null,repY:today.getFullYear(),repM:today.getMonth()+1}
   };
 }
 async function doLogout(){
+  try{ localStorage.removeItem('bsn_auto_login'); }catch(_){}
   if(sbClient)await sbClient.auth.signOut();
   location.reload();
 }
@@ -12293,32 +12902,54 @@ document.addEventListener("DOMContentLoaded",async function(){
   if(overlay)overlay.style.display='flex';
   // 🛡 타임아웃 필수: file:// 또는 오프라인/Tracking Prevention 환경에서
   // getSession()이 무한히 pending되면 sb-loading 오버레이가 걸려 "흰화면"처럼 보임.
+  let sessionOk=false;
   try{
     if(sbClient && typeof _withTimeout==='function'){
-      const {data:{session}}=await _withTimeout(sbClient.auth.getSession(),2500);
-      if(session){
-        if(overlay)overlay.style.display='none';
-        await enterApp();
-        return;
-      }
+      const {data:{session}}=await _withTimeout(sbClient.auth.getSession(),5000);
+      if(session) sessionOk=true;
     } else if(sbClient){
-      // _withTimeout 미정의 폴백
       const {data:{session}}=await Promise.race([
         sbClient.auth.getSession(),
-        new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),2500))
+        new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),5000))
       ]);
-      if(session){
-        if(overlay)overlay.style.display='none';
-        await enterApp();
-        return;
-      }
+      if(session) sessionOk=true;
     }
   }catch(e){console.warn('세션 복원 실패(무시하고 로그인 진행):',e.message);}
+  // 세션 없으면 자동로그인 시도
+  if(!sessionOk){
+    try{
+      const autoRaw=localStorage.getItem('bsn_auto_login');
+      if(autoRaw && sbClient){
+        const auto=JSON.parse(autoRaw);
+        if(auto.e && auto.p){
+          const pw=decodeURIComponent(escape(atob(auto.p)));
+          try{if(overlay){var _ol=overlay.querySelector('div');if(_ol)_ol.textContent='자동 로그인 중...';}}catch(_){}
+          const {data,error}=await sbClient.auth.signInWithPassword({email:auto.e,password:pw});
+          if(!error && data){
+            try{const cloud=await loadFromSupabase();if(cloud) DB=cloud;}catch(_){}
+            sessionOk=true;
+          } else {
+            localStorage.removeItem('bsn_auto_login');
+          }
+        }
+      }
+    }catch(ae){console.warn('자동 로그인 실패:',ae.message);}
+  }
+  // 세션 또는 자동로그인 성공 → 앱 진입
+  if(sessionOk){
+    if(overlay)overlay.style.display='none';
+    try{ var _lo=$('login-ov'); if(_lo) _lo.classList.add('hide'); }catch(_){}
+    try{ var _am=$('app-main'); if(_am) _am.style.display=''; }catch(_){}
+    try{ await enterApp(); }catch(ee){console.warn('enterApp 에러(무시):',ee.message);}
+    return;
+  }
   if(overlay)overlay.style.display='none';
-  // 세션 없으면 로그인 화면 표시 + 최근 이메일 표시
+  // 세션/자동로그인 모두 실패 → 로그인 화면 표시 + 최근 이메일 표시
   try{ $('login-ov')?.classList.remove('hide'); }catch(e){}
   try{ $('app-main') && ($('app-main').style.display='none'); }catch(e){}
   try{ renderRecentEmails(); }catch(e){}
+  // 자동로그인 체크박스 복원
+  try{ if(localStorage.getItem('bsn_auto_login')){ const ac=$('login-auto'); if(ac) ac.checked=true; } }catch(_){}
 });
 
 // ── 건물 점검 ──────────────────────────────────────────
