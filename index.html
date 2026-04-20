@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://api.languagetool.org https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr https://cors.sh; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -778,7 +778,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 .presence-dot.idle{background:#eab308}
 .presence-dot.offline{background:#9ca3af}
 .presence-edit-indicator{position:absolute;top:-2px;right:-2px;left:-2px;bottom:-2px;border:2px solid #ef4444;border-radius:inherit;pointer-events:none;z-index:5;animation:presencePulse 2s infinite}
-.presence-edit-badge{position:absolute;top:-10px;right:4px;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;white-space:nowrap;z-index:6;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.presence-edit-badge{position:absolute;top:0;right:0;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:0 0 0 6px;white-space:nowrap;z-index:6;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 
 /* 현재 층 버튼 */
 .floor-btn{padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--ln);background:var(--w);color:var(--t2);transition:.15s;user-select:none;white-space:nowrap;min-width:44px;text-align:center;-webkit-tap-highlight-color:transparent}
@@ -942,6 +942,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
       <div style="padding:4px 7px;border-bottom:1px solid var(--ln);display:flex;gap:4px;flex-shrink:0">
         <button class="btn pri sm" onclick="openMo('mo-lease')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 호실</button>
         <button class="btn sm" onclick="openMo('mo-bldg')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 건물</button>
+        <button class="btn sm" onclick="openEditHistory('lease')" style="flex-shrink:0;font-size:10px;padding:4px 6px" title="수정 기록">📋</button>
       </div>
       <div class="sb-items" id="lease-bldg-sb"></div>
     </div>
@@ -957,7 +958,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
         <table>
           <thead><tr>
             <th style="text-align:center;width:48px">층</th>
-            <th style="padding-left:2px;padding-right:2px;min-width:110px;text-align:center">임차인(상호)</th>
+            <th style="padding-left:2px;padding-right:2px;min-width:80px;max-width:120px;text-align:center">임차인(상호)</th>
             <th style="width:80px;padding-left:4px;padding-right:4px;text-align:center">계약시작</th><th style="width:80px;padding-left:4px;padding-right:4px;text-align:center">계약만료</th><th class="narrow-col" style="width:52px;text-align:center">D-day</th>
             <th class="money-col wide" style="text-align:center">보증금</th><th class="money-col" style="text-align:center">임대료</th><th class="money-col" style="text-align:center">관리비</th><th class="money-col wide" style="text-align:center">합계(VAT포함)</th>
             <th class="narrow-col" style="width:56px;text-align:center">납부방식</th><th class="narrow-col" style="width:48px;text-align:center">납부일</th>
@@ -981,6 +982,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     </div>
     <!-- 우측: 만료일 테이블 -->
     <div style="overflow:auto;padding:4px" id="expire-right">
+      <div style="display:flex;justify-content:flex-end;padding:0 4px 4px"><button class="btn sm" onclick="openEditHistory('exp')" style="font-size:10px;padding:3px 8px" title="수정 기록">📋 기록</button></div>
       <div class="exp-wrap" style="overflow:visible;zoom:1.2">
         <table class="exp-tbl">
           <thead>
@@ -1085,6 +1087,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div class="ph" style="padding:6px 10px 4px;gap:6px"><h2>고정 일정</h2>
     <input id="fixed-search" placeholder="검색..." oninput="rdFixed()" style="padding:3px 7px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;width:130px">
     <button class="btn sm" onclick="resetFixDone()">완료 초기화</button>
+    <button class="btn sm" onclick="openEditHistory('fixed')" style="font-size:10px;padding:3px 8px" title="수정 기록">📋 기록</button>
   </div>
   <div style="padding:2px 4px;overflow-y:auto;overflow-x:hidden;height:calc(100vh - 56px)">
     <div class="card" style="margin:0;zoom:1.15;transform-origin:top left;width:86.95%"><div style="padding:0" id="fixed-list"></div></div>
@@ -1128,7 +1131,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 
 <!-- 월간보고서 -->
 <div class="page" id="pg-report">
-  <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>월간 운영 보고서</h2></div>
+  <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>월간 운영 보고서</h2><button class="btn sm" onclick="openEditHistory('report')" style="font-size:10px;padding:3px 8px;margin-left:auto" title="수정 기록">📋 기록</button></div>
   <div style="height:calc(100vh - 56px)">
     <div style="display:grid;grid-template-columns:152px 1fr;height:100%">
       <div class="split-left">
@@ -1279,7 +1282,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <!-- 수도요금 -->
 <!-- 수도+전기 통합 -->
 <div class="page" id="pg-utility">
-  <div class="ph" style="padding:2px 10px 2px;gap:4px"></div>
+  <div class="ph" style="padding:2px 10px 2px;gap:4px"><div style="margin-left:auto"><button class="btn sm" onclick="openEditHistory()" style="font-size:10px;padding:3px 8px" title="전체 수정 기록">📋 기록</button></div></div>
   <div style="display:flex;gap:0;height:calc(100vh - 42px);min-height:calc(100vh - 42px);overflow:hidden">
     <!-- 좌: 전기 -->
     <div style="flex:1;min-width:0;border-right:1px solid var(--ln);overflow-y:auto;padding:20px 10px 20px">
@@ -1336,7 +1339,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div style="display:flex;height:calc(100vh - 42px);min-height:calc(100vh - 42px);overflow:hidden">
     <!-- 좌: 사이드 패널 -->
     <div id="drive-side" style="width:180px;flex-shrink:0;background:var(--w2);border-right:1px solid var(--ln);overflow-y:auto;padding:10px 8px;font-size:11px">
-      <div style="font-weight:800;font-size:13px;color:#1e3a5f;margin-bottom:10px;padding:4px 6px">📁 드라이브</div>
+      <div style="font-weight:800;font-size:13px;color:#1e3a5f;margin-bottom:10px;padding:4px 6px;display:flex;align-items:center;gap:6px">📁 드라이브<button class="btn sm" onclick="openEditHistory('drive')" style="font-size:9px;padding:2px 6px;margin-left:auto" title="수정 기록">📋</button></div>
       <div id="drive-nav" style="margin-bottom:10px"></div>
       <div style="font-size:9px;font-weight:700;color:#94a3b8;padding:2px 8px;margin-bottom:4px">건물별</div>
       <div id="drive-bldg-list"></div>
@@ -2207,6 +2210,35 @@ window.restoreLastBackup=function(){
 // false인 동안엔 sv()가 Supabase에 절대 쓰지 않음 (로컬 폴백만)
 // → 세션/네트워크 이슈로 cloud=null일 때 내 stale DB가 남의 최신 데이터를 덮어쓰는 사고 차단
 let _cloudLoadOk=false;
+var _appStartTime=Date.now(); // ★ 앱 시작 시간 — 배너 유예용
+function _showCloudBanner(show){
+  var existing=document.getElementById('cloud-warn-banner');
+  if(!show){ if(existing) existing.remove(); return; }
+  if(existing) return; // 이미 표시중
+  var banner=document.createElement('div');
+  banner.id='cloud-warn-banner';
+  banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:linear-gradient(90deg,#dc2626,#ea580c);color:#fff;text-align:center;padding:6px 16px;font-size:13px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;gap:8px';
+  banner.innerHTML='<span>⚠️ 클라우드 미연결 — 현재 로컬에만 저장됩니다. 자동 재연결 시도 중...</span><button onclick="_forceCloudRetry()" style="padding:3px 10px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit">지금 재시도</button>';
+  document.body.appendChild(banner);
+}
+async function _forceCloudRetry(){
+  if(!sbClient) return;
+  try{
+    var btn=document.querySelector('#cloud-warn-banner button');
+    if(btn){ btn.textContent='재시도 중...'; btn.disabled=true; }
+    await loadFromSupabase();
+    if(_cloudLoadOk){
+      _showCloudBanner(false);
+      showSaveStatus('☁️ 클라우드 연결 복구됨','var(--gr)');
+      await sv();
+    } else {
+      if(btn){ btn.textContent='실패 — 다시 시도'; btn.disabled=false; }
+    }
+  }catch(e){
+    var btn2=document.querySelector('#cloud-warn-banner button');
+    if(btn2){ btn2.textContent='실패 — 다시 시도'; btn2.disabled=false; }
+  }
+}
 
 // 📏 데이터 구조 최소 검증 — 핵심 배열이 누락된 JSON은 절대 수용하지 않음
 function _validDB(d){
@@ -2405,79 +2437,61 @@ function _mergeDB(cloud, local){
       merged[k]=_mergeArrayById(cloud[k]||[], local[k]||[]);
     }
   });
-  // waterBills, electricBills — bills 하위 배열도 머지
+  // ★ waterBills, electricBills — 안전 머지
+  // 원칙: 줄어들면 안 됨, 같은 고객+같은 period는 중복 안 됨
   ['waterBills','electricBills'].forEach(function(k){
-    merged[k]=_mergeArrayById(cloud[k]||[], local[k]||[]);
-    // 각 고객의 bills 배열도 period 기준 머지
-    (merged[k]||[]).forEach(function(w){
-      var cw=(cloud[k]||[]).find(function(x){return x.id===w.id;});
-      var lw=(local[k]||[]).find(function(x){return x.id===w.id;});
-      if(cw&&lw&&Array.isArray(cw.bills)&&Array.isArray(lw.bills)){
-        var bmap={};
-        cw.bills.forEach(function(b){ if(b.period) bmap[b.period]=JSON.parse(JSON.stringify(b)); });
-        lw.bills.forEach(function(b){
-          if(!b.period) return;
-          var existing=bmap[b.period];
-          if(!existing){
-            // 클라우드에 없는 period → 로컬 추가
-            bmap[b.period]=JSON.parse(JSON.stringify(b));
-          } else {
-            // ★ 같은 period: 로컬에 이미지(files)가 있으면 로컬 우선
-            var localHasFiles=b.files&&b.files.length>0&&b.files.some(function(f){return f.data&&f.data.length>100;});
-            var cloudHasFiles=existing.files&&existing.files.length>0&&existing.files.some(function(f){return f.data&&f.data.length>100;});
-            if(localHasFiles && !cloudHasFiles){
-              bmap[b.period]=JSON.parse(JSON.stringify(b));
-            } else if(localHasFiles && cloudHasFiles){
-              // 양쪽 다 이미지 있으면 로컬 files를 클라우드에 복사
-              existing.files=JSON.parse(JSON.stringify(b.files));
-            }
-          }
-        });
-        w.bills=Object.values(bmap);
-      }
-    });
-  });
-  // ★ custNo 기준 중복 제거 (같은 고객번호가 다른 id로 들어온 경우)
-  ['waterBills','electricBills'].forEach(function(k){
-    var arr=merged[k]||[];
-    var beforeMergeCount=0;
-    arr.forEach(function(e){beforeMergeCount+=(e.bills||[]).length;});
+    var cloudArr=cloud[k]||[];
+    var localArr=local[k]||[];
+    var cloudTotal=0, localTotal=0;
+    cloudArr.forEach(function(e){cloudTotal+=(e.bills||[]).length;});
+    localArr.forEach(function(e){localTotal+=(e.bills||[]).length;});
+    var maxBefore=Math.max(cloudTotal,localTotal);
+    // custNo 기준으로 고객 통합 (id가 달라도 같은 custNo면 같은 고객)
     var custMap={};
-    arr.forEach(function(entry){
+    // 클라우드 먼저
+    cloudArr.forEach(function(entry){
       var key=entry.custNo||entry.id;
-      if(!custMap[key]){ custMap[key]=entry; return; }
-      console.log('[MERGE-진단] '+k+' custNo중복병합: key='+key+' (id='+entry.id+' bills='+(entry.bills||[]).length+') → 기존(id='+custMap[key].id+' bills='+(custMap[key].bills||[]).length+')');
-      // 같은 고객 → bills 합치기
+      custMap[key]=JSON.parse(JSON.stringify(entry));
+    });
+    // 로컬 합치기
+    localArr.forEach(function(entry){
+      var key=entry.custNo||entry.id;
+      if(!custMap[key]){ custMap[key]=JSON.parse(JSON.stringify(entry)); return; }
       var existing=custMap[key];
+      // bills를 period 기준으로 합치되, 빠지는 건 없게
       var bmap={};
       (existing.bills||[]).forEach(function(b){if(b.period)bmap[b.period]=b;});
       (entry.bills||[]).forEach(function(b){
         if(!b.period) return;
-        if(!bmap[b.period]) bmap[b.period]=b;
-        else {
-          // 이미지 있는 쪽 우선
-          var newHas=b.files&&b.files.some(function(f){return f.data&&f.data.length>100&&f.data!=='__IMG_IN_LOCAL__';});
-          var oldHas=bmap[b.period].files&&bmap[b.period].files.some(function(f){return f.data&&f.data.length>100&&f.data!=='__IMG_IN_LOCAL__';});
-          if(newHas&&!oldHas) bmap[b.period]=b;
-        }
+        if(!bmap[b.period]){ bmap[b.period]=JSON.parse(JSON.stringify(b)); }
+        // 같은 period면 기존(클라우드) 유지 — 덮어쓰지 않음
       });
       existing.bills=Object.values(bmap);
-      // kepcoLink, bId 등 보존
-      if(!existing.bId && entry.bId) existing.bId=entry.bId;
-      if(!existing.kepcoId && entry.kepcoId) existing.kepcoId=entry.kepcoId;
+      // 부족한 필드 보충
+      if(!existing.bId&&entry.bId)existing.bId=entry.bId;
+      if(!existing.kepcoId&&entry.kepcoId)existing.kepcoId=entry.kepcoId;
+      if(!existing.kepcoLink&&entry.kepcoLink)existing.kepcoLink=entry.kepcoLink;
     });
-    merged[k]=Object.values(custMap);
-    var afterMergeCount=0;
-    merged[k].forEach(function(e){afterMergeCount+=(e.bills||[]).length;});
-    if(beforeMergeCount!==afterMergeCount){
-      console.log('[MERGE-진단] ⚠ '+k+' custNo병합 후 청구서 변경: '+beforeMergeCount+'→'+afterMergeCount+' (차이='+(beforeMergeCount-afterMergeCount)+')');
+    var mergedArr=Object.values(custMap);
+    var mergedTotal=0;
+    mergedArr.forEach(function(e){mergedTotal+=(e.bills||[]).length;});
+    // ★ 안전장치: 머지 후 줄어들면 많은 쪽 원본 유지
+    if(mergedTotal<maxBefore){
+      console.warn('[MERGE] ⚠ '+k+' 머지 후 감소! '+maxBefore+'→'+mergedTotal+' → 원본 유지');
+      merged[k]=JSON.parse(JSON.stringify(cloudTotal>=localTotal?cloudArr:localArr));
+    } else {
+      merged[k]=mergedArr;
     }
+    var finalTotal=0;
+    merged[k].forEach(function(e){finalTotal+=(e.bills||[]).length;});
+    console.log('[MERGE] '+k+': cloud='+cloudTotal+', local='+localTotal+' → 최종='+finalTotal+'건');
   });
   return merged;
 }
 // ── 저장: Supabase 우선, 실패시 localStorage 폴백
 async function sv(){
   if(IS_DEMO){ showSaveStatus('🎭 데모 모드 · 저장 안 됨','#b45309'); return; }
+  window._lastSvTime=Date.now(); // ★ realtime 자기 이벤트 무시용
   _pushRollingBackup('pre-save');
   // IndexedDB에 이미지 포함 전체 저장 (50MB+) — 메인 저장소
   // ★ 기존 IndexedDB에 base64 원본이 있으면 __IMG_IN_LOCAL__로 덮어쓰지 않도록 보호
@@ -2498,8 +2512,15 @@ async function sv(){
   try{ if(DB.personalMemos) localStorage.setItem('bsn_memo_backup', JSON.stringify(DB.personalMemos)); }catch(e){}
   if(!sbClient){ showSaveStatus('💾 로컬 저장됨','var(--t3)'); return; }
   if(!_cloudLoadOk){
-    console.warn('[sv] 클라우드 로드 미완료 → 서버 저장 생략, 로컬만 저장');
-    showSaveStatus('⚠️ 로컬만 저장됨(클라우드 미연결)','var(--am)');
+    // ★ 앱 시작 후 20초 이내면 초기 로딩 중이므로 배너 표시 안 함
+    var _elapsed=Date.now()-_appStartTime;
+    if(_elapsed<20000){
+      showSaveStatus('💾 로컬 저장 (연결 중...)','var(--t3)');
+    } else {
+      console.warn('[sv] 클라우드 로드 미완료 → 서버 저장 생략, 로컬만 저장');
+      showSaveStatus('⚠️ 로컬만 저장됨(클라우드 미연결)','var(--am)');
+      _showCloudBanner(true);
+    }
     return;
   }
   if(!_validDB(DB)){
@@ -2636,7 +2657,16 @@ function _rtApplyRow(row){
   try{ localStorage.setItem(SK, JSON.stringify(_stripBillImages(DB))); }catch(_){}
   const onPage=document.querySelector('.page.on');
   const id=onPage?onPage.id.replace('pg-',''):'';
-  ({lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,drive:rdDrive,admin:loadAdminUsers})[id]?.();
+  // ★ 고정일정 인라인 편집 중이면 rdFixed 호출 지연 (특이사항 유실 방지)
+  if(id==='fixed'){
+    var _fixEditEl=document.querySelector('#fixed-list [contenteditable="true"]');
+    if(_fixEditEl || _spEditPending){
+      console.log('[RT] 고정일정 편집 중 — rdFixed 2초 지연');
+      setTimeout(function(){ rdFixed(); },2000);
+    } else { rdFixed(); }
+  } else {
+    ({lease:rdLease,expire:rdExpire,cal:rdCal,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,drive:rdDrive,admin:loadAdminUsers})[id]?.();
+  }
   _rtShowToast('🔄 다른 사용자가 업데이트함 — 반영됨');
 }
 // 모달 닫힐 때마다 호출: 큐에 있으면 반영
@@ -2673,6 +2703,8 @@ function setupRealtimeSync(){
         if(!row || !row.data) return;
         // 내가 방금 저장한 것은 무시
         if(row.updated_by && CURRENT_USER_ID && row.updated_by===CURRENT_USER_ID) return;
+        // ★ 내가 최근 2초 내 저장했으면 무시 (updated_by 누락 대비)
+        if(window._lastSvTime && (Date.now()-window._lastSvTime)<2000){ console.log('[RT] ⛔ 최근 저장 직후 — 무시'); return; }
         // ★ 캡처 중이거나 캡처 저장 직후면 realtime 무시
         if(_kepcoCapRunning){ console.log('[RT] ⛔ 캡처 중 — realtime 무시'); return; }
         if(window._capSaving && (Date.now()-window._capSaving)<5000){ console.log('[RT] ⛔ 캡처 저장 직후 — realtime 무시'); return; }
@@ -2773,6 +2805,8 @@ function setupPresence(){
         if(status==='SUBSCRIBED'){
           await _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:null,status:'online',typing:false,at:Date.now()});
           console.log('[Presence] ✅ 트래킹 시작 — id:',CURRENT_USER_ID,'name:',CURRENT_USER_NAME);
+          // 접속 상태 사이드바에 즉시 반영
+          _renderPresence();
         }
         if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
           console.error('[Presence] ❌ 채널 연결 실패:',status,'— 5초 후 재시도');
@@ -2788,11 +2822,12 @@ async function _pushPresence(ctx){
   _myEditingCtx=ctx;
   if(ctx) _myStatus='editing';
   else if(_myStatus==='editing') _myStatus='online';
+  // ★ 즉시 렌더 (track 응답 기다리지 않고 _myEditingCtx로 바로 표시)
+  _renderPresence();
+  _renderEditIndicators();
   if(_presenceChannel){
     try{ await _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:ctx,status:_myStatus,typing:_isTyping,at:Date.now()}); }catch(_){}
   }
-  _renderPresence();
-  _renderEditIndicators();
 }
 // ctx 유형: lease/bldg/bmemo/expire/cal/report/water/invoice/pmemo/memo
 // detail: 세부 위치 (예: "301호 보증금", "A동 3층")
@@ -2871,28 +2906,35 @@ function _renderEditIndicators(){
     el.style.outline='';el.style.outlineOffset='';el.style.boxShadow='';
     el.removeAttribute('data-presence-editing');
   });
-  // 다른 접속자의 편집 항목에 표시
-  var others=Object.keys(_presenceState).filter(k=>k!==CURRENT_USER_ID).map(k=>_presenceState[k]).filter(Boolean);
-  if(others.some(function(p){return p&&p.editing;})){
-    console.log('[EditIndicator] 편집중 접속자:', others.filter(function(p){return p&&p.editing;}).map(function(p){return (p.name||'?')+':'+p.editing.type+'#'+p.editing.id;}).join(', '));
+  // 편집 항목 수집: _presenceState + 자기 편집(_myEditingCtx 직접 사용)
+  var editItems=[];
+  // 1) 자기 편집 (즉시 반영 — presenceState 동기 기다릴 필요 없음)
+  if(_myEditingCtx && CURRENT_USER_ID){
+    editItems.push({uid:CURRENT_USER_ID,name:CURRENT_USER_NAME||'나',editing:_myEditingCtx,typing:_isTyping,isSelf:true});
   }
-  others.forEach(function(p){
-    if(!p.editing) return;
-    var type=p.editing.type, id=p.editing.id;
+  // 2) 다른 사용자 (presenceState에서)
+  Object.keys(_presenceState).forEach(function(k){
+    if(k===CURRENT_USER_ID) return; // 자기는 위에서 이미 추가
+    var p=_presenceState[k];
+    if(p&&p.editing) editItems.push({uid:k,name:p.name||'익명',editing:p.editing,typing:p.typing,isSelf:false});
+  });
+  editItems.forEach(function(item){
+    var type=item.editing.type, id=item.editing.id;
     var targets=document.querySelectorAll('[data-presence-type="'+type+'"][data-presence-id="'+id+'"]');
     if(!targets.length) targets=document.querySelectorAll('[data-id="'+id+'"]');
     targets.forEach(function(target){
-      // outline 방식 (tr/td에서도 동작)
-      target.style.outline='2px solid #ef4444';
+      var color=item.isSelf?'rgba(147,197,253,.55)':'#ef4444';
+      var outlineColor=item.isSelf?'rgba(147,197,253,.5)':'#ef4444';
+      target.style.outline='2px solid '+outlineColor;
       target.style.outlineOffset='-1px';
-      target.style.boxShadow='inset 0 0 0 1px rgba(239,68,68,.15)';
+      target.style.boxShadow=item.isSelf?'inset 0 0 0 1px rgba(147,197,253,.18)':'inset 0 0 0 2px rgba(239,68,68,.25)';
       target.setAttribute('data-presence-editing','1');
-      // 배지: tr이면 첫번째 td에, 아니면 자신에 붙임
       var badgeParent=target.tagName==='TR'?(target.cells[0]||target):target;
       if(badgeParent.style.position!=='relative'&&badgeParent.style.position!=='absolute') badgeParent.style.position='relative';
       var badge=document.createElement('div');
       badge.className='presence-edit-badge';
-      badge.textContent=(p.name||'익명')+(p.typing?' ✏':'');
+      badge.style.background=item.isSelf?'rgba(147,197,253,.7)':color;
+      badge.textContent=(item.isSelf?'나':item.name)+(item.typing?' ✏':'');
       badgeParent.appendChild(badge);
     });
   });
@@ -2905,26 +2947,30 @@ window.addEventListener('beforeunload',function(e){
   try{ dirty=_pmemoHasDirty()||_floatDirty||Object.keys(_detachDirty||{}).some(function(k){return _detachDirty[k];}); }catch(_){}
   if(dirty && CURRENT_USER_ID){
     try{
-      // dirty textarea 값을 DB에 반영
+      // ★ DB를 직접 수정하지 않고 사본으로 autosave 저장
       var md=_pmemoData(CURRENT_USER_ID);
+      var _bkPages=JSON.parse(JSON.stringify(md.pages));
       if(_pmemoHasDirty()){
         Object.keys(_pmemoDirtySet).forEach(function(k){
           var idx=parseInt(k);
           var ta=document.querySelector('[data-pmemo-ta-idx="'+idx+'"]');
-          if(ta && md.pages[idx]) md.pages[idx].text=ta.value;
+          if(ta && _bkPages[idx]) _bkPages[idx].text=ta.value;
         });
       }
       if(_floatDirty && _floatDirtyIdx!==null){
         var fta=document.getElementById('float-memo-ta');
-        if(fta && md.pages[_floatDirtyIdx]) md.pages[_floatDirtyIdx].text=fta.value;
+        if(fta && _bkPages[_floatDirtyIdx]) _bkPages[_floatDirtyIdx].text=fta.value;
       }
       Object.keys(_detachDirty||{}).forEach(function(k){
         if(!_detachDirty[k]) return;
         var dta=document.querySelector('[data-detach-ta-idx="'+k+'"]');
-        if(dta && md.pages[parseInt(k)]) md.pages[parseInt(k)].text=dta.value;
+        if(dta && _bkPages[parseInt(k)]) _bkPages[parseInt(k)].text=dta.value;
       });
-      md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
-      localStorage.setItem('bsn_memo_autosave', JSON.stringify({uid:CURRENT_USER_ID, memos:DB.personalMemos, ts:Date.now()}));
+      var _bkMemo=JSON.parse(JSON.stringify(md));
+      _bkMemo.pages=_bkPages;
+      _bkMemo.updatedAt=_pmemoTs(); _bkMemo.userName=CURRENT_USER_NAME||'나';
+      var _bkMemos={}; _bkMemos[CURRENT_USER_ID]=_bkMemo;
+      localStorage.setItem('bsn_memo_autosave', JSON.stringify({uid:CURRENT_USER_ID, memos:_bkMemos, ts:Date.now()}));
     }catch(_){}
     e.preventDefault(); e.returnValue='메모에 저장되지 않은 내용이 있습니다.'; return e.returnValue;
   }
@@ -2934,14 +2980,14 @@ setInterval(function(){
   if(_presenceChannel){
     try{ _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:_myEditingCtx,status:_myStatus,typing:_isTyping,at:Date.now()}); }catch(_){}
   }
-},15000);
-// ★ 2초마다 presence 인디케이터 재렌더 (DOM 변경으로 누락된 배지 복구)
+},8000);
+// ★ 1초마다 presence 인디케이터 재렌더 (빠른 반응)
 setInterval(function(){
   try{
-    var others=Object.keys(_presenceState).filter(function(k){return k!==CURRENT_USER_ID;}).map(function(k){return _presenceState[k];}).filter(Boolean);
-    if(others.length>0){ _renderEditIndicators(); _renderPresence(); }
+    var all=Object.keys(_presenceState).map(function(k){return _presenceState[k];}).filter(Boolean);
+    if(all.length>0){ _renderEditIndicators(); _renderPresence(); }
   }catch(_){}
-},2000);
+},1000);
 
 // ── 초기 DB (localStorage에서 임시 로드, 로그인 후 Supabase/IndexedDB 데이터로 교체)
 let DB = (() => { try{const s=localStorage.getItem(SK);if(s)return JSON.parse(s);}catch(e){} return null; })() || mkDef();
@@ -3103,6 +3149,7 @@ memos:{},
 memoCats:defMemoCats,
 reports:[],
 repPhotos:{},repPhotoCaptions:{},
+editHistory:[],
 ui:{calY:new Date().getFullYear(),calM:new Date().getMonth(),selBldg:null,selMemoCat:null,memoView:'byCategory',memoColW:150,memoRowH:{},leaseF:'all',calBldgF:'all',calView:'month',calFlt:'all',repBldgId:null,repY:new Date().getFullYear(),repM:new Date().getMonth()+1},
 };}
 
@@ -3257,6 +3304,69 @@ function bn(id){const b=DB.buildings.find(b=>b.id==id);return b?b.name:'—';}
 function bs(id){return bn(id).replace(/^\d+\./,'');}
 function nid(){return Date.now()+Math.floor(Math.random()*9999);}
 function editStamp(){const n=new Date();return`${n.getMonth()+1}/${n.getDate()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')} ${CURRENT_USER_NAME||'나'}`;}
+// ★ 수정 기록 저장 (증거용)
+function _logEdit(section,detail,itemId){
+  if(!DB.editHistory) DB.editHistory=[];
+  var now=new Date();
+  DB.editHistory.push({
+    ts:now.toISOString(),
+    user:CURRENT_USER_NAME||'나',
+    userId:CURRENT_USER_ID||'',
+    section:section,
+    detail:detail||'',
+    itemId:itemId||null
+  });
+  // 섹션별 최대 500건 유지
+  var secCount={};
+  DB.editHistory.forEach(function(h){secCount[h.section]=(secCount[h.section]||0)+1;});
+  if(secCount[section]>500){
+    var kept=[], secSeen={};
+    // 역순으로 최신 500건만 유지
+    for(var hi=DB.editHistory.length-1;hi>=0;hi--){
+      var h=DB.editHistory[hi];
+      secSeen[h.section]=(secSeen[h.section]||0)+1;
+      if(secSeen[h.section]<=500) kept.unshift(h);
+    }
+    DB.editHistory=kept;
+  }
+}
+// 수정 기록 모달
+function openEditHistory(filterSection){
+  if(!DB.editHistory) DB.editHistory=[];
+  var items=DB.editHistory.slice().reverse();
+  if(filterSection) items=items.filter(function(h){return h.section===filterSection;});
+  var sectionNames={'lease':'임대현황','exp':'만료일','fixed':'고정일정','water':'청구서','electric':'청구서','drive':'드라이브','report':'월간보고서','bldg':'건물관리','cal':'일정관리'};
+  var h='<div style="max-height:80vh;overflow-y:auto;padding:10px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  h+='<span style="font-size:15px;font-weight:700">📋 수정 기록'+(filterSection?' — '+(sectionNames[filterSection]||filterSection):'')+'</span>';
+  h+='<span style="font-size:11px;color:#94a3b8">최근 '+items.length+'건</span></div>';
+  if(!items.length){
+    h+='<div style="text-align:center;padding:40px;color:#888">수정 기록이 없습니다.</div>';
+  } else {
+    h+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    h+='<thead><tr style="background:#f1f5f9;border-bottom:2px solid #e2e8f0"><th style="padding:6px 8px;text-align:left">시간</th><th style="padding:6px 8px;text-align:left">수정자</th><th style="padding:6px 8px;text-align:left">영역</th><th style="padding:6px 8px;text-align:left">내용</th></tr></thead><tbody>';
+    items.forEach(function(hi){
+      var ts=hi.ts?(hi.ts.slice(0,16).replace('T',' ')):'';
+      h+='<tr style="border-bottom:1px solid #f1f5f9">';
+      h+='<td style="padding:5px 8px;white-space:nowrap;color:#64748b;font-family:monospace;font-size:11px">'+ts+'</td>';
+      h+='<td style="padding:5px 8px;font-weight:600">'+esc(hi.user||'')+'</td>';
+      h+='<td style="padding:5px 8px;color:#3b82f6">'+(sectionNames[hi.section]||hi.section||'')+'</td>';
+      h+='<td style="padding:5px 8px;color:#334155;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(hi.detail||'')+'</td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div>';
+  var overlay=document.createElement('div');
+  overlay.id='edit-history-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10000;display:flex;align-items:center;justify-content:center';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  var box=document.createElement('div');
+  box.style.cssText='background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:500px;max-width:800px;width:90%';
+  box.innerHTML=h;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
 function inlineEdit(el,saveFn){
   if(el.querySelector('textarea'))return;
   const orig=el.textContent;const stamp=el.querySelector('.edit-stamp');
@@ -3651,6 +3761,15 @@ function gp(id,el){
   _gpDo(id,el);
 }
 function _gpDo(id,el){
+  // ★ 탭 전환 전: 편집 중인 특이사항 강제 저장
+  try{ if(_spEditPending) _flushSpEdit(); }catch(_){}
+  // ★ 탭 전환 전: 현재 편집 중인 contenteditable 요소 강제 저장
+  try{
+    var activeEl=document.activeElement;
+    if(activeEl && activeEl.getAttribute('contenteditable')==='true'){
+      activeEl.blur();
+    }
+  }catch(_){}
   try{ localStorage.setItem('bm_lastTab', id); }catch(_){}
   // 점검 오버레이 열려있으면 닫기
   ['field-mode','organize-mode','cam-overlay','lightbox'].forEach(function(oid){var o=$(oid);if(o)o.classList.remove('on');});
@@ -3846,7 +3965,7 @@ function rdLease(){
       const ptBg=l.paytype==='선불'?'background:#fff8d0;':l.paytype==='후불'?'background:#e4f3ea;':'';
       html+=`<tr ondblclick="editLease(${l.id})" style="cursor:pointer;${isV?'background:var(--w2);opacity:.75':''}" title="더블클릭 수정" data-presence-type="lease" data-presence-id="${l.id}">
         <td style="text-align:center;white-space:normal;word-break:keep-all;line-height:1.25">${fmtFloor(l.floor)}</td>
-        <td style="padding-left:2px;padding-right:2px;min-width:110px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':l.tenant}</td>
+        <td style="padding:2px 3px;min-width:70px;max-width:120px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':l.tenant}</td>
         <td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.start)}</td><td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.end)}</td>
         <td class="narrow-col">${l.end&&!isV&&!isDr?ddBg(d,'lease'):'—'}</td>
         <td class="mono right money-col wide">${fm(l.deposit)}</td><td class="mono right money-col">${fm(l.rent)}</td><td class="mono right money-col">${fm(l.mgmt)}</td>
@@ -4047,8 +4166,8 @@ function saveLease(){
       if(!confirm(msg)) return;
     }
   }
-  if(eid){const i=DB.leases.findIndex(l=>l.id==eid);if(i>=0)DB.leases[i]={...DB.leases[i],...o};}
-  else DB.leases.push({id:nid(),...o});
+  if(eid){const i=DB.leases.findIndex(l=>l.id==eid);if(i>=0)DB.leases[i]={...DB.leases[i],...o};_logEdit('lease',(o.tenant||'')+' '+o.floor+' 수정',eid);}
+  else{DB.leases.push({id:nid(),...o});_logEdit('lease',(o.tenant||'')+' '+o.floor+' 추가');}
   _leaseFormSnap=''; // 저장 완료 → 미저장 경고 해제
   sv();closeMo('mo-lease');rdLease();upBadges();
 }
@@ -4692,6 +4811,8 @@ function saveWater(){
   }
   _clearWaterDraft();
   _waterFormSnap=_snapWater();
+  var _bName=(DB.buildings.find(function(b){return b.id===bId;})||{}).name||'';
+  _logEdit('water',_bName+' 수도 '+(id?'수정':'추가')+' ('+custNo+')',id||'new');
   sv(); closeMo('mo-water'); rdWater();
 }
 async function delWater(id){
@@ -7165,6 +7286,8 @@ function saveElectric(){
       }
     }
   }
+  var _eBName=(DB.buildings.find(function(b){return b.id===bId;})||{}).name||'';
+  _logEdit('electric',_eBName+' 전기 '+(id?'수정':'추가')+' ('+custName+')',id||'new');
   sv(); closeMo('mo-electric'); rdElectric();
 }
 function delElectric(id){
@@ -8866,7 +8989,7 @@ function _deduplicateElectricBills(skipConfirm, skipSave){
   console.log('[DEDUP-진단] 완료: 고객병합='+custMerged+'건, 청구서중복제거='+billDeduped+'건, 변경전='+beforeTotal+'건 → 변경후='+afterTotal+'건 (차이='+(beforeTotal-afterTotal)+'건)');
   if(beforeTotal!==afterTotal){
     console.log('[DEDUP-진단] ⚠ 청구서 수 변경됨! 상세:');
-    dupDetails.forEach(function(d,i){console.log('  '+(i+1)+') '+d.custNo+' / '+d.bldgName+' / '+d.period+' / '+d.amount);});
+    dupDetails.forEach(function(d,i){console.log('  '+(i+1)+') '+d.custNo+' / '+d.bldgName+' / '+d.period+' / '+d.amount+' | 보존: mailDate='+(d.kept.mailDate||'없음')+' source='+(d.kept.source||'없음')+' | 제거됨: mailDate='+(d.removed.mailDate||'없음')+' source='+(d.removed.source||'없음'));});
   }
   if((custMerged||billDeduped) && !skipSave) sv();
   return {custMerged:custMerged,billDeduped:billDeduped,before:beforeTotal,after:afterTotal,dupDetails:dupDetails};
@@ -10399,8 +10522,10 @@ function openIE(evt,id,type){
   const td=evt.target.closest('td');if(!td)return;
   const inp=document.createElement('input');inp.type='date';inp.lang='en';inp.value=e.date||'';
   inp.style.cssText='width:100%;font-size:11px;padding:2px 4px;border:1px solid var(--bl);border-radius:3px;outline:none';
-  td.textContent='';td.appendChild(inp);inp.focus();
-  const save=()=>{e.date=inp.value;e._edit=editStamp();sv();if(typeof stopEditing==='function')stopEditing();rdExpire();upBadges();};
+  // 배지 보존: 텍스트만 제거, presence-edit-badge는 유지
+  Array.from(td.childNodes).forEach(function(n){if(!n.classList||!n.classList.contains('presence-edit-badge'))td.removeChild(n);});
+  td.appendChild(inp);inp.focus();
+  const save=()=>{e.date=inp.value;e._edit=editStamp();_logEdit('exp',(e.type||type||'만료일')+' 날짜 변경: '+inp.value,id);sv();if(typeof stopEditing==='function')stopEditing();rdExpire();upBadges();};
   inp.addEventListener('blur',save);
   inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();save();}});
 }
@@ -10880,6 +11005,8 @@ function getFixDow(day){
   return{dow:dw,color:c};
 }
 function rdFixed(){
+  // ★ 특이사항 편집 pending이면 먼저 저장
+  if(_spEditPending){ _flushSpEdit(); return; } // flushSpEdit → sv() → rdFixed() 재호출
   // ★ 인라인 편집 중이면 리렌더 방지 (realtime 업데이트로 편집내용 유실 방지)
   var _editingEl=document.querySelector('#fixed-list [contenteditable="true"]');
   if(_editingEl){ console.log('[rdFixed] 인라인 편집중 — 리렌더 스킵'); return; }
@@ -10963,10 +11090,10 @@ function rdFixed(){
         else if(/^\d+\)/.test(lt)){collecting=false;}
         else if(collecting&&lt){spParts.push(lt);}
       });
-      const spHtml=spParts.length?`<div style="margin-top:2px;font-size:10px;color:var(--am);padding:1px 4px 1px 8px;background:var(--am2);border-radius:3px;display:inline-block" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed',${s.id},'고정일정','${s.day}일 특이사항');beginEditOnDblClick(this)" onblur="saveSpInline(${s.id},${i},this.textContent);if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" onclick="event.stopPropagation()" title="더블클릭하여 수정">${hl(spParts.join(' '))}</div>`:'';
-      return`<div class="fix-task" id="ft-${s.id}-${i}" data-presence-type="fixed" data-presence-id="${s.id}">
+      const spHtml=spParts.length?`<div style="margin-top:2px;font-size:10px;color:var(--am);padding:1px 4px 1px 8px;background:var(--am2);border-radius:3px;display:inline-block" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed','${s.id}_sp${i}','고정일정','${s.day}일 ${i+1}번 특이사항');beginEditOnDblClick(this)" oninput="_spEditPending={sId:${s.id},taskIdx:${i},el:this}" onblur="saveSpInline(${s.id},${i},this);if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" onclick="event.stopPropagation()" title="더블클릭하여 수정">${hl(spParts.join(' '))}</div>`:'';
+      return`<div class="fix-task" id="ft-${s.id}-${i}" data-presence-type="fixed" data-presence-id="${s.id}_${i}">
         <div class="fix-task-cb${done?' done':''}" onclick="togFix('${s.id}',${i})"></div>
-        <div class="fix-task-txt${done?' done':''}" id="ftt-${s.id}-${i}" style="flex:1" ondblclick="if(typeof startEditing==='function')startEditing('fixed',${s.id},'고정일정','${s.day}일 ${i+1}번');beginEditOnDblClick(this)" onblur="saveTaskDirect(${s.id},${i},this);if(typeof stopEditing==='function')stopEditing()" oncontextmenu="event.preventDefault();addSpContext(${s.id},${i})" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정">${i+1}. ${hl(t)}${spHtml}</div>
+        <div class="fix-task-txt${done?' done':''}" id="ftt-${s.id}-${i}" style="flex:1" ondblclick="if(typeof startEditing==='function')startEditing('fixed','${s.id}_${i}','고정일정','${s.day}일 ${i+1}번');beginEditOnDblClick(this)" onblur="saveTaskDirect(${s.id},${i},this);if(typeof stopEditing==='function')stopEditing()" oncontextmenu="event.preventDefault();addSpContext(${s.id},${i})" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정">${i+1}. ${hl(t)}${spHtml}</div>
         <div style="display:flex;gap:2px;flex-shrink:0;align-items:center">
           <button class="btn sm" onclick="event.stopPropagation();moveFixTask(${s.id},${i})" style="font-size:9px;padding:1px 4px" title="날짜 이동">📅</button>
           <button class="btn sm del" onclick="delFixTask(${s.id},${i})" style="font-size:9px;padding:1px 4px">×</button>
@@ -10986,15 +11113,64 @@ function rdFixed(){
   // ★ presence 인디케이터 복원
   try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
 }
+// ★ 특이사항 추출: taskIdx번 업무의 특이사항 텍스트 추출
+function _extractSpForTask(special,taskIdx){
+  var lines=(special||'').split('\n');
+  var parts=[];var collecting=false;
+  lines.forEach(function(l){
+    var lt=l.trim();
+    if(lt.startsWith((taskIdx+1)+')')){collecting=true;parts.push(lt.replace(new RegExp('^'+(taskIdx+1)+'\\)\\s*'),'').trim());}
+    else if(/^\d+\)/.test(lt)){collecting=false;}
+    else if(collecting&&lt){parts.push(lt);}
+  });
+  return parts.join('\n');
+}
+// ★ 특이사항에서 taskIdx번 제거 + 나머지 번호 재조정
+function _removeSpForTask(special,taskIdx){
+  var lines=(special||'').split('\n');
+  var newLines=[];var collecting=false;
+  lines.forEach(function(l){
+    var lt=l.trim();
+    if(lt.startsWith((taskIdx+1)+')')){collecting=true;return;}
+    if(/^\d+\)/.test(lt)){collecting=false;}
+    if(!collecting) newLines.push(l); else return;
+  });
+  // 번호 재조정: taskIdx보다 큰 번호를 1씩 줄임
+  return newLines.map(function(l){
+    var m=l.trim().match(/^(\d+)\)/);
+    if(m&&parseInt(m[1])>taskIdx+1){
+      return l.replace(/^\s*\d+\)/,(parseInt(m[1])-1)+')');
+    }
+    return l;
+  }).join('\n').trim();
+}
+// ★ 특이사항 끝에 새 항목 추가 (번호 자동 부여)
+function _appendSpToSchedule(s,spText){
+  if(!spText) return;
+  var nextNum=(s.tasks||[]).length; // 마지막 업무 번호
+  var newSp=nextNum+') '+spText;
+  s.special=((s.special||'')+'\n'+newSp).trim();
+}
 function moveFixTask(sId,ti){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
   const nd=prompt('이동할 날짜 (1~31, 말일=99)',s.day);if(!nd)return;
   const d=parseInt(nd);if(isNaN(d)||(d<1)||(d>31&&d!==99))return alert('1~31 또는 99');
-  const task=s.tasks[ti];s.tasks.splice(ti,1);
+  // ★ 업무 + 특이사항 함께 이동
+  const task=s.tasks[ti];
+  const spText=_extractSpForTask(s.special,ti);
+  s.tasks.splice(ti,1);
+  s.special=_removeSpForTask(s.special,ti);
   s._edit=editStamp();
   if(!s.tasks.length) s._deleted=true;
   const target=DB.fixedSchedules.find(s2=>!s2._deleted&&s2.day===d);
-  if(target){target.tasks.push(task);target._edit=editStamp();}else{DB.fixedSchedules.push({id:nid(),day:d,dayLabel:d===99?'말일':d+'일',tasks:[task],special:'',_created:editStamp()});}
+  if(target){
+    target.tasks.push(task);
+    if(spText) _appendSpToSchedule(target,spText);
+    target._edit=editStamp();
+  }else{
+    var newSp=spText?(1+') '+spText):'';
+    DB.fixedSchedules.push({id:nid(),day:d,dayLabel:d===99?'말일':d+'일',tasks:[task],special:newSp,_created:editStamp()});
+  }
   sv();rdFixed();
 }
 function saveTaskDirect(sId,ti,el){
@@ -11019,7 +11195,7 @@ function saveTaskDirect(sId,ti,el){
     } else { rdFixed(); }
     return;
   }
-  if(raw!==s.tasks[ti]){s.tasks[ti]=raw;s._edit=editStamp();DB.fixedHistory.push({sId,user:'나',date:editStamp()});sv();}
+  if(raw!==s.tasks[ti]){s.tasks[ti]=raw;s._edit=editStamp();DB.fixedHistory.push({sId,user:'나',date:editStamp()});_logEdit('fixed',(s.dayLabel||s.day+'일')+' '+(ti+1)+'번 업무 수정: '+raw.slice(0,30),sId);sv();}
 }
 function togFix(sId,ti){const key=fixKey(Number(sId),ti);DB.fixedDone[key]=!DB.fixedDone[key];sv();rdFixed();}
 function resetFixDone(){if(!confirm('이달 완료 체크 초기화?'))return;DB.fixedDone={};sv();rdFixed();}
@@ -11056,7 +11232,32 @@ function cancelTaskEdit(sId,ti){
   const tt=$(`ftt-${sId}-${ti}`);if(tt)tt.style.display='';
   editingTask=null;if(typeof stopEditing==='function')stopEditing();
 }
-function saveSpInline(sId,taskIdx,val){
+// ★ 특이사항 편집 상태 전역 추적
+var _spEditPending=null; // {sId, taskIdx, el}
+var _spEditActive=null;  // {sId, taskIdx, el, origText} — 편집 시작부터 추적
+function _flushSpEdit(){
+  // pending이 있으면 우선
+  if(_spEditPending){
+    var p=_spEditPending; _spEditPending=null; _spEditActive=null;
+    _doSaveSpInline(p.sId,p.taskIdx,p.el.textContent);
+    return;
+  }
+  // pending은 없지만 active(편집 중)이면 현재 내용 저장
+  if(_spEditActive && _spEditActive.el){
+    var a=_spEditActive; _spEditActive=null;
+    var cur=(a.el.textContent||'').trim();
+    if(cur!==a.origText){
+      _doSaveSpInline(a.sId,a.taskIdx,cur);
+    }
+  }
+}
+function saveSpInline(sId,taskIdx,el){
+  // el이 DOM 요소면 직접 읽기, 문자열이면 그대로 사용 (하위호환)
+  var val=(typeof el==='string')?el:(el&&el.textContent)||'';
+  _spEditPending=null; // 저장 완료이므로 pending 해제
+  _doSaveSpInline(sId,taskIdx,val);
+}
+function _doSaveSpInline(sId,taskIdx,val){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
   // ★ textContent에 포함된 "N) " 접두사 제거 (중복 방지)
   var cleanVal=(val||'').trim();
@@ -11067,7 +11268,7 @@ function saveSpInline(sId,taskIdx,val){
   lines.forEach((l,i)=>{const lt=l.trim();if(lt.startsWith((taskIdx+1)+')')){collecting=true;idxs.push(i);}else if(/^\d+\)/.test(lt)){collecting=false;}else if(collecting){idxs.push(i);}});
   const newLines=lines.filter((l,i)=>!idxs.includes(i));
   if(cleanVal){let ins=0;for(let i=0;i<newLines.length;i++){const m2=newLines[i].trim().match(/^(\d+)\)/);if(m2&&parseInt(m2[1])<=taskIdx+1)ins=i+1;}newLines.splice(ins,0,(taskIdx+1)+') '+cleanVal);}
-  s.special=newLines.join('\n');s._edit=editStamp();sv();rdFixed();
+  s.special=newLines.join('\n');s._edit=editStamp();_logEdit('fixed',(s.dayLabel||s.day+'일')+' 특이사항 수정',sId);sv();rdFixed();
 }
 function editSpItem(sId,taskIdx){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
@@ -11170,6 +11371,8 @@ function delFixTask(sId,ti){
   if(!confirm('이 업무를 삭제하시겠습니까?'))return;
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
   s.tasks.splice(ti,1);
+  // ★ 특이사항도 함께 삭제 + 남은 번호 재조정
+  s.special=_removeSpForTask(s.special,ti);
   s._edit=editStamp();
   if(!s.tasks.length){ s._deleted=true; }
   sv();rdFixed();
@@ -11686,6 +11889,8 @@ function saveBMemoMgr(key,val){
   }
   DB.memoCats[bId]['_mgr_'+key]=v;
   DB.memoCats[bId]['_e_'+key]=editStamp();
+  var _dBName=(DB.buildings.find(function(b){return b.id===bId;})||{}).name||'';
+  _logEdit('drive',_dBName+' '+key+' 수정',bId);
   sv();
   const sv2=$('bmemo-saved'); if(sv2){ sv2.textContent='저장됨'; setTimeout(()=>{sv2.textContent='';},1500); }
 }
@@ -12251,8 +12456,9 @@ function saveReport(){
     c10:parseInt($('frc10').value)||0,c11:parseInt($('frc11').value)||0,c12:parseInt($('frc12').value)||0,
     c13:parseInt($('frc13').value)||0,c14:parseInt($('frc14').value)||0,c15:parseInt($('frc15').value)||0,
     c15n:$('frc15n').value,maint:$('frmaint').value.trim(),tn:$('frtn').value.trim(),sp:$('frsp').value.trim(),idata:{}};
-  if(eid){const i=DB.reports.findIndex(r=>r.id==eid);if(i>=0)DB.reports[i]={...DB.reports[i],...o,idata:DB.reports[i].idata||{}};}
-  else{DB.reports.push({id:nid(),...o});DB.ui.repBldgId=bId;}
+  var _rBName=(DB.buildings.find(function(b){return b.id===bId;})||{}).name||'';
+  if(eid){const i=DB.reports.findIndex(r=>r.id==eid);if(i>=0)DB.reports[i]={...DB.reports[i],...o,idata:DB.reports[i].idata||{}};_logEdit('report',_rBName+' '+o.year+'/'+o.month+' 보고서 수정',eid);}
+  else{DB.reports.push({id:nid(),...o});DB.ui.repBldgId=bId;_logEdit('report',_rBName+' '+o.year+'/'+o.month+' 보고서 추가');}
   sv();closeMo('mo-report');rdReport();
 }
 function setHA(rId,lId,v){const r=DB.reports.find(r=>r.id==rId);if(!r)return;if(!r.idata)r.idata={};if(!r.idata[lId])r.idata[lId]={};r.idata[lId].ha=v;sv();rdReport();}
@@ -12901,6 +13107,7 @@ function addPMemoCardPage(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   var newG=_pmemoNextGroup(md);
+  md.groupNames[newG]=_nextGroupName(md);
   md.pages.push({id:Date.now(),name:_nextMemoName(md),text:'',todos:[],group:newG});
   md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
   var groups=_pmemoGroupList(md);
@@ -12952,6 +13159,30 @@ function delPMemoGroup(groupNum){
   _pmemoActiveTab=0;
   md.updatedAt=_pmemoTs();
   sv(); rdPMemo(); _showPMemoSaved(); _syncFloatIfOpen();
+}
+function floatDelGroup(groupNum){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var groupPages=md.pages.filter(function(p){return p.group===groupNum;});
+  if(!groupPages.length) return;
+  var names=groupPages.map(function(p){return p.name;}).join(', ');
+  if(!confirm('그룹 내 메모 ['+names+'] 를 모두 삭제하시겠습니까?\n(휴지통에서 복구 가능)')) return;
+  groupPages.forEach(function(p){
+    var deleted=JSON.parse(JSON.stringify(p));
+    deleted._deletedAt=new Date().toISOString();
+    deleted._type='group';
+    deleted._groupNum=groupNum;
+    deleted._groupName=md.groupNames[groupNum]||'';
+    md.deletedPages.push(deleted);
+  });
+  if(md.deletedPages.length>50) md.deletedPages=md.deletedPages.slice(-50);
+  md.pages=md.pages.filter(function(p){return p.group!==groupNum;});
+  if(!md.pages.length) md.pages.push({id:Date.now(),name:'메모1',text:'',todos:[],group:0});
+  var groups=_pmemoGroupList(md);
+  if(_floatPage>=groups.length) _floatPage=groups.length-1;
+  _floatActiveTab=0;
+  md.updatedAt=_pmemoTs();
+  sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
 }
 function openPMemoTrash(){
   if(!CURRENT_USER_ID) return;
@@ -13228,37 +13459,43 @@ function _pmemoSwitchGroup(gi){
   _pmemoCardPage=gi; rdPMemo();
 }
 // ── 메모 자동 임시저장 (10초마다, 저장 안 눌러도 보호) ──
+// ★ DB.personalMemos를 직접 수정하지 않고, 별도 사본을 autosave에 저장
 setInterval(function(){
   if(!CURRENT_USER_ID) return;
   var changed=false;
   var md=_pmemoData(CURRENT_USER_ID);
-  // 메모장 dirty textarea → DB에 반영
+  // dirty 상태 확인만 (DB 수정 없이)
+  var dirtyPages=JSON.parse(JSON.stringify(md.pages)); // deep copy
+  // 메모장 dirty textarea → 사본에 반영
   if(Object.keys(_pmemoDirtySet).length>0){
     Object.keys(_pmemoDirtySet).forEach(function(k){
       var idx=parseInt(k);
       var ta=document.querySelector('[data-pmemo-ta-idx="'+idx+'"]');
-      if(ta && md.pages[idx]) md.pages[idx].text=ta.value;
+      if(ta && dirtyPages[idx]) dirtyPages[idx].text=ta.value;
     });
     changed=true;
   }
-  // 빠른메모 dirty textarea → DB에 반영
+  // 빠른메모 dirty textarea → 사본에 반영
   if(_floatDirty && _floatDirtyIdx!==null){
     var fta=$('float-memo-ta');
-    if(fta && md.pages[_floatDirtyIdx]) md.pages[_floatDirtyIdx].text=fta.value;
+    if(fta && dirtyPages[_floatDirtyIdx]) dirtyPages[_floatDirtyIdx].text=fta.value;
     changed=true;
   }
-  // 분리창 dirty textarea → DB에 반영
+  // 분리창 dirty textarea → 사본에 반영
   Object.keys(_detachDirty).forEach(function(k){
     if(!_detachDirty[k]) return;
     var idx=parseInt(k);
     var dta=document.querySelector('[data-detach-ta-idx="'+idx+'"]');
-    if(dta && md.pages[idx]) md.pages[idx].text=dta.value;
+    if(dta && dirtyPages[idx]) dirtyPages[idx].text=dta.value;
     changed=true;
   });
-  // 변경사항 있으면 localStorage에 임시저장
+  // 변경사항 있으면 localStorage에 임시저장 (사본 사용, DB 건드리지 않음)
   if(changed){
-    md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
-    try{ localStorage.setItem('bsn_memo_autosave', JSON.stringify({uid:CURRENT_USER_ID, memos:DB.personalMemos, ts:Date.now()})); }catch(e){}
+    var bkMemo=JSON.parse(JSON.stringify(md));
+    bkMemo.pages=dirtyPages;
+    bkMemo.updatedAt=_pmemoTs(); bkMemo.userName=CURRENT_USER_NAME||'나';
+    var bkMemos={}; bkMemos[CURRENT_USER_ID]=bkMemo;
+    try{ localStorage.setItem('bsn_memo_autosave', JSON.stringify({uid:CURRENT_USER_ID, memos:bkMemos, ts:Date.now()})); }catch(e){}
   }
 },10000);
 
@@ -13275,9 +13512,18 @@ function _checkMemoAutoRecover(){
     var dbMemo=DB.personalMemos&&DB.personalMemos[saved.uid];
     var bkMemo=saved.memos[saved.uid];
     if(!bkMemo) return;
-    if(dbMemo && dbMemo.updatedAt && bkMemo.updatedAt && bkMemo.updatedAt>dbMemo.updatedAt){
+    // ★ updatedAt 비교 또는 내용 차이가 있으면 복구 제안
+    var _hasContentDiff=false;
+    if(bkMemo.pages && bkMemo.pages.length){
+      var _dbPages=(dbMemo&&dbMemo.pages)||[];
+      bkMemo.pages.forEach(function(bp,i){
+        var dp=_dbPages[i];
+        if((bp.text||'')!==((dp&&dp.text)||'')) _hasContentDiff=true;
+      });
+    }
+    if(_hasContentDiff || (bkMemo.updatedAt && (!dbMemo || !dbMemo.updatedAt || bkMemo.updatedAt>dbMemo.updatedAt))){
       // 전/후 비교 내용 생성
-      var diffHtml='<div style="max-height:60vh;overflow-y:auto;font-size:13px;font-family:inherit">';
+      var diffHtml='<div style="max-height:75vh;overflow-y:auto;font-size:13px;font-family:inherit;padding:10px 18px">';
       var bkPages=bkMemo.pages||[];
       var dbPages=(dbMemo&&dbMemo.pages)||[];
       var hasDiff=false;
@@ -13290,8 +13536,8 @@ function _checkMemoAutoRecover(){
           diffHtml+='<div style="margin-bottom:10px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden">';
           diffHtml+='<div style="padding:4px 8px;background:#f1f5f9;font-weight:600;font-size:12px">📝 '+(bp.name||'메모'+(i+1))+'</div>';
           diffHtml+='<div style="display:flex;gap:0">';
-          diffHtml+='<div style="flex:1;padding:6px 8px;background:#fef2f2;border-right:1px solid #e2e8f0"><div style="font-size:10px;color:#dc2626;margin-bottom:3px;font-weight:600">변경 전</div><pre style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:12px;max-height:100px;overflow-y:auto">'+esc(before.substring(0,300))+(before.length>300?'...':'')+'</pre></div>';
-          diffHtml+='<div style="flex:1;padding:6px 8px;background:#f0fdf4"><div style="font-size:10px;color:#16a34a;margin-bottom:3px;font-weight:600">변경 후 (복구 내용)</div><pre style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:12px;max-height:100px;overflow-y:auto">'+esc(after.substring(0,300))+(after.length>300?'...':'')+'</pre></div>';
+          diffHtml+='<div style="flex:1;padding:10px 12px;background:#fef2f2;border-right:1px solid #e2e8f0"><div style="font-size:12px;color:#dc2626;margin-bottom:5px;font-weight:600">변경 전</div><pre style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:13px;max-height:500px;overflow-y:auto;line-height:1.6">'+esc(before.substring(0,2000))+(before.length>2000?'...':'')+'</pre></div>';
+          diffHtml+='<div style="flex:1;padding:10px 12px;background:#f0fdf4"><div style="font-size:12px;color:#16a34a;margin-bottom:5px;font-weight:600">변경 후 (복구 내용)</div><pre style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:13px;max-height:500px;overflow-y:auto;line-height:1.6">'+esc(after.substring(0,2000))+(after.length>2000?'...':'')+'</pre></div>';
           diffHtml+='</div></div>';
         }
       });
@@ -13300,7 +13546,7 @@ function _checkMemoAutoRecover(){
       // 모달로 비교 표시
       var modal=document.createElement('div');
       modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px';
-      modal.innerHTML='<div style="background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:700px;width:100%;overflow:hidden">'
+      modal.innerHTML='<div style="background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:900px;width:95%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column">'
         +'<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🔄</span><span style="font-size:14px;font-weight:700">저장되지 않은 메모 복구</span><span style="margin-left:auto;font-size:11px;color:var(--t3)">'+new Date(saved.ts).toLocaleString()+'</span></div>'
         +diffHtml
         +'<div style="padding:12px 18px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #e2e8f0">'
@@ -13409,6 +13655,16 @@ function delPMemoTodo(idx){
 let _floatMemoDrag=null;
 function openFloatMemo(){
   var el=$('float-memo'); if(!el) return;
+  if(!CURRENT_USER_ID){
+    // 로그인 전이면 잠시 대기 후 재시도
+    var _fmRetry=0;
+    var _fmWait=setInterval(function(){
+      _fmRetry++;
+      if(CURRENT_USER_ID){ clearInterval(_fmWait); openFloatMemo(); }
+      else if(_fmRetry>20){ clearInterval(_fmWait); alert('로그인 후 사용 가능합니다.'); }
+    },300);
+    return;
+  }
   // 화면 중앙 배치
   var w=el.offsetWidth||700, h=el.offsetHeight||700;
   el.style.left=Math.max(0,Math.floor((window.innerWidth-w)/2))+'px';
@@ -13525,6 +13781,14 @@ function _nextMemoName(md){
   var n=1; while(used[n]) n++;
   return '메모'+n;
 }
+function _nextGroupName(md){
+  // "그룹1","그룹2"... 중복 안되는 번호 자동 지정
+  var used={};
+  var gn=md.groupNames||{};
+  Object.keys(gn).forEach(function(k){ var m=(gn[k]||'').match(/^그룹(\d+)$/); if(m) used[parseInt(m[1])]=true; });
+  var n=1; while(used[n]) n++;
+  return '그룹'+n;
+}
 function floatAddTab(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
@@ -13542,6 +13806,7 @@ function floatAddGroupPage(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   var newG=_pmemoNextGroup(md);
+  md.groupNames[newG]=_nextGroupName(md);
   md.pages.push({id:Date.now(),name:_nextMemoName(md),text:'',todos:[],group:newG});
   _floatActiveTab=md.pages.length-1;
   md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
@@ -13599,11 +13864,17 @@ var _floatActiveTab=0;
 var _floatPage=0;
 function rdFloatMemo(){
   if(!CURRENT_USER_ID) return;
+  try{
   var md=_pmemoData(CURRENT_USER_ID);
-  if(_floatActiveTab>=md.pages.length) _floatActiveTab=0;
+  // ★ 페이지 배열 안전 확인 (빈 화면 방지)
+  if(!md.pages||!md.pages.length){
+    md.pages=[{id:Date.now(),name:'메모1',text:'',todos:[],group:0}];
+  }
+  if(_floatActiveTab<0||_floatActiveTab>=md.pages.length) _floatActiveTab=0;
   // 그룹 기반 탭 렌더
   var fGroups=_pmemoGroupList(md);
   var totalFPages=fGroups.length;
+  if(!totalFPages){ fGroups=[{group:0,items:[{idx:0,page:md.pages[0]}]}]; totalFPages=1; }
   // 활성 탭이 속한 그룹으로 이동
   var activeGroup=0;
   for(var fgi=0;fgi<fGroups.length;fgi++){
@@ -13613,6 +13884,7 @@ function rdFloatMemo(){
   }
   _floatPage=activeGroup;
   if(_floatPage>=totalFPages) _floatPage=totalFPages-1;
+  if(_floatPage<0) _floatPage=0;
   var curFGroup=fGroups[_floatPage]||fGroups[0];
   var fGroupItems=curFGroup?curFGroup.items:[];
   // 탭 바 렌더 (상위: 그룹탭, 하위: 개별 메모탭)
@@ -13625,7 +13897,7 @@ function rdFloatMemo(){
     fGroups.forEach(function(fg,fgi){
       var fpAct=fgi===_floatPage;
       var fgLabel=md.groupNames[fg.group]||fg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
-      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatSwitchGroup('+fgi+','+fg.items[0].idx+');},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:12px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'">'+esc(fgLabel)+'</div>';
+      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatSwitchGroup('+fgi+','+fg.items[0].idx+');},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:12px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'"><span>'+esc(fgLabel)+'</span>'+(fGroups.length>1?'<span onclick="event.stopPropagation();floatDelGroup('+fg.group+')" style="font-size:12px;cursor:pointer;opacity:.5;margin-left:2px" title="그룹 삭제">×</span>':'')+'</div>';
     });
     th+='<div onclick="floatAddGroupPage()" style="padding:4px 8px;font-size:14px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 그룹 추가">＋</div>';
     // 우측: 맞춤법 + 저장
@@ -13655,7 +13927,8 @@ function rdFloatMemo(){
     _initFloatTabDrag(subBar);
   }
   var idx=_floatActiveTab;
-  var pg=md.pages[idx]; if(!pg) pg=md.pages[0];
+  var pg=md.pages[idx]; if(!pg){ _floatActiveTab=0; idx=0; pg=md.pages[0]; }
+  if(!pg){ console.warn('[rdFloatMemo] 페이지 데이터 없음 — 초기화'); pg={id:Date.now(),name:'메모1',text:'',todos:[],group:0}; md.pages[0]=pg; }
   var body=$('float-memo-body'); if(!body) return;
 
   var todos=pg.todos||[];
@@ -13697,6 +13970,7 @@ function rdFloatMemo(){
       if(e.key==='Enter') e.preventDefault();
     });
   }
+  }catch(e){ console.error('[rdFloatMemo] 렌더 오류:',e); }
 }
 function _toggleFloatTodo(){
   var area=$('float-todo-area');
@@ -13816,7 +14090,6 @@ function _runNaverSpellCheck(text,taIdx){
   ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
   var box=document.createElement('div');
   box.style.cssText='background:#fff;border-radius:12px;width:680px;max-width:92vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden';
-  // 헤더
   box.innerHTML='<div style="padding:12px 18px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;background:#fff">'
     +'<div style="display:flex;align-items:center;gap:6px"><div style="width:28px;height:28px;border-radius:6px;background:#3b82f6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px">✏</div>'
     +'<span style="font-size:15px;font-weight:700;color:#222">맞춤법검사</span></div>'
@@ -13825,7 +14098,6 @@ function _runNaverSpellCheck(text,taIdx){
     +'<div style="text-align:center;padding:50px;color:#888"><div class="spell-spin" style="display:inline-block;width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#03c75a;border-radius:50%;animation:spellspin .8s linear infinite;margin-bottom:10px"></div><div>검사 중...</div></div>'
     +'</div>';
   ov.appendChild(box);
-  // 스피너 애니메이션
   if(!document.getElementById('spell-spin-style')){
     var st=document.createElement('style');st.id='spell-spin-style';
     st.textContent='@keyframes spellspin{to{transform:rotate(360deg)}} .spell-err-word{border-bottom:2px solid;cursor:pointer;position:relative;padding-bottom:1px} .spell-err-word:hover .spell-tip{display:block} .spell-tip{display:none;position:absolute;left:0;bottom:100%;background:#333;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;white-space:nowrap;z-index:10;margin-bottom:4px;box-shadow:0 2px 8px rgba(0,0,0,.2)}';
@@ -13833,45 +14105,54 @@ function _runNaverSpellCheck(text,taIdx){
   }
   document.body.appendChild(ov);
 
-  // 500자씩 분할
-  var chunks=[], maxLen=500;
-  for(var ci=0;ci<text.length;ci+=maxLen) chunks.push(text.substring(ci,ci+maxLen));
-  var results=[], done=0, errs=0;
-
-  // JSONP 방식으로 CORS 우회 (GitHub Pages에서도 동작)
-  chunks.forEach(function(chunk,i){
-    var cbName='_spellCb_'+Date.now()+'_'+i;
-    window[cbName]=function(data){
-      try{
-        var msg=data.message.result;
-        results[i]={html:msg.html||'',notag:msg.notag_html||chunk,errata:msg.errata_count||0,origin:chunk};
-      }catch(_){ results[i]={html:'',notag:chunk,errata:0,origin:chunk}; }
-      done++;
-      try{delete window[cbName];}catch(_){}
-      try{var s=document.getElementById('spell-js-'+i);if(s)s.remove();}catch(_){}
-      if(done===chunks.length) _renderSpellResult(results,taIdx,errs,text);
-    };
-    var sc=document.createElement('script');
-    sc.id='spell-js-'+i;
-    sc.src='https://m.search.naver.com/p/csearch/ocontent/util/SpellerProxy?passportKey=&color_blindness=0&q='+encodeURIComponent(chunk)+'&_callback='+cbName;
-    sc.onerror=function(){
-      results[i]={html:'',notag:chunk,errata:0,origin:chunk,err:true};
-      errs++; done++;
-      try{delete window[cbName];}catch(_){}
-      try{sc.remove();}catch(_){}
-      if(done===chunks.length) _renderSpellResult(results,taIdx,errs,text);
-    };
-    document.head.appendChild(sc);
-    // 10초 타임아웃
-    setTimeout(function(){
-      if(!results[i]){
-        results[i]={html:'',notag:chunk,errata:0,origin:chunk,err:true};
-        errs++; done++;
-        try{delete window[cbName];}catch(_){}
-        try{var s2=document.getElementById('spell-js-'+i);if(s2)s2.remove();}catch(_){}
-        if(done===chunks.length) _renderSpellResult(results,taIdx,errs,text);
+  // ★ LanguageTool API (CORS 공식 지원 — 프록시 불필요)
+  console.log('[맞춤법] LanguageTool API 시작...');
+  fetch('https://api.languagetool.org/v2/check',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},
+    body:'text='+encodeURIComponent(text)+'&language=ko'
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(data){
+    console.log('[맞춤법] LanguageTool 응답:', (data.matches||[]).length+'건 오류');
+    var matches=data.matches||[];
+    if(!matches.length){
+      _renderSpellResult([{html:'',notag:text,errata:0,origin:text}],taIdx,0,text);
+      return;
+    }
+    // 교정 결과 생성 (뒤에서부터 치환해야 offset이 안 꼬임)
+    var corrected=text;
+    var sorted=matches.slice().sort(function(a,b){return b.offset-a.offset;});
+    sorted.forEach(function(m){
+      if(m.replacements&&m.replacements.length>0){
+        corrected=corrected.substring(0,m.offset)+m.replacements[0].value+corrected.substring(m.offset+m.length);
       }
-    },10000);
+    });
+    // 원문 하이라이트 (앞에서부터, offset 보정)
+    var htmlMarked='';
+    var lastIdx=0;
+    matches.sort(function(a,b){return a.offset-b.offset;}).forEach(function(m){
+      htmlMarked+=esc(text.substring(lastIdx,m.offset));
+      var errWord=text.substring(m.offset,m.offset+m.length);
+      var suggestion=m.replacements&&m.replacements.length?m.replacements[0].value:'';
+      var tipText=m.message+(suggestion?' → '+suggestion:'');
+      var color=m.rule&&m.rule.category&&m.rule.category.id==='TYPOS'?'#e53935':m.rule&&m.rule.category&&m.rule.category.id==='GRAMMAR'?'#7c4dff':'#03c75a';
+      htmlMarked+='<span style="border-bottom:2px solid '+color+';padding-bottom:1px;cursor:pointer;position:relative" title="'+esc(tipText)+'">'+esc(errWord)+'</span>';
+      lastIdx=m.offset+m.length;
+    });
+    htmlMarked+=esc(text.substring(lastIdx));
+    var results2=[{html:htmlMarked,notag:corrected,errata:matches.length,origin:text}];
+    _renderSpellResult(results2,taIdx,0,text);
+  }).catch(function(e){
+    console.error('[맞춤법] LanguageTool 실패:',e.message);
+    var body2=$('spell-body'); if(!body2) return;
+    body2.innerHTML='<div style="padding:30px 20px;text-align:center">'
+      +'<div style="font-size:40px;margin-bottom:10px">⚠️</div>'
+      +'<div style="font-size:14px;color:#666;margin-bottom:16px">맞춤법검사 서버 연결 실패</div>'
+      +'<button onclick="_runNaverSpellCheck(\''+text.replace(/'/g,"\\'")+'\','+taIdx+')" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">다시 시도</button>'
+      +'<button onclick="document.getElementById(\'spell-overlay\').remove()" style="padding:10px 24px;background:#64748b;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit">닫기</button>'
+      +'</div>';
   });
 }
 function _renderSpellResult(results,taIdx,errs,originalText){
@@ -13880,6 +14161,12 @@ function _renderSpellResult(results,taIdx,errs,originalText){
   results.forEach(function(r){totalErr+=r.errata;});
   var correctedFull=results.map(function(r){return r.notag;}).join('');
   var htmlFull=results.map(function(r){return r.html;}).join('');
+  // ★ errata_count=0이어도 HTML에 교정 span이 있으면 에러 카운트 보정
+  if(totalErr===0 && htmlFull){
+    var spanCount=(htmlFull.match(/<span[^>]*class=['"](green|red|violet|blue|purple)['"]/gi)||[]).length;
+    if(spanCount>0){ totalErr=spanCount; console.log('[맞춤법] errata_count=0이나 HTML span 감지:',spanCount,'건'); }
+  }
+  console.log('[맞춤법] 최종: totalErr='+totalErr+', corrected길이='+correctedFull.length+', html길이='+htmlFull.length);
   _spellCorrected=correctedFull;
 
   var h='';
@@ -13898,6 +14185,11 @@ function _renderSpellResult(results,taIdx,errs,originalText){
     h+='<div style="padding:8px 18px;background:#fff8e1;border-bottom:1px solid #ffe082;font-size:12px;color:#f57f17">일부 구간 검사 실패 ('+errs+'/'+results.length+')</div>';
   }
 
+  // ★ 최종 안전장치: errata=0이어도 원문≠교정문이면 차이 있음
+  if(totalErr===0 && errs===0 && originalText.replace(/\s/g,'')!==correctedFull.replace(/\s/g,'')){
+    totalErr=1;
+    console.log('[맞춤법] 원문≠교정문 → 차이 감지 (errata 보정)');
+  }
   // 결과 없음
   if(totalErr===0 && errs===0){
     h+='<div style="padding:40px 20px;text-align:center">'
@@ -13916,31 +14208,34 @@ function _renderSpellResult(results,taIdx,errs,originalText){
     return;
   }
 
-  // ── 네이버 스타일 결과 표시 ──
-  h+='<div style="padding:14px 18px;background:#f8f9fa;border-bottom:1px solid #e5e7eb">';
-  h+='<div style="font-size:13px;color:#333;margin-bottom:8px"><b style="color:#e53935">'+totalErr+'</b>건의 오류가 발견되었습니다.</div>';
-  h+='<div style="display:flex;gap:14px;font-size:11px;color:#888">';
-  h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e53935;vertical-align:middle;margin-right:3px"></span>맞춤법</span>';
-  h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#03c75a;vertical-align:middle;margin-right:3px"></span>띄어쓰기</span>';
-  h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7c4dff;vertical-align:middle;margin-right:3px"></span>표준어 의심</span>';
+  // ── 네이버 맞춤법 검사기 스타일 (좌우 분할) ──
+  h+='<div style="padding:10px 18px;background:#f8f9fa;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between">';
+  h+='<div><b style="color:#e53935">'+totalErr+'</b><span style="font-size:13px;color:#333">건의 오류가 발견되었습니다.</span></div>';
+  h+='<div style="display:flex;gap:12px;font-size:11px;color:#888">';
+  h+='<span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#e53935;vertical-align:middle;margin-right:2px"></span>맞춤법</span>';
+  h+='<span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#03c75a;vertical-align:middle;margin-right:2px"></span>띄어쓰기</span>';
+  h+='<span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#7c4dff;vertical-align:middle;margin-right:2px"></span>표준어 의심</span>';
   h+='</div></div>';
 
-  // 원문 + 교정 표시
-  h+='<div style="padding:16px 18px">';
-  h+='<div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px">검사 결과</div>';
-  h+='<div style="padding:14px 16px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;line-height:2;white-space:pre-wrap;word-break:break-all;font-family:\'맑은 고딕\',\'Pretendard\',sans-serif">'+htmlFull+'</div>';
+  // 좌우 분할: 원문 | 교정결과 (네이버 스타일)
+  h+='<div style="display:flex;flex:1;overflow:hidden;border-bottom:1px solid #e5e7eb">';
+  // 좌: 원문
+  h+='<div style="flex:1;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;min-width:0">';
+  h+='<div style="padding:8px 14px;font-size:12px;font-weight:700;color:#666;background:#fafafa;border-bottom:1px solid #eee;flex-shrink:0">원문</div>';
+  h+='<div style="padding:14px 16px;font-size:14px;line-height:1.9;white-space:pre-wrap;word-break:break-all;font-family:\'맑은 고딕\',\'Pretendard\',sans-serif;overflow-y:auto;flex:1">'+htmlFull+'</div>';
   h+='</div>';
-
-  h+='<div style="padding:0 18px 16px">';
-  h+='<div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px">교정 결과</div>';
-  h+='<div style="padding:14px 16px;background:#f1f8e9;border:1px solid #c5e1a5;border-radius:8px;font-size:14px;line-height:2;white-space:pre-wrap;word-break:break-all;font-family:\'맑은 고딕\',\'Pretendard\',sans-serif">'+esc(correctedFull)+'</div>';
+  // 우: 교정결과
+  h+='<div style="flex:1;display:flex;flex-direction:column;min-width:0">';
+  h+='<div style="padding:8px 14px;font-size:12px;font-weight:700;color:#666;background:#fafafa;border-bottom:1px solid #eee;flex-shrink:0">교정결과</div>';
+  h+='<div style="padding:14px 16px;font-size:14px;line-height:1.9;white-space:pre-wrap;word-break:break-all;font-family:\'맑은 고딕\',\'Pretendard\',sans-serif;overflow-y:auto;flex:1;background:#f9fff9">'+esc(correctedFull)+'</div>';
+  h+='</div>';
   h+='</div>';
 
   // 하단 버튼
-  h+='<div style="padding:12px 18px;border-top:1px solid #e5e7eb;background:#fafafa;display:flex;align-items:center;gap:10px;justify-content:center">';
-  h+='<button onclick="_applySpellResult()" style="padding:10px 32px;background:#03c75a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">교정 내용 적용</button>';
-  h+='<button onclick="_spellCopyResult()" style="padding:10px 24px;background:#fff;color:#333;border:1px solid #ccc;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">복사</button>';
-  h+='<button onclick="document.getElementById(\'spell-overlay\').remove()" style="padding:10px 24px;background:#fff;color:#888;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">닫기</button>';
+  h+='<div style="padding:10px 18px;background:#fafafa;display:flex;align-items:center;gap:10px;justify-content:center;flex-shrink:0">';
+  h+='<button onclick="_applySpellResult()" style="padding:8px 28px;background:#03c75a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">교정 내용 적용</button>';
+  h+='<button onclick="_spellCopyResult()" style="padding:8px 20px;background:#fff;color:#333;border:1px solid #ccc;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">복사</button>';
+  h+='<button onclick="document.getElementById(\'spell-overlay\').remove()" style="padding:8px 20px;background:#fff;color:#888;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">닫기</button>';
   h+='</div>';
 
   body.innerHTML=h;
@@ -15084,6 +15379,28 @@ async function enterApp(){
       await sv();
     } else {
       _migrateMemoCats();
+    }
+    // ★ 클라우드 로드 실패 시 자동 재시도 (8초 간격, 최대 12회)
+    if(!_cloudLoadOk && sbClient){
+      var _retryCount=0;
+      var _retryInterval=setInterval(async function(){
+        if(_cloudLoadOk || _retryCount>=12){ clearInterval(_retryInterval); if(!_cloudLoadOk) _showCloudBanner(true); return; }
+        _retryCount++;
+        console.log('[cloud-retry] 재시도 '+_retryCount+'/8...');
+        try{
+          var retryCloud=await loadFromSupabase();
+          if(_cloudLoadOk){
+            console.log('[cloud-retry] ✅ 클라우드 연결 복구됨');
+            _showCloudBanner(false);
+            showSaveStatus('☁️ 클라우드 연결됨','var(--gr)');
+            clearInterval(_retryInterval);
+            // 연결 복구 후 로컬 변경사항 즉시 서버에 푸시
+            await sv();
+          }
+        }catch(e){
+          console.warn('[cloud-retry] 시도 '+_retryCount+' 실패:', e.message);
+        }
+      },8000);
     }
   })();
 
