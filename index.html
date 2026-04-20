@@ -3522,8 +3522,10 @@ function gp(id,el){
   // ★ 메모탭 벗어날 때 미저장 확인
   var _prevTab=''; try{_prevTab=localStorage.getItem('bm_lastTab')||'';}catch(_){}
   if(_prevTab==='pmemo' && id!=='pmemo' && _pmemoHasDirty()){
-    if(confirm('메모에 저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _pmemoSaveAllDirty();
-    else { _pmemoDirtySet={}; }
+    _confirmSave3('메모에 저장되지 않은 내용이 있습니다.',
+      function(){ _pmemoSaveAllDirty(); },
+      function(){ _pmemoDirtySet={}; },
+      null);
   }
   try{ localStorage.setItem('bm_lastTab', id); }catch(_){}
   // 점검 오버레이 열려있으면 닫기
@@ -12580,7 +12582,7 @@ function rdPMemo(){
 
     // 상단 바: 페이지 탭 + 추가 버튼 + 저장 표시
     html+='<div style="display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bl2);border-bottom:1px solid var(--ln);flex-shrink:0;flex-wrap:wrap">';
-    html+='<button onclick="openFloatMemo()" style="flex-shrink:0;padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:var(--w);cursor:pointer;color:var(--t2);font-family:inherit;white-space:nowrap;font-weight:500" title="다른 탭에서도 메모 사용">📌 플로팅</button>';
+    html+='<button onclick="openFloatMemo()" style="flex-shrink:0;padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:var(--w);cursor:pointer;color:var(--t2);font-family:inherit;white-space:nowrap;font-weight:500" title="다른 탭에서도 메모 사용">📌 빠른메모</button>';
     // 페이지 탭 (그룹별) — 더블클릭 이름변경, 활성탭에 삭제버튼
     _groups.forEach(function(g,gi){
       var act=gi===_pmemoCardPage;
@@ -12618,14 +12620,16 @@ function rdPMemo(){
       // 카드 헤더 (보라색 그라데이션)
       html+='<div ondblclick="renamePMemoTab('+i+')" style="padding:8px 12px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);cursor:default;flex-shrink:0">';
       html+='<span style="font-weight:700;font-size:12px;color:#fff">'+esc(pg.name)+'</span>';
-      if(md.pages.length>1) html+='<span onclick="delPMemoTab('+i+')" style="margin-left:auto;font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;line-height:1" title="탭 삭제">×</span>';
+      html+='<span onclick="event.stopPropagation();_togglePMemoTodo('+i+')" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.7);cursor:pointer;line-height:1;padding:0 4px" title="할 일 토글">☑</span>';
+      if(md.pages.length>1) html+='<span onclick="delPMemoTab('+i+')" style="font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;line-height:1" title="탭 삭제">×</span>';
       html+='</div>';
       // 카드 내용: 체크리스트 + 메모 세로 분할
       html+='<div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">';
-      // 체크리스트
-      html+='<div class="pmcard-todo" data-card-idx="'+i+'" style="flex:0 0 auto;min-height:120px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">';
+      // 체크리스트 (기본 숨김, 토글 버튼으로 표시)
+      var hasTodos=todos.length>0;
+      html+='<div class="pmcard-todo" data-card-idx="'+i+'" style="flex:0 0 auto;min-height:0;max-height:60%;display:flex;flex-direction:column;overflow:hidden;'+(hasTodos?'':'display:none;')+'" id="pmtodo-area-'+i+'">';
       html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>';
-      html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 4px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;font-style:italic;padding:2px 0">할 일이 없습니다</div>')+'</div>';
+      html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 4px;min-height:0">'+todoH+'</div>';
       html+='<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">';
       html+='<input data-pmemo-todo-idx="'+i+'" placeholder="할 일 입력" style="flex:1;min-width:0;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none">';
       html+='<button onclick="_pmemoActiveTab='+i+';addPMemoTodoFrom(this.previousElementSibling)" class="btn sm" style="flex-shrink:0;font-size:10px;padding:2px 6px">+</button>';
@@ -13044,11 +13048,30 @@ function _pmemoSaveAllDirty(){
   sv(); _showPMemoSaved(); _syncFloatIfOpen();
 }
 function _pmemoHasDirty(){ return Object.keys(_pmemoDirtySet).length>0; }
+// ── 3버튼 저장 확인 다이얼로그 (윈도우 스타일) ──
+function _confirmSave3(msg, onSave, onDiscard, onCancel){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99999;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:12px;padding:24px 28px;box-shadow:0 8px 32px rgba(0,0,0,.25);max-width:380px;width:90%">'
+    +'<div style="font-size:14px;color:#1e293b;margin-bottom:20px;line-height:1.5">'+msg+'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button id="_cs3-save" style="padding:8px 18px;border:none;border-radius:6px;background:#2563eb;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">저장</button>'
+    +'<button id="_cs3-discard" style="padding:8px 18px;border:none;border-radius:6px;background:#e2e8f0;color:#334155;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">저장하지 않음</button>'
+    +'<button id="_cs3-cancel" style="padding:8px 18px;border:none;border-radius:6px;background:#e2e8f0;color:#334155;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">취소</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#_cs3-save').onclick=function(){ ov.remove(); if(onSave) onSave(); };
+  ov.querySelector('#_cs3-discard').onclick=function(){ ov.remove(); if(onDiscard) onDiscard(); };
+  ov.querySelector('#_cs3-cancel').onclick=function(){ ov.remove(); if(onCancel) onCancel(); };
+}
 function _pmemoSwitchGroup(gi){
   if(gi===_pmemoCardPage) return;
   if(_pmemoHasDirty()){
-    if(confirm('저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _pmemoSaveAllDirty();
-    else _pmemoDirtySet={};
+    _confirmSave3('저장되지 않은 내용이 있습니다.',
+      function(){ _pmemoSaveAllDirty(); _pmemoCardPage=gi; rdPMemo(); },
+      function(){ _pmemoDirtySet={}; _pmemoCardPage=gi; rdPMemo(); },
+      null);
+    return;
   }
   _pmemoCardPage=gi; rdPMemo();
 }
@@ -13078,6 +13101,15 @@ function savePMemoCardNow(idx){
   md.userName=CURRENT_USER_NAME||'나';
   md.updatedAt=_pmemoTs();
   sv(); _showPMemoSaved(); _syncFloatIfOpen();
+}
+function _togglePMemoTodo(idx){
+  var area=document.getElementById('pmtodo-area-'+idx);
+  if(!area) return;
+  var isHidden=area.style.display==='none';
+  area.style.display=isHidden?'flex':'none';
+  // 구분선도 토글
+  var dividers=document.querySelectorAll('.pmcard-divider[data-card-idx="'+idx+'"]');
+  dividers.forEach(function(d){d.style.display=isHidden?'':'none';});
 }
 function addPMemoTodoFrom(inp){
   if(!CURRENT_USER_ID||!inp) return;
@@ -13137,10 +13169,33 @@ function openFloatMemo(){
 }
 function closeFloatMemo(){
   if(_floatDirty){
-    if(confirm('저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _floatSaveNow();
-    else { _floatDirty=false; _floatDirtyIdx=null; }
+    _confirmSave3('저장되지 않은 내용이 있습니다.',
+      function(){ _floatSaveNow(); _closeFloatMemoFinal(); },
+      function(){ _floatDirty=false; _floatDirtyIdx=null; _closeFloatMemoFinal(); },
+      null);
+    return;
   }
+  _closeFloatMemoFinal();
+}
+function _closeFloatMemoFinal(){
+  // 분리된 메모창도 모두 닫기
+  Object.keys(_detachedMemos).forEach(function(k){
+    if(_detachDirty[k]) _detachSave(parseInt(k));
+    var w=_detachedMemos[k]; if(w) w.remove();
+    delete _detachedMemos[k]; delete _detachDirty[k];
+  });
   var el=$('float-memo'); if(el) el.classList.remove('on');
+}
+function _floatSwitchGroup(gi,firstIdx){
+  if(gi===_floatPage) return;
+  if(_floatDirty){
+    _confirmSave3('저장되지 않은 내용이 있습니다.',
+      function(){ _floatSaveNow(); _floatPage=gi; _floatActiveTab=firstIdx; rdFloatMemo(); },
+      function(){ _floatDirty=false; _floatDirtyIdx=null; _floatPage=gi; _floatActiveTab=firstIdx; rdFloatMemo(); },
+      null);
+    return;
+  }
+  _floatPage=gi; _floatActiveTab=firstIdx; rdFloatMemo();
 }
 // ★ 플로팅 메모 단축키: 마우스 휠버튼(중간버튼) 클릭으로 토글
 document.addEventListener('mousedown',function(e){
@@ -13264,7 +13319,7 @@ function rdFloatMemo(){
     fGroups.forEach(function(fg,fgi){
       var fpAct=fgi===_floatPage;
       var fgLabel=md.groupNames[fg.group]||fg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
-      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatPage='+fgi+';_floatActiveTab='+fg.items[0].idx+';rdFloatMemo();},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:11px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'">'+esc(fgLabel)+'</div>';
+      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatSwitchGroup('+fgi+','+fg.items[0].idx+');},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:11px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'">'+esc(fgLabel)+'</div>';
     });
     th+='<div onclick="floatAddGroupPage()" style="padding:4px 8px;font-size:12px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 그룹 추가">＋</div>';
     // 우측: 맞춤법 + 저장
@@ -13304,9 +13359,14 @@ function rdFloatMemo(){
       +'</div>';
   }).join('');
 
+  var fHasTodos=todos.length>0;
   body.innerHTML='<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">'
-    // 체크리스트 영역 (상단)
-    +'<div class="float-todo-area" style="flex:0 0 auto;min-height:120px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">'
+    // 할 일 토글 버튼
+    +'<div style="padding:3px 8px;flex-shrink:0;border-bottom:1px solid var(--ln);display:flex;align-items:center">'
+    +'<span onclick="_toggleFloatTodo()" style="font-size:10px;color:var(--t3);cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--ln);background:var(--w)">☑ 할 일 '+(fHasTodos?'('+todos.length+')':'')+'</span>'
+    +'</div>'
+    // 체크리스트 영역 (상단) - 기본 숨김 (할일 있으면 표시)
+    +'<div id="float-todo-area" class="float-todo-area" style="flex:0 0 auto;min-height:120px;max-height:60%;display:'+(fHasTodos?'flex':'none')+';flex-direction:column;overflow:hidden">'
     +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>'
     +'<div style="flex:1;overflow-y:auto;padding:2px 8px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;padding:4px 0">없음</div>')+'</div>'
     +'<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">'
@@ -13314,7 +13374,7 @@ function rdFloatMemo(){
     +'<button onclick="floatAddTodo('+idx+')" style="padding:3px 6px;border:none;background:var(--bl);color:#fff;border-radius:4px;font-size:10px;cursor:pointer">+</button>'
     +'</div></div>'
     // 구분선 (드래그로 높이 조절)
-    +'<div class="float-divider" style="height:4px;background:var(--ln);cursor:row-resize;flex-shrink:0;position:relative"><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:2px;background:var(--t4);border-radius:1px;opacity:.5"></div></div>'
+    +'<div class="float-divider" id="float-todo-divider" style="height:4px;background:var(--ln);cursor:row-resize;flex-shrink:0;position:relative;display:'+(fHasTodos?'block':'none')+'"><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:2px;background:var(--t4);border-radius:1px;opacity:.5"></div></div>'
     // 메모 영역 (하단)
     +'<div style="flex:1;display:flex;flex-direction:column;min-height:40px">'
     +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3)">📝 메모</div>'
@@ -13331,6 +13391,14 @@ function rdFloatMemo(){
       if(e.key==='Enter') e.preventDefault();
     });
   }
+}
+function _toggleFloatTodo(){
+  var area=$('float-todo-area');
+  var div=$('float-todo-divider');
+  if(!area) return;
+  var isHidden=area.style.display==='none';
+  area.style.display=isHidden?'flex':'none';
+  if(div) div.style.display=isHidden?'block':'none';
 }
 function floatToggleTodo(pgIdx,tIdx){
   if(!CURRENT_USER_ID) return;
@@ -13568,13 +13636,14 @@ function _detachMemo(idx){
   var cnt=Object.keys(_detachedMemos).length;
   var baseX=Math.max(50,Math.floor(window.innerWidth/2-200+cnt*30));
   var baseY=Math.max(50,Math.floor(window.innerHeight/2-180+cnt*30));
-  win.style.cssText='position:fixed;left:'+baseX+'px;top:'+baseY+'px;width:380px;height:400px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:9990;display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0;resize:both;min-width:250px;min-height:200px';
+  win.style.cssText='position:fixed;left:'+baseX+'px;top:'+baseY+'px;width:380px;height:400px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10001;display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0;resize:both;min-width:250px;min-height:200px';
 
   // 헤더
   var head=document.createElement('div');
   head.style.cssText='padding:8px 12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;cursor:move;display:flex;align-items:center;gap:6px;flex-shrink:0;user-select:none';
   head.innerHTML='<span style="font-size:12px;font-weight:700;flex:1">📝 '+esc(pg.name)+'</span>'
     +'<span id="detach-save-'+idx+'" style="font-size:9px;opacity:0;transition:opacity .3s">✓</span>'
+    +'<span onclick="_detachSave('+idx+')" style="cursor:pointer;font-size:13px;opacity:.8" title="저장 (Ctrl+S)">💾</span>'
     +'<span onclick="_detachDock('+idx+')" style="cursor:pointer;font-size:11px;opacity:.7" title="빠른메모로 합치기">↙</span>'
     +'<span onclick="_detachClose('+idx+')" style="cursor:pointer;font-size:14px;opacity:.7" title="닫기">×</span>';
   win.appendChild(head);
@@ -13636,7 +13705,11 @@ function _detachSave(idx){
 }
 function _detachClose(idx){
   if(_detachDirty[idx]){
-    if(confirm('저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _detachSave(idx);
+    _confirmSave3('저장되지 않은 내용이 있습니다.',
+      function(){ _detachSave(idx); var w=_detachedMemos[idx];if(w)w.remove();delete _detachedMemos[idx];delete _detachDirty[idx]; },
+      function(){ var w=_detachedMemos[idx];if(w)w.remove();delete _detachedMemos[idx];delete _detachDirty[idx]; },
+      null);
+    return;
   }
   var win=_detachedMemos[idx];
   if(win) win.remove();
