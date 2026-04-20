@@ -12939,7 +12939,7 @@ function rdPMemo(){
     html+='<div style="width:1px;height:18px;background:var(--ln);margin:0 3px"></div>';
     html+='<button onclick="addPMemoTab()" class="btn sm" style="font-size:12px;padding:5px 14px">＋ 메모</button>';
     var _trashCnt=(md.deletedPages&&md.deletedPages.length)||0;
-    html+='<button onclick="_pmemoSpellCheck()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;color:#1a5fa0;white-space:nowrap" title="맞춤법검사">✏ 맞춤법</button>';
+    /* 맞춤법 버튼 제거됨 */
     html+='<button id="pmemo-save-btn" onclick="_pmemoSaveAllDirty()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;transition:background .2s" title="Ctrl+S">💾 저장</button>';
     html+='<div onclick="openPMemoTrash()" style="padding:5px 12px;font-size:12px;color:'+((_trashCnt>0)?'#64748b':'#cbd5e1')+';cursor:pointer;border-radius:6px;font-weight:500;background:var(--w);border:1px solid var(--ln)" title="삭제된 메모 목록">🗑 휴지통('+_trashCnt+')</div>';
     html+='<span id="pmemo-save-ind" style="font-size:11px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:4px">✓ 저장됨</span>';
@@ -13900,9 +13900,8 @@ function rdFloatMemo(){
       th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatSwitchGroup('+fgi+','+fg.items[0].idx+');},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:12px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'"><span>'+esc(fgLabel)+'</span>'+(fGroups.length>1?'<span onclick="event.stopPropagation();floatDelGroup('+fg.group+')" style="font-size:12px;cursor:pointer;opacity:.5;margin-left:2px" title="그룹 삭제">×</span>':'')+'</div>';
     });
     th+='<div onclick="floatAddGroupPage()" style="padding:4px 8px;font-size:14px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 그룹 추가">＋</div>';
-    // 우측: 맞춤법 + 저장
+    // 우측: 저장
     th+='<div style="margin-left:auto;display:flex;gap:4px;flex-shrink:0">';
-    th+='<button onclick="_floatSpellCheck()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;color:#1a5fa0;white-space:nowrap" title="맞춤법검사">✏ 맞춤법</button>';
     th+='<button id="float-save-btn" onclick="_floatSaveNow()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:'+(_floatDirty?'#eab308':'#16a34a')+';color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;transition:background .2s" title="Ctrl+S">💾 저장</button>';
     th+='</div>';
     tabBar.style.display='flex';
@@ -14053,10 +14052,18 @@ function _syncFloatIfOpen(){
   var el=$('float-memo');
   if(el && el.classList.contains('on')) rdFloatMemo();
 }
-// ── 맞춤법검사 ──
-var _spellTaIdx=null;
-var _spellCorrected='';
-function _pmemoSpellCheck(){
+// ── 맞춤법검사 (제거됨 — 함수 스텁만 유지) ──
+function _pmemoSpellCheck(){ return; }
+function _floatSpellCheck(){ return; }
+function _runNaverSpellCheck(){ return; }
+function _renderSpellResult(){ return; }
+function _spellCopyResult(){ return; }
+function _applySpellResult(){ return; }
+function _spTryPusan(){ return; }
+function _spFallbackExternal(){ return; }
+function _spCopyAndOpen(){ return; }
+/* ── 이하 원본 맞춤법 코드 주석처리 ──
+function _pmemoSpellCheck_OLD(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   var _groups=_pmemoGroupList(md);
@@ -14369,6 +14376,7 @@ function _applySpellResult(){
   if(dta){ dta.value=_spellCorrected; _detachDirty[taIdx]=true; }
   var ov=$('spell-overlay'); if(ov) ov.remove();
 }
+── 원본 맞춤법 코드 끝 ── */
 
 // ── 탭 드래그→분리 (빠른메모 밖으로 끌면 분리창 생성) ──
 var _ftDrag=null;
