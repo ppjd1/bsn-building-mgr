@@ -149,6 +149,9 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .exp-tbl thead{position:sticky;top:0;z-index:5}
 .exp-tbl thead th{background:var(--w2);font-size:10px;font-weight:600;color:var(--t3);text-align:center;letter-spacing:.04em}
 .exp-tbl .col-b{text-align:left;font-weight:600;color:var(--bl);font-size:11px;white-space:nowrap;background:var(--w)}
+#tax-side .sb-list-item{padding:4px 6px;cursor:pointer;border-radius:4px;font-size:11px}
+#tax-side .sb-list-item:hover{background:var(--bl2)}
+#tax-side .sb-list-item.on{background:var(--bl);color:#fff;font-weight:600}
 .exp-cell{text-align:center;cursor:pointer;font-family:'Pretendard',sans-serif;font-size:11px;background:var(--w)}
 .exp-cell:hover{background:var(--bl2)}
 .exp-cell.ec-rd{background:var(--rd2) !important;color:var(--t1) !important;font-weight:600}
@@ -1274,12 +1277,12 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div class="ph" style="padding:2px 10px 2px;gap:4px"></div>
   <div style="display:flex;gap:0;height:calc(100vh - 42px);min-height:calc(100vh - 42px);overflow:hidden">
     <!-- 좌: 전기 -->
-    <div style="flex:0.85;min-width:0;border-right:1px solid var(--ln);overflow-y:auto;padding:4px 10px 20px">
+    <div style="flex:1;min-width:0;border-right:1px solid var(--ln);overflow-y:auto;padding:20px 10px 20px">
       <div style="text-align:center;font-size:13px;font-weight:700;color:#d97706;padding:4px 0 6px">⚡ 전기요금</div>
       <div id="electric-list" style="min-height:100%"></div>
     </div>
     <!-- 우: 수도 -->
-    <div style="flex:1.15;min-width:0;overflow-y:auto;padding:4px 10px 20px">
+    <div style="flex:1;min-width:0;overflow-y:auto;padding:20px 10px 20px">
       <div style="text-align:center;font-size:13px;font-weight:700;color:#0284c7;padding:4px 0 6px">💧 수도요금</div>
       <div id="water-list" style="min-height:100%"></div>
     </div>
@@ -1288,30 +1291,58 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 
 <!-- ═══ 건물 점검 페이지 ═══ -->
 <div class="page" id="pg-tax">
-  <div class="ph" style="padding:6px 10px 4px;gap:8px">
-    <h2>🧾 세금계산서</h2>
-    <div style="flex:1"></div>
-  </div>
-  <div class="pb" style="display:flex;flex-direction:column;align-items:center">
-    <div style="width:100%;max-width:820px;padding:40px 20px;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">🧾</div>
-      <div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">세금계산서 API 연동 준비중</div>
-      <div style="font-size:12px;color:var(--t3);line-height:1.6">홈택스 API 연동으로 세금계산서<br>자동 조회·발행 기능이 추가될 예정입니다.</div>
+  <div class="ph" style="padding:2px 10px 2px;gap:4px"><h2>세금계산서 관리</h2></div>
+  <div style="display:flex;gap:0;height:calc(100vh - 42px);min-height:calc(100vh - 42px);overflow:hidden">
+    <!-- 좌: 건물 목록 -->
+    <div id="tax-side" style="width:130px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:var(--w);padding:4px 2px;font-size:11px">
+      <div id="tax-bldg-list"></div>
+    </div>
+    <!-- 우: 메인 -->
+    <div style="flex:1;min-width:0;overflow-y:auto;padding:6px 10px">
+      <div style="display:flex;gap:0;margin-bottom:6px;border-bottom:1px solid var(--ln)">
+        <div class="tax-tab on" data-tab="taxInv" onclick="_taxTab('taxInv')" style="padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent">세금계산서</div>
+        <div class="tax-tab" data-tab="calcInv" onclick="_taxTab('calcInv')" style="padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--t3)">계산서 (면세)</div>
+      </div>
+      <div id="tax-summary" style="font-size:11px;color:var(--t2);margin-bottom:4px"></div>
+      <div id="tax-content"></div>
+      <div id="tax-history" style="margin-top:10px"></div>
     </div>
   </div>
 </div>
 <div class="page" id="pg-drive">
-  <div class="ph" style="padding:6px 10px 4px;gap:8px">
-    <h2>📁 드라이브</h2>
-    <div style="flex:1"></div>
-  </div>
-  <div class="pb" style="display:flex;flex-direction:column;align-items:center">
-    <div style="width:100%;max-width:820px;padding:40px 20px;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">📁</div>
-      <div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">파일 보관 및 공유</div>
-      <div style="font-size:12px;color:var(--t3);line-height:1.6">계약서, 건축물대장, 점검보고서 등<br>파일을 업로드하고 팀원과 공유할 수 있습니다.</div>
+  <div class="ph" style="padding:2px 10px 2px;gap:4px"></div>
+  <div style="display:flex;height:calc(100vh - 42px);min-height:calc(100vh - 42px);overflow:hidden">
+    <!-- 좌: 사이드 패널 -->
+    <div id="drive-side" style="width:180px;flex-shrink:0;background:var(--w2);border-right:1px solid var(--ln);overflow-y:auto;padding:10px 8px;font-size:11px">
+      <div style="font-weight:800;font-size:13px;color:#1e3a5f;margin-bottom:10px;padding:4px 6px">📁 드라이브</div>
+      <div id="drive-nav" style="margin-bottom:10px"></div>
+      <div style="font-size:9px;font-weight:700;color:#94a3b8;padding:2px 8px;margin-bottom:4px">건물별</div>
+      <div id="drive-bldg-list"></div>
+      <div style="font-size:9px;font-weight:700;color:#94a3b8;padding:2px 8px;margin:10px 0 4px">문서유형</div>
+      <div id="drive-cat-list"></div>
+      <div id="drive-storage" style="margin-top:12px;padding:8px;background:var(--w);border-radius:6px;border:1px solid var(--ln)">
+        <div style="font-size:9px;color:#64748b;margin-bottom:3px">저장공간</div>
+        <div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div id="drive-usage-bar" style="height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);width:0%"></div></div>
+        <div id="drive-usage-text" style="font-size:9px;color:#64748b;margin-top:3px">계산중...</div>
+      </div>
+    </div>
+    <!-- 우: 메인 영역 -->
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <div style="padding:8px 14px;background:var(--w);border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:8px">
+        <div id="drive-breadcrumb" style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:4px"></div>
+        <div style="flex:1"></div>
+        <input id="drive-search" type="text" placeholder="🔍 검색..." style="padding:4px 10px;border:1px solid var(--ln);border-radius:5px;font-size:11px;width:160px;font-family:inherit">
+        <button class="btn pri sm" onclick="_driveUpload()" style="font-size:11px">📤 업로드</button>
+        <button class="btn sm" onclick="_driveNewFolder()" style="font-size:11px">📁 새 폴더</button>
+        <div style="display:flex;gap:2px">
+          <span class="btn sm _dv-vt" data-v="grid" onclick="_driveView('grid')" style="padding:3px 6px;font-size:11px;background:var(--bl);color:#fff;border-color:var(--bl)">▦</span>
+          <span class="btn sm _dv-vt" data-v="list" onclick="_driveView('list')" style="padding:3px 6px;font-size:11px">≡</span>
+        </div>
+      </div>
+      <div id="drive-main" style="flex:1;padding:14px;overflow-y:auto"></div>
     </div>
   </div>
+  <input type="file" id="drive-file-input" multiple style="display:none" onchange="_driveHandleFiles(this.files)">
 </div>
 <div class="page" id="pg-inspect">
   <div class="ph" style="padding:6px 10px 4px;gap:8px">
@@ -2314,6 +2345,30 @@ function _mergeArrayById(cloudArr, localArr){
   });
   return Object.values(map);
 }
+// ── memoCats 마이그레이션: defMemoCats에 있는데 DB에 없는 카테고리 키 자동 보충 ──
+function _migrateMemoCats(){
+  if(!DB||!DB.memoCats) return;
+  var changed=false;
+  // defMemoCats의 모든 건물에 대해 tax, account 등 누락 키 보충
+  var defKeys=Object.keys(defMemoCats);
+  defKeys.forEach(function(bId){
+    var def=defMemoCats[bId];
+    if(!def) return;
+    var cur=DB.memoCats[bId];
+    if(!cur){ DB.memoCats[bId]=JSON.parse(JSON.stringify(def)); changed=true; return; }
+    // 각 카테고리 키 체크
+    Object.keys(def).forEach(function(key){
+      // _e_ 접두사(편집기록)나 _mgr_ 접두사(담당자)는 스킵
+      if(key.charAt(0)==='_') return;
+      // 해당 키가 DB에 없거나 빈 문자열이고, def에는 값이 있으면 채움
+      if((!cur[key] || cur[key]==='') && def[key] && def[key]!==''){
+        cur[key]=def[key];
+        changed=true;
+      }
+    });
+  });
+  if(changed) console.log('[migrate] memoCats 누락 키 보충 완료');
+}
 function _mergeDB(cloud, local){
   // 클라우드 기본, 배열은 id 기준 머지 (양쪽 항목 보존)
   var merged=JSON.parse(JSON.stringify(cloud));
@@ -2486,10 +2541,14 @@ function _rtApplyRow(row){
     return;
   }
   _pushRollingBackup('pre-remote-apply');
+  // ★ 로컬 UI 상태 보존 (탭/필터 등 개인 화면 상태는 원격 덮어쓰기 차단)
+  var _savedUI=DB.ui?JSON.parse(JSON.stringify(DB.ui)):null;
   // ★ 클라우드↔로컬 머지 (양쪽 항목 보존) + 이미지 복원
   var _localSnap=JSON.parse(JSON.stringify(DB));
   DB=_mergeDB(row.data, _localSnap);
   DB=_mergeLocalImages(DB, _localSnap);
+  // ★ 로컬 UI 상태 복원 (다른 사용자 탭 클릭이 내 화면에 영향 안 줌)
+  if(_savedUI){DB.ui=_savedUI;}
   // ★ IndexedDB에서도 이미지 복원 (로컬 스냅에 없는 이미지 보호)
   _idbGet('fullDB').then(function(idbFull){
     if(idbFull) DB=_mergeLocalImages(DB, idbFull);
@@ -2500,7 +2559,7 @@ function _rtApplyRow(row){
   try{ localStorage.setItem(SK, JSON.stringify(_stripBillImages(DB))); }catch(_){}
   const onPage=document.querySelector('.page.on');
   const id=onPage?onPage.id.replace('pg-',''):'';
-  ({lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,admin:loadAdminUsers})[id]?.();
+  ({lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,drive:rdDrive,admin:loadAdminUsers})[id]?.();
   _rtShowToast('🔄 다른 사용자가 업데이트함 — 반영됨');
 }
 // 모달 닫힐 때마다 호출: 큐에 있으면 반영
@@ -2787,20 +2846,20 @@ const bldgs=[
   {id:14,name:'36.더파크청담',addr:'청담동 61-10'},
 ];
 const defMemoCats={
-  1:{password:'1층 정문/승강기옆문(07시~22시 개방)\n>리더기3개 경비기능 꺼둠\n정문: 카드키,지문 필요\n열림비번: 1552 > 확인 > 1552 > 확인',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 건물주에 권한 받아야함)\ncctv장비: admin / Secom100',fire:'소방안전관리자: 건물주 구태정',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',etc:'에스원\n트러스트카페\n(박정도, 비상연락망 등록함, b1,1층 경비 가능)\n트러스트빌딩은 출입통제 장비가 없어서 비상연락망 등록 필요\n\n참고사항:\n주차기 안전관리자: 전원성'},
-  2:{password:'1층 출입문: 1 → 확인 → 8284 → 확인\nb1층: 0007#\n3층: 2580#',cctv:'에스원\nadmin\n비번 Secom100',fire:'소방안전관리자: 건물주 김희수',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 24일\n고객번호: 032757520, 주식회사 히프나틱',etc:''},
-  3:{password:'건물 입구: 1 → 확인 → 43733 → 확인\np층 유수검지장치실/b2층 기계실/b2층 창고 포함\n공인인증서 비번: ch4613!!bsn',cctv:'에스원 장비\n아이디: admin\n비번: Secom3112',fire:'소방안전관리자: 윤상수(건물주)',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 29일\n고객번호: 029071835, 윤상수',etc:'(26.01.16 재접수)\np층 공용: 잠김상태 유지\n1층 공용: 평일 08시~20시, 주말 잠금'},
-  4:{password:'1층 정문: 1210\n1층 승강기앞: 1210\nb1층: 0800*\n5층: 1997*\n공인인증서 PW: @duckling11',cctv:'',fire:'소방안전관리자 필요 없음',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 22일\n고객번호: 022818134, (주)엠케이컨텐츠',etc:'신한은행 간편조회\nID: mkcontents1\nPW: mk2580^^\n계좌 비번: 2580'},
-  5:{password:'2층 화장실: 3939*(마스터키2880)\n(카드키4개 조선미 팀장이 보관)\n옥상 출입문: 3738*',cctv:'캡스\nID: giftingbsn\nPW: NEP_qrt3pek5cuz3uvb',fire:'소방안전관리자 필요 없음',elevator:'없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n고객번호: 000444839, 수앤준 (건물주 납부)',etc:'케어팀 서랍에 1층 임직원용 화장실 출입 키 있음'},
-  6:{password:'출입구: 1 > 확인 > 2880 > 확인\n주차장 자물쇠: 1628\n공인인증서 비번: *h4735530*',cctv:'에스원 장비 로그인\nID: admin\nPW: Cctv1588',fire:'소방안전관리자: 임차인',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 8일\n고객번호: 033893045, 황순부',etc:'공용부 출입카드: 1층 임차인 보관\n1층 출입카드: 케어팀 서랍에 보관'},
-  7:{password:'1층 공용부 2개: 1 확인 5223 확인\n공인인증서 비번: my466489$$',cctv:'블루CCTV 어플 설치\n좌측 상단 三 클릭→추가 클릭',fire:'소방안전관리자: 박정도',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 7일\n고객번호: 042807600, (주)브렌트우드',etc:'원격검침용 PC 비번: omniamsys\n하나은행 빠른조회\n계좌번호: 210-910050-88104 / 비번: 0508'},
-  8:{password:'1층 우편함내 카드키',cctv:'건물정보 폴더 안 이미지파일 확인',fire:'소방안전관리자: 임차인',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 022891658, 라이드주식회사',etc:''},
-  9:{password:'건물입구 자동문: 7 확인 7560 확인\n(기존 잠금장치 2216* 해제, 2216# 잠금)\n공인인증서 비번: pace010914! (신사2지점)',cctv:'신사동560 장비\n영상본체 VRN10201 / 맥주소 000322835248\n비번: Secom3112 (첫글자 S는 대문자)',fire:'소방안전관리자: 이신형(임차사 직원)',elevator:'승강기안전관리자: 박정도',water:'수도청구서: 홀수월\n검침일: 홀수월 7일\n일반용: 029132875(철거) / 가정용: 031112881\n수용가명: 주식회사포도클럽',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요\n신한은행: id/pw: pace12 / ace140901! / 비번4자리: 4673'},
-  10:{password:'1층 출입문: 7 확인 7936 확인\n>열림시간: 주7일 12시~22시20분(26.03.04)\n공인인증서 비번: pace010914! (신사1지점)',cctv:'장비 아이디 admin\n비번 Secom3112\n어플 ID: yjmun8383 / PW: Secom560',fire:'소방안전관리자: 건물주 조용호',elevator:'승강기안전관리자: 박정도',water:'성은빌딩\n일반용: 029056246 / 수용가명: 프로젝트에이스주식회사\n검침일: 짝수월',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요'},
-  11:{password:'작심 카페 주출입구: 1 > ok > 00000910 > ok\n(f1 또는 f2 누르고 외출/퇴실 선택)',cctv:'Hik-Connect 어플\nID: 01091409398\nPW: ing2013*',fire:'소방안전관리자: 건물주 직원',elevator:'승강기안전관리자: 박정도',water:'청구서: 홀수월\n검침일: 홀수월 7일\n고객번호: 028634845 / 수용가명: 이현경 / 수도안분 없음',etc:'하나은행 빠른조회\n계좌번호: 13991003215604 / 비밀번호: 9460'},
-  12:{password:'비번: 6 > 확인 > 7904 > 확인\n(26.02.09 임차사 캡스로 변경됨)',cctv:'에스원\n계약번호: N6152121 아민코 / 맥주소: 000322901942\n녹화기명: VRN-10201 / 아이디: admin',fire:'소방안전관리자: (건물주 직원이 발행)',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n수용가명: 아민코 주식회사',etc:'건물 열쇠뭉치 전달함 (26.01.19)'},
-  13:{password:'1층 현관: 5577*\n1층 화장실: 2880\nb1,1층 전용부: 0710*(퇴거)\n3층: 1234*(퇴거)\n4층: 1234*(퇴거)',cctv:'없음',fire:'(없음)',elevator:'승강기 없음',water:'청구서: 홀수월\n검침일: 짝수월 22일\n고객번호: 029061055',etc:''},
-  14:{password:'출입비번: 1 확인 6110 확인',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 권한 받아야함)\ncctv장비 로그인: admin / N6139618!',fire:'(없음)',elevator:'승강기안전관리자: 박정도',water:'짝수월\n수용가명: 프로젝트에이스주식회사',etc:''},
+  1:{password:'1층 정문, 승강기옆문(07시~22시 개방)\n>리더기3개 경비기능 꺼둠\n정문: 카드키,지문 필요(주차기 조작반에 카드키 있음)\n옆문 비번: 1552 > 확인 > 1552 > 확인',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 건물주에 권한 받아야함)\ncctv장비 로그인: admin / Secom100',fire:'소방안전관리자: 건물주 구태정',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',tax:'양부장님이 처리\n(세금계산서는 양부장님 처리)',account:'',contact:'',etc:'에스원\n트러스트카페\n(박정도, 비상연락망 등록함, b1,1층 경비 가능)\n트러스트빌딩은 출입통제 장비가 없어서 비상연락망 등록안됨\n\n참고사항:\n주차기 안전관리자: 전원성'},
+  2:{password:'1층 출입문: 1 → 확인 → 8284 → 확인\nb1층: 0007#\n3층: 2580#\n5층: 0923#(26.04.15 참고용)\n\n{기존 비번 전체삭제}\n12341234 > # > 7 > #\n{비번 등록}\n12341234 > # > 2 > # > 비번4자리 > # > *\n{잠금,열림}\n비번 입력 #\n==============\n{주차장 자물쇠} 8284\n{주차 차단기} 2880\n{3~2층 화장실}\n남자: 3333, 여자: 2222',cctv:'에스원\nadmin\n비번 Secom100',fire:'소방안전관리자: 건물주 김희수',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 24일\n고객번호: 032757520, 주식회사 히프나틱\n\n전기 고객번호:\n사용자명: ㈜히프나틱\n공용: 01-1336-2156\n지하: 01-6067-3348\n1층: 01-6067-3240\n2층: 01-6067-3302\n3층: 01-6067-3311\n4층: 01-6067-3320\n5층: 01-6067-3339',tax:'건물주(김희수 대표)',account:'',contact:'집수정 청소 02-546-0433 (010-9105-1709)',etc:'간이정화조는 집수정 청소 업체에 신청\n집수정 청소 > 02-546-0433 (010-9105-1709)'},
+  3:{password:'{건물 입구}\n1 → 확인 → 43733 → 확인\n\n{p층 유수검지장치실, b2층 기계실, b2층 창고}\n4613*\n\n{8층} 25318\n\n{각층 자동문}\n1층: 4613(에스원: 7 확인 4613 확인)\n2880# : 열림\n2880* : 잠김\n\n>지하 2층 창고 비밀번호: 4613* (보양제 보관중)\n\n',cctv:'에스원 장비\n아이디: admin\n비번: Secom3112',fire:'소방안전관리자: 윤상수(건물주)',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 29일\n고객번호: 029071835, 윤상수',tax:'공인인증서 비번: ch4613!!bsn\n\n임대료,관리비→미드미디앤씨\n주차비→(주)미드미디앤디\n>기본 주차1대\n>추가 1대, 15만원 지불 후 사용',account:'',contact:'',etc:'(26.01.16 재접수)\np층 공용: 잠김상태 유지\n1층 공용: 평일 08시~20시, 주말 잠금\n2층 공용: 평일 08시~20시, 주말 잠금\n\n7층:주차리모컨, 열쇠O\n4층:주차리모컨, 열쇠X'},
+  4:{password:'1층 정문: 1210\n1층 승강기앞: 1210\nb1층: 0800*\n5층: 1997*',cctv:'',fire:'소방안전관리자 필요 없음',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 22일\n고객번호: 022818134, (주)엠케이컨텐츠\n(1/n 안분)',tax:'공인인증서 PW: @duckling11',account:'신한은행 간편조회\nID: mkcontents1\nPW: mk2580^^\n계좌 비번: 2580',contact:'',etc:''},
+  5:{password:'2층 화장실: 3939*(마스터키2880)\n(카드키4개 조선미 팀장이 보관)\n옥상 출입문: 3738*',cctv:'캡스\nID: giftingbsn\nPW: NEP_qrt3pek5cuz3uvb',fire:'소방안전관리자 필요 없음',elevator:'없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n고객번호: 000444839, 수앤준 (건물주 납부)',tax:'',account:'',contact:'',etc:'케어팀 서랍에 1층 임직원용 화장실 출입 키 있음'},
+  6:{password:'출입구: 1 > 확인 > 2880 > 확인\n주차장 자물쇠: 1628',cctv:'에스원 장비 로그인\nID: admin\nPW: Cctv1588\n\n내부만 보는 계정\n>ID: user\n>PW: Admin473',fire:'소방안전관리자: 임차인',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 8일\n고객번호: 033893045, 황순부',tax:'공인인증서 비번: *h4735530*',account:'',contact:'',etc:'공용부 출입카드: 1층 임차인 보관(외등 점등시 출입용)\n1층 출입카드: 케어팀 서랍에 보관(공용분전함 및 소방수신기 확인시 출입용)'},
+  7:{password:'1층 공용부 2개: 1 확인 5223 확인',cctv:'블루CCTV 어플 설치\n>좌측 상단 三 클릭→추가 클릭\n>TCP/IP 체크\n\n[녹화기1]\n접속주소: ja500a5.ddnscctv.com\n포트: 7621\n아이디: admin\n비밀번호: a12345678!\n\n[녹화기2]\n접속주소: ja500f1.ddnscctv.com\n포트: 7623\n아이디: admin\n비밀번호: a12345678!',fire:'소방안전관리자: 박정도',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 7일\n고객번호: 042807600, (주)브렌트우드',tax:'공인인증서 비번: my466489$$',account:'하나은행 빠른조회\n계좌번호: 210-910050-88104\n비번: 0508\n사업자 뒷5자리: 02595',contact:'',etc:'원격검침용 PC 비번: omniamsys'},
+  8:{password:'1층 우편함내 카드키',cctv:'건물정보 폴더 안 이미지파일 확인',fire:'소방안전관리자: 임차인',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 022891658, 라이드주식회사\n\n전기 고객번호:\n고객명: 라이드주식회사\n공용: 01-6059-0669\nB1층: 01-6059-0678\n1층: 01-6059-0687\n2층: 01-6059-0696\n3층: 01-6059-0703\n4층: 01-6059-0712\n5층: 01-6059-0721\n6층: 01-6059-0730',tax:'건물주(최원석 대표님)',account:'',contact:'',etc:''},
+  9:{password:'건물입구 자동문: 7 확인 7560 확인\n(기존 잠금장치 2216* 해제, 2216# 잠금)',cctv:'신사동560 장비\n영상본체 VRN10201 / 맥주소 000322835248\n비번: Secom3112 (첫글자 S는 대문자)\n\n어플 ID: yjmun8383\nPW: Secom560',fire:'소방안전관리자: 이신형(임차사 직원)',elevator:'승강기안전관리자: 박정도',water:'수도청구서: 홀수월\n검침일: 홀수월 7일\n일반용: 029132875(철거) / 가정용: 031112881\n수용가명: 주식회사포도클럽',tax:'공인인증서 비번\n신사2지점: pace010914!',account:'신한은행 간편조회\nid/pw: pace12 / ace140901!\n비번4자리: 4673\n계좌: 140-014-204152',contact:'',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요'},
+  10:{password:'1층 출입문: 7 확인 7936 확인\n>열림시간: 주7일 12시~22시20분(26.03.04)',cctv:'장비 아이디 admin\n비번 Secom3112\n\n어플 ID: yjmun8383 / PW: Secom560',fire:'소방안전관리자: 건물주 조용호',elevator:'승강기안전관리자: 박정도',water:'성은빌딩\n일반용: 029056246 / 수용가명: 프로젝트에이스주식회사\n검침일: 짝수월 25일\n고지서: 홀수월\n\n전기 고객번호:\n고객명: 프로젝트에이스 주식회사\n공용: 01-6112-2361\nB1층: 01-0147-5253\n1층: 01-6112-2370\n2층: 01-6112-2389\n3층: 01-6112-2398\n4층: 01-6112-2405\n5층: 01-6112-2414',tax:'공인인증서 비번\n신사1지점: pace010914!',account:'건물주 직접 체크',contact:'',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요'},
+  11:{password:'작심 카페 주출입구: 1 > ok > 00000910 > ok\n(f1 또는 f2 누르고 외출/퇴실 선택)\n\nb2층 도어락 및 1층 주차기옆 도어락: 0910\nb1층 뒷문 도어락: 7788\n주차기: 2737\n5층: 6688*',cctv:'Hik-Connect 어플\nID: 01091409398\nPW: ing2013*\n=============\n추가 CCTV 어플: 밝히는 CCTV\nTCP/P2P mode: TCP Mode\n도메인: 346e11.jdrddns.com\n포트: 8602\n아이디: admin\n비밀번호: cctv1234!',fire:'소방안전관리자: 건물주 직원',elevator:'승강기안전관리자: 박정도',water:'청구서: 홀수월\n검침일: 홀수월 7일\n고객번호: 028634845 / 수용가명: 이현경\n수도안분 없음(건물주가 다 납부함)',tax:'건물주 직원\n임수진(계산서발행) 010-7708-4161',account:'하나은행 빠른조회\n계좌번호: 13991003215604\n비밀번호: 9460\n사업자번호: 02915',contact:'임수진(계산서발행) 010-7708-4161',etc:''},
+  12:{password:'비번: 6 > 확인 > 7904 > 확인\n(26.02.09 임차사 캡스로 변경됨)',cctv:'에스원\n계약번호: N6152121 아민코 / 맥주소: 000322901942\n녹화기명: VRN-10201 / 아이디: admin',fire:'소방안전관리자: (건물주 직원이 발행)',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n수용가명: 아민코 주식회사',tax:'건물주 직원이 발행',account:'건물주 직원이 체크',contact:'',etc:'건물 열쇠뭉치 전달함 (26.01.19)'},
+  13:{password:'1층 현관: 5577*\n1층 화장실: 2880\nb1,1층 전용부: 0710*(퇴거)\n3층: 1234*(퇴거)\n4층: 1234*(퇴거)',cctv:'없음',fire:'(없음)',elevator:'승강기 없음',water:'청구서: 홀수월\n검침일: 짝수월 22일\n고객번호: 029061055',tax:'건물주 측에서 발행',account:'',contact:'',etc:''},
+  14:{password:'출입비번: 1 확인 6110 확인',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 권한 받아야함)\ncctv장비 로그인: admin / N6139618!',fire:'(없음)',elevator:'승강기안전관리자: 박정도',water:'짝수월\n수용가명: 프로젝트에이스주식회사',tax:'',account:'',contact:'',etc:''},
 };
 return{
 buildings:bldgs,
@@ -2810,8 +2869,8 @@ leases:[
   {id:3,bId:1,floor:'2층',tenant:'법무법인 인율',start:'2025-01-10',end:'2027-01-09',deposit:100000000,rent:6500000,mgmt:500000,paytype:'선불',payday:'10일',phone:'대표님 010-4040-2102',email:'inyul@inyullaw.com',note:'렌트프리(3개월) 25.01.10~25.04.09'},
   {id:4,bId:1,floor:'3층',tenant:'세무법인 펜타곤',start:'2025-04-21',end:'2027-04-20',deposit:100000000,rent:5500000,mgmt:500000,paytype:'선불',payday:'21일',phone:'대표님 010-3211-3132',email:'',note:'렌트프리(2개월) 25.04.21~25.06.20'},
   {id:5,bId:1,floor:'4층',tenant:'세무법인 디엘지(DLG)',start:'2024-11-19',end:'2026-11-18',deposit:200000000,rent:12000000,mgmt:1000000,paytype:'선불',payday:'19일',phone:'대표님 010-9344-1543',email:'',note:'렌트프리(2개월)'},
-  {id:6,bId:1,floor:'6층',tenant:'조준우(바디움대표)개인',start:'2024-05-16',end:'2026-05-15',deposit:150000000,rent:15000000,mgmt:2000000,paytype:'선불',payday:'16일',phone:'조준우 010-9285-3907',email:'jina@bodium.co.kr',note:''},
-  {id:7,bId:1,floor:'7층',tenant:'주식회사바디움',start:'2024-05-16',end:'2026-05-15',deposit:50000000,rent:5000000,mgmt:1000000,paytype:'선불',payday:'16일',phone:'',email:'jina@bodium.co.kr',note:''},
+  {id:6,bId:1,floor:'6~7층',tenant:'조준우(바디움대표)개인',start:'2024-05-16',end:'2026-05-15',deposit:150000000,rent:15000000,mgmt:2000000,paytype:'선불',payday:'16일',phone:'조준우 010-9285-3907',email:'jina@bodium.co.kr',note:'6~7층 세트'},
+  {id:7,bId:1,floor:'8층',tenant:'주식회사바디움',start:'2024-05-16',end:'2026-05-15',deposit:50000000,rent:5000000,mgmt:1000000,paytype:'선불',payday:'16일',phone:'',email:'jina@bodium.co.kr',note:''},
   {id:8,bId:2,floor:'1층',tenant:'주식회사 누땡',start:'2023-12-26',end:'2026-12-25',deposit:100000000,rent:6000000,mgmt:400000,paytype:'선불',payday:'26일',phone:'010-9245-9943',email:'nuthang13@naver.com',note:'렌트프리(3개월)'},
   {id:9,bId:2,floor:'2층',tenant:'두보산업㈜',start:'2025-08-11',end:'2027-08-10',deposit:50000000,rent:4500000,mgmt:400000,paytype:'선불',payday:'11일',phone:'정경래 010-9808-8725',email:'',note:''},
   {id:10,bId:2,floor:'4층',tenant:'비주얼인텔리전스',start:'2026-03-05',end:'2027-03-04',deposit:50000000,rent:4500000,mgmt:300000,paytype:'선불',payday:'4일',phone:'장세훈 010-9663-3214',email:'sehun.chang@visualint.co.kr',note:''},
@@ -2835,6 +2894,33 @@ leases:[
   {id:28,bId:11,floor:'3층',tenant:'오수진(GLP아카데미)',start:'2026-04-01',end:'2028-03-31',deposit:20000000,rent:3165000,mgmt:200000,paytype:'선불',payday:'30일',phone:'010-5269-8687',email:'',note:''},
   {id:29,bId:12,floor:'지하1층~5층',tenant:'그랑파리',start:'2026-01-07',end:'2029-01-06',deposit:400000000,rent:28000000,mgmt:0,paytype:'선불',payday:'7일',phone:'최윤영 010-9002-8863',email:'hichois@naver.com',note:'렌트프리 26.01.07~26.04.06'},
   {id:30,bId:13,floor:'2층',tenant:'이작디자인',start:'2025-03-27',end:'2026-03-26',deposit:1000000,rent:600000,mgmt:0,paytype:'후불',payday:'말일',phone:'양은주 010-6209-6657',email:'',note:''},
+  {id:31,bId:2,floor:'5층',tenant:'바오밥픽처스',start:'2024-09-23',end:'2026-09-22',deposit:60000000,rent:4200000,mgmt:400000,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:32,bId:1,floor:'1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:33,bId:1,floor:'5층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:34,bId:2,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:35,bId:3,floor:'지하2층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:36,bId:3,floor:'지하1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:37,bId:3,floor:'1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:38,bId:3,floor:'2층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:39,bId:3,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:40,bId:3,floor:'5층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:41,bId:3,floor:'6층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:42,bId:3,floor:'8층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:43,bId:4,floor:'2층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:44,bId:4,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:45,bId:4,floor:'4층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:46,bId:5,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'건물주 사용'},
+  {id:47,bId:6,floor:'지하1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'슈퍼보이드 사용(임대료 없음)'},
+  {id:48,bId:6,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:49,bId:6,floor:'5층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'슈퍼보이드 사용(임대료 없음)'},
+  {id:50,bId:11,floor:'지하1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:51,bId:11,floor:'4층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:52,bId:11,floor:'5층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:53,bId:13,floor:'지하1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:54,bId:13,floor:'1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
+  {id:55,bId:13,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'퇴거완료'},
+  {id:56,bId:13,floor:'4층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'명도 완료'},
+  {id:58,bId:2,floor:'지하1층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
 ],
 expires:[
   {id:1,bId:1,type:'승강기 보험',date:'2026-09-06',note:''},{id:2,bId:1,type:'화재 보험',date:'2026-08-29',note:''},{id:3,bId:1,type:'주차기 보험',date:'2027-02-05',note:''},{id:4,bId:1,type:'저수조 청소',date:'2026-09-09',note:'6개월 주기(26년 03/09완료)'},{id:5,bId:1,type:'정화조 청소',date:'2026-10-23',note:''},
@@ -3315,7 +3401,7 @@ function gp(id,el){
   if(id==='memo'){ DB.ui.selMemoCat=null; const ms=$('memo-search'); if(ms) ms.value=''; }
   if(id==='report'){ DB.ui.repBldgId=null; }
   if(id==='expire'){ const es=$('expire-search'); if(es) es.value=''; }
-  sv();
+  // UI 탭 상태는 로컬 전용 — sv() 호출 안 함 (다른 사용자 화면에 영향 방지)
   ({lease:rdLease,expire:rdExpire,cal:()=>{
       fillSel('ca-bldg',true);
       const today=fd(new Date());
@@ -3326,7 +3412,7 @@ function gp(id,el){
       DB.ui.calM=now.getMonth();
       calSelDate=today;
       rdCal();
-    },fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:function(){},drive:function(){},admin:loadAdminUsers})[id]?.();
+    },fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:rdTax,drive:rdDrive,admin:loadAdminUsers})[id]?.();
 }
 function upBadges(){
   const y=$('nb-ex');
@@ -3441,8 +3527,18 @@ function rdLease(){
       grp[b.id]=[];
     }
   });
+  // 층 순서 정렬 함수
+  const _floorOrd=function(fl){
+    var s=String(fl||'').replace(/\s/g,'');
+    if(/전체/.test(s)) return -100;
+    var m=s.match(/지하(\d+)/);if(m) return -parseInt(m[1]);
+    m=s.match(/^(\d+)/);if(m) return parseInt(m[1]);
+    if(/옥상/.test(s)) return 9999;
+    return 0;
+  };
   let html='';
   Object.entries(grp).forEach(([bId,ls])=>{
+    ls.sort(function(a,b){return _floorOrd(a.floor)-_floorOrd(b.floor);});
     const b=DB.buildings.find(b=>b.id==bId);const addr=b?_shortAddr(b.addr):'';
     let bmSeg='';
     const hideBm=_hideBm;
@@ -3480,7 +3576,7 @@ function rdLease(){
       const isV=!l.tenant||l.tenant==='공실';const isDr=l.paytype==='직영';
       const d=l.end?dday(l.end):9999;const vat=((l.rent||0)+(l.mgmt||0))*1.1;
       const ptBg=l.paytype==='선불'?'background:#fff8d0;':l.paytype==='후불'?'background:#e4f3ea;':'';
-      html+=`<tr ondblclick="editLease(${l.id})" style="cursor:pointer" title="더블클릭 수정" data-presence-type="lease" data-presence-id="${l.id}">
+      html+=`<tr ondblclick="editLease(${l.id})" style="cursor:pointer;${isV?'background:var(--w2);opacity:.75':''}" title="더블클릭 수정" data-presence-type="lease" data-presence-id="${l.id}">
         <td style="text-align:center;white-space:normal;word-break:keep-all;line-height:1.25">${fmtFloor(l.floor)}</td>
         <td style="padding-left:2px;padding-right:2px;min-width:110px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':l.tenant}</td>
         <td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.start)}</td><td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.end)}</td>
@@ -3547,7 +3643,7 @@ function rdLease(){
           }catch(_){}
           return `<span style="display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:2px 7px;background:#fef3c7;border:1px solid #fbbf24;border-radius:4px;color:#92400e;font-weight:600;white-space:nowrap;font-family:'Pretendard',sans-serif"><span>${rfLabelDay(l.rfStart)}<br>~ ${rfLabelDay(l.rfEnd)}</span>${days}</span>`;
         })()}</td>
-        <td style="font-size:11px;white-space:pre-line;line-height:1.3;padding:2px 6px;width:130px;min-width:110px;word-break:keep-all">${l.note||''}</td>
+        <td style="font-size:11px;white-space:pre-line;line-height:1.3;padding:2px 6px;width:130px;min-width:110px;word-break:keep-all">${isV&&l.note?'<span style="color:#b45309;font-weight:500">'+l.note+'</span>':l.note||''}</td>
       </tr>`;
     });
   });
@@ -3580,7 +3676,7 @@ function rdLease(){
     }
   }
 }
-function setLF(v){DB.ui.leaseF=v;sv();rdLease();}
+function setLF(v){DB.ui.leaseF=v;rdLease();}
 function toggleHideBm(cb){try{localStorage.setItem('bm_showBm',cb.checked?'1':'0');}catch(e){}
   const det=$('bmfee-detail'); if(det) det.style.display='none';
   rdLease();
@@ -3931,6 +4027,26 @@ function _autoMeterDay(w){
   return best;
 }
 // (건물메모→수도 마이그레이션 제거됨 — 수도요금에서 직접 입력)
+function _toggleWaterRows(bId){
+  var rows=document.querySelectorAll('[data-wcollapse="'+bId+'"]');
+  var ctrl=document.querySelector('[data-wcollapse-ctrl="'+bId+'"]');
+  var label=document.querySelector('[data-wcollapse-label="'+bId+'"]');
+  if(!rows.length) return;
+  var isHidden=rows[0].style.display==='none';
+  rows.forEach(function(r){ r.style.display=isHidden?'':'none'; });
+  if(ctrl) ctrl.style.display=isHidden?'':'';
+  // rowspan 업데이트 — 해당 건물의 td만 정확히 찾기
+  var bldgTd=document.querySelector('td[data-wcollapse-bldg="'+bId+'"]');
+  if(bldgTd){
+    var total=parseInt(bldgTd.getAttribute('rowspan'))||0;
+    if(isHidden){
+      bldgTd.setAttribute('rowspan', total+rows.length);
+    } else {
+      bldgTd.setAttribute('rowspan', total-rows.length);
+    }
+  }
+  if(label) label.textContent=isHidden?'▲ 접기':'▼ +'+rows.length+'개 더보기';
+}
 function rdWater(){
   const list=$('water-list'); if(!list) return;
   const q='';
@@ -3961,49 +4077,45 @@ function rdWater(){
     return (b.name||'').toLowerCase().includes(q) || (w.custNo||'').toLowerCase().includes(q) || (w.custName||'').toLowerCase().includes(q) || (w.note||'').toLowerCase().includes(q);
   };
   // 사용법 + 테이블을 flex로 나란히 배치
-  html+='<div style="display:flex;justify-content:center;padding:6px;gap:10px;align-items:flex-start">';
+  html+='<div style="display:flex;padding:2px;gap:4px;align-items:flex-start">';
   // 좌측: 사용법 패널 (테이블 밖)
-  html+='<div style="width:170px;flex-shrink:0;background:var(--w2);border:1px solid var(--ln);border-radius:var(--r2);padding:10px 12px;font-size:11px;color:var(--t2);line-height:1.7">';
-  html+='<div style="font-weight:700;color:var(--bl);font-size:11.5px;margin-bottom:4px">확장프로그램 <span style="color:#dc2626;font-size:10px">(필수)</span></div>';
-  html+='<a href="arisu-extension.zip" download style="display:inline-block;padding:3px 8px;margin-bottom:4px;font-size:10.5px;background:#0284c7;color:#fff;border-radius:4px;text-decoration:none;font-weight:600">⬇ 배포파일 다운로드</a><br>';
-  html+='① zip 압축풀기<br>';
-  html+='② chrome://extensions<br>';
-  html+='③ 개발자 모드 ON<br>';
-  html+='④ 확장 로드 → 폴더선택';
-  html+='<hr style="border:none;border-top:1px solid var(--ln);margin:6px 0">';
-  html+='<div style="font-weight:700;color:var(--bl);font-size:11.5px;margin-bottom:3px">사용법</div>';
-  html+='<b style="color:var(--t1)">🌐 조회</b> — 자동조회<br>';
-  html+='<span style="font-size:10.5px">&gt; 고객번호입력+조회+캡처 자동</span>';
-  html+='<hr style="border:none;border-top:1px solid var(--ln);margin:6px 0">';
-  html+='<a href="https://i121.seoul.go.kr" target="_blank" style="color:var(--bl);font-size:11px;text-decoration:none;font-weight:600">🔗 아리수 홈페이지</a>';
+  html+='<div style="width:138px;flex-shrink:0;background:var(--w2);border:1px solid var(--ln);border-radius:var(--r2);padding:8px 2px 8px 6px;font-size:11px;color:var(--t2);line-height:1.7">';
+  html+='<div style="font-weight:700;color:var(--bl);font-size:12px;margin-bottom:4px">확장프로그램 <span style="color:#dc2626;font-size:10.5px">(필수)</span></div>';
+  html+='<a href="arisu-extension.zip" download style="display:inline-block;padding:4px 10px;margin-bottom:4px;font-size:11.5px;background:#0284c7;color:#fff;border-radius:5px;text-decoration:none;font-weight:600">⬇ 배포파일 다운로드</a><br>';
+  html+='<span style="font-size:13px;font-weight:700">①</span> zip 압축풀기<br>';
+  html+='<span style="font-size:13px;font-weight:700">②</span> chrome://extensions<br>';
+  html+='<span style="font-size:13px;font-weight:700">③</span> 개발자 모드 ON<br>';
+  html+='<span style="font-size:13px;font-weight:700">④</span> 확장 로드 → 폴더선택';
   html+='<hr style="border:none;border-top:1px solid var(--ln);margin:8px 0">';
-  html+='<button onclick="_showWaterBillModal(null)" style="display:block;width:100%;padding:10px 8px;font-size:13px;font-weight:700;background:#0284c7;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(2,132,199,.3)">📂 청구서 폴더</button>';
-  html+='<button onclick="_fetchWaterBulk()" style="display:block;width:100%;padding:10px 8px;font-size:13px;font-weight:700;background:#059669;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(5,150,105,.3);margin-top:6px">🌐 일괄조회</button>';
-  html+='<button onclick="_autoFillWaterFromMemo()" style="display:block;width:100%;padding:8px 8px;font-size:11.5px;font-weight:600;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:6px">📋 메모→자동채우기</button>';
+  html+='<div style="font-weight:700;color:var(--bl);font-size:12px;margin-bottom:3px">사용법</div>';
+  html+='<b style="color:var(--t1)">🌐 조회</b> — 자동조회<br>';
+  html+='<span style="font-size:11px">&gt; 입력+조회+캡처 자동</span>';
+  html+='<hr style="border:none;border-top:1px solid var(--ln);margin:8px 0">';
+  html+='<a href="https://i121.seoul.go.kr" target="_blank" style="color:var(--bl);font-size:12px;text-decoration:none;font-weight:600">🔗 아리수 홈페이지</a>';
+  html+='<hr style="border:none;border-top:1px solid var(--ln);margin:10px 0">';
+  html+='<button onclick="_showWaterBillModal(null)" style="display:block;width:100%;padding:10px 6px;font-size:12px;font-weight:700;background:#0284c7;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(2,132,199,.3)">📂 청구서 폴더</button>';
+  html+='<button onclick="_fetchWaterBulk()" style="display:block;width:100%;padding:10px 6px;font-size:12px;font-weight:700;background:#059669;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(5,150,105,.3);margin-top:8px">🌐 일괄조회</button>';
+  html+='<button onclick="_autoFillWaterFromMemo()" style="display:block;width:100%;padding:9px 6px;font-size:11.5px;font-weight:600;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:8px">📋 메모→자동채우기</button>';
   html+='</div>';
   // 우측: 테이블
-  html+='<div style="flex:1;min-width:540px;max-width:100%"><table style="border-collapse:collapse;font-size:13px;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);overflow:hidden;text-align:center;width:100%;table-layout:fixed;box-shadow:0 1px 2px rgba(0,0,0,.03)">';
-  html+='<colgroup><col style="width:120px"><col style="width:100px"><col style="width:80px"><col style="width:84px"><col style="width:138px"></colgroup>';
+  html+='<div style="flex:1;min-width:0;overflow-x:auto">';
+  // 필터 버튼 + 테이블을 감싸는 wrapper
+  html+='<div style="border:1px solid var(--ln);border-radius:var(--r2);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.03)">';
+  // 필터 버튼 (테이블 위, 가운데 정렬)
   var _wfOn='background:var(--bl);color:#fff;border-color:var(--bl);';
+  html+='<div style="display:flex;gap:4px;justify-content:center;padding:4px 6px;background:var(--w2);border-bottom:1px solid var(--ln)">';
+  html+='<button class="btn sm" onclick="_setWaterFilter(\'all\')" style="padding:4px 12px;font-size:12px;font-weight:600;min-width:48px;justify-content:center;'+(_waterFilter==='all'?_wfOn:'')+'">전체</button>';
+  html+='<button class="btn sm" onclick="_setWaterFilter(\'odd\')" style="padding:4px 12px;font-size:12px;min-width:56px;justify-content:center;'+(_waterFilter==='odd'?_wfOn:'')+'" id="wf-odd">홀수월</button>';
+  html+='<button class="btn sm" onclick="_setWaterFilter(\'even\')" style="padding:4px 12px;font-size:12px;min-width:56px;justify-content:center;'+(_waterFilter==='even'?_wfOn:'')+'" id="wf-even">짝수월</button>';
+  html+='</div>';
+  html+='<table style="border-collapse:collapse;font-size:12px;background:var(--w);text-align:center;width:100%">';
   html+='<thead>';
-  // 1행: 필터 버튼 (고객명 위)
-  html+='<tr style="background:var(--w2)">';
-  html+='<th style="border-right:1px solid var(--ln);background:var(--w2)"></th>';
-  html+='<th style="border-right:1px solid var(--ln);background:var(--w2)"></th>';
-  html+='<th style="padding:4px 8px;border-right:1px solid var(--ln);background:var(--w2)"><div style="display:flex;gap:3px;justify-content:center">';
-  html+='<button class="btn sm" onclick="_setWaterFilter(\'all\')" style="padding:2px 8px;font-size:10px;font-weight:600;min-width:40px;text-align:center;'+(_waterFilter==='all'?_wfOn:'')+'">전체</button>';
-  html+='<button class="btn sm" onclick="_setWaterFilter(\'odd\')" style="padding:2px 8px;font-size:10px;min-width:50px;text-align:center;'+(_waterFilter==='odd'?_wfOn:'')+'" id="wf-odd">홀수월</button>';
-  html+='<button class="btn sm" onclick="_setWaterFilter(\'even\')" style="padding:2px 8px;font-size:10px;min-width:50px;text-align:center;'+(_waterFilter==='even'?_wfOn:'')+'" id="wf-even">짝수월</button>';
-  html+='</div></th>';
-  html+='<th style="border-right:1px solid var(--ln);background:var(--w2)"></th>';
-  html+='<th style="background:var(--w2);padding:4px 8px"></th></tr>';
-  // 2행: 컬럼 헤더
-  html+='<tr style="background:var(--w2);color:var(--t3);font-weight:700;font-size:11.5px;border-bottom:2px solid var(--ln)">';
-  html+='<th style="padding:8px 14px;border-right:1px solid var(--ln)">건물</th>';
-  html+='<th style="padding:8px 14px;border-right:1px solid var(--ln)">고객번호</th>';
-  html+='<th style="padding:8px 14px;border-right:1px solid var(--ln)">고객명</th>';
-  html+='<th style="padding:8px 10px;border-right:1px solid var(--ln)">청구서</th>';
-  html+='<th style="padding:8px 4px;font-size:11px;text-align:center">처리현황/조회</th></tr></thead><tbody>';
+  html+='<tr style="background:var(--w2);color:var(--t3);font-weight:700;font-size:11.5px;border-bottom:1px solid var(--ln)">';
+  html+='<th style="padding:5px 6px;border-right:1px solid var(--ln);font-size:11px">건물</th>';
+  html+='<th style="padding:5px 6px;border-right:1px solid var(--ln);font-size:11px">고객번호</th>';
+  html+='<th style="padding:5px 6px;border-right:1px solid var(--ln);font-size:11px">고객명</th>';
+  html+='<th style="padding:5px 4px;border-right:1px solid var(--ln);font-size:11px">청구서</th>';
+  html+='<th style="padding:5px 4px;font-size:10px;text-align:center">처리현황/조회</th></tr></thead><tbody>';
   Object.values(grp).forEach(g=>{
     const b=g.bldg;
     const items=g.items.filter(w=>filterMatch(w,b));
@@ -4013,40 +4125,76 @@ function rdWater(){
       html+='<td style="padding:7px 10px;font-weight:600;font-size:13px;border-right:1px solid var(--ln);white-space:nowrap">'+esc(b.name)+'</td><td colspan="4" style="padding:7px 14px;color:var(--t4);font-size:12px;text-align:center">등록된 고객정보 없음 <button class="btn sm" style="padding:4px 10px;font-size:12px;margin-left:10px" onclick="openWaterModal(null,'+b.id+')">+ 추가</button></td></tr>';
       return;
     }
+    var _wCollapse=items.length>=2;
+    var _wVisCount=_wCollapse?1:items.length;
+    var _wBid=b.id;
+    // 접힌 건물: 처리현황 카운트 미리 계산
+    var _wDoneCount=0, _wTotalMonth=0;
+    var __cm=new Date().toISOString().slice(0,7);
+    var __cmon=parseInt(__cm.split('-')[1]);
+    if(_wCollapse){
+      items.forEach(function(wi){
+        var _rbc=wi.billCycle||wi.meterCycle||'odd';
+        var _wbc=(_rbc==='even'||_rbc===2||_rbc==='2')?'even':'odd';
+        var _isMy=(_wbc==='even')?(__cmon%2===0):(__cmon%2===1);
+        if(_isMy){
+          _wTotalMonth++;
+          var _hc=false;
+          if(wi.bills&&wi.bills.length){ wi.bills.forEach(function(bb){ if(bb.period===__cm&&bb.files&&bb.files.length) _hc=true; }); }
+          if(_hc) _wDoneCount++;
+        }
+      });
+    }
     items.forEach((w,idx)=>{
       const isFirst=(idx===0);
-      html+='<tr ondblclick="openWaterModal('+w.id+')" style="border-top:1px solid var(--ln);cursor:pointer" title="더블클릭: 수정" data-presence-type="water" data-presence-id="'+w.id+'">';
+      var _hiddenRow=(_wCollapse && idx>=_wVisCount);
+      html+='<tr ondblclick="openWaterModal('+w.id+')" style="border-top:1px solid var(--ln);cursor:pointer'+(_hiddenRow?';display:none':'')+'" title="더블클릭: 수정" data-presence-type="water" data-presence-id="'+w.id+'"'+(_hiddenRow?' data-wcollapse="'+_wBid+'"':'')+'>';
       if(isFirst){
-        html+='<td style="padding:8px 10px;font-weight:700;vertical-align:middle;font-size:13px;border-right:1px solid var(--ln);white-space:nowrap" rowspan="'+items.length+'"><div style="display:inline-flex;align-items:center;gap:4px"><span>'+esc(b.name)+'</span><button class="btn sm" style="padding:0 5px;font-size:9px;line-height:16px;min-width:18px;min-height:16px;border-radius:3px;color:var(--t3)" onclick="event.stopPropagation();openWaterModal(null,'+b.id+')" title="고객정보 추가">+</button></div></td>';
+        html+='<td data-wcollapse-bldg="'+_wBid+'" style="padding:5px 6px;font-weight:700;vertical-align:middle;font-size:12px;border-right:1px solid var(--ln);white-space:nowrap" rowspan="'+(_wCollapse?_wVisCount+1:items.length)+'"><div style="display:inline-flex;align-items:center;gap:2px"><span>'+esc(b.name)+'</span><button class="btn sm" style="padding:0 3px;font-size:8px;line-height:14px;min-width:14px;min-height:14px;border-radius:3px;color:var(--t3)" onclick="event.stopPropagation();openWaterModal(null,'+b.id+')" title="고객정보 추가">+</button></div></td>';
       }
-      html+='<td style="padding:8px 14px;font-family:\'Pretendard\',monospace;font-weight:700;color:var(--bl);user-select:all;white-space:nowrap;font-size:13.5px;letter-spacing:0.3px;border-right:1px solid var(--ln)">'+esc(w.custNo||'')+'</td>';
-      html+='<td style="padding:8px 14px;white-space:nowrap;font-size:13px;border-right:1px solid var(--ln)">'+esc(w.custName||'')+'</td>';
+      html+='<td style="padding:5px 6px;font-family:\'Pretendard\',monospace;font-weight:700;color:var(--bl);user-select:all;white-space:nowrap;font-size:12px;border-right:1px solid var(--ln)">'+esc(w.custNo||'')+'</td>';
+      html+='<td style="padding:5px 6px;font-size:12px;border-right:1px solid var(--ln);white-space:nowrap" title="'+esc(w.custName||'')+'">'+esc(w.custName||'')+'</td>';
       // billCycle 정규화: 숫자(1=홀,2=짝) → 문자열
       var _rawBc=w.billCycle||w.meterCycle||'odd';
       var bc=(_rawBc==='even'||_rawBc===2||_rawBc==='2')?'even':(_rawBc==='odd'||_rawBc===1||_rawBc==='1')?'odd':'odd';
       const bcLabel=bc==='odd'?'홀수월':'짝수월';
       const bcColor=bc==='odd'?'#0284c7':'#d97706';
-      html+='<td style="padding:6px 8px;border-right:1px solid var(--ln);white-space:nowrap;text-align:center"><span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10.5px;font-weight:600;color:#fff;background:'+bcColor+'">'+bcLabel+'</span></td>';
-      html+='<td style="padding:6px 4px;white-space:nowrap;height:38px">';
-      html+='<div style="display:flex;align-items:center;gap:4px;justify-content:center">';
-      var _curMonth=new Date().toISOString().slice(0,7);
-      var _curMon=parseInt(_curMonth.split('-')[1]);
-      var _isMyMonth=(bc==='even')?(_curMon%2===0):(_curMon%2===1);
-      var _hasCur=false;
-      if(w.bills&&w.bills.length){ w.bills.forEach(function(b){ if(b.period===_curMonth&&b.files&&b.files.length) _hasCur=true; }); }
-      // 📄 상태 표시 — 고정 폭
-      if(_isMyMonth && _hasCur){
-        html+='<span style="display:inline-block;width:50px;text-align:center;padding:3px 0;font-size:11px;background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:4px" title="'+_curMonth+' 캡쳐완료">📄 ✓</span>';
-      } else if(_isMyMonth && !_hasCur){
-        html+='<span style="display:inline-block;width:50px;text-align:center;padding:3px 0;font-size:11px;background:#fff7ed;color:#c2410c;border:1px solid #fdba74;border-radius:4px" title="'+_curMonth+' 미캡쳐">📄 !</span>';
+      html+='<td style="padding:4px 4px;border-right:1px solid var(--ln);white-space:nowrap;text-align:center"><span style="display:inline-block;padding:2px 5px;border-radius:8px;font-size:11px;font-weight:600;color:#fff;background:'+bcColor+'">'+bcLabel+'</span></td>';
+      html+='<td style="padding:4px 4px;white-space:nowrap">';
+      html+='<div style="display:flex;align-items:center;gap:3px;justify-content:center">';
+      // 접힌 건물 첫 행: 전체 처리현황 N/M 표시
+      if(_wCollapse && isFirst && _wTotalMonth>0){
+        var _allDone=_wDoneCount===_wTotalMonth;
+        html+='<span style="display:inline-block;min-width:26px;text-align:center;padding:2px 3px;font-size:11px;background:'+(_allDone?'#dcfce7':'#fff7ed')+';color:'+(_allDone?'#15803d':'#c2410c')+';border:1px solid '+(_allDone?'#86efac':'#fdba74')+';border-radius:3px;font-weight:700" title="이번달 처리 '+_wDoneCount+'/'+_wTotalMonth+'">'+_wDoneCount+'/'+_wTotalMonth+'</span>';
       } else {
-        html+='<span style="display:inline-block;width:50px;text-align:center;padding:3px 0;font-size:11px;color:#ccc;background:#f9fafb;border:1px solid #eee;border-radius:4px" title="이번 달 해당없음">📄 —</span>';
+        var _curMonth=__cm;
+        var _curMon=__cmon;
+        var _isMyMonth=(bc==='even')?(_curMon%2===0):(_curMon%2===1);
+        var _hasCur=false;
+        if(w.bills&&w.bills.length){ w.bills.forEach(function(b){ if(b.period===_curMonth&&b.files&&b.files.length) _hasCur=true; }); }
+        if(_isMyMonth && _hasCur){
+          html+='<span style="display:inline-block;width:26px;text-align:center;padding:2px 0;font-size:12px;background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:3px;font-weight:700" title="'+_curMonth+' 캡쳐완료">✓</span>';
+        } else if(_isMyMonth && !_hasCur){
+          html+='<span style="display:inline-block;width:26px;text-align:center;padding:2px 0;font-size:12px;background:#fff7ed;color:#c2410c;border:1px solid #fdba74;border-radius:3px;font-weight:700" title="'+_curMonth+' 미캡쳐">!</span>';
+        } else {
+          html+='<span style="display:inline-block;width:26px;text-align:center;padding:2px 0;font-size:12px;color:#ccc;background:#f9fafb;border:1px solid #eee;border-radius:3px" title="이번 달 해당없음">—</span>';
+        }
       }
-      html+='<button class="btn pri sm" onclick="event.stopPropagation();fetchWaterBill('+w.id+')" style="padding:5px 11px;font-size:12px;background:#0284c7;border-color:#0284c7" title="1클릭 수도요금 조회">🌐 조회</button>';
+      if(_isMyMonth && _hasCur){
+        html+='<button class="btn sm" onclick="event.stopPropagation();if(!confirm(\'이미 캡처 완료된 건입니다. 재조회하시겠습니까?\'))return;fetchWaterBill('+w.id+')" style="padding:4px 8px;font-size:11px;background:#94a3b8;border-color:#94a3b8;color:#fff" title="이미 캡처완료 — 재조회">재조회</button>';
+      } else {
+        html+='<button class="btn pri sm" onclick="event.stopPropagation();fetchWaterBill('+w.id+')" style="padding:4px 8px;font-size:11px;background:#0284c7;border-color:#0284c7" title="1클릭 수도요금 조회">조회</button>';
+      }
       html+='</div></td></tr>';
     });
+    // 접기/펼치기 행
+    if(_wCollapse){
+      html+='<tr data-wcollapse-ctrl="'+_wBid+'" style="border-top:1px solid var(--ln);background:#f0f7ff">';
+      html+='<td colspan="4" style="padding:5px 8px;text-align:center;font-size:11px;color:var(--bl);cursor:pointer" onclick="_toggleWaterRows('+_wBid+')">';
+      html+='<span data-wcollapse-label="'+_wBid+'">▼ +'+(items.length-_wVisCount)+'개 더보기</span></td></tr>';
+    }
   });
-  html+='</tbody></table></div></div>';
+  html+='</tbody></table></div></div></div>';
   // 건물없이 저장된 수도요금 (레거시)
   const orphan=bills.filter(w=>!grp[w.bId]).filter(w=>{
     if(!q) return true;
@@ -4586,14 +4734,32 @@ if(!window._bsnWaterMsgHooked){
         var _spath='waterBills/'+w.id+'/'+period+'/'+Date.now()+'.'+_ext;
         file=await _uploadFileToStorage(dataUrl, _spath, period+'_청구서.'+_ext, _mime);
       }
+      // ★ 중복 캡처 방지: 같은 고객+같은 기간에 30초 이내 재수신이면 스킵
+      if(!window._waterCapLog) window._waterCapLog={};
+      var _wcKey=w.id+'_'+period;
+      var _wcNow=Date.now();
+      if(window._waterCapLog[_wcKey] && (_wcNow - window._waterCapLog[_wcKey]) < 30000){
+        console.log('[BSN water-bill] 중복 캡처 무시 (30초 이내 재수신):', _wcKey);
+        _waterToast('ℹ️ 이미 저장된 캡처입니다 — 중복 무시','#64748b');
+        return;
+      }
+      window._waterCapLog[_wcKey]=_wcNow;
       const ex=w.bills.find(x=>x.period===period);
       let mergedInto='새 폴더';
       if(ex){
-        if(file) ex.files=(ex.files||[]).concat([file]);
+        // 기존 기간에 이미 파일이 있으면 교체 (중복 쌓임 방지), 없으면 추가
+        if(file){
+          if(ex.files && ex.files.length > 0){
+            ex.files=[file]; // 기존 파일 교체 (중복 방지)
+            mergedInto='기존 '+period+' 캡처 교체';
+          } else {
+            ex.files=[file];
+            mergedInto='기존 '+period+' 폴더에 캡처 추가';
+          }
+        }
         if(d.amount) ex.amount=d.amount;
         if(d.usage) ex.usage=d.usage;
         ex.uploadedAt=Date.now();
-        mergedInto='기존 '+period+' 폴더에 추가';
       } else {
         var entry={period, uploadedAt:Date.now()};
         if(file) entry.files=[file]; else entry.files=[];
@@ -6524,23 +6690,23 @@ function rdElectric(){
   const bldgs=DB.buildings||[];
   let html='';
   // 좌측 패널 (항상 표시)
-  var _leftPanel='<div style="width:170px;flex-shrink:0;background:var(--w2);border:1px solid var(--ln);border-radius:var(--r2);padding:10px 12px;font-size:11px;color:var(--t2);line-height:1.7">';
-  _leftPanel+='<div style="font-weight:700;color:#d97706;font-size:11.5px;margin-bottom:4px">확장프로그램 <span style="color:#dc2626;font-size:10px">(필수)</span></div>';
-  _leftPanel+='<a href="bsn-kepco-extension.zip" download style="display:inline-block;padding:3px 8px;margin-bottom:4px;font-size:10.5px;background:#f59e0b;color:#fff;border-radius:4px;text-decoration:none;font-weight:600">⬇ 배포파일 다운로드</a><br>';
-  _leftPanel+='① zip 압축풀기<br>';
-  _leftPanel+='② chrome://extensions<br>';
-  _leftPanel+='③ 개발자 모드 ON<br>';
-  _leftPanel+='④ 확장 로드 → 폴더선택';
-  _leftPanel+='<hr style="border:none;border-top:1px solid var(--ln);margin:6px 0">';
-  _leftPanel+='<div style="font-weight:700;color:#d97706;font-size:11.5px;margin-bottom:3px">사용법</div>';
-  _leftPanel+='<b style="color:var(--t1)">📧 Gmail 불러오기</b><br>';
-  _leftPanel+='<span style="font-size:10.5px">&gt; 한전 청구메일 자동수집</span><br>';
-  _leftPanel+='<b style="color:var(--t1)">📸 청구서 캡처</b><br>';
-  _leftPanel+='<span style="font-size:10.5px">&gt; 한전사이트 자동캡처</span>';
+  var _leftPanel='<div style="width:155px;flex-shrink:0;background:var(--w2);border:1px solid var(--ln);border-radius:var(--r2);padding:8px 5px 8px 8px;font-size:11.5px;color:var(--t2);line-height:1.7">';
+  _leftPanel+='<div style="font-weight:700;color:#d97706;font-size:12px;margin-bottom:4px">확장프로그램 <span style="color:#dc2626;font-size:10.5px">(필수)</span></div>';
+  _leftPanel+='<a href="bsn-kepco-extension.zip" download style="display:inline-block;padding:4px 10px;margin-bottom:4px;font-size:11.5px;background:#f59e0b;color:#fff;border-radius:5px;text-decoration:none;font-weight:600">⬇ 배포파일 다운로드</a><br>';
+  _leftPanel+='<span style="font-size:13px;font-weight:700">①</span> zip 압축풀기<br>';
+  _leftPanel+='<span style="font-size:13px;font-weight:700">②</span> chrome://extensions<br>';
+  _leftPanel+='<span style="font-size:13px;font-weight:700">③</span> 개발자 모드 ON<br>';
+  _leftPanel+='<span style="font-size:13px;font-weight:700">④</span> 확장 로드 → 폴더선택';
   _leftPanel+='<hr style="border:none;border-top:1px solid var(--ln);margin:8px 0">';
-  _leftPanel+='<button onclick="openGmailElectricImport()" style="display:block;width:100%;padding:8px 8px;margin-bottom:6px;font-size:12px;font-weight:700;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(220,38,38,.3)">📧 Gmail에서 불러오기</button>';
-  _leftPanel+='<button onclick="_startKepcoBillCapture()" id="btn-kepco-capture" style="display:block;width:100%;padding:8px 8px;margin-bottom:6px;font-size:12px;font-weight:700;background:#f59e0b;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(245,158,11,.3)">📸 청구서 캡처</button>';
-  _leftPanel+='<button onclick="_showElectricBillModal(null,null)" style="display:block;width:100%;padding:8px 8px;margin-bottom:8px;font-size:12px;font-weight:700;background:#fff;color:#d97706;border:2px solid #f59e0b;border-radius:6px;cursor:pointer">📂 청구서 폴더</button>';
+  _leftPanel+='<div style="font-weight:700;color:#d97706;font-size:12px;margin-bottom:3px">사용법</div>';
+  _leftPanel+='<b style="color:var(--t1)">📧 Gmail 불러오기</b><br>';
+  _leftPanel+='<span style="font-size:11px">&gt; 한전 청구메일 자동수집</span><br>';
+  _leftPanel+='<b style="color:var(--t1)">📸 청구서 캡처</b><br>';
+  _leftPanel+='<span style="font-size:11px">&gt; 한전사이트 자동캡처</span>';
+  _leftPanel+='<hr style="border:none;border-top:1px solid var(--ln);margin:10px 0">';
+  _leftPanel+='<button onclick="openGmailElectricImport()" style="display:block;width:100%;padding:12px 6px;margin-bottom:8px;font-size:12px;font-weight:700;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(220,38,38,.3);white-space:nowrap">📧 Gmail에서 불러오기</button>';
+  _leftPanel+='<button onclick="_startKepcoBillCapture()" id="btn-kepco-capture" style="display:block;width:100%;padding:12px 10px;margin-bottom:8px;font-size:14px;font-weight:700;background:#f59e0b;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(245,158,11,.3)">📸 청구서 캡처</button>';
+  _leftPanel+='<button onclick="_showElectricBillModal(null,null)" style="display:block;width:100%;padding:12px 10px;margin-bottom:8px;font-size:14px;font-weight:700;background:#fff;color:#d97706;border:2px solid #f59e0b;border-radius:8px;cursor:pointer">📂 청구서 폴더</button>';
   _leftPanel+='<div style="border-top:1px dashed var(--ln);padding-top:8px;margin-top:2px">';
   _leftPanel+='<div style="font-size:10px;color:#94a3b8;margin-bottom:5px;letter-spacing:.5px">도구</div>';
   /* 미지정 고객 배치 — 청구서 폴더 탭에서 접근하도록 변경 */
@@ -6572,17 +6738,17 @@ function rdElectric(){
   }
   _leftPanel+='</div></div>';
   if(!DB.electricBills.length){
-    html='<div style="display:flex;justify-content:center;padding:6px;gap:10px;align-items:flex-start">'+_leftPanel+'<div style="text-align:center;padding:40px 20px;color:var(--t3);font-size:13px;line-height:1.7;flex:1">⚡ 전기요금 청구서가 없습니다<br><span style="font-size:11.5px;color:var(--t4)">좌측 <b style="color:#dc2626">📧 Gmail에서 불러오기</b> 버튼으로 한전 청구서를 자동 가져오세요</span></div></div>';
+    html='<div style="display:flex;padding:6px;gap:10px;align-items:flex-start">'+_leftPanel+'<div style="text-align:center;padding:40px 20px;color:var(--t3);font-size:13px;line-height:1.7;flex:1">⚡ 전기요금 청구서가 없습니다<br><span style="font-size:11.5px;color:var(--t4)">좌측 <b style="color:#dc2626">📧 Gmail에서 불러오기</b> 버튼으로 한전 청구서를 자동 가져오세요</span></div></div>';
   } else {
     const elGrp={};
     bldgs.forEach(b=>{ elGrp[b.id]={bldg:b, items:[]}; });
     (DB.electricBills||[]).forEach(e=>{ if(elGrp[e.bId]) elGrp[e.bId].items.push(e); });
     const noBldgItems=(DB.electricBills||[]).filter(e=>!e.bId||!elGrp[e.bId]);
     // 사용법 + 테이블을 flex로 나란히 배치
-    html+='<div style="display:flex;justify-content:center;padding:6px;gap:10px;align-items:flex-start">';
+    html+='<div style="display:flex;padding:6px;gap:10px;align-items:flex-start">';
     html+=_leftPanel;
-    // 우측: 테이블
-    html+='<table style="border-collapse:collapse;font-size:13px;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);overflow:hidden;text-align:center;width:auto;max-width:100%;min-width:480px;table-layout:fixed;box-shadow:0 1px 2px rgba(0,0,0,.03)">';
+    // 우측: 테이블 (가용공간 꽉 채움)
+    html+='<table style="border-collapse:collapse;font-size:13px;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);overflow:hidden;text-align:center;width:100%;table-layout:fixed;box-shadow:0 1px 2px rgba(0,0,0,.03)">';
     html+='<thead><tr style="background:#fffbeb;color:#92400e;font-weight:700;font-size:11.5px;border-bottom:2px solid var(--ln)">';
     html+='<th style="padding:8px 14px;text-align:left">건물</th>';
     html+='<th style="padding:8px 14px">고객</th>';
@@ -9620,12 +9786,33 @@ function _renderModalViewer(elId, target, blobKey, attachFn, scaleKey){
     v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">📂</div><div>${esc(target.ownerLabel)}</div></div>`;
     return;
   }
-  const doc=_getDocData(target.id, target.kind);
+  let doc=_getDocData(target.id, target.kind);
   if(!doc||!doc.files.length){
     v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">📂</div><div><strong>${esc(target.label)}</strong> 미첨부</div><div style="font-size:11px;color:var(--t4)">${esc(target.ownerLabel)}</div><button type="button" class="btn pri sm" onclick="${attachFn}()" style="margin-top:6px">📎 파일 첨부</button></div>`;
     return;
   }
-  const files=doc.files;
+  // __IMG_IN_LOCAL__ 또는 storage 없는 빈 데이터면 IndexedDB에서 복원 시도
+  const _hasValid=(d)=>d&&d.files.some(f=>f.storage||(f.data&&f.data!=='__IMG_IN_LOCAL__'&&f.data.length>30));
+  if(!_hasValid(doc)){
+    v.innerHTML=`<div class="ml-empty"><div class="mv-spinner"></div><div>파일 로딩 중...</div></div>`;
+    _idbGet('fullDB').then(function(fullDB){
+      if(!fullDB) { v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>파일 원본을 찾을 수 없습니다</div><button type="button" class="btn pri sm" onclick="${attachFn}()" style="margin-top:6px">📎 재첨부</button></div>`; return; }
+      const _getFromFull=function(db,_id,_kind){
+        if(_kind==='cert'){const b=(db.buildings||[]).find(b=>String(b.id)===String(_id));if(!b)return null;if(b.certFiles&&b.certFiles.length)return{files:b.certFiles};if(b.cert)return{files:[{data:b.cert,name:b.certName||'건축물대장',mime:b.certMime||''}]};return null;}
+        else if(_kind==='contract'){const b=(db.buildings||[]).find(b=>String(b.id)===String(_id));if(!b)return null;if(b.mgmtContractFiles&&b.mgmtContractFiles.length)return{files:b.mgmtContractFiles};if(b.mgmtContract)return{files:[{data:b.mgmtContract,name:b.mgmtContractName||'관리계약서',mime:b.mgmtContractMime||''}]};return null;}
+        else{const l=(db.leases||[]).find(l=>String(l.id)===String(_id));if(!l)return null;if(l.contractFiles&&l.contractFiles.length)return{files:l.contractFiles};if(l.contract)return{files:[{data:l.contract,name:l.contractName||'임대차계약서',mime:l.contractMime||''}]};return null;}
+      };
+      const idbDoc=_getFromFull(fullDB,target.id,target.kind);
+      if(idbDoc&&idbDoc.files.some(f=>f.storage||(f.data&&f.data!=='__IMG_IN_LOCAL__'&&f.data.length>30))){
+        DB=_mergeLocalImages(DB, fullDB);
+        _renderModalViewer(elId, target, blobKey, attachFn, scaleKey); // 재귀 호출로 다시 렌더
+      } else {
+        v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>파일 원본을 찾을 수 없습니다</div><button type="button" class="btn pri sm" onclick="${attachFn}()" style="margin-top:6px">📎 재첨부</button></div>`;
+      }
+    }).catch(function(){ v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>파일 로드 실패</div></div>`; });
+    return;
+  }
+  let files=doc.files;
   const isPdf=files.length===1&&(files[0].mime||'').includes('pdf');
 
   // ── PDF: 네이티브 iframe 뷰어 (스크롤·줌·드래그 모두 브라우저 기본 기능 사용) ──
@@ -9634,7 +9821,9 @@ function _renderModalViewer(elId, target, blobKey, attachFn, scaleKey){
     const rawData=files[0].data;
     const rawMime=files[0].mime;
     let blob=null;
-    try{ blob=_dataUrlToBlobUrl(rawData, rawMime); }catch(e){}
+    // Storage URL 우선, 없으면 base64 → blob
+    if(files[0].storage){ blob=_stUrl(files[0].storage); }
+    else { try{ blob=_dataUrlToBlobUrl(rawData, rawMime); }catch(e){} }
     const src=blob||(typeof rawData==='string'&&rawData.startsWith('data:')?rawData:null);
     if(!src){
       v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>PDF를 표시할 수 없습니다</div><button type="button" class="btn pri sm" onclick="viewDoc(${target.id},'${target.kind}')" style="margin-top:6px">🔍 새 창으로 열기</button></div>`;
@@ -9670,7 +9859,9 @@ function _renderModalViewer(elId, target, blobKey, attachFn, scaleKey){
   let h=`<div class="mv-gallery" id="${gId}"><div class="mv-imgs" id="${elId}-imgs">`;
   files.forEach((f,i)=>{
     let blob=null;
-    try{ blob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){}
+    // Storage URL 우선, 없으면 base64 → blob
+    if(f.storage){ blob=_stUrl(f.storage); }
+    else { try{ blob=_dataUrlToBlobUrl(f.data, f.mime||'image/jpeg'); }catch(e){} }
     const fallback=(typeof f.data==='string'&&f.data.startsWith('data:'))?f.data:'';
     const src=blob||fallback;
     if(blob) urls.push(blob);
@@ -9886,7 +10077,7 @@ function delBldg(id){
 let ieTarget=null;
 function rdExpire(){
   // Left panel: lease expiry
-  const leRows=DB.leases.filter(l=>l.tenant&&l.tenant!=='직영'&&l.end&&dday(l.end)>=0&&dday(l.end)<=90).sort((a,b)=>dday(a.end)-dday(b.end));
+  const leRows=DB.leases.filter(l=>l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실'&&l.end&&dday(l.end)>=0&&dday(l.end)<=90).sort((a,b)=>dday(a.end)-dday(b.end));
   const lp=$('expire-lease-list');
   if(lp){lp.innerHTML=leRows.length?leRows.map(l=>{const d=dday(l.end);return`<div style="padding:4px 5px;border-bottom:1px solid var(--ln);font-size:11px">
     <div style="display:flex;justify-content:space-between"><strong>${bs(l.bId)}</strong>${ddBg(d,'lease')}</div>
@@ -10175,7 +10366,7 @@ function rdCalL(y,m,evs){
   }
   $('cal-list-body').innerHTML=html||'<div class="empty">이달 일정 없음</div>';
 }
-function setCBF(v){DB.ui.calBldgF=v;sv();rdCal();}
+function setCBF(v){DB.ui.calBldgF=v;rdCal();}
 function setFlt(v,el){DB.ui.calFlt=v;document.querySelectorAll('#flt-all,#flt-todo').forEach(b=>b.classList.remove('on'));el.classList.add('on');rdCal();}
 function switchView(v,el){DB.ui.calView=v;
   const mg=$('cal-month-grid'),lb=$('cal-list-body'),dd=$('cal-day-detail');
@@ -10193,8 +10384,8 @@ function switchView(v,el){DB.ui.calView=v;
   }
   rdCal();
 }
-function calPrev(){if(DB.ui.calM===0){DB.ui.calM=11;DB.ui.calY--;}else DB.ui.calM--;sv();rdCal();}
-function calNext(){if(DB.ui.calM===11){DB.ui.calM=0;DB.ui.calY++;}else DB.ui.calM++;sv();rdCal();}
+function calPrev(){if(DB.ui.calM===0){DB.ui.calM=11;DB.ui.calY--;}else DB.ui.calM--;rdCal();}
+function calNext(){if(DB.ui.calM===11){DB.ui.calM=0;DB.ui.calY++;}else DB.ui.calM++;rdCal();}
 function calToday(){
   const now=new Date();
   DB.ui.calY=now.getFullYear();
@@ -10693,7 +10884,8 @@ function delFixTask(sId,ti){
 // ── MEMO ──────────────────────────────────────────────────────────────
 let MC=DB.memoCategories||[
   {key:'password',label:'비밀번호'},{key:'cctv',label:'CCTV'},{key:'water',label:'수도'},
-  {key:'elevator',label:'승강기'},{key:'fire',label:'소방'},{key:'parking',label:'주차기'},
+  {key:'elevator',label:'승강기'},{key:'fire',label:'소방'},{key:'tax',label:'세금계산서'},
+  {key:'account',label:'빠른계좌'},{key:'parking',label:'주차기'},
   {key:'electric',label:'전기'},{key:'insurance',label:'보험/점검'},{key:'etc',label:'기타 참고'},
   {key:'contact',label:'연락처',side:true}
 ];
@@ -10703,7 +10895,17 @@ if(!DB.memoCategories){DB.memoCategories=MC;sv();}
   let dirty=false;
   const f=MC.find(c=>c.key==='fire'); if(f && f.label==='소방/비상'){ f.label='소방'; dirty=true; }
   const p=MC.find(c=>c.key==='parking'); if(p && p.label==='주차'){ p.label='주차기'; dirty=true; }
-  const desired=['password','cctv','water','elevator','fire','parking','electric','insurance','etc','contact'];
+  const desired=['password','cctv','water','elevator','fire','tax','account','parking','electric','insurance','etc','contact'];
+  // 마이그레이션: desired에 있는데 MC에 없는 키 자동 추가
+  const defLabels={tax:'세금계산서',account:'빠른계좌',contact:'연락처',password:'비밀번호',cctv:'CCTV',water:'수도',elevator:'승강기',fire:'소방',parking:'주차기',electric:'전기',insurance:'보험/점검',etc:'기타 참고'};
+  desired.forEach(function(k){
+    if(!MC.find(function(c){return c.key===k;})){
+      var item={key:k,label:defLabels[k]||k};
+      if(k==='contact') item.side=true;
+      MC.push(item);
+      dirty=true;
+    }
+  });
   const known=MC.filter(c=>desired.includes(c.key)).sort((a,b)=>desired.indexOf(a.key)-desired.indexOf(b.key));
   const custom=MC.filter(c=>!desired.includes(c.key));
   const newOrder=[...known,...custom];
@@ -10746,9 +10948,9 @@ function rdMemo(){
     else{$('mp-title').textContent='건물을 선택하세요';$('memo-cats').innerHTML='';}
   }
 }
-function setMemoView(v){DB.ui.memoView=v;sv();rdMemo();}
-function selMemoCat(k){DB.ui.selMemoCat=k;sv();rdMemo();}
-function selMemoBldg(id){DB.ui.selBldg=id;sv();rdMemo();}
+function setMemoView(v){DB.ui.memoView=v;rdMemo();}
+function selMemoCat(k){DB.ui.selMemoCat=k;rdMemo();}
+function selMemoBldg(id){DB.ui.selBldg=id;rdMemo();}
 function memoRowH(rowKey){return (DB.ui.memoRowH||{})[rowKey]||'';}
 function memoColW(){return DB.ui.memoColW||150;}
 function rdMemoByCategory(catKey){
@@ -11695,9 +11897,9 @@ function loadPrevReport(){
   o.ri2=ls.reduce((s,l)=>s+(rateFor(l,DB.ui.repY,DB.ui.repM).mgmt||0),0);
   DB.reports.push(o);sv();rdReport();
 }
-function setRB(id){DB.ui.repBldgId=id;sv();rdReport();}
-function repPrev(){if(DB.ui.repM===1){DB.ui.repM=12;DB.ui.repY--;}else DB.ui.repM--;sv();rdReport();}
-function repNext(){if(DB.ui.repM===12){DB.ui.repM=1;DB.ui.repY++;}else DB.ui.repM++;sv();rdReport();}
+function setRB(id){DB.ui.repBldgId=id;rdReport();}
+function repPrev(){if(DB.ui.repM===1){DB.ui.repM=12;DB.ui.repY--;}else DB.ui.repM--;rdReport();}
+function repNext(){if(DB.ui.repM===12){DB.ui.repM=1;DB.ui.repY++;}else DB.ui.repM++;rdReport();}
 function openRepModal(){
   fillSel('frb');$('fry').value=DB.ui.repY;$('frm').value=DB.ui.repM;
   if(DB.ui.repBldgId)$('frb').value=DB.ui.repBldgId;
@@ -12108,15 +12310,37 @@ let _pmemoDragState=null; // 리사이즈 드래그
 
 function _pmemoData(uid){
   if(!DB.personalMemos) DB.personalMemos={};
-  if(!DB.personalMemos[uid]) DB.personalMemos[uid]={userName:'',updatedAt:'',pages:[{id:Date.now(),name:'메모 1',text:'',todos:[]}]};
+  if(!DB.personalMemos[uid]) DB.personalMemos[uid]={userName:'',updatedAt:'',pages:[{id:Date.now(),name:'메모 1',text:'',todos:[],group:0}]};
   var d=DB.personalMemos[uid];
   // 마이그레이션: 구버전(text/todos) → pages 변환
   if(!d.pages){
-    d.pages=[{id:Date.now(),name:'메모 1',text:d.text||'',todos:d.todos||[]}];
+    d.pages=[{id:Date.now(),name:'메모 1',text:d.text||'',todos:d.todos||[],group:0}];
     delete d.text; delete d.todos;
   }
-  if(!d.pages.length) d.pages.push({id:Date.now(),name:'메모 1',text:'',todos:[]});
+  if(!d.pages.length) d.pages.push({id:Date.now(),name:'메모 1',text:'',todos:[],group:0});
+  // 마이그레이션: group 필드 없는 페이지에 group 추가
+  var hasGroup=d.pages.some(function(p){return typeof p.group==='number';});
+  if(!hasGroup){ d.pages.forEach(function(p,i){ p.group=Math.floor(i/4); }); }
+  // 마이그레이션: groupNames 객체 추가
+  if(!d.groupNames) d.groupNames={};
+  // 마이그레이션: deletedPages 휴지통 추가
+  if(!d.deletedPages) d.deletedPages=[];
   return d;
+}
+// 그룹별 페이지 정리 (상위탭 = 그룹, 하위탭 = 페이지)
+function _pmemoGroupList(md){
+  var groups={}, order=[];
+  md.pages.forEach(function(p,i){
+    var g=typeof p.group==='number'?p.group:0;
+    if(!groups[g]){ groups[g]=[]; order.push(g); }
+    groups[g].push({page:p,idx:i});
+  });
+  order.sort(function(a,b){return a-b;});
+  return order.map(function(g){ return {group:g, items:groups[g]}; });
+}
+function _pmemoNextGroup(md){
+  var max=-1; md.pages.forEach(function(p){ if(typeof p.group==='number'&&p.group>max) max=p.group; });
+  return max+1;
 }
 
 function _pmemoTs(){
@@ -12165,34 +12389,37 @@ function rdPMemo(){
     var md=_pmemoData(CURRENT_USER_ID);
     var upd=md.updatedAt?'<span style="font-size:10px;color:var(--t4)">'+md.updatedAt+'</span>':'';
 
-    // 페이지 계산 (4개씩)
-    var CARDS_PER_PAGE=4;
-    var totalPages=Math.ceil(md.pages.length/CARDS_PER_PAGE);
+    // 그룹 기반 페이지 계산
+    var _groups=_pmemoGroupList(md);
+    var totalPages=_groups.length;
     if(_pmemoCardPage>=totalPages) _pmemoCardPage=totalPages-1;
     if(_pmemoCardPage<0) _pmemoCardPage=0;
-    var startIdx=_pmemoCardPage*CARDS_PER_PAGE;
-    var pageCards=md.pages.slice(startIdx,startIdx+CARDS_PER_PAGE);
+    var curGroup=_groups[_pmemoCardPage]||_groups[0];
+    var pageCards=curGroup?curGroup.items:[];
 
     // 상단 바: 페이지 탭 + 추가 버튼 + 저장 표시
-    html+='<div style="display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bl2);border-bottom:1px solid var(--ln);flex-shrink:0">';
-    html+='<button onclick="openFloatMemo()" style="flex-shrink:0;padding:3px 8px;font-size:10px;border:1px solid var(--ln);border-radius:5px;background:var(--w);cursor:pointer;color:var(--t2);font-family:inherit;white-space:nowrap" title="다른 탭에서도 메모 사용">📌 플로팅</button>';
-    // 페이지 탭 (항상 표시)
-    for(var pi=0;pi<totalPages;pi++){
-      var act=pi===_pmemoCardPage;
-      var pgStart=pi*CARDS_PER_PAGE, pgEnd=Math.min(pgStart+CARDS_PER_PAGE, md.pages.length);
-      html+='<div onclick="_pmemoCardPage='+pi+';rdPMemo()" style="padding:3px 10px;font-size:10px;border-radius:5px;cursor:pointer;'+(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')+'">'+md.pages.slice(pgStart,pgEnd).map(function(p){return p.name.substring(0,2)}).join(' ')+'</div>';
-    }
-    html+='<div onclick="addPMemoCardPage()" style="padding:3px 8px;font-size:11px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 페이지 (메모 4개 그룹)">＋</div>';
-    html+='<div style="width:1px;height:14px;background:var(--ln);margin:0 2px"></div>';
-    html+='<button onclick="addPMemoTab()" class="btn sm" style="font-size:10px;padding:3px 10px">＋ 메모</button>';
-    html+='<span id="pmemo-save-ind" style="font-size:10px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:4px">✓ 저장됨</span>';
+    html+='<div style="display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bl2);border-bottom:1px solid var(--ln);flex-shrink:0;flex-wrap:wrap">';
+    html+='<button onclick="openFloatMemo()" style="flex-shrink:0;padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:var(--w);cursor:pointer;color:var(--t2);font-family:inherit;white-space:nowrap;font-weight:500" title="다른 탭에서도 메모 사용">📌 플로팅</button>';
+    // 페이지 탭 (그룹별) — 더블클릭 이름변경, 활성탭에 삭제버튼
+    _groups.forEach(function(g,gi){
+      var act=gi===_pmemoCardPage;
+      var gLabel=md.groupNames[g.group]||g.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
+      html+='<div onclick="_pmemoCardPage='+gi+';rdPMemo()" ondblclick="event.stopPropagation();renamePMemoGroup('+g.group+')" style="padding:5px 14px;font-size:12px;border-radius:6px;cursor:pointer;position:relative;'+(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')+'">'+gLabel;
+      if(act && _groups.length>1) html+='<span onclick="event.stopPropagation();delPMemoGroup('+g.group+')" style="margin-left:5px;font-size:11px;cursor:pointer;opacity:.6" title="이 그룹 삭제">×</span>';
+      html+='</div>';
+    });
+    html+='<div onclick="addPMemoCardPage()" style="padding:5px 10px;font-size:13px;color:var(--t4);cursor:pointer;border-radius:6px" title="새 페이지 (메모 4개 그룹)">＋</div>';
+    if(md.deletedPages&&md.deletedPages.length) html+='<div onclick="restorePMemo()" style="padding:5px 12px;font-size:12px;color:#e67e22;cursor:pointer;border-radius:6px;margin-left:auto;font-weight:500" title="삭제된 메모 복구">↩ 되돌리기</div>';
+    html+='<div style="width:1px;height:18px;background:var(--ln);margin:0 3px"></div>';
+    html+='<button onclick="addPMemoTab()" class="btn sm" style="font-size:12px;padding:5px 14px">＋ 메모</button>';
+    html+='<span id="pmemo-save-ind" style="font-size:11px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:4px">✓ 저장됨</span>';
     html+='<span style="margin-left:auto">'+upd+'</span>';
     html+='</div>';
 
     // 카드 그리드
-    html+='<div style="flex:1;display:flex;gap:8px;padding:8px 10px;overflow:hidden;min-height:0">';
-    pageCards.forEach(function(pg,localIdx){
-      var i=startIdx+localIdx;
+    html+='<div style="flex:1;display:flex;gap:0;padding:8px 10px;overflow:hidden;min-height:0">';
+    pageCards.forEach(function(item,localIdx){
+      var pg=item.page, i=item.idx;
       var todos=pg.todos||[];
       var todoH=todos.map(function(t,ti){
         return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0">'
@@ -12202,7 +12429,8 @@ function rdPMemo(){
           +'</div>';
       }).join('');
 
-      html+='<div style="flex:1;min-width:260px;max-width:500px;display:flex;flex-direction:column;border-radius:10px;background:var(--w);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)">';
+      var cwStyle=_pmemoCardWidths[i]?'flex:0 0 '+_pmemoCardWidths[i]+'px;max-width:none;min-width:160px':'flex:1;min-width:160px;max-width:380px';
+      html+='<div data-pmcard-w="'+i+'" style="'+cwStyle+';display:flex;flex-direction:column;border-radius:10px;background:var(--w);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)">';
       // 카드 헤더 (보라색 그라데이션)
       html+='<div ondblclick="renamePMemoTab('+i+')" style="padding:8px 12px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);cursor:default;flex-shrink:0">';
       html+='<span style="font-weight:700;font-size:12px;color:#fff">'+esc(pg.name)+'</span>';
@@ -12211,7 +12439,7 @@ function rdPMemo(){
       // 카드 내용: 체크리스트 + 메모 세로 분할
       html+='<div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">';
       // 체크리스트
-      html+='<div class="pmcard-todo" data-card-idx="'+i+'" style="flex:0 0 auto;min-height:60px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">';
+      html+='<div class="pmcard-todo" data-card-idx="'+i+'" style="flex:0 0 auto;min-height:120px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">';
       html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>';
       html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 4px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;font-style:italic;padding:2px 0">할 일이 없습니다</div>')+'</div>';
       html+='<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">';
@@ -12226,47 +12454,68 @@ function rdPMemo(){
       html+='<textarea data-pmemo-ta-idx="'+i+'" oninput="savePMemoCard('+i+')" style="flex:1;padding:4px 8px;border:none;outline:none;font-family:inherit;font-size:12px;line-height:1.5;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>';
       html+='</div>';
       html+='</div></div>';
+      // 우측 리사이즈 핸들 (카드 옆 형제 요소, 더블클릭=초기화)
+      html+='<div class="pmcard-wedge" data-wedge-idx="'+i+'" ondblclick="delete _pmemoCardWidths[\''+i+'\'];rdPMemo()" style="flex-shrink:0;width:8px;cursor:col-resize;display:flex;align-items:center;justify-content:center" title="드래그: 너비 조절 / 더블클릭: 초기화"><div style="width:2px;height:28px;background:var(--t4);border-radius:1px;opacity:.4"></div></div>';
     });
     html+='</div>';
 
   } else if(viewUid && DB.personalMemos[viewUid]) {
-    // ── 다른 사용자 메모 (읽기전용) ──
+    // ── 다른 사용자 메모 (읽기전용) — 본인 메모와 동일 카드 디자인 ──
     var od=_pmemoData(viewUid);
     var oName=esc(od.userName||'사용자');
     var oUpd=od.updatedAt?'<span style="font-size:10px;color:var(--t4)">'+od.updatedAt+'</span>':'';
 
-    html+='<div style="padding:8px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--ln);background:#fef9ee">';
-    html+='<span style="font-weight:700;font-size:13px">'+oName+'님의 메모</span>';
-    html+='<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px">🔒 읽기전용</span>';
-    html+='<span style="margin-left:auto">'+oUpd+'</span></div>';
+    // 그룹 기반 페이지 계산 (읽기전용)
+    var roGroups=_pmemoGroupList(od);
+    var roTotalPages=roGroups.length;
+    if(_pmemoCardPage>=roTotalPages) _pmemoCardPage=roTotalPages-1;
+    if(_pmemoCardPage<0) _pmemoCardPage=0;
+    var roCurGroup=roGroups[_pmemoCardPage]||roGroups[0];
+    var roPageCards=roCurGroup?roCurGroup.items:[];
 
-    // 메모 탭 (읽기전용)
-    if(od.pages.length>1){
-      html+='<div style="display:flex;gap:2px;padding:4px 10px;background:var(--w2);border-bottom:1px solid var(--ln)">';
-      od.pages.forEach(function(p,i){
-        var act=i===_pmemoActiveTab;
-        html+='<div onclick="switchPMemoTab('+i+')" style="padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;'
-          +(act?'background:var(--w);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06)':'color:var(--t3)')
-          +'">'+esc(p.name)+'</div>';
-      });
+    // 상단 바 (읽기전용 표시 + 페이지 탭)
+    html+='<div style="display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bl2);border-bottom:1px solid var(--ln);flex-shrink:0">';
+    html+='<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;flex-shrink:0">🔒 '+oName+'</span>';
+    roGroups.forEach(function(rg,rgi){
+      var ract=rgi===_pmemoCardPage;
+      html+='<div onclick="_pmemoCardPage='+rgi+';rdPMemo()" style="padding:3px 10px;font-size:10px;border-radius:5px;cursor:pointer;'+(ract?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')+'">'+rg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ')+'</div>';
+    });
+    html+='<span style="margin-left:auto">'+oUpd+'</span>';
+    html+='</div>';
+
+    // 카드 그리드 (본인 메모와 동일 레이아웃, 읽기전용)
+    html+='<div style="flex:1;display:flex;gap:8px;padding:8px 10px;overflow:hidden;min-height:0">';
+    roPageCards.forEach(function(item,localIdx){
+      var pg=item.page, i=item.idx;
+      var todos=pg.todos||[];
+      var todoH=todos.map(function(t,ti){
+        return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0">'
+          +'<input type="checkbox" '+(t.done?'checked':'')+' disabled style="margin:0;cursor:default;accent-color:var(--bl);flex-shrink:0;width:13px;height:13px">'
+          +'<span style="flex:1;font-size:11px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
+          +'</div>';
+      }).join('');
+
+      html+='<div style="flex:1;min-width:260px;max-width:500px;display:flex;flex-direction:column;border-radius:10px;background:var(--w);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)">';
+      // 카드 헤더 (보라색 그라데이션)
+      html+='<div style="padding:8px 12px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);flex-shrink:0">';
+      html+='<span style="font-weight:700;font-size:12px;color:#fff">'+esc(pg.name)+'</span>';
       html+='</div>';
-    }
-
-    var oPg=od.pages[Math.min(_pmemoActiveTab,od.pages.length-1)]||od.pages[0];
-    var oTodos=oPg.todos||[];
-    var oTodoH=oTodos.length?oTodos.map(function(t){
-      return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0;font-size:11px;color:var(--t2)">'
-        +'<span style="color:'+(t.done?'#16a34a':'var(--t4)')+'">'+(t.done?'☑':'☐')+'</span>'
-        +'<span style="'+(t.done?'text-decoration:line-through;color:var(--t3)':'')+'">'+esc(t.text)+'</span></div>';
-    }).join(''):'';
-
-    html+='<div style="display:flex;flex:1;min-height:0">';
-    if(oTodoH){
-      html+='<div style="flex:0 0 220px;padding:10px 12px;border-right:1px solid var(--ln);overflow-y:auto">';
-      html+='<div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:4px">☑ 할 일</div>'+oTodoH+'</div>';
-    }
-    html+='<div style="flex:1;padding:10px 12px;font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--t2);overflow-y:auto">'
-      +(esc(oPg.text||'')||'<span style="color:var(--t4);font-style:italic">내용 없음</span>')+'</div>';
+      // 카드 내용: 체크리스트 + 메모 세로 분할
+      html+='<div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">';
+      // 체크리스트
+      html+='<div style="flex:0 0 auto;min-height:120px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">';
+      html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>';
+      html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 4px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;font-style:italic;padding:2px 0">할 일이 없습니다</div>')+'</div>';
+      html+='</div>';
+      // 구분선
+      html+='<div style="height:4px;background:var(--ln);flex-shrink:0;position:relative"><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:2px;background:var(--t4);border-radius:1px;opacity:.5"></div></div>';
+      // 메모
+      html+='<div style="flex:1;display:flex;flex-direction:column;min-height:40px">';
+      html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3)">📝 메모</div>';
+      html+='<div style="flex:1;padding:4px 8px;font-size:12px;line-height:1.5;white-space:pre-wrap;color:var(--t2);overflow-y:auto">'+(esc(pg.text||'')||'<span style="color:var(--t4);font-style:italic">내용 없음</span>')+'</div>';
+      html+='</div>';
+      html+='</div></div>';
+    });
     html+='</div>';
   } else {
     html+='<div style="color:var(--t3);font-size:13px;padding:20px;text-align:center">메모가 없습니다.</div>';
@@ -12311,28 +12560,27 @@ function switchPMemoTab(idx){
 function addPMemoTab(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
-  // 현재 페이지의 카드 수 확인 — 4개 미만이면 현재 페이지에 추가
+  // 현재 그룹에 메모 추가 (4개 미만일 때만)
+  var groups=_pmemoGroupList(md);
+  var curG=groups[_pmemoCardPage]||groups[0];
+  if(curG && curG.items.length>=4){ alert('이 그룹은 메모 4개가 최대입니다.\n새 페이지(＋)를 추가하세요.'); return; }
+  var gNum=curG?curG.group:0;
   var num=md.pages.length+1;
-  md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[]});
+  md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[],group:gNum});
   md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
   _pmemoActiveTab=md.pages.length-1;
-  _pmemoCardPage=Math.floor((md.pages.length-1)/4);
   sv(); rdPMemo(); _showPMemoSaved();
 }
 function addPMemoCardPage(){
-  // 새 페이지 생성: 다음 페이지에 메모 1개 자동 추가
+  // 새 그룹(상위탭) 생성: 메모 1개 자동 추가
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
-  // 다음 4의 배수까지 채우고 +1개 추가 (새 페이지의 첫 카드)
-  var nextPageStart=Math.ceil(md.pages.length/4)*4;
-  // 현재 페이지가 꽉 찼으면 바로 추가, 아니면 빈 슬롯 채우고 새 페이지
-  var toAdd=nextPageStart-md.pages.length+1;
-  for(var a=0;a<toAdd;a++){
-    var num=md.pages.length+1;
-    md.pages.push({id:Date.now()+a,name:'메모 '+num,text:'',todos:[]});
-  }
+  var newG=_pmemoNextGroup(md);
+  var num=md.pages.length+1;
+  md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[],group:newG});
   md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
-  _pmemoCardPage=Math.floor((md.pages.length-1)/4);
+  var groups=_pmemoGroupList(md);
+  _pmemoCardPage=groups.length-1;
   sv(); rdPMemo(); _showPMemoSaved();
 }
 function delPMemoTab(idx){
@@ -12341,24 +12589,123 @@ function delPMemoTab(idx){
   if(md.pages.length<=1) return;
   var name=md.pages[idx].name;
   if(!confirm('"'+name+'" 탭을 삭제하시겠습니까?\n내용이 모두 삭제됩니다.')) return;
-  if(!confirm('정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+  if(!confirm('정말로 삭제하시겠습니까?\n(삭제 후 되돌리기 버튼으로 복구 가능)')) return;
+  // 휴지통에 저장
+  var deleted=JSON.parse(JSON.stringify(md.pages[idx]));
+  deleted._deletedAt=new Date().toISOString();
+  deleted._type='tab';
+  md.deletedPages.push(deleted);
+  if(md.deletedPages.length>50) md.deletedPages=md.deletedPages.slice(-50);
+  var delGroup=md.pages[idx].group;
   md.pages.splice(idx,1);
+  // 그룹에 남은 페이지가 없으면 페이지 탭 조정
+  var groups=_pmemoGroupList(md);
+  if(_pmemoCardPage>=groups.length) _pmemoCardPage=groups.length-1;
   if(_pmemoActiveTab>=md.pages.length) _pmemoActiveTab=md.pages.length-1;
-  var CARDS_PER_PAGE=4;
-  var totalPages=Math.ceil(md.pages.length/CARDS_PER_PAGE);
-  if(_pmemoCardPage>=totalPages) _pmemoCardPage=totalPages-1;
   md.updatedAt=_pmemoTs();
-  sv(); rdPMemo(); _showPMemoSaved();
+  sv(); rdPMemo(); _showPMemoSaved(); _syncFloatIfOpen();
+}
+function delPMemoGroup(groupNum){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var groupPages=md.pages.filter(function(p){return p.group===groupNum;});
+  if(!groupPages.length) return;
+  var names=groupPages.map(function(p){return p.name;}).join(', ');
+  if(!confirm('그룹 내 메모 ['+names+'] 를 모두 삭제하시겠습니까?')) return;
+  if(!confirm('정말로 삭제하시겠습니까?\n(삭제 후 되돌리기 버튼으로 복구 가능)')) return;
+  // 휴지통에 저장
+  groupPages.forEach(function(p){
+    var deleted=JSON.parse(JSON.stringify(p));
+    deleted._deletedAt=new Date().toISOString();
+    deleted._type='group';
+    deleted._groupNum=groupNum;
+    deleted._groupName=md.groupNames[groupNum]||'';
+    md.deletedPages.push(deleted);
+  });
+  if(md.deletedPages.length>50) md.deletedPages=md.deletedPages.slice(-50);
+  md.pages=md.pages.filter(function(p){return p.group!==groupNum;});
+  if(!md.pages.length) md.pages.push({id:Date.now(),name:'메모 1',text:'',todos:[],group:0});
+  var groups=_pmemoGroupList(md);
+  if(_pmemoCardPage>=groups.length) _pmemoCardPage=groups.length-1;
+  _pmemoActiveTab=0;
+  md.updatedAt=_pmemoTs();
+  sv(); rdPMemo(); _showPMemoSaved(); _syncFloatIfOpen();
+}
+function restorePMemo(){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  if(!md.deletedPages||!md.deletedPages.length){ alert('복구할 메모가 없습니다.'); return; }
+  // 마지막 삭제건 복구
+  var last=md.deletedPages[md.deletedPages.length-1];
+  var isGroup=last._type==='group';
+  var desc=isGroup?'그룹 "'+last.name+'" 외 '+(md.deletedPages.filter(function(d){return d._groupNum===last._groupNum&&d._deletedAt===last._deletedAt;}).length)+'개':'메모 "'+last.name+'"';
+  if(!confirm(desc+' 을(를) 복구하시겠습니까?')) return;
+  if(isGroup){
+    var gNum=last._groupNum;
+    var delAt=last._deletedAt;
+    var items=md.deletedPages.filter(function(d){return d._groupNum===gNum&&d._deletedAt===delAt;});
+    items.forEach(function(item){
+      var restored={id:item.id,name:item.name,text:item.text||'',todos:item.todos||[],group:item.group};
+      md.pages.push(restored);
+    });
+    md.deletedPages=md.deletedPages.filter(function(d){return !(d._groupNum===gNum&&d._deletedAt===delAt);});
+    if(last._groupName) md.groupNames[gNum]=last._groupName;
+  } else {
+    var restored={id:last.id,name:last.name,text:last.text||'',todos:last.todos||[],group:last.group};
+    md.pages.push(restored);
+    md.deletedPages.pop();
+  }
+  md.updatedAt=_pmemoTs();
+  var groups=_pmemoGroupList(md);
+  _pmemoCardPage=groups.length-1;
+  sv(); rdPMemo(); _showPMemoSaved(); _syncFloatIfOpen();
+}
+function renamePMemoGroup(groupNum){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var tabs=document.querySelectorAll('[ondblclick*="renamePMemoGroup('+groupNum+')"]');
+  var tab=tabs.length?tabs[0]:null;
+  if(!tab) return;
+  var curName=md.groupNames[groupNum]||'';
+  var groupPages=md.pages.filter(function(p){return p.group===groupNum;});
+  if(!curName) curName=groupPages.map(function(p){return p.name.substring(0,2)}).join(' ');
+  var inp=document.createElement('input');
+  inp.type='text'; inp.value=curName;
+  inp.style.cssText='background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);border-radius:4px;color:#fff;font-size:10px;font-weight:600;padding:1px 6px;width:80px;outline:none;font-family:inherit';
+  tab.innerHTML=''; tab.appendChild(inp);
+  inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim();
+    if(v && v!==curName){
+      md.groupNames[groupNum]=v;
+      md.updatedAt=_pmemoTs();
+      sv(); _showPMemoSaved(); _syncFloatIfOpen();
+    }
+    rdPMemo();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){inp.value=curName;inp.blur();} });
 }
 function renamePMemoTab(idx){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   var pg=md.pages[idx]; if(!pg) return;
-  var name=prompt('탭 이름 변경',pg.name);
-  if(name===null||!name.trim()) return;
-  pg.name=name.trim();
-  md.updatedAt=_pmemoTs();
-  sv(); rdPMemo(); _showPMemoSaved();
+  // 인라인 편집: 더블클릭한 span을 input으로 교체
+  var spans=document.querySelectorAll('[ondblclick="renamePMemoTab('+idx+')"] span[style*="font-weight:700"]');
+  var span=spans.length?spans[0]:null;
+  if(!span) return;
+  var inp=document.createElement('input');
+  inp.type='text'; inp.value=pg.name;
+  inp.style.cssText='background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);border-radius:4px;color:#fff;font-size:12px;font-weight:700;padding:1px 6px;width:120px;outline:none;font-family:inherit';
+  span.replaceWith(inp);
+  inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim();
+    if(v && v!==pg.name){ pg.name=v; md.updatedAt=_pmemoTs(); sv(); _showPMemoSaved(); _syncFloatIfOpen(); }
+    rdPMemo();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){inp.value=pg.name;inp.blur();} });
 }
 
 // ── 드래그 리사이즈 ──
@@ -12440,6 +12787,7 @@ function addPMemoTodoFrom(inp){
   if(!pg.todos) pg.todos=[];
   pg.todos.push({text:val,done:false});
   md.updatedAt=_pmemoTs();
+  inp.blur(); // blur 후 rdPMemo가 리렌더 스킵하지 않도록
   sv(); rdPMemo(); _showPMemoSaved(); _syncFloatIfOpen();
 }
 
@@ -12503,8 +12851,13 @@ function floatDelTab(idx){
 function floatAddTab(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
+  // 현재 플로팅 탭이 속한 그룹에 추가
+  var curPg=md.pages[_floatActiveTab];
+  var gNum=curPg?curPg.group||0:0;
+  var groupPages=md.pages.filter(function(p){return p.group===gNum;});
+  if(groupPages.length>=4){ alert('이 그룹은 메모 4개가 최대입니다.'); return; }
   var num=md.pages.length+1;
-  md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[]});
+  md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[],group:gNum});
   _floatActiveTab=md.pages.length-1;
   md.updatedAt=_pmemoTs();
   sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
@@ -12513,11 +12866,49 @@ function floatRenameTab(idx){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   var pg=md.pages[idx]; if(!pg) return;
-  var name=prompt('메모 이름 변경',pg.name);
-  if(name===null||!name.trim()) return;
-  pg.name=name.trim();
-  md.updatedAt=_pmemoTs();
-  sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
+  // 인라인 편집: 탭을 input으로 교체
+  var tabs=document.querySelectorAll('[ondblclick="floatRenameTab('+idx+')"]');
+  var tab=tabs.length?tabs[0]:null;
+  if(!tab) return;
+  var inp=document.createElement('input');
+  inp.type='text'; inp.value=pg.name;
+  inp.style.cssText='background:var(--w);border:1px solid var(--bl);border-radius:4px;font-size:10px;padding:2px 6px;width:80px;outline:none;font-family:inherit';
+  var origHtml=tab.innerHTML;
+  tab.innerHTML=''; tab.appendChild(inp);
+  inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim();
+    if(v && v!==pg.name){ pg.name=v; md.updatedAt=_pmemoTs(); sv(); _syncPMemoIfOpen(); _showFloatSaved(); }
+    rdFloatMemo();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){inp.value=pg.name;inp.blur();} });
+}
+function floatRenameGroup(groupNum){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var tabs=document.querySelectorAll('[ondblclick*="floatRenameGroup('+groupNum+')"]');
+  var tab=tabs.length?tabs[0]:null;
+  if(!tab) return;
+  var curName=md.groupNames[groupNum]||'';
+  var groupPages=md.pages.filter(function(p){return p.group===groupNum;});
+  if(!curName) curName=groupPages.map(function(p){return p.name.substring(0,2)}).join(' ');
+  var inp=document.createElement('input');
+  inp.type='text'; inp.value=curName;
+  inp.style.cssText='background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);border-radius:4px;color:#fff;font-size:10px;font-weight:600;padding:1px 6px;width:80px;outline:none;font-family:inherit';
+  tab.innerHTML=''; tab.appendChild(inp);
+  inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim();
+    if(v && v!==curName){
+      md.groupNames[groupNum]=v;
+      md.updatedAt=_pmemoTs();
+      sv(); _syncPMemoIfOpen(); _showFloatSaved();
+    }
+    rdFloatMemo();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){inp.value=curName;inp.blur();} });
 }
 var _floatActiveTab=0;
 var _floatPage=0;
@@ -12525,37 +12916,48 @@ function rdFloatMemo(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   if(_floatActiveTab>=md.pages.length) _floatActiveTab=0;
-  var FPP=4; // 페이지당 탭 수
-  var totalFPages=Math.ceil(md.pages.length/FPP);
-  // 활성 탭이 속한 페이��로 이동
-  _floatPage=Math.floor(_floatActiveTab/FPP);
+  // 그룹 기반 탭 렌더
+  var fGroups=_pmemoGroupList(md);
+  var totalFPages=fGroups.length;
+  // 활성 탭이 속한 그룹으로 이동
+  var activeGroup=0;
+  for(var fgi=0;fgi<fGroups.length;fgi++){
+    for(var fii=0;fii<fGroups[fgi].items.length;fii++){
+      if(fGroups[fgi].items[fii].idx===_floatActiveTab){ activeGroup=fgi; break; }
+    }
+  }
+  _floatPage=activeGroup;
   if(_floatPage>=totalFPages) _floatPage=totalFPages-1;
-  var fStart=_floatPage*FPP, fEnd=Math.min(fStart+FPP,md.pages.length);
+  var curFGroup=fGroups[_floatPage]||fGroups[0];
+  var fGroupItems=curFGroup?curFGroup.items:[];
   // 탭 바 렌더 (2줄: 상위 페이지탭 + 하위 메모탭)
   var tabBar=$('float-memo-tabs');
   if(tabBar){
     var th='';
-    // 상위 페이지 그룹 탭 (4개 이상일 때만 표시)
+    // 상위 페이지 그룹 탭 (2개 이상일 때만 표시)
     if(totalFPages>1){
-      th+='<div style="display:flex;gap:2px;margin-bottom:2px;width:100%">';
-      for(var fp=0;fp<totalFPages;fp++){
-        var fpAct=fp===_floatPage;
-        var fpStart=fp*FPP,fpEnd=Math.min(fpStart+FPP,md.pages.length);
-        th+='<div onclick="_floatPage='+fp+';_floatActiveTab='+fpStart+';rdFloatMemo()" style="padding:2px 6px;font-size:9px;border-radius:3px;cursor:pointer;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w);color:var(--t4)')+'">'+md.pages.slice(fpStart,fpEnd).map(function(p){return p.name.substring(0,2)}).join(' ')+'</div>';
-      }
+      th+='<div style="display:flex;gap:3px;margin-bottom:2px;width:100%">';
+      fGroups.forEach(function(fg,fgi){
+        var fpAct=fgi===_floatPage;
+        var fgLabel=md.groupNames[fg.group]||fg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
+        th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatPage='+fgi+';_floatActiveTab='+fg.items[0].idx+';rdFloatMemo();},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:500;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w);color:var(--t4)')+'">'+esc(fgLabel)+'</div>';
+      });
       th+='</div>';
+      // 상위탭/하위탭 구분선
+      th+='<div style="border-bottom:1px solid rgba(128,128,128,.2);margin:2px 0 4px"></div>';
     }
     // 하위 메모 탭
-    th+='<div style="display:flex;gap:2px;align-items:center;width:100%">';
-    for(var fi=fStart;fi<fEnd;fi++){
+    th+='<div style="display:flex;gap:3px;align-items:center;width:100%">';
+    fGroupItems.forEach(function(item){
+      var fi=item.idx;
       var act=fi===_floatActiveTab;
-      th+='<div onclick="_floatActiveTab='+fi+';rdFloatMemo()" ondblclick="floatRenameTab('+fi+')" style="padding:3px 8px;font-size:10px;border-radius:4px;cursor:pointer;white-space:nowrap;'
+      th+='<div onclick="_floatActiveTab='+fi+';rdFloatMemo()" ondblclick="floatRenameTab('+fi+')" style="padding:5px 12px;font-size:12px;border-radius:5px;cursor:pointer;white-space:nowrap;'
         +(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')
         +'">'+esc(md.pages[fi].name);
-      if(md.pages.length>1) th+='<span onclick="event.stopPropagation();floatDelTab('+fi+')" style="margin-left:3px;font-size:9px;cursor:pointer;opacity:.5" title="삭제">×</span>';
+      if(md.pages.length>1) th+='<span onclick="event.stopPropagation();floatDelTab('+fi+')" style="margin-left:4px;font-size:11px;cursor:pointer;opacity:.5" title="삭제">×</span>';
       th+='</div>';
-    }
-    th+='<div onclick="floatAddTab()" style="padding:3px 6px;font-size:11px;color:var(--t4);cursor:pointer" title="메모 추가">＋</div>';
+    });
+    th+='<div onclick="floatAddTab()" style="padding:5px 10px;font-size:13px;color:var(--t4);cursor:pointer" title="메모 추가">＋</div>';
     th+='</div>';
     tabBar.innerHTML=th;
   }
@@ -12573,7 +12975,7 @@ function rdFloatMemo(){
 
   body.innerHTML='<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">'
     // 체크리스트 영역 (상단)
-    +'<div class="float-todo-area" style="flex:0 0 auto;min-height:50px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">'
+    +'<div class="float-todo-area" style="flex:0 0 auto;min-height:120px;max-height:60%;display:flex;flex-direction:column;overflow:hidden">'
     +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>'
     +'<div style="flex:1;overflow-y:auto;padding:2px 8px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;padding:4px 0">없음</div>')+'</div>'
     +'<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">'
@@ -12612,6 +13014,7 @@ function floatAddTodo(pgIdx){
   var inp=$('float-todo-input'); if(!inp) return;
   var val=inp.value.trim(); if(!val) return;
   inp.value='';
+  inp.blur();
   var md=_pmemoData(CURRENT_USER_ID);
   var pg=md.pages[pgIdx]; if(!pg) return;
   if(!pg.todos) pg.todos=[];
@@ -12661,7 +13064,7 @@ function _syncFloatIfOpen(){
   document.addEventListener('mousemove',function(e){
     if(!_fd) return;
     var dy=e.clientY-_fd.sy;
-    var nh=Math.max(80,_fd.sh+dy);
+    var nh=Math.max(120,_fd.sh+dy);
     var parent=_fd.el.parentElement;
     var maxH=parent?parent.offsetHeight-80:300;
     if(nh>maxH) nh=maxH;
@@ -12725,6 +13128,34 @@ function _syncFloatIfOpen(){
 
 // 카드 내 체크리스트/메모 구분선 드래그 리사이즈
 var _pmemoTodoHeights={};
+var _pmemoCardWidths={};
+// 카드 개별 너비 드래그 리사이즈 (우측 가장자리)
+(function(){
+  var _cw=null;
+  document.addEventListener('mousedown',function(e){
+    var handle=e.target.closest&&e.target.closest('.pmcard-wedge');
+    if(!handle) return;
+    var card=handle.previousElementSibling;
+    if(!card||!card.hasAttribute('data-pmcard-w')) return;
+    _cw={el:card,sx:e.clientX,sw:card.offsetWidth,idx:handle.getAttribute('data-wedge-idx')};
+    e.preventDefault();
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!_cw) return;
+    var dx=e.clientX-_cw.sx;
+    var nw=Math.max(160,_cw.sw+dx);
+    _cw.el.style.flex='0 0 '+nw+'px';
+    _cw.el.style.width=nw+'px';
+    _cw.el.style.maxWidth='none';
+    _cw.el.style.minWidth='160px';
+    if(_cw.idx) _pmemoCardWidths[_cw.idx]=nw;
+  });
+  document.addEventListener('mouseup',function(){
+    if(_cw){document.body.style.cursor='';document.body.style.userSelect='';_cw=null;}
+  });
+})();
 (function(){
   var _cd=null;
   document.addEventListener('mousedown',function(e){
@@ -12738,7 +13169,7 @@ var _pmemoTodoHeights={};
   document.addEventListener('mousemove',function(e){
     if(!_cd) return;
     var dy=e.clientY-_cd.sy;
-    var nh=Math.max(80,_cd.sh+dy);
+    var nh=Math.max(120,_cd.sh+dy);
     var parent=_cd.el.parentElement;
     var maxH=parent?parent.offsetHeight-80:400;
     if(nh>maxH) nh=maxH;
@@ -12749,6 +13180,119 @@ var _pmemoTodoHeights={};
   });
   document.addEventListener('mouseup',function(){_cd=null;});
 })();
+
+// ── 세금계산서 관리 ──
+var _taxBldgId=0,_taxType='taxInv';
+function rdTax(){
+  if(!DB.buildings||!DB.buildings.length)return;
+  if(!_taxBldgId) _taxBldgId=DB.buildings[0].id;
+  // 사이드바 건물 목록
+  var bl=$('tax-bldg-list');
+  if(bl) bl.innerHTML=DB.buildings.map(function(b){
+    return '<div class="sb-list-item'+(b.id===_taxBldgId?' on':'')+'" onclick="_taxSelBldg('+b.id+')" style="padding:4px 6px;font-size:11px;cursor:pointer">'+b.name+'</div>';
+  }).join('');
+  // 탭 상태
+  document.querySelectorAll('.tax-tab').forEach(function(t){
+    var isOn=t.getAttribute('data-tab')===_taxType;
+    t.style.borderBottomColor=isOn?'var(--bl)':'transparent';
+    t.style.color=isOn?'var(--bl)':'var(--t3)';
+    t.classList.toggle('on',isOn);
+  });
+  var isTax=_taxType==='taxInv';
+  var label=isTax?'세금계산서':'계산서 (면세)';
+  // 해당 건물 세입자
+  var ls=DB.leases.filter(function(l){return l.bId===_taxBldgId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
+  // 발행 데이터
+  if(!DB.taxInvoices) DB.taxInvoices=[];
+  var now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var issued=DB.taxInvoices.filter(function(t){return t.bId===_taxBldgId&&t.type===_taxType&&t.month===ym;});
+  var issuedIds=issued.map(function(t){return t.leaseId;});
+  // 요약
+  var sumEl=$('tax-summary');
+  if(sumEl) sumEl.innerHTML='<span style="color:var(--gn);font-weight:600">발행완료 '+issued.length+'건</span> · <span style="color:var(--rd);font-weight:600">미발행 '+(ls.length-issued.length)+'건</span> · 총 '+ls.length+'명 · '+ym;
+  // 테이블
+  var h='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+  h+='<thead><tr style="background:var(--w2)"><th style="padding:4px 6px;text-align:left;border-bottom:1px solid var(--ln)">호실</th>';
+  h+='<th style="padding:4px 6px;text-align:left;border-bottom:1px solid var(--ln)">세입자</th>';
+  h+='<th style="padding:4px 6px;text-align:left;border-bottom:1px solid var(--ln)">사업자번호</th>';
+  h+='<th style="padding:4px 6px;text-align:center;border-bottom:1px solid var(--ln)">발행</th>';
+  h+='<th style="padding:4px 6px;text-align:right;border-bottom:1px solid var(--ln)">공급가액</th>';
+  if(isTax) h+='<th style="padding:4px 6px;text-align:right;border-bottom:1px solid var(--ln)">세액</th>';
+  h+='<th style="padding:4px 6px;text-align:center;border-bottom:1px solid var(--ln)">상태</th>';
+  h+='<th style="padding:4px 6px;border-bottom:1px solid var(--ln)"></th></tr></thead><tbody>';
+  ls.forEach(function(l){
+    var inv=issued.find(function(t){return t.leaseId===l.id;});
+    var rt=typeof rateFor==='function'?rateFor(l,now.getFullYear(),now.getMonth()+1):{rent:l.rent||0,mgmt:l.mgmt||0};
+    var supply=isTax?(rt.rent||0)+(rt.mgmt||0):0;
+    var tax=isTax?Math.round(supply*0.1):0;
+    var cats=DB.memoCats&&DB.memoCats[_taxBldgId]||{};
+    var taxInfo=cats.tax||{};
+    var bizNo=taxInfo[l.floor]||'';
+    var done=!!inv;
+    h+='<tr style="border-bottom:1px solid var(--ln)">';
+    h+='<td style="padding:4px 6px;font-weight:600">'+l.floor+'</td>';
+    h+='<td style="padding:4px 6px">'+l.tenant+'</td>';
+    h+='<td style="padding:4px 6px;font-family:monospace;font-size:10px;color:var(--t2)">'+(bizNo||'<span style="color:var(--t4)">미등록</span>')+'</td>';
+    h+='<td style="padding:4px 6px;text-align:center">'+(done?'<span style="color:var(--gn)">✓</span>':'<span style="color:var(--t4)">—</span>')+'</td>';
+    h+='<td style="padding:4px 6px;text-align:right;font-family:monospace">'+fm(supply)+'</td>';
+    if(isTax) h+='<td style="padding:4px 6px;text-align:right;font-family:monospace;color:var(--t2)">'+fm(tax)+'</td>';
+    h+='<td style="padding:4px 6px;text-align:center">'+(done?'<span style="font-size:10px;background:var(--gn2);color:var(--gn);padding:1px 6px;border-radius:8px">발행완료</span>':'<span style="font-size:10px;background:var(--w2);color:var(--t3);padding:1px 6px;border-radius:8px">미발행</span>')+'</td>';
+    h+='<td style="padding:4px 6px"><button class="btn sm" onclick="_taxIssue('+l.id+')" style="font-size:10px;padding:2px 8px">'+(done?'취소':'발행')+'</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  h+='<div style="margin-top:6px;display:flex;gap:4px">';
+  h+='<button class="btn pri sm" onclick="_taxBulkIssue()" style="font-size:11px;padding:4px 12px">일괄발행 ('+label+')</button>';
+  h+='</div>';
+  $('tax-content').innerHTML=h;
+  // 최근 발행 이력
+  var hist=DB.taxInvoices.filter(function(t){return t.bId===_taxBldgId&&t.type===_taxType;}).slice(-10).reverse();
+  var hh='';
+  if(hist.length){
+    hh='<div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:4px">최근 발행이력</div>';
+    hh+='<table style="width:100%;border-collapse:collapse;font-size:10px">';
+    hh+='<thead><tr style="background:var(--w2)"><th style="padding:3px 6px;text-align:left;border-bottom:1px solid var(--ln)">월</th><th style="padding:3px 6px;text-align:left;border-bottom:1px solid var(--ln)">세입자</th><th style="padding:3px 6px;text-align:right;border-bottom:1px solid var(--ln)">금액</th><th style="padding:3px 6px;text-align:left;border-bottom:1px solid var(--ln)">발행일</th></tr></thead><tbody>';
+    hist.forEach(function(t){
+      var l=DB.leases.find(function(x){return x.id===t.leaseId;});
+      hh+='<tr style="border-bottom:1px solid var(--ln)"><td style="padding:2px 6px">'+t.month+'</td><td style="padding:2px 6px">'+(l?l.tenant:'?')+'</td><td style="padding:2px 6px;text-align:right;font-family:monospace">'+fm(t.amount||0)+'</td><td style="padding:2px 6px">'+(t.issuedAt||'')+'</td></tr>';
+    });
+    hh+='</tbody></table>';
+  }
+  $('tax-history').innerHTML=hh;
+}
+function _taxSelBldg(bId){_taxBldgId=bId;rdTax();}
+function _taxTab(type){_taxType=type;rdTax();}
+function _taxIssue(leaseId){
+  if(!DB.taxInvoices) DB.taxInvoices=[];
+  var now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var idx=DB.taxInvoices.findIndex(function(t){return t.bId===_taxBldgId&&t.type===_taxType&&t.month===ym&&t.leaseId===leaseId;});
+  if(idx>=0){DB.taxInvoices.splice(idx,1);}
+  else{
+    var l=DB.leases.find(function(x){return x.id===leaseId;});
+    var rt=typeof rateFor==='function'?rateFor(l,now.getFullYear(),now.getMonth()+1):{rent:l.rent||0,mgmt:l.mgmt||0};
+    var supply=_taxType==='taxInv'?(rt.rent||0)+(rt.mgmt||0):0;
+    DB.taxInvoices.push({id:nid(),bId:_taxBldgId,type:_taxType,month:ym,leaseId:leaseId,amount:supply,issuedAt:now.toISOString().slice(0,10)});
+  }
+  sv();rdTax();
+}
+function _taxBulkIssue(){
+  if(!DB.taxInvoices) DB.taxInvoices=[];
+  var now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var ls=DB.leases.filter(function(l){return l.bId===_taxBldgId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
+  var existing=DB.taxInvoices.filter(function(t){return t.bId===_taxBldgId&&t.type===_taxType&&t.month===ym;});
+  var existIds=existing.map(function(t){return t.leaseId;});
+  var added=0;
+  ls.forEach(function(l){
+    if(existIds.indexOf(l.id)>=0) return;
+    var rt=typeof rateFor==='function'?rateFor(l,now.getFullYear(),now.getMonth()+1):{rent:l.rent||0,mgmt:l.mgmt||0};
+    var supply=_taxType==='taxInv'?(rt.rent||0)+(rt.mgmt||0):0;
+    DB.taxInvoices.push({id:nid(),bId:_taxBldgId,type:_taxType,month:ym,leaseId:l.id,amount:supply,issuedAt:now.toISOString().slice(0,10)});
+    added++;
+  });
+  if(added) sv();
+  alert(added+'건 발행 완료');
+  rdTax();
+}
 
 function initInvoice(){
   fillSel('inv-bldg');
@@ -13218,7 +13762,7 @@ async function enterApp(){
   DB.ui.calM=_now.getMonth();
   calSelDate=fd(_now);
   // 렌더 dispatch — water/pmemo 누락됐던 거 추가 (수도요금 탭 새로고침시 빈화면 버그 수정)
-  const _renderers={lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:function(){},drive:function(){},admin:loadAdminUsers};
+  const _renderers={lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:rdTax,drive:function(){},admin:loadAdminUsers};
   function _renderCurrentTab(tab){
     try{ _renderers[tab]?.(); }
     catch(e){ console.error('탭 렌더 실패',tab,e); try{ rdLease(); }catch(_){} }
@@ -13257,6 +13801,7 @@ async function enterApp(){
         DB=_mergeDB(cloud, _localDB);
         DB=_mergeLocalImages(DB, _localDB);
         if(_idbFull) DB=_mergeLocalImages(DB, _idbFull);
+        _migrateMemoCats(); // 누락 카테고리 키 보충
         // UI 초기화 상태는 유지
         if(!DB.ui) DB.ui={};
         DB.ui.leaseF='all';
@@ -13272,7 +13817,10 @@ async function enterApp(){
       }
     } else if(sbClient){
       // 클라우드 빈 상태(최초) — _cloudLoadOk 허용되면 로컬을 서버에 푸시
+      _migrateMemoCats();
       await sv();
+    } else {
+      _migrateMemoCats();
     }
   })();
 
@@ -13824,14 +14372,15 @@ function rdDash(){
   if(el) el.textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월 '+now.getDate()+'일';
   // 요약 카드
   var totalUnits=DB.leases?DB.leases.length:0;
-  var occupied=DB.leases?DB.leases.filter(function(l){return l.tenant&&l.tenant.trim();}).length:0;
+  var occupied=DB.leases?DB.leases.filter(function(l){return l.tenant&&l.tenant.trim()&&l.tenant!=='공실';}).length:0;
+  var vacant=DB.leases?DB.leases.filter(function(l){return !l.tenant||!l.tenant.trim()||l.tenant==='공실';}).length:0;
   var totalBuildings=DB.buildings?DB.buildings.length:0;
   var sum=document.getElementById('dash-summary');
   if(sum) sum.innerHTML=
     '<div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--bl)">'+totalBuildings+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">관리 건물</div></div>'+
     '<div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--t1)">'+totalUnits+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">총 호실</div></div>'+
     '<div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gn)">'+occupied+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">입주</div></div>'+
-    '<div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--t4)">—</div><div style="font-size:10px;color:var(--t3);margin-top:2px">공실</div></div>';
+    '<div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#b45309">'+vacant+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">공실</div></div>';
   // 만료 임박
   var expEl=document.getElementById('dash-expiring');
   if(expEl&&DB.leases){
@@ -14265,6 +14814,227 @@ function aiSend(){
     if(fm&&fm.classList.contains('on')){_ef();return;}
   });
 })();
+
+// ==============================
+// 📁 드라이브 (Supabase Storage)
+// ==============================
+var _dvPath=[];  // 현재 폴더 경로 ['건물명','하위폴더']
+var _dvView='grid';
+var _dvFilter='all'; // all, starred, recent, trash, bldg:XX, cat:XX
+var _dvBldg=null;
+var _dvCat=null;
+var _dvFiles=[];  // DB.driveFiles 참조
+
+function rdDrive(){
+  if(!DB.driveFiles) DB.driveFiles=[];
+  _dvFiles=DB.driveFiles;
+  var nav$=$('drive-nav'), bldg$=$('drive-bldg-list'), cat$=$('drive-cat-list');
+  if(!nav$) return;
+  // 네비게이션
+  var navItems=[
+    {id:'all',ico:'🏠',label:'전체 파일'},
+    {id:'starred',ico:'⭐',label:'즐겨찾기'},
+    {id:'recent',ico:'🕐',label:'최근 파일'},
+    {id:'trash',ico:'🗑',label:'휴지통'}
+  ];
+  nav$.innerHTML=navItems.map(function(n){
+    var on=_dvFilter===n.id?'background:#eff6ff;color:#2563eb;font-weight:600':'';
+    return '<div onclick="_dvNav(\''+n.id+'\')" style="padding:6px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:1px;font-size:11px;'+on+'"><span style="font-size:13px;min-width:16px;text-align:center">'+n.ico+'</span>'+n.label+'</div>';
+  }).join('');
+  // 건물 목록
+  var bldgs=DB.buildings||[];
+  bldg$.innerHTML=bldgs.map(function(b){
+    var on=_dvBldg===b.id?'background:#1e3a5f;color:#fff':'';
+    return '<div onclick="_dvNavBldg('+b.id+')" style="padding:4px 8px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:5px;margin-bottom:1px;font-size:10.5px;'+on+'"><span style="width:5px;height:5px;border-radius:50%;background:'+(_dvBldg===b.id?'#60a5fa':'#94a3b8')+'"></span>'+b.name+'</div>';
+  }).join('');
+  // 문서유형
+  var cats=[
+    {id:'contract',ico:'📋',label:'임대차계약서'},
+    {id:'tax',ico:'🧾',label:'세금계산서'},
+    {id:'bill',ico:'💰',label:'청구서'},
+    {id:'report',ico:'📊',label:'월간보고서'},
+    {id:'building',ico:'🏗',label:'건축물대장'},
+    {id:'inspect',ico:'🔧',label:'점검보고서'},
+    {id:'etc',ico:'📁',label:'기타'}
+  ];
+  cat$.innerHTML=cats.map(function(c){
+    var on=_dvCat===c.id?'background:#eff6ff;color:#2563eb;font-weight:600':'';
+    return '<div onclick="_dvNavCat(\''+c.id+'\')" style="padding:5px 8px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:1px;font-size:10.5px;'+on+'"><span style="font-size:12px">'+c.ico+'</span>'+c.label+'</div>';
+  }).join('');
+  // 저장공간
+  var totalSize=0;
+  _dvFiles.forEach(function(f){ if(!f.deleted) totalSize+=(f.size||0); });
+  var mb=(totalSize/1024/1024).toFixed(1);
+  var pct=Math.min(100,(totalSize/(1024*1024*1024))*100);
+  var bar$=$('drive-usage-bar'); if(bar$) bar$.style.width=pct+'%';
+  var txt$=$('drive-usage-text'); if(txt$) txt$.textContent=mb+'MB / 1GB 사용중';
+  // 브레드크럼
+  _dvRenderBreadcrumb();
+  // 메인 영역 렌더
+  _dvRenderMain();
+  // 검색 이벤트
+  var si=$('drive-search');
+  if(si && !si._dvBound){ si._dvBound=true; si.addEventListener('input',function(){ _dvRenderMain(); }); }
+}
+function _dvNav(id){ _dvFilter=id; _dvBldg=null; _dvCat=null; _dvPath=[]; rdDrive(); }
+function _dvNavBldg(bId){ _dvFilter='bldg'; _dvBldg=bId; _dvCat=null; _dvPath=[]; rdDrive(); }
+function _dvNavCat(cId){ _dvFilter='cat'; _dvCat=cId; _dvBldg=null; _dvPath=[]; rdDrive(); }
+function _dvRenderBreadcrumb(){
+  var bc$=$('drive-breadcrumb'); if(!bc$) return;
+  var parts=['<a style="color:#3b82f6;cursor:pointer;text-decoration:none" onclick="_dvNav(\'all\')">드라이브</a>'];
+  if(_dvFilter==='bldg' && _dvBldg){
+    var b=(DB.buildings||[]).find(function(x){return x.id===_dvBldg;});
+    parts.push('<span style="color:#94a3b8">/</span><span>'+(b?b.name:'')+'</span>');
+  }
+  if(_dvFilter==='cat' && _dvCat){
+    var catNames={contract:'임대차계약서',tax:'세금계산서',bill:'청구서',report:'월간보고서',building:'건축물대장',inspect:'점검보고서',etc:'기타'};
+    parts.push('<span style="color:#94a3b8">/</span><span>'+(catNames[_dvCat]||_dvCat)+'</span>');
+  }
+  _dvPath.forEach(function(p,i){
+    parts.push('<span style="color:#94a3b8">/</span><a style="color:#3b82f6;cursor:pointer" onclick="_dvGoPath('+i+')">'+p+'</a>');
+  });
+  bc$.innerHTML=parts.join(' ');
+}
+function _dvGoPath(idx){ _dvPath=_dvPath.slice(0,idx+1); _dvRenderMain(); _dvRenderBreadcrumb(); }
+function _dvRenderMain(){
+  var main$=$('drive-main'); if(!main$) return;
+  var q=($('drive-search')||{}).value||''; q=q.toLowerCase();
+  // 파일 필터링
+  var files=_dvFiles.filter(function(f){
+    if(_dvFilter==='trash') return f.deleted;
+    if(f.deleted) return false;
+    if(_dvFilter==='starred') return f.starred;
+    if(_dvFilter==='bldg' && _dvBldg) return f.bldgId===_dvBldg;
+    if(_dvFilter==='cat' && _dvCat) return f.category===_dvCat;
+    return true;
+  });
+  if(_dvFilter==='recent') files.sort(function(a,b){return (b.uploadedAt||'').localeCompare(a.uploadedAt||'');});
+  if(q) files=files.filter(function(f){ return (f.name||'').toLowerCase().includes(q); });
+  // 폴더 + 파일 분리
+  var folders=[], items=[];
+  files.forEach(function(f){
+    if(f.isFolder) folders.push(f); else items.push(f);
+  });
+  var html='';
+  // 드래그앤드롭 영역
+  html+='<div id="drive-drop" style="border:2px dashed #d1d5db;border-radius:10px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;transition:.15s" onclick="$(\'drive-file-input\').click()">';
+  html+='<div style="font-size:28px;margin-bottom:4px">📤</div>';
+  html+='<div style="font-size:11px;color:#64748b">파일을 여기에 끌어다 놓거나 클릭하여 업로드</div></div>';
+  if(files.length===0){
+    html+='<div style="text-align:center;padding:40px;color:var(--t3);font-size:12px">파일이 없습니다</div>';
+    main$.innerHTML=html; return;
+  }
+  // 폴더
+  if(folders.length>0){
+    html+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:6px">📁 폴더</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px">';
+    folders.forEach(function(f){
+      html+='<div onclick="_dvOpenFolder(\''+f.id+'\')" style="background:var(--w);border:1px solid var(--ln);border-radius:8px;padding:10px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s">';
+      html+='<span style="font-size:24px">📁</span><div><div style="font-size:11px;font-weight:600">'+f.name+'</div></div></div>';
+    });
+    html+='</div>';
+  }
+  // 파일
+  if(items.length>0){
+    html+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:6px">📄 파일</div>';
+    if(_dvView==='grid'){
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">';
+      items.forEach(function(f){
+        var ext=(f.name||'').split('.').pop().toLowerCase();
+        var icon=_dvFileIcon(ext);
+        var bgMap={pdf:'#fef2f2',xlsx:'#f0fdf4',xls:'#f0fdf4',jpg:'#eff6ff',jpeg:'#eff6ff',png:'#eff6ff',doc:'#eff6ff',docx:'#eff6ff'};
+        var bg=bgMap[ext]||'#f8fafc';
+        var sz=f.size?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'—';
+        html+='<div style="background:var(--w);border:1px solid var(--ln);border-radius:8px;overflow:hidden;cursor:pointer;position:relative" onclick="_dvPreview(\''+f.id+'\')">';
+        html+='<div style="height:80px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:30px">'+icon+'</div>';
+        html+='<div style="padding:6px 8px"><div style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+'</div>';
+        html+='<div style="font-size:9px;color:#94a3b8;margin-top:2px;display:flex;justify-content:space-between"><span>'+sz+'</span><span>'+(f.uploadedAt||'').slice(2,10)+'</span></div></div>';
+        html+='<span onclick="event.stopPropagation();_dvToggleStar(\''+f.id+'\')" style="position:absolute;top:4px;right:6px;font-size:12px;cursor:pointer;opacity:'+(f.starred?'1':'.3')+'">'+(f.starred?'⭐':'☆')+'</span>';
+        html+='</div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="color:#64748b;font-size:10px;border-bottom:1px solid var(--ln)">';
+      html+='<th style="padding:6px 8px;text-align:left;width:30px"></th><th style="padding:6px;text-align:left">이름</th><th style="padding:6px;width:70px">크기</th><th style="padding:6px;width:80px">업로드일</th><th style="padding:6px;width:50px">⭐</th></tr></thead><tbody>';
+      items.forEach(function(f){
+        var ext=(f.name||'').split('.').pop().toLowerCase();
+        var icon=_dvFileIcon(ext);
+        var sz=f.size?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'—';
+        html+='<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="_dvPreview(\''+f.id+'\')">';
+        html+='<td style="padding:6px 8px;text-align:center;font-size:16px">'+icon+'</td>';
+        html+='<td style="padding:6px;font-weight:600">'+f.name+'</td>';
+        html+='<td style="padding:6px;color:#94a3b8;text-align:center">'+sz+'</td>';
+        html+='<td style="padding:6px;color:#94a3b8;text-align:center">'+(f.uploadedAt||'').slice(2,10)+'</td>';
+        html+='<td style="padding:6px;text-align:center;cursor:pointer" onclick="event.stopPropagation();_dvToggleStar(\''+f.id+'\')">'+(f.starred?'⭐':'☆')+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    }
+  }
+  main$.innerHTML=html;
+  // 드래그앤드롭
+  var drop=$('drive-drop');
+  if(drop){
+    drop.ondragover=function(e){e.preventDefault();drop.style.borderColor='#3b82f6';drop.style.background='#eff6ff';};
+    drop.ondragleave=function(){drop.style.borderColor='#d1d5db';drop.style.background='';};
+    drop.ondrop=function(e){e.preventDefault();drop.style.borderColor='#d1d5db';drop.style.background='';_driveHandleFiles(e.dataTransfer.files);};
+  }
+}
+function _dvFileIcon(ext){
+  var m={pdf:'📄',xlsx:'📊',xls:'📊',doc:'📝',docx:'📝',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',zip:'📦',hwp:'📃'};
+  return m[ext]||'📄';
+}
+function _driveView(v){ _dvView=v; document.querySelectorAll('._dv-vt').forEach(function(b){b.style.background=b.dataset.v===v?'var(--bl)':'';b.style.color=b.dataset.v===v?'#fff':'';b.style.borderColor=b.dataset.v===v?'var(--bl)':'';});_dvRenderMain(); }
+function _driveUpload(){ $('drive-file-input').click(); }
+function _driveHandleFiles(fileList){
+  if(!fileList||!fileList.length) return;
+  if(!DB.driveFiles) DB.driveFiles=[];
+  var now=new Date().toISOString().slice(0,19).replace('T',' ');
+  Array.from(fileList).forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var entry={id:nid(),name:file.name,size:file.size,type:file.type,data:e.target.result,uploadedAt:now,bldgId:_dvBldg||null,category:_dvCat||'etc',starred:false,deleted:false,isFolder:false};
+      DB.driveFiles.push(entry);
+      _dvFiles=DB.driveFiles;
+      sv();rdDrive();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function _driveNewFolder(){
+  var name=prompt('새 폴더 이름:');
+  if(!name) return;
+  if(!DB.driveFiles) DB.driveFiles=[];
+  DB.driveFiles.push({id:nid(),name:name,isFolder:true,bldgId:_dvBldg||null,category:_dvCat||null,starred:false,deleted:false,uploadedAt:new Date().toISOString().slice(0,19).replace('T',' ')});
+  sv();rdDrive();
+}
+function _dvToggleStar(fid){
+  var f=_dvFiles.find(function(x){return x.id===fid;});
+  if(f){f.starred=!f.starred;sv();rdDrive();}
+}
+function _dvPreview(fid){
+  var f=_dvFiles.find(function(x){return x.id===fid;});
+  if(!f) return;
+  if(f.deleted){
+    if(confirm(f.name+'\n\n복구하시겠습니까?')){f.deleted=false;sv();rdDrive();}
+    return;
+  }
+  // 컨텍스트 메뉴: 다운로드/삭제/이름변경
+  var act=prompt(f.name+'\n\n크기: '+(f.size?(f.size/1024).toFixed(0)+'KB':'—')+'\n업로드: '+(f.uploadedAt||'')+'\n\n1=다운로드  2=이름변경  3=삭제  (번호 입력)');
+  if(act==='1' && f.data){
+    var a=document.createElement('a');a.href=f.data;a.download=f.name;document.body.appendChild(a);a.click();document.body.removeChild(a);
+  } else if(act==='2'){
+    var nn=prompt('새 이름:',f.name);
+    if(nn){f.name=nn;sv();rdDrive();}
+  } else if(act==='3'){
+    if(confirm(f.name+' 삭제?')){f.deleted=true;sv();rdDrive();}
+  }
+}
+function _dvOpenFolder(fid){
+  // 폴더 클릭 시 해당 폴더명을 경로에 추가 (향후 하위 폴더 지원)
+  var f=_dvFiles.find(function(x){return x.id===fid;});
+  if(f) _dvPath.push(f.name);
+  _dvRenderBreadcrumb();_dvRenderMain();
+}
 </script>
 
 <!-- 플로팅 메모 -->
