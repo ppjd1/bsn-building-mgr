@@ -11090,7 +11090,7 @@ function rdFixed(){
         else if(/^\d+\)/.test(lt)){collecting=false;}
         else if(collecting&&lt){spParts.push(lt);}
       });
-      const spHtml=spParts.length?`<div style="margin-top:2px;font-size:10px;color:var(--am);padding:1px 4px 1px 8px;background:var(--am2);border-radius:3px;display:inline-block" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed','${s.id}_sp${i}','고정일정','${s.day}일 ${i+1}번 특이사항');beginEditOnDblClick(this)" oninput="_spEditPending={sId:${s.id},taskIdx:${i},el:this}" onblur="saveSpInline(${s.id},${i},this);if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" onclick="event.stopPropagation()" title="더블클릭하여 수정">${hl(spParts.join(' '))}</div>`:'';
+      const spHtml=spParts.length?`<div style="margin-top:2px;font-size:10px;color:var(--am);padding:1px 4px 1px 8px;background:var(--am2);border-radius:3px;display:inline-block" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed','${s.id}_sp${i}','고정일정','${s.day}일 ${i+1}번 특이사항');_spEditActive={sId:${s.id},taskIdx:${i},el:this,origText:(this.textContent||'').trim()};beginEditOnDblClick(this)" oninput="_spEditPending={sId:${s.id},taskIdx:${i},el:this}" onblur="saveSpInline(${s.id},${i},this);_spEditActive=null;if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" onclick="event.stopPropagation()" title="더블클릭하여 수정">${hl(spParts.join(' '))}</div>`:'';
       return`<div class="fix-task" id="ft-${s.id}-${i}" data-presence-type="fixed" data-presence-id="${s.id}_${i}">
         <div class="fix-task-cb${done?' done':''}" onclick="togFix('${s.id}',${i})"></div>
         <div class="fix-task-txt${done?' done':''}" id="ftt-${s.id}-${i}" style="flex:1" ondblclick="if(typeof startEditing==='function')startEditing('fixed','${s.id}_${i}','고정일정','${s.day}일 ${i+1}번');beginEditOnDblClick(this)" onblur="saveTaskDirect(${s.id},${i},this);if(typeof stopEditing==='function')stopEditing()" oncontextmenu="event.preventDefault();addSpContext(${s.id},${i})" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정">${i+1}. ${hl(t)}${spHtml}</div>
@@ -14105,55 +14105,167 @@ function _runNaverSpellCheck(text,taIdx){
   }
   document.body.appendChild(ov);
 
-  // ★ LanguageTool API (CORS 공식 지원 — 프록시 불필요)
-  console.log('[맞춤법] LanguageTool API 시작...');
-  fetch('https://api.languagetool.org/v2/check',{
-    method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},
-    body:'text='+encodeURIComponent(text)+'&language=ko'
-  }).then(function(r){
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  }).then(function(data){
-    console.log('[맞춤법] LanguageTool 응답:', (data.matches||[]).length+'건 오류');
-    var matches=data.matches||[];
-    if(!matches.length){
-      _renderSpellResult([{html:'',notag:text,errata:0,origin:text}],taIdx,0,text);
+  // ★ Mora API (한국어 맞춤법 전용) + 부산대 폴백
+  console.log('[맞춤법] Mora API 시작...');
+  var _spellText=text;
+  var _spellTaIdxLocal=taIdx;
+  // 500자 단위로 분할 (API 제한 대응)
+  var _spChunks=[];
+  for(var ci=0;ci<_spellText.length;ci+=500){ _spChunks.push(_spellText.substring(ci,ci+500)); }
+  var _spResults=[];
+  var _spDone=0;
+  function _spProcessChunk(idx){
+    if(idx>=_spChunks.length){
+      // 모든 청크 완료 → 결과 합산
+      var totalErr=0; _spResults.forEach(function(r){totalErr+=r.errata;});
+      console.log('[맞춤법] Mora 완료: '+totalErr+'건 오류');
+      _renderSpellResult(_spResults,_spellTaIdxLocal,0,_spellText);
       return;
     }
-    // 교정 결과 생성 (뒤에서부터 치환해야 offset이 안 꼬임)
-    var corrected=text;
-    var sorted=matches.slice().sort(function(a,b){return b.offset-a.offset;});
-    sorted.forEach(function(m){
-      if(m.replacements&&m.replacements.length>0){
-        corrected=corrected.substring(0,m.offset)+m.replacements[0].value+corrected.substring(m.offset+m.length);
+    var chunk=_spChunks[idx];
+    fetch('https://mora-bot.kr/api/v1/grammar?string='+encodeURIComponent(chunk),{method:'GET'})
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(function(data){
+      console.log('[맞춤법] Mora 청크'+idx+' 응답:', JSON.stringify(data).substring(0,200));
+      // Mora API 응답 파싱: data가 배열이거나 객체 형태
+      var items=Array.isArray(data)?data:(data.result||data.data||data.items||[data]);
+      if(!Array.isArray(items)) items=[items];
+      var corrected=chunk;
+      var htmlMarked='';
+      var errCount=0;
+      // 응답 형식에 따라 적응적 파싱
+      if(items.length>0 && items[0] && (items[0].candWord||items[0].replacement||items[0].suggestions)){
+        // 부산대 스타일: {str, candWord, help, errorIdx}
+        var lastPos=0;
+        items.forEach(function(it){
+          var orig=it.str||it.token||it.orgStr||'';
+          var cand=it.candWord||it.replacement||it.correct||(it.suggestions&&it.suggestions[0])||'';
+          var help=it.help||it.message||'';
+          if(!orig) return;
+          var pos=chunk.indexOf(orig,lastPos);
+          if(pos>=0){
+            htmlMarked+=esc(chunk.substring(lastPos,pos));
+            var color=(it.errorIdx===1||/맞춤법/.test(help))?'#e53935':(it.errorIdx===2||/띄어쓰기/.test(help))?'#03c75a':'#7c4dff';
+            htmlMarked+='<span style="border-bottom:2px solid '+color+';padding-bottom:1px;cursor:pointer;position:relative" title="'+esc(help+(cand?' → '+cand:''))+'">'+esc(orig)+'</span>';
+            lastPos=pos+orig.length;
+            errCount++;
+            // 교정문 치환
+            corrected=corrected.substring(0,pos)+cand+corrected.substring(pos+orig.length);
+          }
+        });
+        htmlMarked+=esc(chunk.substring(lastPos));
+      } else if(data.message && data.original){
+        // Mora 단순 응답: {message:교정문, original:원문, errnum}
+        corrected=data.message||chunk;
+        errCount=data.errnum||0;
+        if(errCount>0 && corrected!==chunk){
+          // 차이가 있으면 diff 기반 표시
+          htmlMarked=esc(chunk); // 간단 처리
+        } else {
+          htmlMarked=esc(chunk);
+        }
+      } else {
+        // 알 수 없는 형식 — 에러 없음으로 처리
+        htmlMarked=esc(chunk);
+        corrected=chunk;
+      }
+      _spResults.push({html:htmlMarked,notag:corrected,errata:errCount,origin:chunk});
+      _spProcessChunk(idx+1);
+    }).catch(function(e){
+      console.error('[맞춤법] Mora 실패 (청크'+idx+'):', e.message);
+      // Mora 실패 → 부산대 CORS 프록시 시도
+      if(idx===0){
+        _spTryPusan(_spellText,_spellTaIdxLocal);
+      } else {
+        // 중간 청크 실패 → 지금까지 결과로 렌더
+        _spResults.push({html:esc(chunk),notag:chunk,errata:0,origin:chunk});
+        _spProcessChunk(idx+1);
       }
     });
-    // 원문 하이라이트 (앞에서부터, offset 보정)
+  }
+  _spProcessChunk(0);
+}
+// ── 부산대 맞춤법 검사기 (CORS 프록시 경유) ──
+function _spTryPusan(text,taIdx){
+  console.log('[맞춤법] 부산대 프록시 시도...');
+  var pusanUrl='http://speller.cs.pusan.ac.kr/PnuWebSpeller/lib/check.asp';
+  var proxyUrl='https://corsproxy.io/?'+encodeURIComponent(pusanUrl);
+  fetch(proxyUrl,{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'text1='+encodeURIComponent(text)
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(function(html){
+    console.log('[맞춤법] 부산대 응답 수신:', html.length+'자');
+    // 부산대 응답에서 JSON 추출: data = [{...}] 패턴
+    var m=html.match(/data\s*=\s*(\[[\s\S]*?\]);/);
+    if(!m) throw new Error('응답 파싱 실패');
+    var items=JSON.parse(m[1]);
+    var corrected=text;
     var htmlMarked='';
-    var lastIdx=0;
-    matches.sort(function(a,b){return a.offset-b.offset;}).forEach(function(m){
-      htmlMarked+=esc(text.substring(lastIdx,m.offset));
-      var errWord=text.substring(m.offset,m.offset+m.length);
-      var suggestion=m.replacements&&m.replacements.length?m.replacements[0].value:'';
-      var tipText=m.message+(suggestion?' → '+suggestion:'');
-      var color=m.rule&&m.rule.category&&m.rule.category.id==='TYPOS'?'#e53935':m.rule&&m.rule.category&&m.rule.category.id==='GRAMMAR'?'#7c4dff':'#03c75a';
-      htmlMarked+='<span style="border-bottom:2px solid '+color+';padding-bottom:1px;cursor:pointer;position:relative" title="'+esc(tipText)+'">'+esc(errWord)+'</span>';
-      lastIdx=m.offset+m.length;
+    var lastPos=0;
+    var errCount=0;
+    items.forEach(function(it){
+      var orig=it.orgStr||it.str||'';
+      var cand=it.candWord||'';
+      var help=it.help||'';
+      if(!orig||!cand||orig===cand) return;
+      var pos=text.indexOf(orig,lastPos);
+      if(pos>=0){
+        htmlMarked+=esc(text.substring(lastPos,pos));
+        var color=(it.errorIdx===1)?'#e53935':(it.errorIdx===2)?'#03c75a':'#7c4dff';
+        htmlMarked+='<span style="border-bottom:2px solid '+color+';padding-bottom:1px;cursor:pointer;position:relative" title="'+esc(help+(cand?' → '+cand:''))+'">'+esc(orig)+'</span>';
+        lastPos=pos+orig.length;
+        errCount++;
+      }
     });
-    htmlMarked+=esc(text.substring(lastIdx));
-    var results2=[{html:htmlMarked,notag:corrected,errata:matches.length,origin:text}];
-    _renderSpellResult(results2,taIdx,0,text);
+    htmlMarked+=esc(text.substring(lastPos));
+    // 교정문 생성
+    items.sort(function(a,b){
+      var pa=text.indexOf(a.orgStr||''); var pb=text.indexOf(b.orgStr||'');
+      return pb-pa; // 뒤에서부터
+    }).forEach(function(it){
+      var orig=it.orgStr||it.str||'';
+      var cand=it.candWord||'';
+      if(!orig||!cand||orig===cand) return;
+      var pos=corrected.lastIndexOf(orig);
+      if(pos>=0) corrected=corrected.substring(0,pos)+cand+corrected.substring(pos+orig.length);
+    });
+    _renderSpellResult([{html:htmlMarked,notag:corrected,errata:errCount,origin:text}],taIdx,0,text);
   }).catch(function(e){
-    console.error('[맞춤법] LanguageTool 실패:',e.message);
-    var body2=$('spell-body'); if(!body2) return;
-    body2.innerHTML='<div style="padding:30px 20px;text-align:center">'
-      +'<div style="font-size:40px;margin-bottom:10px">⚠️</div>'
-      +'<div style="font-size:14px;color:#666;margin-bottom:16px">맞춤법검사 서버 연결 실패</div>'
-      +'<button onclick="_runNaverSpellCheck(\''+text.replace(/'/g,"\\'")+'\','+taIdx+')" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">다시 시도</button>'
-      +'<button onclick="document.getElementById(\'spell-overlay\').remove()" style="padding:10px 24px;background:#64748b;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit">닫기</button>'
-      +'</div>';
+    console.error('[맞춤법] 부산대 프록시 실패:', e.message);
+    // 최종 폴백: 클립보드 복사 + 부산대 새 탭 열기
+    _spFallbackExternal(text,taIdx);
   });
+}
+// ── 최종 폴백: 부산대 검사기 새 탭 열기 ──
+function _spFallbackExternal(text,taIdx){
+  var body2=$('spell-body'); if(!body2) return;
+  body2.innerHTML='<div style="padding:24px 20px;text-align:center">'
+    +'<div style="font-size:36px;margin-bottom:10px">📋</div>'
+    +'<div style="font-size:14px;color:#333;margin-bottom:8px;font-weight:600">맞춤법검사 서버 연결 실패</div>'
+    +'<div style="font-size:13px;color:#666;margin-bottom:16px">텍스트를 복사하여 부산대 맞춤법 검사기에서 직접 확인할 수 있습니다.</div>'
+    +'<button onclick="_spCopyAndOpen()" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">텍스트 복사 + 검사기 열기</button>'
+    +'<button onclick="_runNaverSpellCheck(\''+text.replace(/'/g,"\\'")+'\','+taIdx+')" style="padding:10px 24px;background:#64748b;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;margin-right:8px">다시 시도</button>'
+    +'<button onclick="document.getElementById(\'spell-overlay\').remove()" style="padding:10px 24px;background:#94a3b8;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit">닫기</button>'
+    +'</div>';
+  // 클립보드에 미리 복사
+  try{navigator.clipboard.writeText(text);}catch(_){}
+}
+function _spCopyAndOpen(){
+  var ta=document.querySelector('[data-pmemo-ta-idx]');
+  var text=ta?ta.value:'';
+  if(!text){var fta=$('float-memo-ta');text=fta?fta.value:'';}
+  try{navigator.clipboard.writeText(text).then(function(){
+    window.open('http://speller.cs.pusan.ac.kr/','_blank');
+    alert('텍스트가 복사되었습니다.\\n부산대 검사기에서 붙여넣기(Ctrl+V) 후 검사하세요.');
+  });}catch(_){
+    window.open('http://speller.cs.pusan.ac.kr/','_blank');
+  }
 }
 function _renderSpellResult(results,taIdx,errs,originalText){
   var body=$('spell-body'); if(!body) return;
