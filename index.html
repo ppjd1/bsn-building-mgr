@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -889,6 +889,11 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <div class="app" style="display:none" id="app-main">
 <aside class="sb">
   <div class="sb-logo" onclick="var db=document.querySelector('.nb[data-id=dash]');if(db){gp('dash',db);}else{location.reload();}" style="cursor:pointer" title="대시보드로 이동"><span style="font-size:13px;font-weight:800;letter-spacing:-.3px;color:#00249C;font-family:'Archivo Black','Arial Black',sans-serif;line-height:1">BSN<span style="color:#1e40af;font-weight:700">.CARE</span></span></div>
+  <!-- ★ 팀 전환 토글 -->
+  <div id="team-toggle" style="margin:6px 8px 4px;display:flex;background:#0f172a;border-radius:8px;overflow:hidden;border:1px solid #334155">
+    <button id="team-btn-1" class="team-btn" onclick="switchTeam(1)" style="flex:1;padding:6px 0;font-size:11px;font-weight:600;border:none;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;font-family:inherit">1팀</button>
+    <button id="team-btn-2" class="team-btn" onclick="switchTeam(2)" style="flex:1;padding:6px 0;font-size:11px;font-weight:600;border:none;cursor:pointer;transition:all .2s;background:#3b82f6;color:#fff;border-radius:6px;box-shadow:0 2px 8px rgba(59,130,246,.4);font-family:inherit">2팀</button>
+  </div>
   <nav class="sb-nav" id="nav"></nav>
   <div class="sb-foot">
     <div id="sb-users" style="margin-bottom:6px;display:flex;flex-direction:column;gap:2px"></div>
@@ -1297,15 +1302,32 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <div id="tax-side" style="width:130px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:var(--w);padding:4px 2px;font-size:11px">
       <div id="tax-bldg-list"></div>
     </div>
-    <!-- 우: 메인 -->
-    <div style="flex:1;min-width:0;overflow-y:auto;padding:6px 10px">
+    <!-- 좌2: 청구서 미리보기 사이드패널 (층 사이드목록 + 청구서) -->
+    <div id="tax-inv-preview" style="width:0;flex-shrink:0;border-right:1px solid var(--ln);overflow:hidden;background:#f8fafc;transition:width .25s ease;position:relative">
+      <div id="tax-inv-preview-inner" style="width:380px;display:none;height:100%;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #e2e8f0;flex-shrink:0">
+          <span style="font-size:12px;font-weight:700;color:#1e293b">🧾 청구서 미리보기</span>
+          <button onclick="_taxClosePreview()" style="background:none;border:none;cursor:pointer;font-size:16px;color:#64748b;padding:2px 6px">×</button>
+        </div>
+        <div style="flex:1;display:flex;min-height:0;overflow:hidden">
+          <!-- 층 사이드목록 (세로) -->
+          <div id="tax-inv-floors" style="width:80px;flex-shrink:0;border-right:1px solid #e2e8f0;overflow-y:auto;background:#fff;padding:4px 2px"></div>
+          <!-- 청구서 내용 -->
+          <div id="tax-inv-detail" style="flex:1;overflow-y:auto;padding:10px;font-size:11px"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 우: 메인 (가운데 정렬, 최대폭 제한) -->
+    <div style="flex:1;min-width:0;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;align-items:center">
+      <div style="width:100%;max-width:750px">
       <div style="display:flex;gap:0;margin-bottom:6px;border-bottom:1px solid var(--ln)">
         <div class="tax-tab on" data-tab="taxInv" onclick="_taxTab('taxInv')" style="padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent">세금계산서</div>
         <div class="tax-tab" data-tab="calcInv" onclick="_taxTab('calcInv')" style="padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--t3)">계산서 (면세)</div>
       </div>
-      <div id="tax-summary" style="font-size:11px;color:var(--t2);margin-bottom:4px"></div>
+      <div id="tax-summary" style="font-size:11px;color:var(--t2);margin-bottom:6px"></div>
       <div id="tax-content"></div>
       <div id="tax-history" style="margin-top:10px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2372,6 +2394,8 @@ function _migrateMemoCats(){
 function _mergeDB(cloud, local){
   // 클라우드 기본, 배열은 id 기준 머지 (양쪽 항목 보존)
   var merged=JSON.parse(JSON.stringify(cloud));
+  // ★ ui는 개인 로컬 설정 — 클라우드가 아닌 로컬 값 유지
+  if(local.ui) merged.ui=JSON.parse(JSON.stringify(local.ui));
   var arrKeys=['calEvents','leases','expires','fixedEvents','fixedSchedules','memos','pMemos'];
   arrKeys.forEach(function(k){
     if(Array.isArray(cloud[k]) || Array.isArray(local[k])){
@@ -2556,6 +2580,9 @@ function _rtApplyRow(row){
   }).catch(function(){});
   // IndexedDB에도 이미지 포함 전체 저장 (로컬 이미지 유실 방지)
   try{ _idbPut('fullDB',DB).catch(function(e){console.warn('[rt] idb err',e);}); }catch(e){}
+  // ★ 전기청구서 중복 방지: 머지 후 항상 dedup 실행 (412→812 같은 증식 차단)
+  // skipSave=true: realtime 핸들러 내에서 sv() 호출하면 무한루프 발생
+  try{ _deduplicateElectricBills(true, true); }catch(e){ console.warn('[rt] dedup err',e); }
   try{ localStorage.setItem(SK, JSON.stringify(_stripBillImages(DB))); }catch(_){}
   const onPage=document.querySelector('.page.on');
   const id=onPage?onPage.id.replace('pg-',''):'';
@@ -2690,8 +2717,11 @@ function setupPresence(){
           console.log('[Presence] ✅ 트래킹 시작 — id:',CURRENT_USER_ID,'name:',CURRENT_USER_NAME);
         }
         if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
-          console.error('[Presence] ❌ 채널 연결 실패:',status);
+          console.error('[Presence] ❌ 채널 연결 실패:',status,'— 5초 후 재시도');
+          try{ _presenceChannel.unsubscribe(); }catch(_){}
           _presenceChannel=null;
+          // ★ 자동 재연결 (5초 후)
+          setTimeout(function(){ setupPresence(); },5000);
         }
       });
   }catch(e){ console.warn('Presence 구독 실패:',e.message); _presenceChannel=null; }
@@ -2807,7 +2837,27 @@ function _renderEditIndicators(){
   });
 }
 // 로그아웃/언로드 시 presence 해제
-window.addEventListener('beforeunload',()=>{ if(_presenceChannel) try{ _presenceChannel.untrack(); }catch(_){} });
+window.addEventListener('beforeunload',function(e){
+  if(_presenceChannel) try{ _presenceChannel.untrack(); }catch(_){}
+  // 메모 미저장 경고
+  var dirty=false;
+  try{ dirty=_pmemoHasDirty()||_floatDirty; }catch(_){}
+  if(dirty){ e.preventDefault(); e.returnValue='메모에 저장되지 않은 내용이 있습니다.'; return e.returnValue; }
+});
+// ★ Presence heartbeat — 15초마다 상태 재전송 (채널 유지 + 상대방 sync 보장)
+setInterval(function(){
+  if(_presenceChannel){
+    try{ _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:_myEditingCtx,status:_myStatus,typing:_isTyping,at:Date.now()}); }catch(_){}
+  }
+},15000);
+// ★ 5초마다 presence 인디케이터 재렌더 (DOM 변경으로 누락된 배지 복구)
+setInterval(function(){
+  try{
+    var others=Object.keys(_presenceState).filter(function(k){return k!==CURRENT_USER_ID;}).map(function(k){return _presenceState[k];}).filter(Boolean);
+    var hasEditing=others.some(function(p){return p&&p.editing;});
+    if(hasEditing) _renderEditIndicators();
+  }catch(_){}
+},5000);
 
 // ── 초기 DB (localStorage에서 임시 로드, 로그인 후 Supabase/IndexedDB 데이터로 교체)
 let DB = (() => { try{const s=localStorage.getItem(SK);if(s)return JSON.parse(s);}catch(e){} return null; })() || mkDef();
@@ -3144,7 +3194,62 @@ function ddBg(d,type){
   return``;
 }
 function expCls(d){return d<=30?'ec-rd':'';} // only red for <=30
-function fillSel(id,withNone){const el=$(id);if(!el)return;el.innerHTML=(withNone?'<option value="">건물전체</option>':'')+DB.buildings.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');}
+// ── 팀 전환 ─────────────────────────────────────────────────────────────
+function _getCurrentTeam(){ return DB.ui.currentTeam||2; }
+function _teamBuildings(){ return DB.buildings.filter(function(b){ return (b.team||2)===_getCurrentTeam(); }); }
+function switchTeam(t){
+  DB.ui.currentTeam=t;
+  try{ localStorage.setItem('bm_currentTeam',String(t)); }catch(_){}
+  _renderTeamToggle();
+  // ★ 팀 전환 시 건물 선택 ID 리셋 (이전 팀 건물이 남아있으면 빈화면)
+  var _tb=_teamBuildings();
+  var _firstB=_tb.length?_tb[0].id:null;
+  DB.ui.leaseF='all';
+  DB.ui.repBldgId=_firstB;
+  if(typeof _taxBldgId!=='undefined') _taxBldgId=_firstB;
+  // ★ 세금계산서 전체 상태 리셋 (팀간 데이터 잔류 방지)
+  if(typeof _taxPreviewLeaseId!=='undefined') _taxPreviewLeaseId=null;
+  if(typeof _taxType!=='undefined') _taxType='taxInv';
+  try{
+    var _tid=$('tax-inv-detail');if(_tid)_tid.innerHTML='';
+    var _tif=$('tax-inv-floors');if(_tif)_tif.innerHTML='';
+    var _ttc=$('tax-content');if(_ttc)_ttc.innerHTML='';
+    var _tth=$('tax-history');if(_tth)_tth.innerHTML='';
+    var _tts=$('tax-summary');if(_tts)_tts.innerHTML='';
+  }catch(_){}
+  // fillSel 갱신
+  try{ fillSel('ca-bldg',true); fillSel('fl-b'); fillSel('fe-b'); fillSel('frb'); }catch(_){}
+  // 현재 탭 새로고침
+  var _curTab='dash'; try{_curTab=localStorage.getItem('bm_lastTab')||'dash';}catch(_){}
+  if(typeof _renderCurrentTab==='function') _renderCurrentTab(_curTab);
+  else { try{ rdLease(); }catch(_){} }
+}
+function _renderTeamToggle(){
+  var ct=_getCurrentTeam();
+  var b1=$('team-btn-1'),b2=$('team-btn-2');
+  if(!b1||!b2) return;
+  if(ct===1){
+    b1.style.background='#3b82f6';b1.style.color='#fff';b1.style.borderRadius='6px';b1.style.boxShadow='0 2px 8px rgba(59,130,246,.4)';
+    b2.style.background='transparent';b2.style.color='#64748b';b2.style.borderRadius='0';b2.style.boxShadow='none';
+  } else {
+    b2.style.background='#3b82f6';b2.style.color='#fff';b2.style.borderRadius='6px';b2.style.boxShadow='0 2px 8px rgba(59,130,246,.4)';
+    b1.style.background='transparent';b1.style.color='#64748b';b1.style.borderRadius='0';b1.style.boxShadow='none';
+  }
+}
+function _initTeam(){
+  try{ var saved=localStorage.getItem('bm_currentTeam'); if(saved) DB.ui.currentTeam=parseInt(saved)||2; }catch(_){}
+  if(!DB.ui.currentTeam) DB.ui.currentTeam=2;
+  _renderTeamToggle();
+}
+// 기존 건물 team 미배정 시 team=2로 자동 배정
+function _ensureBuildingTeams(){
+  var changed=false;
+  DB.buildings.forEach(function(b){ if(!b.team){ b.team=2; changed=true; }});
+  // 고정일정에도 team 배정
+  (DB.fixedSchedules||[]).forEach(function(s){ if(!s.team){ s.team=2; changed=true; }});
+  return changed;
+}
+function fillSel(id,withNone){const el=$(id);if(!el)return;var bldgs=_teamBuildings();el.innerHTML=(withNone?'<option value="">건물전체</option>':'')+bldgs.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');}
 
 // ── NAV ───────────────────────────────────────────────────────────────
 let IS_ADMIN=false;          // 관리자 (승인/차단 가능)
@@ -3158,16 +3263,26 @@ const PAGES=[
   {id:'dash',ico:'📋',label:'대시보드',sec:1},
   {id:'lease',ico:'🏠',label:'임대현황',sec:1},
   {id:'expire',ico:'⏰',label:'만료일',sec:1},
-  {id:'cal',ico:'📅',label:'일정관리',sec:2},
+  {id:'cal',ico:'📅',label:'일정관리',sec:2,shared:true},
   {id:'fixed',ico:'🔄',label:'고정일정',sec:2},
   {id:'report',ico:'📓',label:'월간보고서',sec:2},
   {id:'invoice',ico:'🧾',label:'청구서',sec:2},
   {id:'utility',ico:'⚡💧',label:'전기·수도',sec:3},
-  {id:'pmemo',ico:'📝',label:'개인메모',sec:3},
+  {id:'pmemo',ico:'📝',label:'개인메모',sec:3,shared:true},
   {id:'inspect',ico:'🔧',label:'건물점검',sec:3},
   {id:'tax',ico:'💰',label:'세금계산서',sec:4},
-  {id:'drive',ico:'📁',label:'드라이브',sec:4},
+  {id:'drive',ico:'📁',label:'드라이브',sec:4,shared:true},
 ];
+// 공용 탭 ID 목록 (팀 필터 적용 안 됨)
+const SHARED_TAB_IDS=new Set(['cal','pmemo','drive']);
+// ★ 사이드탭 라벨 개별 커스텀 (localStorage)
+function _getNavLabel(p){
+  try{var m=JSON.parse(localStorage.getItem('bm_navLabels')||'{}');if(m[p.id])return m[p.id];}catch(_){}
+  return p.label;
+}
+function _setNavLabel(pageId,newLabel){
+  try{var m=JSON.parse(localStorage.getItem('bm_navLabels')||'{}');m[pageId]=newLabel;localStorage.setItem('bm_navLabels',JSON.stringify(m));}catch(_){}
+}
 // 사용자가 드래그로 정한 사이드탭 순서 (localStorage: bm_navOrder)
 function _loadNavOrder(){
   try{
@@ -3209,7 +3324,8 @@ function buildNav(){
   function _navBtn(p){
     const isAdmin=p.id==='admin';
     return `<button class="nb${p.id===lastTab?' on':''}" data-id="${p.id}" onclick="gp('${p.id}',this)" style="position:relative"${isAdmin?'':' draggable="true" ondragstart="_navDragStart(event)" ondragover="_navDragOver(event)" ondragleave="_navDragLeave(event)" ondrop="_navDrop(event)" ondragend="_navDragEnd(event)" title="'+p.label+'"'}>
-      ${p.ico?`<span class="nb-ico"${p.id==='utility'?' style="font-size:9px;letter-spacing:-3px"':''}>${p.ico}</span>`:''}<span class="nb-lbl">${p.label}</span>
+      ${p.ico?`<span class="nb-ico"${p.id==='utility'?' style="font-size:9px;letter-spacing:-3px"':''}>${p.ico}</span>`:''}<span class="nb-lbl" ondblclick="event.stopPropagation();_editTabLabel('${p.id}',this)">${_getNavLabel(p)}</span>
+      ${p.shared?'<span style="font-size:7px;color:#94a3b8;position:absolute;right:4px;top:2px;letter-spacing:-.3px">공용</span>':''}
       ${p.id==='expire'?'<span class="nbadge" id="nb-ex">0</span>':''}
       ${p.id==='admin'?'<span class="nbadge" id="nb-ad">0</span>':''}
     </button>`;
@@ -3227,7 +3343,7 @@ function buildNav(){
   });
   navHtml+=_sepDrop(4);
   // ★ 건물메모 바로가기 (맨 아래 고정)
-  navHtml+='<button class="nb-memo-btn" onclick="var fb=DB.buildings[0];if(fb)openBMemo(fb.id);else openAllBMemo();" title="건물 메모"><span class="nb-ico">🗂</span><span class="nb-lbl">건물메모</span></button>';
+  navHtml+='<button class="nb-memo-btn" onclick="var fb=_teamBuildings()[0];if(fb)openBMemo(fb.id);else openAllBMemo();" title="건물 메모"><span class="nb-ico">🗂</span><span class="nb-lbl">건물메모</span></button>';
   $('nav').innerHTML=navHtml;
   // ★ 관리 버튼은 sb-foot에 렌더
   if(adminPage){
@@ -3335,6 +3451,21 @@ function _editSecLabel(el,idx){
   inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){buildNav();}});
   inp.addEventListener('blur',save);
 }
+// ★ 탭 라벨 개별 수정 (더블클릭 → 인라인 input)
+function _editTabLabel(pageId,el){
+  var cur=el.textContent.trim();
+  var inp=document.createElement('input');
+  inp.value=cur;
+  inp.style.cssText='width:60px;font-size:10px;border:1px solid var(--bl);border-radius:3px;padding:1px 4px;font-family:inherit;outline:none;background:#fff;color:var(--t1)';
+  el.textContent='';el.appendChild(inp);inp.focus();inp.select();
+  function save(){
+    var v=inp.value.trim()||cur;
+    _setNavLabel(pageId,v);
+    buildNav();
+  }
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){buildNav();}});
+  inp.addEventListener('blur',save);
+}
 // 구분선 위에 드래그/드롭 — 위쪽 or 아래쪽 섹션으로 이동
 function _navSepOver(ev){
   if(!_navDraggedId) return;
@@ -3388,6 +3519,12 @@ window.resetNavOrder=function(){
   buildNav();
 };
 function gp(id,el){
+  // ★ 메모탭 벗어날 때 미저장 확인
+  var _prevTab=''; try{_prevTab=localStorage.getItem('bm_lastTab')||'';}catch(_){}
+  if(_prevTab==='pmemo' && id!=='pmemo' && _pmemoHasDirty()){
+    if(confirm('메모에 저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _pmemoSaveAllDirty();
+    else { _pmemoDirtySet={}; }
+  }
   try{ localStorage.setItem('bm_lastTab', id); }catch(_){}
   // 점검 오버레이 열려있으면 닫기
   ['field-mode','organize-mode','cam-overlay','lightbox'].forEach(function(oid){var o=$(oid);if(o)o.classList.remove('on');});
@@ -3401,8 +3538,9 @@ function gp(id,el){
   if(id==='memo'){ DB.ui.selMemoCat=null; const ms=$('memo-search'); if(ms) ms.value=''; }
   if(id==='report'){ DB.ui.repBldgId=null; }
   if(id==='expire'){ const es=$('expire-search'); if(es) es.value=''; }
+  if(id==='tax'){ _taxBldgId=0; _taxPreviewLeaseId=null; }
   // UI 탭 상태는 로컬 전용 — sv() 호출 안 함 (다른 사용자 화면에 영향 방지)
-  ({lease:rdLease,expire:rdExpire,cal:()=>{
+  ({dash:rdDash,lease:rdLease,expire:rdExpire,cal:()=>{
       fillSel('ca-bldg',true);
       const today=fd(new Date());
       if($('ca-date')) $('ca-date').value=today;
@@ -3413,6 +3551,8 @@ function gp(id,el){
       calSelDate=today;
       rdCal();
     },fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:rdTax,drive:rdDrive,admin:loadAdminUsers})[id]?.();
+  // ★ 탭 전환 후 presence 인디케이터 복원
+  try{ if(typeof _renderEditIndicators==='function') setTimeout(_renderEditIndicators,50); }catch(_){}
 }
 function upBadges(){
   const y=$('nb-ex');
@@ -3487,7 +3627,9 @@ function rdLease(){
   const _hideBm=!_showBm;
   const hbCb=$('lease-hide-bm'); if(hbCb) hbCb.checked=_showBm;
   const sq=($('lease-search')?$('lease-search').value:'').trim().toLowerCase();
-  let rows=f==='all'?DB.leases:DB.leases.filter(l=>l.bId==f);
+  // ★ 팀 필터: 현재 팀 건물의 임대만 표시
+  const _tBids=new Set(_teamBuildings().map(b=>b.id));
+  let rows=f==='all'?DB.leases.filter(l=>_tBids.has(l.bId)):DB.leases.filter(l=>l.bId==f);
   if(sq){
     const nsq=sq.replace(/\s+/g,'');
     const floorVariants=s=>{
@@ -3518,11 +3660,11 @@ function rdLease(){
     });
   }
   const sbEl=$('lease-bldg-sb');
-  if(sbEl){sbEl.innerHTML=`<div class="sb-list-item${f==='all'?' on':''}" onclick="setLF('all')"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">전체</span></div>`+DB.buildings.map(b=>`<div class="sb-list-item${f==b.id?' on':''}" onclick="setLF(${b.id})" oncontextmenu="event.preventDefault();delBldg(${b.id})"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span></div>`).join('');}
+  if(sbEl){sbEl.innerHTML=`<div class="sb-list-item${f==='all'?' on':''}" onclick="setLF('all')"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">전체</span></div>`+_teamBuildings().map(b=>`<div class="sb-list-item${f==b.id?' on':''}" onclick="setLF(${b.id})" oncontextmenu="event.preventDefault();delBldg(${b.id})"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span></div>`).join('');}
   $('lease-alerts').innerHTML='';
   const grp={};rows.forEach(l=>{if(!grp[l.bId])grp[l.bId]=[];grp[l.bId].push(l);});
-  // 호실 없는 건물도 포함 (공실 표시)
-  (DB.buildings||[]).forEach(function(b){
+  // 호실 없는 건물도 포함 (공실 표시) — 현재 팀 건물만
+  _teamBuildings().forEach(function(b){
     if(!grp[b.id] && (f==='all'||f==b.id)){
       grp[b.id]=[];
     }
@@ -3651,7 +3793,7 @@ function rdLease(){
   // 건물관리비 합계 표시
   const bmTotalEl=$('bmfee-total');
   if(bmTotalEl){
-    const bldgsWithFee=DB.buildings.filter(b=>b.bmFee>0);
+    const bldgsWithFee=_teamBuildings().filter(b=>b.bmFee>0);
     const totalBmFee=bldgsWithFee.reduce((s,b)=>s+(b.bmFee||0),0);
     if(totalBmFee>0){
       const rev=totalBmFee-Math.round(totalBmFee*0.1);
@@ -3675,6 +3817,8 @@ function rdLease(){
       const detEl=$('bmfee-detail'); if(detEl) detEl.style.display='none';
     }
   }
+  // ★ presence 인디케이터 복원
+  try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
 }
 function setLF(v){DB.ui.leaseF=v;rdLease();}
 function toggleHideBm(cb){try{localStorage.setItem('bm_showBm',cb.checked?'1':'0');}catch(e){}
@@ -3685,7 +3829,7 @@ function toggleBmFeeDetail(){
   const det=$('bmfee-detail');
   if(!det) return;
   if(det.style.display!=='none'){ det.style.display='none'; return; }
-  const bldgs=DB.buildings.filter(b=>b.bmFee>0);
+  const bldgs=_teamBuildings().filter(b=>b.bmFee>0);
   const total=bldgs.reduce((s,b)=>s+(b.bmFee||0),0);
   det.innerHTML=_buildBmFeeDetailHTML(bldgs, total);
   det.style.display='block';
@@ -4059,9 +4203,9 @@ function rdWater(){
     if(info && info.billCycle){ w.billCycle=info.billCycle; _bcFixed++; }
   });
   if(_bcFixed>0){ try{sv();}catch(e){} }
-  // 건물별 그룹핑
+  // 건물별 그룹핑 — 현재 팀 건물만
   const grp={};
-  DB.buildings.forEach(b=>{ grp[b.id]={bldg:b,items:[]}; });
+  _teamBuildings().forEach(b=>{ grp[b.id]={bldg:b,items:[]}; });
   bills.forEach(w=>{
     if(!grp[w.bId]) return;
     // billCycle 기준 필터 (정규화: 숫자→문자열)
@@ -4288,7 +4432,7 @@ function _parseBldgWaterInfo(bId){
 function _autoFillWaterFromMemo(){
   if(!DB.waterBills) DB.waterBills=[];
   var added=0, updated=0;
-  DB.buildings.forEach(function(b){
+  _teamBuildings().forEach(function(b){
     var info=_parseBldgWaterInfo(b.id);
     if(!info||!info.custNo) return;
     // 전체 waterBills에서 같은 고객번호가 이미 있으면 → 홀짝/검침일/고객명만 보완
@@ -4734,32 +4878,24 @@ if(!window._bsnWaterMsgHooked){
         var _spath='waterBills/'+w.id+'/'+period+'/'+Date.now()+'.'+_ext;
         file=await _uploadFileToStorage(dataUrl, _spath, period+'_청구서.'+_ext, _mime);
       }
-      // ★ 중복 캡처 방지: 같은 고객+같은 기간에 30초 이내 재수신이면 스킵
-      if(!window._waterCapLog) window._waterCapLog={};
-      var _wcKey=w.id+'_'+period;
-      var _wcNow=Date.now();
-      if(window._waterCapLog[_wcKey] && (_wcNow - window._waterCapLog[_wcKey]) < 30000){
-        console.log('[BSN water-bill] 중복 캡처 무시 (30초 이내 재수신):', _wcKey);
-        _waterToast('ℹ️ 이미 저장된 캡처입니다 — 중복 무시','#64748b');
+      // ★ 중복 캡처 완전 차단: 해당 고객의 해당 기간에 이미 파일이 있으면 무시
+      const ex=w.bills.find(x=>x.period===period);
+      if(ex && ex.files && ex.files.length > 0){
+        console.log('[BSN water-bill] 이미 캡처완료 — 무시:', w.custNo, period, '파일'+ex.files.length+'장');
+        _waterToast('ℹ️ '+_periodLabel(period)+' 이미 캡처 완료 — 중복 무시','#64748b');
+        // 금액/사용량 데이터만 보완 (이미지는 추가 안 함)
+        if(d.amount && !ex.amount) ex.amount=d.amount;
+        if(d.usage && !ex.usage) ex.usage=d.usage;
         return;
       }
-      window._waterCapLog[_wcKey]=_wcNow;
-      const ex=w.bills.find(x=>x.period===period);
       let mergedInto='새 폴더';
       if(ex){
-        // 기존 기간에 이미 파일이 있으면 교체 (중복 쌓임 방지), 없으면 추가
-        if(file){
-          if(ex.files && ex.files.length > 0){
-            ex.files=[file]; // 기존 파일 교체 (중복 방지)
-            mergedInto='기존 '+period+' 캡처 교체';
-          } else {
-            ex.files=[file];
-            mergedInto='기존 '+period+' 폴더에 캡처 추가';
-          }
-        }
+        // 기존 기간 있지만 파일 없음 → 첫 캡처
+        if(file) ex.files=[file];
         if(d.amount) ex.amount=d.amount;
         if(d.usage) ex.usage=d.usage;
         ex.uploadedAt=Date.now();
+        mergedInto='기존 '+period+' 폴더에 캡처 추가';
       } else {
         var entry={period, uploadedAt:Date.now()};
         if(file) entry.files=[file]; else entry.files=[];
@@ -6687,7 +6823,7 @@ function _saveUnmatchedAssign(){
 function rdElectric(){
   const list=$('electric-list'); if(!list) return;
   if(!DB.electricBills) DB.electricBills=[];
-  const bldgs=DB.buildings||[];
+  const bldgs=_teamBuildings();
   let html='';
   // 좌측 패널 (항상 표시)
   var _leftPanel='<div style="width:155px;flex-shrink:0;background:var(--w2);border:1px solid var(--ln);border-radius:var(--r2);padding:8px 5px 8px 8px;font-size:11.5px;color:var(--t2);line-height:1.7">';
@@ -8522,7 +8658,7 @@ function _kepcoRescanLinks(){
   try{sv();}catch(e){}
   openGmailElectricImport();
 }
-function _deduplicateElectricBills(skipConfirm){
+function _deduplicateElectricBills(skipConfirm, skipSave){
   var bills=DB.electricBills||[];
   if(!bills.length) return {custMerged:0,billDeduped:0,before:0,after:0,dupDetails:[]};
   var beforeTotal=0;
@@ -8597,7 +8733,7 @@ function _deduplicateElectricBills(skipConfirm){
   DB.electricBills=keep;
   var afterTotal=0;
   keep.forEach(function(e){afterTotal+=(e.bills||[]).length;});
-  if(custMerged||billDeduped) sv();
+  if((custMerged||billDeduped) && !skipSave) sv();
   return {custMerged:custMerged,billDeduped:billDeduped,before:beforeTotal,after:afterTotal,dupDetails:dupDetails};
 }
 function _showDedupDetails(custMerges, billDups, beforeTotal, keep){
@@ -9820,35 +9956,40 @@ function _renderModalViewer(elId, target, blobKey, attachFn, scaleKey){
   if(isPdf){
     const rawData=files[0].data;
     const rawMime=files[0].mime;
-    let blob=null;
-    // Storage URL 우선, 없으면 base64 → blob
-    if(files[0].storage){ blob=_stUrl(files[0].storage); }
-    else { try{ blob=_dataUrlToBlobUrl(rawData, rawMime); }catch(e){} }
-    const src=blob||(typeof rawData==='string'&&rawData.startsWith('data:')?rawData:null);
-    if(!src){
-      v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>PDF를 표시할 수 없습니다</div><button type="button" class="btn pri sm" onclick="viewDoc(${target.id},'${target.kind}')" style="margin-top:6px">🔍 새 창으로 열기</button></div>`;
-      return;
-    }
-    if(blob) window[blobKey]=blob;
     window[scaleKey]=100;
     const wrId=elId+'-pdfwrap';
-    // 로딩 표시 + 툴바 보이는 네이티브 PDF 뷰어 (scrollbar + 확대/축소 버튼 포함)
     v.innerHTML=`<div class="ml-empty" id="${wrId}-loading"><div class="mv-spinner"></div><div>파일 로딩 중...</div></div>
-    <iframe src="${src}#toolbar=1&navpanes=0&view=FitH" id="${wrId}-ifr" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#525659;display:none"></iframe>`;
+    <iframe id="${wrId}-ifr" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#525659;display:none"></iframe>`;
     const ifr=$(wrId+'-ifr'), loadEl=$(wrId+'-loading');
-    ifr.onload=function(){
-      if(loadEl) loadEl.style.display='none';
-      ifr.style.display='block';
-    };
-    ifr.onerror=function(){
-      v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>PDF 로딩 실패</div><button type="button" class="btn pri sm" onclick="viewDoc(${target.id},'${target.kind}')" style="margin-top:6px">🔍 새 창으로 열기</button></div>`;
-    };
-    setTimeout(()=>{
-      if(loadEl&&loadEl.style.display!=='none'){
-        loadEl.style.display='none';
-        ifr.style.display='block';
+    // Storage URL이면 fetch→blob 변환 (X-Frame-Options 우회), 아니면 직접 사용
+    const _showPdfSrc=function(src){
+      if(!src){
+        v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>PDF를 표시할 수 없습니다</div><button type="button" class="btn pri sm" onclick="viewDoc(${target.id},'${target.kind}')" style="margin-top:6px">🔍 새 창으로 열기</button></div>`;
+        return;
       }
-    },3000);
+      window[blobKey]=src;
+      ifr.src=src+'#toolbar=1&navpanes=0&view=FitH';
+      ifr.onload=function(){ if(loadEl)loadEl.style.display='none'; ifr.style.display='block'; };
+      ifr.onerror=function(){ v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>PDF 로딩 실패</div><button type="button" class="btn pri sm" onclick="viewDoc(${target.id},'${target.kind}')" style="margin-top:6px">🔍 새 창으로 열기</button></div>`; };
+      setTimeout(()=>{ if(loadEl&&loadEl.style.display!=='none'){loadEl.style.display='none';ifr.style.display='block';} },5000);
+    };
+    if(files[0].storage){
+      // Storage URL → fetch로 blob 가져와서 iframe에 표시 (cross-origin 차단 우회)
+      var _pdfUrl=_stUrl(files[0].storage);
+      fetch(_pdfUrl).then(r=>r.blob()).then(function(bl){
+        var blobUrl=URL.createObjectURL(bl);
+        _showPdfSrc(blobUrl);
+      }).catch(function(){
+        // fetch 실패 시 새 창으로 열기 안내
+        v.innerHTML=`<div class="ml-empty"><div style="font-size:28px">⚠️</div><div>PDF 로딩 실패 (CORS 차단)</div><button type="button" class="btn pri sm" onclick="viewDoc(${target.id},'${target.kind}')" style="margin-top:6px">🔍 새 창으로 열기</button></div>`;
+      });
+    } else {
+      // base64 → blob URL
+      var _blobSrc=null;
+      try{ _blobSrc=_dataUrlToBlobUrl(rawData, rawMime); }catch(e){}
+      if(!_blobSrc && typeof rawData==='string'&&rawData.startsWith('data:')) _blobSrc=rawData;
+      _showPdfSrc(_blobSrc);
+    }
     return;
   }
 
@@ -10039,7 +10180,7 @@ function saveBldg(){
       if(jibunAddr && DB.buildings[i].altAddrs.indexOf(jibunAddr)<0 && jibunAddr!==o.addr) DB.buildings[i].altAddrs.push(jibunAddr);
     }
   }else{
-    var newB={id:nid(),...o,altAddrs:[]};
+    var newB={id:nid(),...o,altAddrs:[],team:_getCurrentTeam()};
     if(roadAddr) newB.altAddrs.push(roadAddr);
     if(jibunAddr && jibunAddr!==roadAddr) newB.altAddrs.push(jibunAddr);
     DB.buildings.push(newB);
@@ -10076,8 +10217,10 @@ function delBldg(id){
 // ── EXPIRE (임대만료 통합) ────────────────────────────────────────────
 let ieTarget=null;
 function rdExpire(){
+  // ★ 팀 필터
+  const _tBids=new Set(_teamBuildings().map(b=>b.id));
   // Left panel: lease expiry
-  const leRows=DB.leases.filter(l=>l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실'&&l.end&&dday(l.end)>=0&&dday(l.end)<=90).sort((a,b)=>dday(a.end)-dday(b.end));
+  const leRows=DB.leases.filter(l=>_tBids.has(l.bId)&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실'&&l.end&&dday(l.end)>=0&&dday(l.end)<=90).sort((a,b)=>dday(a.end)-dday(b.end));
   const lp=$('expire-lease-list');
   if(lp){lp.innerHTML=leRows.length?leRows.map(l=>{const d=dday(l.end);return`<div style="padding:4px 5px;border-bottom:1px solid var(--ln);font-size:11px">
     <div style="display:flex;justify-content:space-between"><strong>${bs(l.bId)}</strong>${ddBg(d,'lease')}</div>
@@ -10087,7 +10230,7 @@ function rdExpire(){
   // Right: expire table
   const T=['승강기 보험','화재 보험','주차기 보험','저수조 청소','정화조 청소'];
   const getE=(bId,t)=>DB.expires.find(e=>e.bId==bId&&e.type===t);
-  $('expire-body').innerHTML=DB.buildings.map(b=>{
+  $('expire-body').innerHTML=_teamBuildings().map(b=>{
     function insCell(t){
       const e=getE(b.id,t);
       if(!e)return`<td class="exp-cell ec-add" onclick="addExpFor(${b.id},'${t}')">+</td>`;
@@ -10112,6 +10255,8 @@ function rdExpire(){
     const spAdd=`<div class="sp-add" onclick="addExpForOther(${b.id})" title="특이사항 추가" style="padding:1px 4px;color:var(--t4);cursor:pointer;text-align:center;font-size:13px">+</div>`;
     return`<tr><td class="col-b">${b.name}</td>${insCell('승강기 보험')}${insCell('화재 보험')}${insCell('주차기 보험')}${cleanCell('저수조 청소')}${cleanCell('정화조 청소')}<td class="exp-note-cell" style="font-size:11px;color:var(--t2);background:var(--w);min-width:140px;padding:0">${spLines}${spAdd}</td></tr>`;
   }).join('');
+  // ★ presence 인디케이터 복원
+  try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
 }
 function openIE(evt,id,type){
   const e=DB.expires.find(e=>e.id===id);if(!e)return;
@@ -10206,8 +10351,8 @@ function rdCal(){
   const bf=DB.ui.calBldgF;
   const calSb=$('cal-bldg-f');
   if(calSb){
-    calSb.innerHTML=`<div class="sb-list-item${bf==='all'?' on':''}" onclick="setCBF('all')">전체</div>`+
-      DB.buildings.map(b=>`<div class="sb-list-item${bf==b.id?' on':''}" onclick="setCBF(${b.id})">${b.name}</div>`).join('');
+    calSb.innerHTML=`<div class="sb-list-item${bf==='all'?' on':''}" onclick="setCBF('all')">전체 (양팀)</div>`+
+      DB.buildings.map(b=>`<div class="sb-list-item${bf==b.id?' on':''}" onclick="setCBF(${b.id})"><span style="font-size:9px;color:var(--t4);margin-right:2px">${b.team===1?'①':'②'}</span>${b.name}</div>`).join('');
   }
   const myOnly=$('cal-my')?.checked;
   const flt=DB.ui.calFlt;
@@ -10599,6 +10744,9 @@ function getFixDow(day){
   return{dow:dw,color:c};
 }
 function rdFixed(){
+  // ★ 인라인 편집 중이면 리렌더 방지 (realtime 업데이트로 편집내용 유실 방지)
+  var _editingEl=document.querySelector('#fixed-list [contenteditable="true"]');
+  if(_editingEl){ console.log('[rdFixed] 인라인 편집중 — 리렌더 스킵'); return; }
   const sqRaw=($('fixed-search')?.value||'').trim();
   const sq=sqRaw.toLowerCase();
   const hl=(txt)=>{
@@ -10631,8 +10779,10 @@ function rdFixed(){
       taskMatchMap[s.id]=matches;
     });
   }
+  // ★ 팀 필터: 현재 팀 고정일정만 표시 (team 미지정=2팀)
+  const _ct=_getCurrentTeam();
   const sorted=[...DB.fixedSchedules]
-    .filter(s=>!s._deleted)
+    .filter(s=>!s._deleted && (s.team||2)===_ct)
     .filter(s=>!sq||(taskMatchMap[s.id]&&taskMatchMap[s.id].size>0))
     .sort((a,b)=>(a.day===99?100:a.day)-(b.day===99?100:b.day));
   // 검색 중엔 매칭된 날짜만, 아니면 1~31+말일 전부 렌더
@@ -10697,6 +10847,8 @@ function rdFixed(){
       <div class="fix-tasks-cell">${tasksHtml}</div>
     </div>`;
   }).join('');
+  // ★ presence 인디케이터 복원
+  try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
 }
 function moveFixTask(sId,ti){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
@@ -10868,8 +11020,10 @@ function addSpContext(sId,taskIdx){
 function addFixedTask(day){
   const task=prompt('업무 내용');if(!task)return;
   const existing=DB.fixedSchedules.find(s=>!s._deleted&&s.day===day);
-  if(existing){existing.tasks.push(task);existing._edit=editStamp();}
-  else{DB.fixedSchedules.push({id:nid(),day,dayLabel:day===99?'말일':day+'일',tasks:[task],special:'',_created:editStamp()});}
+  // ★ 같은 팀+날짜의 기존 일정 찾기
+  const _ct=_getCurrentTeam();
+  if(existing && (existing.team||2)===_ct){existing.tasks.push(task);existing._edit=editStamp();}
+  else{DB.fixedSchedules.push({id:nid(),day,dayLabel:day===99?'말일':day+'일',tasks:[task],special:'',team:_ct,_created:editStamp()});}
   sv();rdFixed();
 }
 function delFixTask(sId,ti){
@@ -11513,15 +11667,21 @@ function filterRepBldgs(q){
   });
 }
 function rdReport(){
+  // ★ 팀 전환 시 건물ID가 현재 팀에 없으면 첫 건물로 리셋
+  var _tB=_teamBuildings();
+  if(DB.ui.repBldgId && !_tB.find(b=>b.id===DB.ui.repBldgId)) DB.ui.repBldgId=_tB.length?_tB[0].id:null;
   const rb=DB.ui.repBldgId;
   const bldgList=$('rep-bldg-list');
   if(bldgList){
-    bldgList.innerHTML=DB.buildings.map(b=>`<div class="sb-list-item${rb===b.id?' on':''}" data-n="${b.name.toLowerCase()}" onclick="setRB(${b.id})">${b.name}</div>`).join('');
+    bldgList.innerHTML=_tB.map(b=>`<div class="sb-list-item${rb===b.id?' on':''}" data-n="${b.name.toLowerCase()}" onclick="setRB(${b.id})">${b.name}</div>`).join('');
   }
   $('rep-lbl').textContent=`${DB.ui.repY}년 ${DB.ui.repM}월`;
   var allBtn=$('rep-all-btn');
   if(allBtn) allBtn.textContent='📑 '+DB.ui.repY+'년 '+DB.ui.repM+'월 전체 PDF';
   if(!rb){$('rep-content').innerHTML='<div class="empty">건물을 선택하세요</div>';return;}
+  // ★ presence 매칭을 위해 rep-content에 속성 설정
+  var _rcEl=$('rep-content');
+  if(_rcEl){ _rcEl.setAttribute('data-presence-type','report'); _rcEl.setAttribute('data-presence-id',rb+'_'+DB.ui.repY+'_'+DB.ui.repM); }
   const ls=DB.leases.filter(l=>l.bId===rb&&l.tenant&&l.tenant!=='직영');
   const rep=DB.reports.find(r=>r.bId===rb&&r.year===DB.ui.repY&&r.month===DB.ui.repM);
   const bld=bn(rb);
@@ -11596,7 +11756,9 @@ function rdReport(){
       ${hasPrev?`<button class="btn pri sm" onclick="loadPrevReport()" style="margin-top:6px">이전달(${prevM}월) 보고서 불러와서 작성</button>`:''}
       <button class="btn sm" onclick="openRepModal()" style="margin-top:6px;margin-left:4px">새로 작성</button>
     </div></div>`;
-    $('rep-content').innerHTML=html;return;
+    $('rep-content').innerHTML=html;
+    try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
+    return;
   }
 
   // ── 공통 데이터 ──
@@ -11855,6 +12017,8 @@ function rdReport(){
   }
 
   $('rep-content').innerHTML=html;
+  // ★ 리렌더 후 presence 인디케이터 복원
+  try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
 }
 function dropCoverPhoto(evt,bId){
   const f=evt.dataTransfer.files[0];if(!f||!f.type.startsWith('image/'))return;
@@ -11901,6 +12065,10 @@ function setRB(id){DB.ui.repBldgId=id;rdReport();}
 function repPrev(){if(DB.ui.repM===1){DB.ui.repM=12;DB.ui.repY--;}else DB.ui.repM--;rdReport();}
 function repNext(){if(DB.ui.repM===12){DB.ui.repM=1;DB.ui.repY++;}else DB.ui.repM++;rdReport();}
 function openRepModal(){
+  // 편집 충돌 방지 (presence)
+  var _repId=DB.ui.repBldgId?(DB.ui.repBldgId+'_'+DB.ui.repY+'_'+DB.ui.repM):'new';
+  var _repBldg=DB.ui.repBldgId?DB.buildings.find(b=>b.id===DB.ui.repBldgId):null;
+  if(typeof startEditing==='function' && !startEditing('report',_repId,'월간보고서',_repBldg?_repBldg.name:'')) return;
   fillSel('frb');$('fry').value=DB.ui.repY;$('frm').value=DB.ui.repM;
   if(DB.ui.repBldgId)$('frb').value=DB.ui.repBldgId;
   const rep=DB.ui.repBldgId?DB.reports.find(r=>r.bId===DB.ui.repBldgId&&r.year===DB.ui.repY&&r.month===DB.ui.repM):null;
@@ -12351,6 +12519,19 @@ function _pmemoTs(){
 function rdPMemo(){
   if(!DB.personalMemos) DB.personalMemos={};
   var area=$('pmemo-area'); if(!area) return;
+  // ★ 리렌더 전 미저장 textarea 내용을 데이터에 반영 (개별 저장 보장)
+  if(CURRENT_USER_ID && Object.keys(_pmemoDirtySet).length>0){
+    var _md=_pmemoData(CURRENT_USER_ID);
+    Object.keys(_pmemoDirtySet).forEach(function(k){
+      var idx=parseInt(k);
+      var ta=document.querySelector('[data-pmemo-ta-idx="'+idx+'"]');
+      if(ta && _md.pages[idx]) _md.pages[idx].text=ta.value;
+    });
+    _md.userName=CURRENT_USER_NAME||'나';
+    _md.updatedAt=_pmemoTs();
+    _pmemoDirtySet={};
+    sv();
+  }
   if(CURRENT_USER_ID){
     var m=_pmemoData(CURRENT_USER_ID);
     if(!m.userName) m.userName=CURRENT_USER_NAME||'나';
@@ -12404,14 +12585,17 @@ function rdPMemo(){
     _groups.forEach(function(g,gi){
       var act=gi===_pmemoCardPage;
       var gLabel=md.groupNames[g.group]||g.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
-      html+='<div onclick="_pmemoCardPage='+gi+';rdPMemo()" ondblclick="event.stopPropagation();renamePMemoGroup('+g.group+')" style="padding:5px 14px;font-size:12px;border-radius:6px;cursor:pointer;position:relative;'+(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')+'">'+gLabel;
+      html+='<div onclick="_pmemoSwitchGroup('+gi+')" ondblclick="event.stopPropagation();renamePMemoGroup('+g.group+')" style="padding:5px 14px;font-size:12px;border-radius:6px;cursor:pointer;position:relative;'+(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')+'">'+gLabel;
       if(act && _groups.length>1) html+='<span onclick="event.stopPropagation();delPMemoGroup('+g.group+')" style="margin-left:5px;font-size:11px;cursor:pointer;opacity:.6" title="이 그룹 삭제">×</span>';
       html+='</div>';
     });
     html+='<div onclick="addPMemoCardPage()" style="padding:5px 10px;font-size:13px;color:var(--t4);cursor:pointer;border-radius:6px" title="새 페이지 (메모 4개 그룹)">＋</div>';
-    if(md.deletedPages&&md.deletedPages.length) html+='<div onclick="restorePMemo()" style="padding:5px 12px;font-size:12px;color:#e67e22;cursor:pointer;border-radius:6px;margin-left:auto;font-weight:500" title="삭제된 메모 복구">↩ 되돌리기</div>';
     html+='<div style="width:1px;height:18px;background:var(--ln);margin:0 3px"></div>';
     html+='<button onclick="addPMemoTab()" class="btn sm" style="font-size:12px;padding:5px 14px">＋ 메모</button>';
+    var _trashCnt=(md.deletedPages&&md.deletedPages.length)||0;
+    html+='<button onclick="_pmemoSpellCheck()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;color:#1a5fa0;white-space:nowrap" title="네이버 맞춤법검사">✏ 맞춤법</button>';
+    html+='<button onclick="_pmemoSaveAllDirty()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap" title="Ctrl+S">💾 저장</button>';
+    html+='<div onclick="openPMemoTrash()" style="padding:5px 12px;font-size:12px;color:'+((_trashCnt>0)?'#64748b':'#cbd5e1')+';cursor:pointer;border-radius:6px;font-weight:500;background:var(--w);border:1px solid var(--ln)" title="삭제된 메모 목록">🗑 휴지통('+_trashCnt+')</div>';
     html+='<span id="pmemo-save-ind" style="font-size:11px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:4px">✓ 저장됨</span>';
     html+='<span style="margin-left:auto">'+upd+'</span>';
     html+='</div>';
@@ -12423,9 +12607,9 @@ function rdPMemo(){
       var todos=pg.todos||[];
       var todoH=todos.map(function(t,ti){
         return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0">'
-          +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="_pmemoActiveTab='+i+';togglePMemoTodo('+ti+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:13px;height:13px">'
-          +'<span style="flex:1;font-size:11px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
-          +'<button onclick="_pmemoActiveTab='+i+';delPMemoTodo('+ti+')" style="border:none;background:none;color:var(--t4);cursor:pointer;font-size:13px;padding:0 2px;flex-shrink:0" title="삭제">×</button>'
+          +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="_pmemoActiveTab='+i+';togglePMemoTodo('+ti+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:15px;height:15px">'
+          +'<span style="flex:1;font-size:13px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
+          +'<button onclick="_pmemoActiveTab='+i+';delPMemoTodo('+ti+')" style="border:none;background:none;color:var(--t4);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0" title="삭제">×</button>'
           +'</div>';
       }).join('');
 
@@ -12443,7 +12627,7 @@ function rdPMemo(){
       html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>';
       html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 4px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;font-style:italic;padding:2px 0">할 일이 없습니다</div>')+'</div>';
       html+='<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">';
-      html+='<input data-pmemo-todo-idx="'+i+'" placeholder="할 일 입력" style="flex:1;min-width:0;padding:3px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;font-family:inherit;outline:none">';
+      html+='<input data-pmemo-todo-idx="'+i+'" placeholder="할 일 입력" style="flex:1;min-width:0;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none">';
       html+='<button onclick="_pmemoActiveTab='+i+';addPMemoTodoFrom(this.previousElementSibling)" class="btn sm" style="flex-shrink:0;font-size:10px;padding:2px 6px">+</button>';
       html+='</div></div>';
       // 구분선 (드래그로 높이 조절)
@@ -12451,7 +12635,7 @@ function rdPMemo(){
       // 메모
       html+='<div style="flex:1;display:flex;flex-direction:column;min-height:40px">';
       html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3)">📝 메모</div>';
-      html+='<textarea data-pmemo-ta-idx="'+i+'" oninput="savePMemoCard('+i+')" style="flex:1;padding:4px 8px;border:none;outline:none;font-family:inherit;font-size:12px;line-height:1.5;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>';
+      html+='<textarea data-pmemo-ta-idx="'+i+'" oninput="_pmemoDirtyMark('+i+')" spellcheck="false" style="flex:1;padding:6px 10px;border:none;outline:none;font-family:\'맑은 고딕\',Consolas,monospace;font-size:15px;line-height:1.25;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>';
       html+='</div>';
       html+='</div></div>';
       // 우측 리사이즈 핸들 (카드 옆 형제 요소, 더블클릭=초기화)
@@ -12631,6 +12815,76 @@ function delPMemoGroup(groupNum){
   md.updatedAt=_pmemoTs();
   sv(); rdPMemo(); _showPMemoSaved(); _syncFloatIfOpen();
 }
+function openPMemoTrash(){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  if(!md.deletedPages||!md.deletedPages.length){ alert('휴지통이 비어있습니다.'); return; }
+  // 삭제일 기준 역순 (최신 위)
+  var items=md.deletedPages.slice().reverse();
+  var h='<div style="max-height:70vh;overflow-y:auto;padding:10px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  h+='<span style="font-size:14px;font-weight:700">🗑 휴지통 <span style="font-size:11px;color:#94a3b8;font-weight:400">('+items.length+'개 / 최대 50개)</span></span>';
+  h+='<button onclick="emptyPMemoTrash()" style="font-size:11px;padding:4px 10px;border:1px solid #fca5a5;background:#fff;color:#dc2626;border-radius:6px;cursor:pointer">전체 비우기</button>';
+  h+='</div>';
+  items.forEach(function(d,ri){
+    var origIdx=md.deletedPages.length-1-ri;
+    var dt=d._deletedAt?d._deletedAt.slice(0,16).replace('T',' '):'';
+    var preview=(d.text||'').slice(0,60).replace(/\n/g,' ');
+    var todoCount=(d.todos||[]).length;
+    h+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #f1f5f9">';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div style="font-size:13px;font-weight:600">'+esc(d.name)+'</div>';
+    h+='<div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(preview||'(빈 메모)')+(todoCount?' · 할일 '+todoCount+'개':'')+'</div>';
+    h+='<div style="font-size:10px;color:#94a3b8">삭제: '+dt+'</div>';
+    h+='</div>';
+    h+='<button onclick="restorePMemoAt('+origIdx+')" style="font-size:11px;padding:4px 10px;border:1px solid #3b82f6;background:#eff6ff;color:#2563eb;border-radius:6px;cursor:pointer;white-space:nowrap">복구</button>';
+    h+='<button onclick="permDelPMemo('+origIdx+')" style="font-size:11px;padding:4px 10px;border:1px solid #fca5a5;background:#fff;color:#dc2626;border-radius:6px;cursor:pointer;white-space:nowrap">삭제</button>';
+    h+='</div>';
+  });
+  h+='</div>';
+  // 모달로 표시
+  var overlay=document.createElement('div');
+  overlay.id='pmemo-trash-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10000;display:flex;align-items:center;justify-content:center';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  var box=document.createElement('div');
+  box.style.cssText='background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:400px;max-width:560px;width:90%';
+  box.innerHTML=h;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+function restorePMemoAt(idx){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var d=md.deletedPages[idx]; if(!d) return;
+  var restored={id:d.id||Date.now(),name:d.name,text:d.text||'',todos:d.todos||[],group:d.group||0};
+  md.pages.push(restored);
+  md.deletedPages.splice(idx,1);
+  md.updatedAt=_pmemoTs();
+  sv(); rdPMemo(); _syncFloatIfOpen();
+  var ov=$('pmemo-trash-overlay'); if(ov) ov.remove();
+  if(md.deletedPages.length) openPMemoTrash(); // 다시 열기
+}
+function permDelPMemo(idx){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var d=md.deletedPages[idx]; if(!d) return;
+  if(!confirm('"'+d.name+'" 을(를) 완전히 삭제하시겠습니까?\n복구할 수 없습니다.')) return;
+  md.deletedPages.splice(idx,1);
+  md.updatedAt=_pmemoTs();
+  sv(); rdPMemo();
+  var ov=$('pmemo-trash-overlay'); if(ov) ov.remove();
+  if(md.deletedPages.length) openPMemoTrash();
+}
+function emptyPMemoTrash(){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  if(!confirm('휴지통의 모든 메모('+md.deletedPages.length+'개)를 완전히 삭제하시겠습니까?\n복구할 수 없습니다.')) return;
+  md.deletedPages=[];
+  md.updatedAt=_pmemoTs();
+  sv(); rdPMemo();
+  var ov=$('pmemo-trash-overlay'); if(ov) ov.remove();
+}
 function restorePMemo(){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
@@ -12756,17 +13010,65 @@ function savePMemo(){
 }
 function _showPMemoSaved(){
   var ind=$('pmemo-save-ind'); if(!ind) return;
-  ind.style.opacity='1';
+  ind.textContent='✓ 저장됨'; ind.style.color='#16a34a'; ind.style.opacity='1';
   clearTimeout(_pmemoSaveTimer);
   _pmemoSaveTimer=setTimeout(function(){ind.style.opacity='0';},2000);
 }
 
-// ── 카드별 저장 ──
-var _pmemoCardTimers={};
-function savePMemoCard(idx){
-  clearTimeout(_pmemoCardTimers[idx]);
-  _pmemoCardTimers[idx]=setTimeout(function(){savePMemoCardNow(idx);},800);
+// ── 카드별 저장 (Ctrl+S / 탭이동 시 저장) ──
+var _pmemoDirtySet={};  // idx → true (미저장 상태)
+function _pmemoDirtyMark(idx){
+  _pmemoDirtySet[idx]=true;
+  _showPMemoDirtyState();
 }
+function _showPMemoDirtyState(){
+  var ind=$('pmemo-save-ind');
+  if(!ind) return;
+  var dirty=Object.keys(_pmemoDirtySet).length>0;
+  if(dirty){ ind.textContent='● 미저장 (Ctrl+S)'; ind.style.color='#dc2626'; ind.style.opacity='1'; }
+  else { ind.textContent='✓ 저장됨'; ind.style.color='#16a34a'; ind.style.opacity='1'; clearTimeout(ind._ht); ind._ht=setTimeout(function(){ind.style.opacity='0';},2000); }
+}
+function _pmemoSaveAllDirty(){
+  if(!CURRENT_USER_ID) return;
+  var keys=Object.keys(_pmemoDirtySet);
+  if(!keys.length) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  keys.forEach(function(k){
+    var idx=parseInt(k);
+    var ta=document.querySelector('[data-pmemo-ta-idx="'+idx+'"]');
+    if(ta && md.pages[idx]){ md.pages[idx].text=ta.value; }
+  });
+  md.userName=CURRENT_USER_NAME||'나';
+  md.updatedAt=_pmemoTs();
+  _pmemoDirtySet={};
+  sv(); _showPMemoSaved(); _syncFloatIfOpen();
+}
+function _pmemoHasDirty(){ return Object.keys(_pmemoDirtySet).length>0; }
+function _pmemoSwitchGroup(gi){
+  if(gi===_pmemoCardPage) return;
+  if(_pmemoHasDirty()){
+    if(confirm('저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _pmemoSaveAllDirty();
+    else _pmemoDirtySet={};
+  }
+  _pmemoCardPage=gi; rdPMemo();
+}
+// Ctrl+S 단축키 (메모/플로팅 저장)
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey) && e.key==='s'){
+    var saved=false;
+    // 플로팅 메모 활성 + dirty → 우선 저장
+    var fm=$('float-memo');
+    if(fm && fm.classList.contains('on') && _floatDirty){ e.preventDefault(); _floatSaveNow(); saved=true; }
+    // 메모 탭 활성 시
+    var pmPage=$('pg-pmemo');
+    if(pmPage && pmPage.classList.contains('on') && _pmemoHasDirty()){ e.preventDefault(); _pmemoSaveAllDirty(); saved=true; }
+    // 어디서든 Ctrl+S가 메모 관련이면 브라우저 저장 방지
+    if(saved || (fm && fm.classList.contains('on')) || (pmPage && pmPage.classList.contains('on'))){ e.preventDefault(); }
+  }
+});
+// 기존 호환용
+var _pmemoCardTimers={};
+function savePMemoCard(idx){ _pmemoDirtyMark(idx); }
 function savePMemoCardNow(idx){
   if(!CURRENT_USER_ID) return;
   var ta=document.querySelector('[data-pmemo-ta-idx="'+idx+'"]'); if(!ta) return;
@@ -12826,7 +13128,7 @@ let _floatMemoDrag=null;
 function openFloatMemo(){
   var el=$('float-memo'); if(!el) return;
   // 화면 중앙 배치
-  var w=el.offsetWidth||440, h=el.offsetHeight||340;
+  var w=el.offsetWidth||700, h=el.offsetHeight||700;
   el.style.left=Math.max(0,Math.floor((window.innerWidth-w)/2))+'px';
   el.style.top=Math.max(0,Math.floor((window.innerHeight-h)/2))+'px';
   el.style.right='auto'; el.style.bottom='auto';
@@ -12834,8 +13136,20 @@ function openFloatMemo(){
   rdFloatMemo();
 }
 function closeFloatMemo(){
+  if(_floatDirty){
+    if(confirm('저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _floatSaveNow();
+    else { _floatDirty=false; _floatDirtyIdx=null; }
+  }
   var el=$('float-memo'); if(el) el.classList.remove('on');
 }
+// ★ 플로팅 메모 단축키: 마우스 휠버튼(중간버튼) 클릭으로 토글
+document.addEventListener('mousedown',function(e){
+  if(e.button!==1) return;
+  e.preventDefault();
+  var el=$('float-memo');
+  if(el && el.classList.contains('on')) closeFloatMemo();
+  else openFloatMemo();
+});
 function floatDelTab(idx){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
@@ -12860,6 +13174,16 @@ function floatAddTab(){
   md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[],group:gNum});
   _floatActiveTab=md.pages.length-1;
   md.updatedAt=_pmemoTs();
+  sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
+}
+function floatAddGroupPage(){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var newG=_pmemoNextGroup(md);
+  var num=md.pages.length+1;
+  md.pages.push({id:Date.now(),name:'메모 '+num,text:'',todos:[],group:newG});
+  _floatActiveTab=md.pages.length-1;
+  md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
   sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
 }
 function floatRenameTab(idx){
@@ -12930,36 +13254,43 @@ function rdFloatMemo(){
   if(_floatPage>=totalFPages) _floatPage=totalFPages-1;
   var curFGroup=fGroups[_floatPage]||fGroups[0];
   var fGroupItems=curFGroup?curFGroup.items:[];
-  // 탭 바 렌더 (2줄: 상위 페이지탭 + 하위 메모탭)
+  // 탭 바 렌더 (상위: 그룹탭, 하위: 개별 메모탭)
   var tabBar=$('float-memo-tabs');
+  var subBar=$('float-memo-subtabs');
   if(tabBar){
     var th='';
-    // 상위 페이지 그룹 탭 (2개 이상일 때만 표시)
-    if(totalFPages>1){
-      th+='<div style="display:flex;gap:3px;margin-bottom:2px;width:100%">';
-      fGroups.forEach(function(fg,fgi){
-        var fpAct=fgi===_floatPage;
-        var fgLabel=md.groupNames[fg.group]||fg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
-        th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatPage='+fgi+';_floatActiveTab='+fg.items[0].idx+';rdFloatMemo();},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:500;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w);color:var(--t4)')+'">'+esc(fgLabel)+'</div>';
-      });
-      th+='</div>';
-      // 상위탭/하위탭 구분선
-      th+='<div style="border-bottom:1px solid rgba(128,128,128,.2);margin:2px 0 4px"></div>';
-    }
-    // 하위 메모 탭
-    th+='<div style="display:flex;gap:3px;align-items:center;width:100%">';
+    // 상위 페이지 그룹 탭 — 폴더 스타일
+    th+='<span style="font-size:9px;color:var(--t4);font-weight:600;margin-right:2px;flex-shrink:0">📁 그룹</span>';
+    fGroups.forEach(function(fg,fgi){
+      var fpAct=fgi===_floatPage;
+      var fgLabel=md.groupNames[fg.group]||fg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
+      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatPage='+fgi+';_floatActiveTab='+fg.items[0].idx+';rdFloatMemo();},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:11px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'">'+esc(fgLabel)+'</div>';
+    });
+    th+='<div onclick="floatAddGroupPage()" style="padding:4px 8px;font-size:12px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 그룹 추가">＋</div>';
+    // 우측: 맞춤법 + 저장
+    th+='<div style="margin-left:auto;display:flex;gap:4px;flex-shrink:0">';
+    th+='<button onclick="_floatSpellCheck()" style="padding:4px 10px;font-size:11px;border:1px solid var(--ln);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;color:#1a5fa0;white-space:nowrap" title="네이버 맞춤법검사">✏ 맞춤법</button>';
+    th+='<button onclick="_floatSaveNow()" style="padding:4px 10px;font-size:11px;border:1px solid var(--ln);border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap" title="Ctrl+S">💾 저장</button>';
+    th+='</div>';
+    tabBar.style.display='flex';
+    tabBar.innerHTML=th;
+  }
+  // 하위 개별 메모 탭 — 메모지 스타일
+  if(subBar){
+    var sh='';
+    sh+='<span style="font-size:9px;color:var(--t4);font-weight:600;margin-right:2px;flex-shrink:0">📝 메모</span>';
     fGroupItems.forEach(function(item){
       var fi=item.idx;
       var act=fi===_floatActiveTab;
-      th+='<div onclick="_floatActiveTab='+fi+';rdFloatMemo()" ondblclick="floatRenameTab('+fi+')" style="padding:5px 12px;font-size:12px;border-radius:5px;cursor:pointer;white-space:nowrap;'
-        +(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:var(--w);color:var(--t3)')
-        +'">'+esc(md.pages[fi].name);
-      if(md.pages.length>1) th+='<span onclick="event.stopPropagation();floatDelTab('+fi+')" style="margin-left:4px;font-size:11px;cursor:pointer;opacity:.5" title="삭제">×</span>';
-      th+='</div>';
+      sh+='<div onclick="_floatActiveTab='+fi+';rdFloatMemo()" ondblclick="floatRenameTab('+fi+')" style="padding:4px 10px;font-size:11px;border-radius:5px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;border:1px solid '+(act?'#764ba2':'var(--ln)')+';'
+        +(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:#fff;color:var(--t3)')
+        +'"><span>'+esc(md.pages[fi].name)+'</span>';
+      sh+='<span onclick="event.stopPropagation();_detachMemo('+fi+')" style="font-size:10px;cursor:pointer;opacity:.5;margin-left:2px" title="별도 창으로 분리">↗</span>';
+      if(md.pages.length>1) sh+='<span onclick="event.stopPropagation();floatDelTab('+fi+')" style="font-size:11px;cursor:pointer;opacity:.5" title="삭제">×</span>';
+      sh+='</div>';
     });
-    th+='<div onclick="floatAddTab()" style="padding:5px 10px;font-size:13px;color:var(--t4);cursor:pointer" title="메모 추가">＋</div>';
-    th+='</div>';
-    tabBar.innerHTML=th;
+    sh+='<div onclick="floatAddTab()" style="padding:4px 8px;font-size:11px;color:var(--t4);cursor:pointer" title="이 그룹에 메모 추가">＋</div>';
+    subBar.innerHTML=sh;
   }
   var idx=_floatActiveTab;
   var pg=md.pages[idx]; if(!pg) pg=md.pages[0];
@@ -12968,8 +13299,8 @@ function rdFloatMemo(){
   var todos=pg.todos||[];
   var todoH=todos.map(function(t,i){
     return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0">'
-      +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="floatToggleTodo('+idx+','+i+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0">'
-      +'<span style="flex:1;font-size:11px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
+      +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="floatToggleTodo('+idx+','+i+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:15px;height:15px">'
+      +'<span style="flex:1;font-size:13px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
       +'</div>';
   }).join('');
 
@@ -12979,7 +13310,7 @@ function rdFloatMemo(){
     +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>'
     +'<div style="flex:1;overflow-y:auto;padding:2px 8px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;padding:4px 0">없음</div>')+'</div>'
     +'<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">'
-    +'<input id="float-todo-input" data-float-pg="'+idx+'" placeholder="할일 추가" style="flex:1;min-width:0;padding:3px 5px;border:1px solid var(--ln);border-radius:4px;font-size:10px;font-family:inherit">'
+    +'<input id="float-todo-input" data-float-pg="'+idx+'" placeholder="할일 추가" style="flex:1;min-width:0;padding:4px 6px;border:1px solid var(--ln);border-radius:4px;font-size:13px;font-family:inherit">'
     +'<button onclick="floatAddTodo('+idx+')" style="padding:3px 6px;border:none;background:var(--bl);color:#fff;border-radius:4px;font-size:10px;cursor:pointer">+</button>'
     +'</div></div>'
     // 구분선 (드래그로 높이 조절)
@@ -12987,7 +13318,7 @@ function rdFloatMemo(){
     // 메모 영역 (하단)
     +'<div style="flex:1;display:flex;flex-direction:column;min-height:40px">'
     +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3)">📝 메모</div>'
-    +'<textarea id="float-memo-ta" oninput="floatSaveMemo('+idx+')" style="flex:1;padding:4px 8px;border:none;outline:none;font-family:inherit;font-size:12px;line-height:1.5;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>'
+    +'<textarea id="float-memo-ta" oninput="_floatDirtyMark('+idx+')" spellcheck="false" style="flex:1;padding:6px 10px;border:none;outline:none;font-family:\'맑은 고딕\',Consolas,monospace;font-size:15px;line-height:1.25;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>'
     +'</div></div>';
 
   // 엔터키 처리 (한글 IME 호환 — keyup 사용)
@@ -13023,21 +13354,28 @@ function floatAddTodo(pgIdx){
   sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
 }
 var _floatSaveTimer=null;
-function floatSaveMemo(pgIdx){
-  clearTimeout(_floatSaveTimer);
-  _floatSaveTimer=setTimeout(function(){
-    if(!CURRENT_USER_ID) return;
-    var ta=$('float-memo-ta'); if(!ta) return;
-    var md=_pmemoData(CURRENT_USER_ID);
-    var pg=md.pages[pgIdx]; if(!pg) return;
-    pg.text=ta.value;
-    md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
-    sv(); _syncPMemoIfOpen(); _showFloatSaved();
-  },800);
+var _floatDirty=false;
+var _floatDirtyIdx=null;
+function _floatDirtyMark(pgIdx){
+  _floatDirty=true;
+  _floatDirtyIdx=pgIdx;
+  var ind=$('float-save-ind');
+  if(ind){ ind.textContent='● 미저장 (Ctrl+S)'; ind.style.color='#dc2626'; ind.style.opacity='1'; }
 }
+function _floatSaveNow(){
+  if(!_floatDirty||_floatDirtyIdx===null||!CURRENT_USER_ID) return;
+  var ta=$('float-memo-ta'); if(!ta) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var pg=md.pages[_floatDirtyIdx]; if(!pg) return;
+  pg.text=ta.value;
+  md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
+  _floatDirty=false;
+  sv(); _syncPMemoIfOpen(); _showFloatSaved();
+}
+function floatSaveMemo(pgIdx){ _floatDirtyMark(pgIdx); }
 function _showFloatSaved(){
   var ind=$('float-save-ind'); if(!ind) return;
-  ind.style.opacity='1';
+  ind.textContent='✓ 저장됨'; ind.style.color='#16a34a'; ind.style.opacity='1';
   clearTimeout(ind._t);
   ind._t=setTimeout(function(){ind.style.opacity='0';},1500);
 }
@@ -13050,6 +13388,287 @@ function _syncFloatIfOpen(){
   var el=$('float-memo');
   if(el && el.classList.contains('on')) rdFloatMemo();
 }
+// ── 네이버 맞춤법검사 ──
+var _spellTaIdx=null;
+var _spellCorrected='';
+function _pmemoSpellCheck(){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var _groups=_pmemoGroupList(md);
+  var curGroup=_groups[_pmemoCardPage]||_groups[0];
+  if(!curGroup||!curGroup.items.length){ alert('검사할 메모가 없습니다.'); return; }
+  var activeTA=document.activeElement;
+  var taIdx=-1;
+  if(activeTA && activeTA.tagName==='TEXTAREA' && activeTA.hasAttribute('data-pmemo-ta-idx')){
+    taIdx=parseInt(activeTA.getAttribute('data-pmemo-ta-idx'));
+  }
+  if(taIdx<0) taIdx=curGroup.items[0].idx;
+  var ta=document.querySelector('[data-pmemo-ta-idx="'+taIdx+'"]');
+  var text=ta?ta.value:'';
+  if(!text.trim()){ alert('검사할 텍스트가 없습니다.'); return; }
+  _runNaverSpellCheck(text,taIdx);
+}
+function _floatSpellCheck(){
+  var ta=$('float-memo-ta'); if(!ta||!ta.value.trim()){ alert('검사할 텍스트가 없습니다.'); return; }
+  var idx=(_floatDirtyIdx!==null)?_floatDirtyIdx:_floatActiveTab;
+  _runNaverSpellCheck(ta.value,idx);
+}
+function _runNaverSpellCheck(text,taIdx){
+  _spellTaIdx=taIdx;
+  _spellCorrected='';
+  // 기존 오버레이 제거
+  var old=$('spell-overlay'); if(old) old.remove();
+  // 모달 생성
+  var ov=document.createElement('div');
+  ov.id='spell-overlay';
+  ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+  var box=document.createElement('div');
+  box.style.cssText='background:#fff;border-radius:12px;width:680px;max-width:92vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden';
+  // 네이버 스타일 헤더
+  box.innerHTML='<div style="padding:12px 18px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;background:#fff">'
+    +'<div style="display:flex;align-items:center;gap:6px"><div style="width:28px;height:28px;border-radius:6px;background:#03c75a;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px">N</div>'
+    +'<span style="font-size:15px;font-weight:700;color:#222">맞춤법검사</span></div>'
+    +'<span style="margin-left:auto;cursor:pointer;font-size:20px;color:#888;padding:4px" onclick="document.getElementById(\'spell-overlay\').remove()">✕</span></div>'
+    +'<div id="spell-body" style="flex:1;overflow-y:auto;padding:0;font-size:14px">'
+    +'<div style="text-align:center;padding:50px;color:#888"><div class="spell-spin" style="display:inline-block;width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#03c75a;border-radius:50%;animation:spellspin .8s linear infinite;margin-bottom:10px"></div><div>검사 중...</div></div>'
+    +'</div>';
+  ov.appendChild(box);
+  // 스피너 애니메이션
+  if(!document.getElementById('spell-spin-style')){
+    var st=document.createElement('style');st.id='spell-spin-style';
+    st.textContent='@keyframes spellspin{to{transform:rotate(360deg)}} .spell-err-word{border-bottom:2px solid;cursor:pointer;position:relative;padding-bottom:1px} .spell-err-word:hover .spell-tip{display:block} .spell-tip{display:none;position:absolute;left:0;bottom:100%;background:#333;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;white-space:nowrap;z-index:10;margin-bottom:4px;box-shadow:0 2px 8px rgba(0,0,0,.2)}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(ov);
+
+  // 500자씩 분할
+  var chunks=[], maxLen=500;
+  for(var ci=0;ci<text.length;ci+=maxLen) chunks.push(text.substring(ci,ci+maxLen));
+  var results=[], done=0, errs=0;
+
+  chunks.forEach(function(chunk,i){
+    var url='https://m.search.naver.com/p/csearch/ocontent/util/SpellerProxy?passportKey=&color_blindness=0&q='+encodeURIComponent(chunk);
+    fetch(url).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(function(data){
+      try{
+        var msg=data.message.result;
+        results[i]={html:msg.html||'',notag:msg.notag_html||chunk,errata:msg.errata_count||0,origin:chunk};
+      }catch(_){ results[i]={html:'',notag:chunk,errata:0,origin:chunk}; }
+    }).catch(function(err){
+      results[i]={html:'',notag:chunk,errata:0,origin:chunk,err:true};
+      errs++;
+    }).finally(function(){
+      done++;
+      if(done===chunks.length) _renderSpellResult(results,taIdx,errs,text);
+    });
+  });
+}
+function _renderSpellResult(results,taIdx,errs,originalText){
+  var body=$('spell-body'); if(!body) return;
+  var totalErr=0;
+  results.forEach(function(r){totalErr+=r.errata;});
+  var correctedFull=results.map(function(r){return r.notag;}).join('');
+  var htmlFull=results.map(function(r){return r.html;}).join('');
+  _spellCorrected=correctedFull;
+
+  var h='';
+  // API 완전 실패 시 → 네이버 페이지로 안내
+  if(errs===results.length){
+    h+='<div style="padding:30px 20px;text-align:center">'
+      +'<div style="font-size:14px;color:#666;margin-bottom:16px">네이버 맞춤법검사 서버에 연결할 수 없습니다.<br>네이버 페이지에서 직접 검사할 수 있습니다.</div>'
+      +'<button onclick="_spellOpenNaver()" style="padding:12px 28px;background:#03c75a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">네이버 맞춤법검사 열기</button>'
+      +'<div style="font-size:11px;color:#aaa;margin-top:10px">텍스트가 클립보드에 복사됩니다</div>'
+      +'</div>';
+    body.innerHTML=h;
+    return;
+  }
+
+  if(errs>0){
+    h+='<div style="padding:8px 18px;background:#fff8e1;border-bottom:1px solid #ffe082;font-size:12px;color:#f57f17">일부 구간 검사 실패 ('+errs+'/'+results.length+')</div>';
+  }
+
+  // 결과 없음
+  if(totalErr===0){
+    h+='<div style="padding:40px 20px;text-align:center">'
+      +'<div style="font-size:44px;margin-bottom:12px">✅</div>'
+      +'<div style="font-size:16px;font-weight:700;color:#03c75a">맞춤법/문법 오류가 없습니다.</div>'
+      +'</div>';
+    body.innerHTML=h;
+    return;
+  }
+
+  // ── 네이버 스타일 결과 표시 ──
+  h+='<div style="padding:14px 18px;background:#f8f9fa;border-bottom:1px solid #e5e7eb">';
+  h+='<div style="font-size:13px;color:#333;margin-bottom:8px"><b style="color:#e53935">'+totalErr+'</b>건의 오류가 발견되었습니다.</div>';
+  h+='<div style="display:flex;gap:14px;font-size:11px;color:#888">';
+  h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e53935;vertical-align:middle;margin-right:3px"></span>맞춤법</span>';
+  h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#03c75a;vertical-align:middle;margin-right:3px"></span>띄어쓰기</span>';
+  h+='<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7c4dff;vertical-align:middle;margin-right:3px"></span>표준어 의심</span>';
+  h+='</div></div>';
+
+  // 원문 + 교정 표시
+  h+='<div style="padding:16px 18px">';
+  h+='<div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px">검사 결과</div>';
+  h+='<div style="padding:14px 16px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;line-height:2;white-space:pre-wrap;word-break:break-all;font-family:\'맑은 고딕\',\'Pretendard\',sans-serif">'+htmlFull+'</div>';
+  h+='</div>';
+
+  h+='<div style="padding:0 18px 16px">';
+  h+='<div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px">교정 결과</div>';
+  h+='<div style="padding:14px 16px;background:#f1f8e9;border:1px solid #c5e1a5;border-radius:8px;font-size:14px;line-height:2;white-space:pre-wrap;word-break:break-all;font-family:\'맑은 고딕\',\'Pretendard\',sans-serif">'+esc(correctedFull)+'</div>';
+  h+='</div>';
+
+  // 하단 버튼
+  h+='<div style="padding:12px 18px;border-top:1px solid #e5e7eb;background:#fafafa;display:flex;align-items:center;gap:10px;justify-content:center">';
+  h+='<button onclick="_applySpellResult()" style="padding:10px 32px;background:#03c75a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">교정 내용 적용</button>';
+  h+='<button onclick="_spellCopyResult()" style="padding:10px 24px;background:#fff;color:#333;border:1px solid #ccc;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">복사</button>';
+  h+='<button onclick="document.getElementById(\'spell-overlay\').remove()" style="padding:10px 24px;background:#fff;color:#888;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">닫기</button>';
+  h+='</div>';
+
+  body.innerHTML=h;
+}
+function _spellOpenNaver(){
+  // 클립보드에 텍스트 복사 후 네이버 맞춤법검사 페이지 열기
+  var ta=document.querySelector('[data-pmemo-ta-idx="'+_spellTaIdx+'"]');
+  var fta=$('float-memo-ta');
+  var text=(ta?ta.value:'') || (fta?fta.value:'');
+  if(text){ try{navigator.clipboard.writeText(text);}catch(_){} }
+  window.open('https://search.naver.com/search.naver?where=nexearch&query=%EB%A7%9E%EC%B6%A4%EB%B2%95%EA%B2%80%EC%82%AC','_blank');
+}
+function _spellCopyResult(){
+  if(_spellCorrected){ try{navigator.clipboard.writeText(_spellCorrected);alert('교정 결과가 복사되었습니다.');}catch(_){alert('복사에 실패했습니다.');} }
+}
+function _applySpellResult(){
+  if(!_spellCorrected){ alert('교정 결과가 없습니다.'); return; }
+  if(!confirm('메모 내용을 교정 결과로 교체하시겠습니까?')) return;
+  var taIdx=_spellTaIdx;
+  // 메모탭 textarea
+  var ta=document.querySelector('[data-pmemo-ta-idx="'+taIdx+'"]');
+  if(ta){ ta.value=_spellCorrected; _pmemoDirtyMark(taIdx); }
+  // 플로팅 textarea
+  var fta=$('float-memo-ta');
+  if(fta){ fta.value=_spellCorrected; _floatDirty=true; _floatDirtyIdx=taIdx; }
+  var ov=$('spell-overlay'); if(ov) ov.remove();
+}
+
+// ── 분리형 메모 창 (윈도우 메모장처럼 개별 창) ──
+var _detachedMemos={}; // idx → DOM element
+function _detachMemo(idx){
+  if(_detachedMemos[idx]){ _detachedMemos[idx].focus(); return; } // 이미 열려있으면 포커스
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var pg=md.pages[idx]; if(!pg) return;
+
+  var win=document.createElement('div');
+  win.className='detached-memo';
+  win.setAttribute('data-detach-idx',idx);
+  // 화면 중앙 근처 랜덤 배치 (겹치지 않게 약간 오프셋)
+  var cnt=Object.keys(_detachedMemos).length;
+  var baseX=Math.max(50,Math.floor(window.innerWidth/2-200+cnt*30));
+  var baseY=Math.max(50,Math.floor(window.innerHeight/2-180+cnt*30));
+  win.style.cssText='position:fixed;left:'+baseX+'px;top:'+baseY+'px;width:380px;height:400px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:9990;display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0;resize:both;min-width:250px;min-height:200px';
+
+  // 헤더
+  var head=document.createElement('div');
+  head.style.cssText='padding:8px 12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;cursor:move;display:flex;align-items:center;gap:6px;flex-shrink:0;user-select:none';
+  head.innerHTML='<span style="font-size:12px;font-weight:700;flex:1">📝 '+esc(pg.name)+'</span>'
+    +'<span id="detach-save-'+idx+'" style="font-size:9px;opacity:0;transition:opacity .3s">✓</span>'
+    +'<span onclick="_detachDock('+idx+')" style="cursor:pointer;font-size:11px;opacity:.7" title="빠른메모로 합치기">↙</span>'
+    +'<span onclick="_detachClose('+idx+')" style="cursor:pointer;font-size:14px;opacity:.7" title="닫기">×</span>';
+  win.appendChild(head);
+
+  // 본문
+  var ta=document.createElement('textarea');
+  ta.value=pg.text||'';
+  ta.spellcheck=false;
+  ta.style.cssText='flex:1;padding:10px 12px;border:none;outline:none;font-family:\'맑은 고딕\',Consolas,monospace;font-size:15px;line-height:1.25;resize:none;background:#fff';
+  ta.setAttribute('data-detach-ta-idx',idx);
+  ta.addEventListener('input',function(){
+    _detachDirty[idx]=true;
+    var ind=document.getElementById('detach-save-'+idx);
+    if(ind){ind.textContent='● 미저장';ind.style.color='#fbbf24';ind.style.opacity='1';}
+  });
+  ta.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){
+      e.preventDefault();
+      _detachSave(idx);
+    }
+  });
+  win.appendChild(ta);
+
+  // 드래그 이동
+  var _dd=null;
+  head.addEventListener('mousedown',function(e){
+    if(e.target.tagName==='SPAN'&&e.target.onclick) return;
+    _dd={el:win,sx:e.clientX,sy:e.clientY,ox:win.offsetLeft,oy:win.offsetTop};
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!_dd||_dd.el!==win) return;
+    var nx=_dd.ox+(e.clientX-_dd.sx);
+    var ny=_dd.oy+(e.clientY-_dd.sy);
+    if(ny<0) ny=0;
+    if(ny>window.innerHeight-40) ny=window.innerHeight-40;
+    win.style.left=nx+'px';
+    win.style.top=ny+'px';
+  });
+  document.addEventListener('mouseup',function(){if(_dd&&_dd.el===win)_dd=null;});
+
+  document.body.appendChild(win);
+  _detachedMemos[idx]=win;
+  ta.focus();
+}
+var _detachDirty={};
+function _detachSave(idx){
+  if(!CURRENT_USER_ID) return;
+  var ta=document.querySelector('[data-detach-ta-idx="'+idx+'"]');
+  if(!ta) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var pg=md.pages[idx]; if(!pg) return;
+  pg.text=ta.value;
+  md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
+  _detachDirty[idx]=false;
+  sv(); _syncFloatIfOpen(); _syncPMemoIfOpen();
+  var ind=document.getElementById('detach-save-'+idx);
+  if(ind){ind.textContent='✓ 저장됨';ind.style.color='#fff';ind.style.opacity='1';setTimeout(function(){ind.style.opacity='0';},1500);}
+}
+function _detachClose(idx){
+  if(_detachDirty[idx]){
+    if(confirm('저장되지 않은 내용이 있습니다. 저장하시겠습니까?')) _detachSave(idx);
+  }
+  var win=_detachedMemos[idx];
+  if(win) win.remove();
+  delete _detachedMemos[idx];
+  delete _detachDirty[idx];
+}
+function _detachDock(idx){
+  // 분리된 창의 내용을 저장하고 빠른메모로 돌아가기
+  if(_detachDirty[idx]) _detachSave(idx);
+  var win=_detachedMemos[idx];
+  if(win) win.remove();
+  delete _detachedMemos[idx];
+  delete _detachDirty[idx];
+  _floatActiveTab=idx;
+  var fm=$('float-memo');
+  if(fm && fm.classList.contains('on')) rdFloatMemo();
+  else openFloatMemo();
+}
+// 분리된 메모도 Ctrl+S 전역 저장에 포함
+var _origCtrlSHandler=null;
+(function(){
+  document.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){
+      var keys=Object.keys(_detachDirty).filter(function(k){return _detachDirty[k];});
+      if(keys.length){
+        e.preventDefault();
+        keys.forEach(function(k){_detachSave(parseInt(k));});
+      }
+    }
+  });
+})();
+
 // 플로팅 메모 내부 구분선 드래그
 (function(){
   var _fd=null;
@@ -13090,9 +13709,11 @@ function _syncFloatIfOpen(){
     var el=$('float-memo'); if(!el) return;
     var x=e.clientX-_floatMemoDrag.ox;
     var y=e.clientY-_floatMemoDrag.oy;
-    if(x<0) x=0; if(y<0) y=0;
-    if(x+el.offsetWidth>window.innerWidth) x=window.innerWidth-el.offsetWidth;
-    if(y+el.offsetHeight>window.innerHeight) y=window.innerHeight-el.offsetHeight;
+    // ★ 상단 헤더(36px)는 항상 화면 안에 유지 — 잡을 수 있도록
+    if(x<-el.offsetWidth+100) x=-el.offsetWidth+100;
+    if(x>window.innerWidth-100) x=window.innerWidth-100;
+    if(y<0) y=0;
+    if(y>window.innerHeight-40) y=window.innerHeight-40;
     el.style.left=x+'px'; el.style.top=y+'px';
     el.style.right='auto'; el.style.bottom='auto';
   });
@@ -13119,6 +13740,7 @@ function _syncFloatIfOpen(){
     if(d.indexOf('w')>=0){nw=Math.max(300,_rs.ow-dx);nl=_rs.ol+(_rs.ow-nw);}
     if(d.indexOf('s')>=0) nh=Math.max(200,_rs.oh+dy);
     if(d.indexOf('n')>=0){nh=Math.max(200,_rs.oh-dy);nt=_rs.ot+(_rs.oh-nh);}
+    if(nt<0) nt=0;
     el.style.width=nw+'px'; el.style.height=nh+'px';
     el.style.left=nl+'px'; el.style.top=nt+'px';
     el.style.right='auto'; el.style.bottom='auto';
@@ -13184,12 +13806,17 @@ var _pmemoCardWidths={};
 // ── 세금계산서 관리 ──
 var _taxBldgId=0,_taxType='taxInv';
 function rdTax(){
-  if(!DB.buildings||!DB.buildings.length)return;
-  if(!_taxBldgId) _taxBldgId=DB.buildings[0].id;
+  var _tBldgs=_teamBuildings();
+  if(!_tBldgs.length){
+    var _tc=$('tax-content');if(_tc)_tc.innerHTML='<div class="empty" style="padding:40px;text-align:center;color:var(--t4)">이 팀에 등록된 건물이 없습니다</div>';
+    var _tb2=$('tax-bldg-list');if(_tb2)_tb2.innerHTML='';
+    return;
+  }
+  if(!_taxBldgId || !_tBldgs.find(b=>b.id===_taxBldgId)) _taxBldgId=_tBldgs[0].id;
   // 사이드바 건물 목록
   var bl=$('tax-bldg-list');
-  if(bl) bl.innerHTML=DB.buildings.map(function(b){
-    return '<div class="sb-list-item'+(b.id===_taxBldgId?' on':'')+'" onclick="_taxSelBldg('+b.id+')" style="padding:4px 6px;font-size:11px;cursor:pointer">'+b.name+'</div>';
+  if(bl) bl.innerHTML=_tBldgs.map(function(b){
+    return '<div class="sb-list-item'+(b.id===_taxBldgId?' on':'')+'" onclick="_taxSelBldgWithPreview('+b.id+')" style="padding:4px 6px;font-size:11px;cursor:pointer">'+b.name+'</div>';
   }).join('');
   // 탭 상태
   document.querySelectorAll('.tax-tab').forEach(function(t){
@@ -13210,39 +13837,59 @@ function rdTax(){
   // 요약
   var sumEl=$('tax-summary');
   if(sumEl) sumEl.innerHTML='<span style="color:var(--gn);font-weight:600">발행완료 '+issued.length+'건</span> · <span style="color:var(--rd);font-weight:600">미발행 '+(ls.length-issued.length)+'건</span> · 총 '+ls.length+'명 · '+ym;
-  // 테이블
-  var h='<table style="width:100%;border-collapse:collapse;font-size:11px">';
-  h+='<thead><tr style="background:var(--w2)"><th style="padding:4px 6px;text-align:left;border-bottom:1px solid var(--ln)">호실</th>';
-  h+='<th style="padding:4px 6px;text-align:left;border-bottom:1px solid var(--ln)">세입자</th>';
-  h+='<th style="padding:4px 6px;text-align:left;border-bottom:1px solid var(--ln)">사업자번호</th>';
-  h+='<th style="padding:4px 6px;text-align:center;border-bottom:1px solid var(--ln)">발행</th>';
-  h+='<th style="padding:4px 6px;text-align:right;border-bottom:1px solid var(--ln)">공급가액</th>';
-  if(isTax) h+='<th style="padding:4px 6px;text-align:right;border-bottom:1px solid var(--ln)">세액</th>';
-  h+='<th style="padding:4px 6px;text-align:center;border-bottom:1px solid var(--ln)">상태</th>';
-  h+='<th style="padding:4px 6px;border-bottom:1px solid var(--ln)"></th></tr></thead><tbody>';
-  ls.forEach(function(l){
+  // ★ 양식 스타일 테이블 (B컴팩트 + C양식 내용)
+  var bldgName=bn(_taxBldgId);
+  var h='<div style="background:#1e293b;color:#fff;padding:8px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center">';
+  h+='<span style="font-size:14px;font-weight:700;letter-spacing:2px">'+(isTax?'세 금 계 산 서':'계 산 서')+'</span>';
+  h+='<span style="font-size:11px;color:#94a3b8">'+bldgName+' · '+ym+'</span></div>';
+  h+='<div style="border:1px solid #cbd5e1;border-top:none;border-radius:0 0 8px 8px;overflow:hidden">';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+  h+='<thead><tr>';
+  h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:8%">No.</th>';
+  h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:12%">호실</th>';
+  h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:18%">세입자</th>';
+  h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:16%">사업자번호</th>';
+  h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:16%">공급가액</th>';
+  if(isTax) h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:12%">세액</th>';
+  h+='<th style="background:#f1f5f9;padding:6px 8px;font-size:10px;color:#475569;font-weight:600;border:1px solid #e2e8f0;text-align:center;width:14%">발행</th>';
+  h+='</tr></thead><tbody>';
+  var totalSupply=0, totalTax=0, issuedCnt=0;
+  ls.forEach(function(l,idx){
     var inv=issued.find(function(t){return t.leaseId===l.id;});
     var rt=typeof rateFor==='function'?rateFor(l,now.getFullYear(),now.getMonth()+1):{rent:l.rent||0,mgmt:l.mgmt||0};
     var supply=isTax?(rt.rent||0)+(rt.mgmt||0):0;
     var tax=isTax?Math.round(supply*0.1):0;
+    totalSupply+=supply; totalTax+=tax;
     var cats=DB.memoCats&&DB.memoCats[_taxBldgId]||{};
     var taxInfo=cats.tax||{};
     var bizNo=taxInfo[l.floor]||'';
     var done=!!inv;
-    h+='<tr style="border-bottom:1px solid var(--ln)">';
-    h+='<td style="padding:4px 6px;font-weight:600">'+l.floor+'</td>';
-    h+='<td style="padding:4px 6px">'+l.tenant+'</td>';
-    h+='<td style="padding:4px 6px;font-family:monospace;font-size:10px;color:var(--t2)">'+(bizNo||'<span style="color:var(--t4)">미등록</span>')+'</td>';
-    h+='<td style="padding:4px 6px;text-align:center">'+(done?'<span style="color:var(--gn)">✓</span>':'<span style="color:var(--t4)">—</span>')+'</td>';
-    h+='<td style="padding:4px 6px;text-align:right;font-family:monospace">'+fm(supply)+'</td>';
-    if(isTax) h+='<td style="padding:4px 6px;text-align:right;font-family:monospace;color:var(--t2)">'+fm(tax)+'</td>';
-    h+='<td style="padding:4px 6px;text-align:center">'+(done?'<span style="font-size:10px;background:var(--gn2);color:var(--gn);padding:1px 6px;border-radius:8px">발행완료</span>':'<span style="font-size:10px;background:var(--w2);color:var(--t3);padding:1px 6px;border-radius:8px">미발행</span>')+'</td>';
-    h+='<td style="padding:4px 6px"><button class="btn sm" onclick="_taxIssue('+l.id+')" style="font-size:10px;padding:2px 8px">'+(done?'취소':'발행')+'</button></td>';
+    if(done) issuedCnt++;
+    var rowBg=done?'background:#f0fdf4':'background:#fff';
+    h+='<tr style="'+rowBg+'">';
+    h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;color:#64748b">'+(idx+1)+'</td>';
+    h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">'+l.floor+'</td>';
+    h+='<td style="padding:6px 8px;border:1px solid #e2e8f0">'+l.tenant+'</td>';
+    h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;font-family:monospace;font-size:10px;color:#64748b;text-align:center">'+(bizNo||'<span style="color:#ef4444">미등록</span>')+'</td>';
+    h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-family:monospace">'+fm(supply)+'</td>';
+    if(isTax) h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-family:monospace;color:#64748b">'+fm(tax)+'</td>';
+    if(done){
+      h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center"><span style="display:inline-block;border:2px solid var(--gn);color:var(--gn);border-radius:50%;width:28px;height:28px;line-height:26px;text-align:center;font-size:9px;font-weight:800;transform:rotate(-15deg)">발행</span> <button class="btn sm" onclick="_taxIssue('+l.id+')" style="font-size:9px;padding:1px 6px;color:#dc2626;margin-left:2px">취소</button></td>';
+    } else {
+      h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center"><button class="btn pri sm" onclick="_taxIssue('+l.id+')" style="font-size:10px;padding:3px 10px">발행</button></td>';
+    }
     h+='</tr>';
   });
-  h+='</tbody></table>';
-  h+='<div style="margin-top:6px;display:flex;gap:4px">';
-  h+='<button class="btn pri sm" onclick="_taxBulkIssue()" style="font-size:11px;padding:4px 12px">일괄발행 ('+label+')</button>';
+  // 합계행
+  h+='<tr style="background:#f8fafc">';
+  h+='<td colspan="'+(isTax?4:3)+'" style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#1e293b">합 계</td>';
+  h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-family:monospace;font-weight:700">'+fm(totalSupply)+'</td>';
+  if(isTax) h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-family:monospace;font-weight:700;color:#64748b">'+fm(totalTax)+'</td>';
+  h+='<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;font-size:10px;color:var(--gn);font-weight:600">'+issuedCnt+'/'+ls.length+'건</td>';
+  h+='</tr>';
+  h+='</tbody></table></div>';
+  h+='<div style="margin-top:8px;display:flex;gap:6px">';
+  h+='<button class="btn pri sm" onclick="_taxBulkIssue()" style="font-size:11px;padding:5px 14px">일괄발행 ('+label+')</button>';
   h+='</div>';
   $('tax-content').innerHTML=h;
   // 최근 발행 이력
@@ -13259,6 +13906,8 @@ function rdTax(){
     hh+='</tbody></table>';
   }
   $('tax-history').innerHTML=hh;
+  // ★ 미리보기 패널 항상 펼침
+  _taxOpenPreview();
 }
 function _taxSelBldg(bId){_taxBldgId=bId;rdTax();}
 function _taxTab(type){_taxType=type;rdTax();}
@@ -13292,6 +13941,82 @@ function _taxBulkIssue(){
   if(added) sv();
   alert(added+'건 발행 완료');
   rdTax();
+}
+
+// ═══ 세금계산서 - 청구서 미리보기 패널 ═══
+var _taxPreviewLeaseId=null;
+function _taxOpenPreview(){
+  var panel=$('tax-inv-preview');if(!panel)return;
+  panel.style.width='380px';
+  var inner=$('tax-inv-preview-inner');if(inner)inner.style.display='flex';
+  _taxRenderFloors();
+}
+function _taxClosePreview(){
+  var panel=$('tax-inv-preview');if(!panel)return;
+  panel.style.width='0';
+  var inner=$('tax-inv-preview-inner');if(inner)inner.style.display='none';
+  _taxPreviewLeaseId=null;
+}
+function _taxRenderFloors(){
+  var el=$('tax-inv-floors');if(!el)return;
+  var ls=DB.leases.filter(function(l){return l.bId===_taxBldgId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
+  if(!ls.length){el.innerHTML='<div style="color:#94a3b8;font-size:10px;padding:8px 4px;text-align:center">세입자 없음</div>';return;}
+  el.innerHTML=ls.map(function(l){
+    var on=_taxPreviewLeaseId===l.id;
+    return '<div onclick="_taxPreviewFloor('+l.id+')" style="padding:6px 6px;font-size:10px;font-weight:'+(on?'700':'500')+';border-left:3px solid '+(on?'#3b82f6':'transparent')+';background:'+(on?'#eff6ff':'transparent')+';color:'+(on?'#2563eb':'#374151')+';cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s" title="'+esc(l.floor)+' · '+esc(l.tenant||'')+'">'+esc(l.floor)+'<div style="font-size:9px;color:'+(on?'#3b82f6':'#94a3b8')+';overflow:hidden;text-overflow:ellipsis">'+esc(l.tenant||'')+'</div></div>';
+  }).join('');
+}
+function _taxPreviewFloor(leaseId){
+  _taxPreviewLeaseId=leaseId;
+  _taxRenderFloors();
+  _taxRenderPreviewDetail();
+}
+function _taxRenderPreviewDetail(){
+  var el=$('tax-inv-detail');if(!el)return;
+  var l=DB.leases.find(function(x){return x.id===_taxPreviewLeaseId;});
+  if(!l){el.innerHTML='<div style="color:#94a3b8;text-align:center;padding:20px">층을 선택하세요</div>';return;}
+  var b=DB.buildings.find(function(x){return x.id===l.bId;});
+  var now=new Date(),yr=now.getFullYear(),mo=now.getMonth()+1;
+  var ym=yr+'-'+String(mo).padStart(2,'0');
+  var rt=typeof rateFor==='function'?rateFor(l,yr,mo):{rent:l.rent||0,mgmt:l.mgmt||0};
+  var rentFree=typeof isRentFreeMonth==='function'?isRentFreeMonth(l,yr,mo):false;
+  var rent=rentFree?0:Math.round((rt.rent||0)*1.1);
+  var mgmt=Math.round((rt.mgmt||0)*1.1);
+  var total=rent+mgmt;
+  // 발행 여부
+  if(!DB.taxInvoices) DB.taxInvoices=[];
+  var inv=DB.taxInvoices.find(function(t){return t.bId===_taxBldgId&&t.leaseId===l.id&&t.month===ym;});
+  var issued=!!inv;
+  var h='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px">';
+  h+='<div style="text-align:center;font-size:13px;font-weight:700;margin-bottom:8px;color:#1e293b">청구서</div>';
+  h+='<div style="font-size:10px;color:#64748b;margin-bottom:6px;text-align:center">'+(b?b.name:'')+' · '+l.floor+' · '+l.tenant+'</div>';
+  h+='<div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-top:4px">';
+  h+='<table style="width:100%;font-size:10px;border-collapse:collapse">';
+  h+='<tr><td style="padding:3px 0;color:#64748b">청구월</td><td style="padding:3px 0;text-align:right;font-weight:600">'+ym+'</td></tr>';
+  h+='<tr><td style="padding:3px 0;color:#64748b">임대료 (VAT포함)</td><td style="padding:3px 0;text-align:right;font-family:monospace">'+(rentFree?'<span style="color:#f59e0b">렌트프리</span>':fm(rent))+'</td></tr>';
+  h+='<tr><td style="padding:3px 0;color:#64748b">관리비 (VAT포함)</td><td style="padding:3px 0;text-align:right;font-family:monospace">'+fm(mgmt)+'</td></tr>';
+  h+='<tr style="border-top:1px solid #e2e8f0"><td style="padding:5px 0;font-weight:700">합계</td><td style="padding:5px 0;text-align:right;font-weight:700;font-size:12px;color:#1e293b;font-family:monospace">'+fm(total)+'</td></tr>';
+  h+='</table></div>';
+  // 발행 상태
+  h+='<div style="margin-top:10px;text-align:center">';
+  if(issued){
+    h+='<div style="display:inline-block;border:2px solid #22c55e;color:#22c55e;border-radius:50%;width:36px;height:36px;line-height:34px;font-size:10px;font-weight:800;transform:rotate(-15deg);margin-bottom:6px">발행</div>';
+    h+='<div style="font-size:10px;color:#22c55e;font-weight:600">세금계산서 발행완료</div>';
+    h+='<button onclick="_taxIssue('+l.id+');_taxRenderPreviewDetail()" style="margin-top:6px;padding:4px 12px;font-size:10px;border:1px solid #fca5a5;background:#fff;color:#dc2626;border-radius:6px;cursor:pointer">발행취소</button>';
+  } else {
+    h+='<div style="font-size:10px;color:#ef4444;margin-bottom:6px">⚠️ 미발행</div>';
+    h+='<button onclick="_taxIssue('+l.id+');_taxRenderPreviewDetail()" style="padding:5px 16px;font-size:11px;font-weight:600;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer">발행하기</button>';
+  }
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+
+// 건물 선택 시 미리보기 자동 열기
+function _taxSelBldgWithPreview(bId){
+  _taxBldgId=bId;
+  _taxPreviewLeaseId=null;
+  rdTax();
+  _taxOpenPreview();
 }
 
 function initInvoice(){
@@ -13762,11 +14487,16 @@ async function enterApp(){
   DB.ui.calM=_now.getMonth();
   calSelDate=fd(_now);
   // 렌더 dispatch — water/pmemo 누락됐던 거 추가 (수도요금 탭 새로고침시 빈화면 버그 수정)
-  const _renderers={lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:rdTax,drive:function(){},admin:loadAdminUsers};
-  function _renderCurrentTab(tab){
+  const _renderers={dash:rdDash,lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:rdTax,drive:rdDrive,admin:loadAdminUsers};
+  window._renderCurrentTab=function(tab){
     try{ _renderers[tab]?.(); }
     catch(e){ console.error('탭 렌더 실패',tab,e); try{ rdLease(); }catch(_){} }
-  }
+    // ★ 렌더 후 presence 인디케이터 복원 (DOM 재생성으로 사라진 배지 복구)
+    try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
+  };
+  // ★ 팀 초기화: 기존 건물에 team 필드 배정 + 토글 상태 복원
+  _ensureBuildingTeams();
+  _initTeam();
   const _lastTab=buildNav();fillSel('ca-bldg',true);
   const caDate=$('ca-date');if(caDate)caDate.value=fd(new Date());
   _renderCurrentTab(_lastTab);
@@ -13802,6 +14532,8 @@ async function enterApp(){
         DB=_mergeLocalImages(DB, _localDB);
         if(_idbFull) DB=_mergeLocalImages(DB, _idbFull);
         _migrateMemoCats(); // 누락 카테고리 키 보충
+        // ★ 전기청구서 중복 방지: cloud 머지 후 항상 dedup 실행 (skipSave: 이후 렌더에서 저장됨)
+        try{ _deduplicateElectricBills(true, true); }catch(e){}
         // UI 초기화 상태는 유지
         if(!DB.ui) DB.ui={};
         DB.ui.leaseF='all';
@@ -13809,6 +14541,10 @@ async function enterApp(){
         DB.ui.calFlt='all';
         DB.ui.calY=_now.getFullYear();
         DB.ui.calM=_now.getMonth();
+        // ★ 팀 상태는 로컬 개인 설정 — 클라우드 값으로 덮어쓰지 않음
+        try{ var _savedTeam=localStorage.getItem('bm_currentTeam'); if(_savedTeam) DB.ui.currentTeam=parseInt(_savedTeam)||2; }catch(_){}
+        if(!DB.ui.currentTeam) DB.ui.currentTeam=2;
+        _renderTeamToggle();
         _renderCurrentTab(_lastTab);
         if(_lastTab!=='lease'){ try{ rdLease(); }catch(_){} }
         showSaveStatus('☁️ 최신 데이터 반영');
@@ -14370,11 +15106,13 @@ function rdDash(){
   var now=new Date();
   var el=document.getElementById('dash-date');
   if(el) el.textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월 '+now.getDate()+'일';
-  // 요약 카드
-  var totalUnits=DB.leases?DB.leases.length:0;
-  var occupied=DB.leases?DB.leases.filter(function(l){return l.tenant&&l.tenant.trim()&&l.tenant!=='공실';}).length:0;
-  var vacant=DB.leases?DB.leases.filter(function(l){return !l.tenant||!l.tenant.trim()||l.tenant==='공실';}).length:0;
-  var totalBuildings=DB.buildings?DB.buildings.length:0;
+  // 요약 카드 — 현재 팀 건물만
+  var _tBids=new Set(_teamBuildings().map(function(b){return b.id;}));
+  var _tLeases=DB.leases?DB.leases.filter(function(l){return _tBids.has(l.bId);}):[];
+  var totalUnits=_tLeases.length;
+  var occupied=_tLeases.filter(function(l){return l.tenant&&l.tenant.trim()&&l.tenant!=='공실';}).length;
+  var vacant=_tLeases.filter(function(l){return !l.tenant||!l.tenant.trim()||l.tenant==='공실';}).length;
+  var totalBuildings=_teamBuildings().length;
   var sum=document.getElementById('dash-summary');
   if(sum) sum.innerHTML=
     '<div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--bl)">'+totalBuildings+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">관리 건물</div></div>'+
@@ -14823,6 +15561,7 @@ var _dvView='grid';
 var _dvFilter='all'; // all, starred, recent, trash, bldg:XX, cat:XX
 var _dvBldg=null;
 var _dvCat=null;
+var _dvTeamFilter='all'; // 'all', 1, 2 — 드라이브 내부 팀 필터
 var _dvFiles=[];  // DB.driveFiles 참조
 
 function rdDrive(){
@@ -14841,9 +15580,12 @@ function rdDrive(){
     var on=_dvFilter===n.id?'background:#eff6ff;color:#2563eb;font-weight:600':'';
     return '<div onclick="_dvNav(\''+n.id+'\')" style="padding:6px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:1px;font-size:11px;'+on+'"><span style="font-size:13px;min-width:16px;text-align:center">'+n.ico+'</span>'+n.label+'</div>';
   }).join('');
-  // 건물 목록
-  var bldgs=DB.buildings||[];
-  bldg$.innerHTML=bldgs.map(function(b){
+  // 건물 목록 — 드라이브 내부 팀 필터 (공용이므로 양팀 모두 표시 가능)
+  var _dvTF=_dvTeamFilter;
+  var bldgs=_dvTF==='all'?(DB.buildings||[]):DB.buildings.filter(function(b){return (b.team||2)===_dvTF;});
+  // 팀 필터 토글
+  bldg$.innerHTML='<div style="display:flex;gap:2px;margin-bottom:4px;padding:0 4px"><button onclick="_dvSetTeam(\'all\')" style="flex:1;padding:3px 0;font-size:9px;border:1px solid '+((_dvTF==='all')?'#3b82f6':'#e2e8f0')+';background:'+((_dvTF==='all')?'#eff6ff':'#fff')+';color:'+((_dvTF==='all')?'#2563eb':'#64748b')+';border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit">전체</button><button onclick="_dvSetTeam(1)" style="flex:1;padding:3px 0;font-size:9px;border:1px solid '+((_dvTF===1)?'#3b82f6':'#e2e8f0')+';background:'+((_dvTF===1)?'#eff6ff':'#fff')+';color:'+((_dvTF===1)?'#2563eb':'#64748b')+';border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit">1팀</button><button onclick="_dvSetTeam(2)" style="flex:1;padding:3px 0;font-size:9px;border:1px solid '+((_dvTF===2)?'#3b82f6':'#e2e8f0')+';background:'+((_dvTF===2)?'#eff6ff':'#fff')+';color:'+((_dvTF===2)?'#2563eb':'#64748b')+';border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit">2팀</button></div>'
+  +bldgs.map(function(b){
     var on=_dvBldg===b.id?'background:#1e3a5f;color:#fff':'';
     return '<div onclick="_dvNavBldg('+b.id+')" style="padding:4px 8px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:5px;margin-bottom:1px;font-size:10.5px;'+on+'"><span style="width:5px;height:5px;border-radius:50%;background:'+(_dvBldg===b.id?'#60a5fa':'#94a3b8')+'"></span>'+b.name+'</div>';
   }).join('');
@@ -14879,6 +15621,7 @@ function rdDrive(){
 function _dvNav(id){ _dvFilter=id; _dvBldg=null; _dvCat=null; _dvPath=[]; rdDrive(); }
 function _dvNavBldg(bId){ _dvFilter='bldg'; _dvBldg=bId; _dvCat=null; _dvPath=[]; rdDrive(); }
 function _dvNavCat(cId){ _dvFilter='cat'; _dvCat=cId; _dvBldg=null; _dvPath=[]; rdDrive(); }
+function _dvSetTeam(t){ _dvTeamFilter=t; _dvBldg=null; _dvPath=[]; rdDrive(); }
 function _dvRenderBreadcrumb(){
   var bc$=$('drive-breadcrumb'); if(!bc$) return;
   var parts=['<a style="color:#3b82f6;cursor:pointer;text-decoration:none" onclick="_dvNav(\'all\')">드라이브</a>'];
@@ -15038,7 +15781,7 @@ function _dvOpenFolder(fid){
 </script>
 
 <!-- 플로팅 메모 -->
-<div id="float-memo" class="float-memo" style="width:440px;height:380px">
+<div id="float-memo" class="float-memo" style="width:700px;height:700px">
   <div class="float-memo-edge top" data-resize="n"></div>
   <div class="float-memo-edge bottom" data-resize="s"></div>
   <div class="float-memo-edge left" data-resize="w"></div>
@@ -15049,15 +15792,13 @@ function _dvOpenFolder(fid){
   <div class="float-memo-edge bottom-right" data-resize="se"></div>
   <div class="float-memo-head" id="float-memo-head">
     <span>📝 빠른 메모</span>
+    <button onclick="closeFloatMemo();var b=document.querySelector('.nb[data-id=pmemo]');if(b)gp('pmemo',b);" style="border:none;background:none;cursor:pointer;font-size:10px;color:var(--t3);font-family:inherit;padding:2px 6px;border-radius:4px;margin-left:4px" title="개인메모 탭으로 이동">📋 개인메모</button>
     <span id="float-save-ind" style="font-size:9px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:auto">✓ 저장됨</span>
     <button class="float-memo-close" onclick="closeFloatMemo()">×</button>
   </div>
   <div id="float-memo-tabs" style="display:flex;align-items:center;gap:2px;padding:3px 8px;background:var(--bl2);border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;flex-wrap:nowrap"></div>
+  <div id="float-memo-subtabs" style="display:flex;align-items:center;gap:2px;padding:3px 8px;background:#fff;border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;flex-wrap:nowrap"></div>
   <div class="float-memo-body" id="float-memo-body"></div>
-  <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:5px 10px;border-top:1px solid var(--ln);background:var(--bl2);flex-shrink:0">
-    <button onclick="closeFloatMemo();var b=document.querySelector('.nb[data-id=pmemo]');if(b)gp('pmemo',b);" style="border:none;background:none;cursor:pointer;font-size:11px;color:var(--t2);font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;padding:2px 8px" title="메모장 탭으로 이동"><span style="font-size:16px">📋</span><span style="font-size:8px">메모장</span></button>
-    <button onclick="closeFloatMemo()" style="border:none;background:none;cursor:pointer;font-size:11px;color:var(--t2);font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;padding:2px 8px" title="닫기"><span style="font-size:16px">✕</span><span style="font-size:8px">닫기</span></button>
-  </div>
 </div>
 
 </body>
