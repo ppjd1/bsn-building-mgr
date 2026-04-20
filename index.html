@@ -12608,10 +12608,10 @@ function rdPMemo(){
       var pg=item.page, i=item.idx;
       var todos=pg.todos||[];
       var todoH=todos.map(function(t,ti){
-        return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0">'
-          +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="_pmemoActiveTab='+i+';togglePMemoTodo('+ti+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:15px;height:15px">'
-          +'<span style="flex:1;font-size:13px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
-          +'<button onclick="_pmemoActiveTab='+i+';delPMemoTodo('+ti+')" style="border:none;background:none;color:var(--t4);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0" title="삭제">×</button>'
+        return '<div style="display:flex;align-items:center;gap:5px;padding:3px 0">'
+          +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="_pmemoActiveTab='+i+';togglePMemoTodo('+ti+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:17px;height:17px">'
+          +'<span style="flex:1;font-size:14px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
+          +'<button onclick="_pmemoActiveTab='+i+';delPMemoTodo('+ti+')" style="border:none;background:none;color:var(--t4);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0" title="삭제">×</button>'
           +'</div>';
       }).join('');
 
@@ -12620,8 +12620,8 @@ function rdPMemo(){
       // 카드 헤더 (보라색 그라데이션)
       html+='<div ondblclick="renamePMemoTab('+i+')" style="padding:8px 12px;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);cursor:default;flex-shrink:0">';
       html+='<span style="font-weight:700;font-size:12px;color:#fff">'+esc(pg.name)+'</span>';
-      html+='<span onclick="event.stopPropagation();_togglePMemoTodo('+i+')" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.7);cursor:pointer;line-height:1;padding:0 4px" title="할 일 토글">☑</span>';
-      if(md.pages.length>1) html+='<span onclick="delPMemoTab('+i+')" style="font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;line-height:1" title="탭 삭제">×</span>';
+      html+='<span onclick="event.stopPropagation();_togglePMemoTodo('+i+')" style="margin-left:auto;font-size:15px;color:rgba(255,255,255,.8);cursor:pointer;line-height:1;padding:2px 6px" title="할 일 토글">☑</span>';
+      if(md.pages.length>1) html+='<span onclick="delPMemoTab('+i+')" style="font-size:16px;color:rgba(255,255,255,.7);cursor:pointer;line-height:1;padding:2px 4px" title="탭 삭제">×</span>';
       html+='</div>';
       // 카드 내용: 체크리스트 + 메모 세로 분할
       html+='<div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">';
@@ -12629,7 +12629,7 @@ function rdPMemo(){
       var hasTodos=todos.length>0;
       html+='<div class="pmcard-todo" data-card-idx="'+i+'" style="flex:0 0 auto;min-height:0;max-height:60%;display:flex;flex-direction:column;overflow:hidden;'+(hasTodos?'':'display:none;')+'" id="pmtodo-area-'+i+'">';
       html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>';
-      html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 4px;min-height:0">'+todoH+'</div>';
+      html+='<div style="flex:1;overflow-y:auto;padding:2px 8px 8px;min-height:0">'+todoH+'</div>';
       html+='<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">';
       html+='<input data-pmemo-todo-idx="'+i+'" placeholder="할 일 입력" style="flex:1;min-width:0;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:13px;font-family:inherit;outline:none">';
       html+='<button onclick="_pmemoActiveTab='+i+';addPMemoTodoFrom(this.previousElementSibling)" class="btn sm" style="flex-shrink:0;font-size:10px;padding:2px 6px">+</button>';
@@ -12638,7 +12638,6 @@ function rdPMemo(){
       html+='<div class="pmcard-divider" data-card-idx="'+i+'" style="height:4px;background:var(--ln);cursor:row-resize;flex-shrink:0;position:relative" title="드래그하여 영역 크기 조절"><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:2px;background:var(--t4);border-radius:1px;opacity:.5"></div></div>';
       // 메모
       html+='<div style="flex:1;display:flex;flex-direction:column;min-height:40px">';
-      html+='<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3)">📝 메모</div>';
       html+='<textarea data-pmemo-ta-idx="'+i+'" oninput="_pmemoDirtyMark('+i+')" spellcheck="false" style="flex:1;padding:6px 10px;border:none;outline:none;font-family:\'맑은 고딕\',Consolas,monospace;font-size:15px;line-height:1.25;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>';
       html+='</div>';
       html+='</div></div>';
@@ -13315,17 +13314,17 @@ function rdFloatMemo(){
   if(tabBar){
     var th='';
     // 상위 페이지 그룹 탭 — 폴더 스타일
-    th+='<span style="font-size:9px;color:var(--t4);font-weight:600;margin-right:2px;flex-shrink:0">📁 그룹</span>';
+    th+='<span style="font-size:11px;color:var(--t4);font-weight:600;margin-right:2px;flex-shrink:0">📁 그룹</span>';
     fGroups.forEach(function(fg,fgi){
       var fpAct=fgi===_floatPage;
       var fgLabel=md.groupNames[fg.group]||fg.items.map(function(it){return it.page.name.substring(0,2)}).join(' ');
-      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatSwitchGroup('+fgi+','+fg.items[0].idx+');},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:11px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'">'+esc(fgLabel)+'</div>';
+      th+='<div onclick="clearTimeout(this._dblT);var _s=this;this._dblT=setTimeout(function(){_floatSwitchGroup('+fgi+','+fg.items[0].idx+');},200)" ondblclick="clearTimeout(this._dblT);event.stopPropagation();floatRenameGroup('+fg.group+')" style="padding:4px 10px;font-size:12px;border-radius:5px 5px 0 0;cursor:pointer;font-weight:600;white-space:nowrap;border:1px solid '+(fpAct?'var(--bl)':'var(--ln)')+';border-bottom:none;'+(fpAct?'background:var(--bl);color:#fff':'background:var(--w2);color:var(--t3)')+'">'+esc(fgLabel)+'</div>';
     });
-    th+='<div onclick="floatAddGroupPage()" style="padding:4px 8px;font-size:12px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 그룹 추가">＋</div>';
+    th+='<div onclick="floatAddGroupPage()" style="padding:4px 8px;font-size:14px;color:var(--t4);cursor:pointer;border-radius:5px" title="새 그룹 추가">＋</div>';
     // 우측: 맞춤법 + 저장
     th+='<div style="margin-left:auto;display:flex;gap:4px;flex-shrink:0">';
-    th+='<button onclick="_floatSpellCheck()" style="padding:4px 10px;font-size:11px;border:1px solid var(--ln);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;color:#1a5fa0;white-space:nowrap" title="네이버 맞춤법검사">✏ 맞춤법</button>';
-    th+='<button onclick="_floatSaveNow()" style="padding:4px 10px;font-size:11px;border:1px solid var(--ln);border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap" title="Ctrl+S">💾 저장</button>';
+    th+='<button onclick="_floatSpellCheck()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;color:#1a5fa0;white-space:nowrap" title="네이버 맞춤법검사">✏ 맞춤법</button>';
+    th+='<button onclick="_floatSaveNow()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap" title="Ctrl+S">💾 저장</button>';
     th+='</div>';
     tabBar.style.display='flex';
     tabBar.innerHTML=th;
@@ -13333,18 +13332,18 @@ function rdFloatMemo(){
   // 하위 개별 메모 탭 — 메모지 스타일
   if(subBar){
     var sh='';
-    sh+='<span style="font-size:9px;color:var(--t4);font-weight:600;margin-right:2px;flex-shrink:0">📝 메모</span>';
+    sh+='<span style="font-size:11px;color:var(--t4);font-weight:600;margin-right:2px;flex-shrink:0">📝 메모</span>';
     fGroupItems.forEach(function(item){
       var fi=item.idx;
       var act=fi===_floatActiveTab;
-      sh+='<div onclick="_floatActiveTab='+fi+';rdFloatMemo()" ondblclick="floatRenameTab('+fi+')" style="padding:4px 10px;font-size:11px;border-radius:5px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;border:1px solid '+(act?'#764ba2':'var(--ln)')+';'
+      sh+='<div onclick="_floatActiveTab='+fi+';rdFloatMemo()" ondblclick="floatRenameTab('+fi+')" style="padding:4px 10px;font-size:12px;border-radius:5px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;border:1px solid '+(act?'#764ba2':'var(--ln)')+';'
         +(act?'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600':'background:#fff;color:var(--t3)')
         +'"><span>'+esc(md.pages[fi].name)+'</span>';
-      sh+='<span onclick="event.stopPropagation();_detachMemo('+fi+')" style="font-size:10px;cursor:pointer;opacity:.5;margin-left:2px" title="별도 창으로 분리">↗</span>';
-      if(md.pages.length>1) sh+='<span onclick="event.stopPropagation();floatDelTab('+fi+')" style="font-size:11px;cursor:pointer;opacity:.5" title="삭제">×</span>';
+      sh+='<span onclick="event.stopPropagation();_detachMemo('+fi+')" style="font-size:12px;cursor:pointer;opacity:.5;margin-left:2px" title="별도 창으로 분리">↗</span>';
+      if(md.pages.length>1) sh+='<span onclick="event.stopPropagation();floatDelTab('+fi+')" style="font-size:13px;cursor:pointer;opacity:.5" title="삭제">×</span>';
       sh+='</div>';
     });
-    sh+='<div onclick="floatAddTab()" style="padding:4px 8px;font-size:11px;color:var(--t4);cursor:pointer" title="이 그룹에 메모 추가">＋</div>';
+    sh+='<div onclick="floatAddTab()" style="padding:4px 8px;font-size:13px;color:var(--t4);cursor:pointer" title="이 그룹에 메모 추가">＋</div>';
     subBar.innerHTML=sh;
   }
   var idx=_floatActiveTab;
@@ -13353,9 +13352,10 @@ function rdFloatMemo(){
 
   var todos=pg.todos||[];
   var todoH=todos.map(function(t,i){
-    return '<div style="display:flex;align-items:center;gap:4px;padding:2px 0">'
-      +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="floatToggleTodo('+idx+','+i+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:15px;height:15px">'
-      +'<span style="flex:1;font-size:13px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
+    return '<div style="display:flex;align-items:center;gap:5px;padding:3px 0">'
+      +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="floatToggleTodo('+idx+','+i+')" style="margin:0;cursor:pointer;accent-color:var(--bl);flex-shrink:0;width:17px;height:17px">'
+      +'<span style="flex:1;font-size:14px;'+(t.done?'text-decoration:line-through;color:var(--t3)':'color:var(--t1)')+'">'+esc(t.text)+'</span>'
+      +'<button onclick="floatDelTodo('+idx+','+i+')" style="border:none;background:none;color:var(--t4);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0" title="삭제">×</button>'
       +'</div>';
   }).join('');
 
@@ -13363,12 +13363,12 @@ function rdFloatMemo(){
   body.innerHTML='<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">'
     // 할 일 토글 버튼
     +'<div style="padding:3px 8px;flex-shrink:0;border-bottom:1px solid var(--ln);display:flex;align-items:center">'
-    +'<span onclick="_toggleFloatTodo()" style="font-size:10px;color:var(--t3);cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--ln);background:var(--w)">☑ 할 일 '+(fHasTodos?'('+todos.length+')':'')+'</span>'
+    +'<span onclick="_toggleFloatTodo()" style="font-size:12px;color:var(--t3);cursor:pointer;padding:3px 8px;border-radius:4px;border:1px solid var(--ln);background:var(--w)">☑ 할 일 '+(fHasTodos?'('+todos.length+')':'')+'</span>'
     +'</div>'
     // 체크리스트 영역 (상단) - 기본 숨김 (할일 있으면 표시)
     +'<div id="float-todo-area" class="float-todo-area" style="flex:0 0 auto;min-height:120px;max-height:60%;display:'+(fHasTodos?'flex':'none')+';flex-direction:column;overflow:hidden">'
     +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3);flex-shrink:0">☑ 할 일</div>'
-    +'<div style="flex:1;overflow-y:auto;padding:2px 8px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;padding:4px 0">없음</div>')+'</div>'
+    +'<div style="flex:1;overflow-y:auto;padding:2px 8px 8px;min-height:0">'+(todoH||'<div style="color:var(--t4);font-size:10px;padding:4px 0">없음</div>')+'</div>'
     +'<div style="padding:3px 8px 5px;display:flex;gap:3px;flex-shrink:0;border-top:1px solid var(--ln)">'
     +'<input id="float-todo-input" data-float-pg="'+idx+'" placeholder="할일 추가" style="flex:1;min-width:0;padding:4px 6px;border:1px solid var(--ln);border-radius:4px;font-size:13px;font-family:inherit">'
     +'<button onclick="floatAddTodo('+idx+')" style="padding:3px 6px;border:none;background:var(--bl);color:#fff;border-radius:4px;font-size:10px;cursor:pointer">+</button>'
@@ -13377,7 +13377,6 @@ function rdFloatMemo(){
     +'<div class="float-divider" id="float-todo-divider" style="height:4px;background:var(--ln);cursor:row-resize;flex-shrink:0;position:relative;display:'+(fHasTodos?'block':'none')+'"><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:2px;background:var(--t4);border-radius:1px;opacity:.5"></div></div>'
     // 메모 영역 (하단)
     +'<div style="flex:1;display:flex;flex-direction:column;min-height:40px">'
-    +'<div style="padding:4px 8px 2px;font-size:9px;font-weight:600;color:var(--t3)">📝 메모</div>'
     +'<textarea id="float-memo-ta" oninput="_floatDirtyMark('+idx+')" spellcheck="false" style="flex:1;padding:6px 10px;border:none;outline:none;font-family:\'맑은 고딕\',Consolas,monospace;font-size:15px;line-height:1.25;resize:none;background:var(--w)">'+esc(pg.text||'')+'</textarea>'
     +'</div></div>';
 
@@ -13418,6 +13417,14 @@ function floatAddTodo(pgIdx){
   var pg=md.pages[pgIdx]; if(!pg) return;
   if(!pg.todos) pg.todos=[];
   pg.todos.push({text:val,done:false});
+  md.updatedAt=_pmemoTs();
+  sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
+}
+function floatDelTodo(pgIdx,tIdx){
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var pg=md.pages[pgIdx]; if(!pg||!pg.todos||!pg.todos[tIdx]) return;
+  pg.todos.splice(tIdx,1);
   md.updatedAt=_pmemoTs();
   sv(); rdFloatMemo(); _syncPMemoIfOpen(); _showFloatSaved();
 }
@@ -13623,6 +13630,7 @@ function _applySpellResult(){
 
 // ── 분리형 메모 창 (윈도우 메모장처럼 개별 창) ──
 var _detachedMemos={}; // idx → DOM element
+var _detachZCounter=10001;
 function _detachMemo(idx){
   if(_detachedMemos[idx]){ _detachedMemos[idx].focus(); return; } // 이미 열려있으면 포커스
   if(!CURRENT_USER_ID) return;
@@ -13684,6 +13692,9 @@ function _detachMemo(idx){
     win.style.top=ny+'px';
   });
   document.addEventListener('mouseup',function(){if(_dd&&_dd.el===win)_dd=null;});
+
+  // 클릭 시 맨 앞으로
+  win.addEventListener('mousedown',function(){ _detachZCounter++; win.style.zIndex=_detachZCounter; });
 
   document.body.appendChild(win);
   _detachedMemos[idx]=win;
@@ -15864,7 +15875,7 @@ function _dvOpenFolder(fid){
   <div class="float-memo-edge bottom-left" data-resize="sw"></div>
   <div class="float-memo-edge bottom-right" data-resize="se"></div>
   <div class="float-memo-head" id="float-memo-head">
-    <span>📝 빠른 메모</span>
+    <span>📌 빠른 메모</span>
     <button onclick="closeFloatMemo();var b=document.querySelector('.nb[data-id=pmemo]');if(b)gp('pmemo',b);" style="border:none;background:none;cursor:pointer;font-size:10px;color:var(--t3);font-family:inherit;padding:2px 6px;border-radius:4px;margin-left:4px" title="개인메모 탭으로 이동">📋 개인메모</button>
     <span id="float-save-ind" style="font-size:9px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:auto">✓ 저장됨</span>
     <button class="float-memo-close" onclick="closeFloatMemo()">×</button>
