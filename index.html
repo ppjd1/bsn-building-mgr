@@ -3459,7 +3459,7 @@ function openEditHistory(filterSection){
       var _parts=_rawDet.split(', ');
       // _detFull: 원문 전체 (펼쳐보기용), _detShort: 축약 (기본 표시용)
       function _ehCut(s,n){return s.length>n?s.substring(0,n)+'…':s;}
-      function _ehHL(bef,aft){return '<span style="background:#fef9c3;padding:1px 3px;border-radius:2px">'+bef+'</span> → <span style="background:#dcfce7;padding:1px 3px;border-radius:2px">'+aft+'</span>';}
+      function _ehHL(bef,aft){return '<span style="background:#fef9c3;padding:1px 3px;border-radius:2px">'+bef+'</span><br><span style="color:#94a3b8">→</span> <span style="background:#dcfce7;padding:1px 3px;border-radius:2px">'+aft+'</span>';}
       var _MV=40;
       var _detFull, _detShort;
       if(_parts.length>1 && _rawDet.indexOf(' → ')>0){
@@ -3481,10 +3481,12 @@ function openEditHistory(filterSection){
           _detShort=_ehCut(_rawDet,80);
         }
       }
-      var _needExpand=_rawDet.length>80 || (_parts.length>2 && _rawDet.indexOf(' → ')>0);
+      var _needExpand=_detShort!==_detFull;
       h+='<td style="padding:5px 8px;color:#334155;max-width:500px;line-height:1.6;cursor:pointer" onclick="var d=this.querySelector(\'._eh-full\');if(d){var v=d.style.display;d.style.display=v===\'none\'?\'block\':\'none\';this.querySelector(\'._eh-short\').style.display=v===\'none\'?\'none\':\'block\';}">';
       if(_needExpand){
-        if(_detShort===_detFull) _detShort=_ehCut(_rawDet,40)+' <span style="color:#3b82f6;font-size:10px;font-weight:600;background:#eff6ff;padding:1px 5px;border-radius:3px">펼쳐보기 ▼</span>';
+        var _expandBtn=' <span style="color:#3b82f6;font-size:10px;font-weight:600;background:#eff6ff;padding:1px 5px;border-radius:3px;white-space:nowrap">펼쳐보기 ▼</span>';
+        if(_detShort===_detFull) _detShort=_ehCut(_rawDet,40)+_expandBtn;
+        else _detShort+=_expandBtn;
         h+='<div class="_eh-short" style="max-width:480px">'+_detShort+'</div>';
         h+='<div class="_eh-full" style="display:none;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto">'+_detFull+'</div>';
       } else {
@@ -11612,7 +11614,11 @@ function editSpItem(sId,taskIdx){
     }
     val.trim().split('\n').forEach((vl,vi)=>{newLines.splice(insertAt+vi,0,vi===0?`${taskIdx+1}) ${vl}`:vl);});
   }
-  s.special=newLines.join('\n');sv();rdFixed();
+  s.special=newLines.join('\n');s._edit=editStamp();
+  var _cleanCur=cur.replace(new RegExp('^'+(taskIdx+1)+'\\)\\s*'),'').trim();
+  var _cleanNew=val.trim().replace(new RegExp('^'+(taskIdx+1)+'\\)\\s*'),'').trim();
+  if(_cleanCur!==_cleanNew){_logEdit('fixed',(s.dayLabel||s.day+'일')+' '+(taskIdx+1)+'번 특이사항: '+(_cleanCur||'(없음)')+' → '+(_cleanNew||'(삭제)'),sId);}
+  sv();rdFixed();
 }
 function delSpItem(sId,taskIdx){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
@@ -11625,7 +11631,12 @@ function delSpItem(sId,taskIdx){
     if(/^\d+\)/.test(lt)){collecting=false;}
     if(!collecting)keep.push(l);
   });
-  s.special=keep.join('\n');s._edit=editStamp();sv();rdFixed();
+  var _delParts=[];var _colDel=false;
+  (s.special||'').split('\n').forEach(function(l){var lt=l.trim();if(lt.startsWith((taskIdx+1)+')')){_colDel=true;_delParts.push(lt);}else if(/^\d+\)/.test(lt)){_colDel=false;}else if(_colDel&&lt){_delParts.push(lt);}});
+  var _delText=_delParts.join(' ').replace(new RegExp('^'+(taskIdx+1)+'\\)\\s*'),'').trim();
+  s.special=keep.join('\n');s._edit=editStamp();
+  _logEdit('fixed',(s.dayLabel||s.day+'일')+' '+(taskIdx+1)+'번 특이사항 삭제: '+(_delText||''),sId);
+  sv();rdFixed();
 }
 function delSpecial(sId){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s||!s.special)return;
