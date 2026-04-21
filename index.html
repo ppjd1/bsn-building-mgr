@@ -779,6 +779,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 .presence-dot.offline{background:#9ca3af}
 .presence-edit-indicator{position:absolute;top:-2px;right:-2px;left:-2px;bottom:-2px;border:2px solid #ef4444;border-radius:inherit;pointer-events:none;z-index:5;animation:presencePulse 2s infinite}
 .presence-edit-badge{position:absolute;top:0;right:0;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:0 0 0 6px;white-space:nowrap;z-index:6;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.eh-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:14px;height:14px;line-height:14px;text-align:center;border-radius:7px;padding:0 3px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 
 /* 현재 층 버튼 */
 .floor-btn{padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--ln);background:var(--w);color:var(--t2);transition:.15s;user-select:none;white-space:nowrap;min-width:44px;text-align:center;-webkit-tap-highlight-color:transparent}
@@ -942,7 +943,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
       <div style="padding:4px 7px;border-bottom:1px solid var(--ln);display:flex;gap:4px;flex-shrink:0">
         <button class="btn pri sm" onclick="openMo('mo-lease')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 호실</button>
         <button class="btn sm" onclick="openMo('mo-bldg')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 건물</button>
-        <button class="btn sm" onclick="openEditHistory('lease')" style="flex-shrink:0;font-size:10px;padding:4px 6px" title="수정 기록">📋</button>
+        <button class="btn sm" id="ehbtn-lease" onclick="openEditHistory('lease')" style="flex-shrink:0;font-size:10px;padding:4px 6px;position:relative" title="수정 기록">📋<span class="eh-badge" style="display:none"></span></button>
       </div>
       <div class="sb-items" id="lease-bldg-sb"></div>
     </div>
@@ -982,7 +983,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     </div>
     <!-- 우측: 만료일 테이블 -->
     <div style="overflow:auto;padding:4px" id="expire-right">
-      <div style="display:flex;justify-content:flex-end;padding:0 4px 4px"><button class="btn sm" onclick="openEditHistory('exp')" style="font-size:10px;padding:3px 8px" title="수정 기록">📋 기록</button></div>
+      <div style="display:flex;justify-content:flex-end;padding:0 4px 4px"><button class="btn sm" id="ehbtn-exp" onclick="openEditHistory('exp')" style="font-size:10px;padding:3px 8px;position:relative" title="수정 기록">📋 기록<span class="eh-badge" style="display:none"></span></button></div>
       <div class="exp-wrap" style="overflow:visible;zoom:1.2">
         <table class="exp-tbl">
           <thead>
@@ -1087,7 +1088,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
   <div class="ph" style="padding:6px 10px 4px;gap:6px"><h2>고정 일정</h2>
     <input id="fixed-search" placeholder="검색..." oninput="rdFixed()" style="padding:3px 7px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;width:130px">
     <button class="btn sm" onclick="resetFixDone()">완료 초기화</button>
-    <button class="btn sm" onclick="openEditHistory('fixed')" style="font-size:10px;padding:3px 8px" title="수정 기록">📋 기록</button>
+    <button class="btn sm" id="ehbtn-fixed" onclick="openEditHistory('fixed')" style="font-size:10px;padding:3px 8px;position:relative" title="수정 기록">📋 기록<span class="eh-badge" style="display:none"></span></button>
   </div>
   <div style="padding:2px 4px;overflow-y:auto;overflow-x:hidden;height:calc(100vh - 56px)">
     <div class="card" style="margin:0;zoom:1.15;transform-origin:top left;width:86.95%"><div style="padding:0" id="fixed-list"></div></div>
@@ -1131,7 +1132,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 
 <!-- 월간보고서 -->
 <div class="page" id="pg-report">
-  <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>월간 운영 보고서</h2><button class="btn sm" onclick="openEditHistory('report')" style="font-size:10px;padding:3px 8px;margin-left:auto" title="수정 기록">📋 기록</button></div>
+  <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>월간 운영 보고서</h2><button class="btn sm" id="ehbtn-report" onclick="openEditHistory('report')" style="font-size:10px;padding:3px 8px;margin-left:auto;position:relative" title="수정 기록">📋 기록<span class="eh-badge" style="display:none"></span></button></div>
   <div style="height:calc(100vh - 56px)">
     <div style="display:grid;grid-template-columns:152px 1fr;height:100%">
       <div class="split-left">
@@ -1157,11 +1158,22 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <!-- 청구서 -->
 <div class="page" id="pg-invoice">
   <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>청구서 작성</h2></div>
-  <div style="display:grid;grid-template-columns:380px 1fr;height:calc(100vh - 56px);zoom:1.2">
-    <div class="split-left" style="padding:6px;overflow-y:auto">
-      <div class="fg"><label>건물</label><select id="inv-bldg" onchange="invBldgChange()" style="font-size:12px;padding:5px 7px"></select></div>
-      <div class="fg"><label>층/임차인</label><select id="inv-tenant" style="font-size:12px;padding:5px 7px"></select></div>
-      <div class="fg"><label>청구년월</label><input type="month" id="inv-month" style="font-size:12px;padding:5px 7px"></div>
+  <div style="display:flex;gap:0;height:calc(100vh - 56px);zoom:1.2">
+    <!-- 좌: 건물 사이드바 -->
+    <div class="split-left" id="inv-bldg-sidebar" style="width:130px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;padding:0">
+      <div style="padding:5px 8px;border-bottom:1px solid var(--ln);font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.04em">건물 선택</div>
+      <div id="inv-bldg-list"></div>
+    </div>
+    <!-- 좌2: 층/임차인 사이드바 -->
+    <div id="inv-floor-sidebar" style="width:120px;flex-shrink:0;border-right:1px solid var(--ln);overflow-y:auto;background:#fff;padding:0">
+      <div style="padding:5px 8px;border-bottom:1px solid var(--ln);font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.04em">층/임차인</div>
+      <div id="inv-floor-list"></div>
+    </div>
+    <!-- 중: 입력 폼 -->
+    <div class="split-left" style="width:340px;flex-shrink:0;padding:6px;overflow-y:auto;border-right:1px solid var(--ln)">
+      <input type="hidden" id="inv-bldg" value="">
+      <input type="hidden" id="inv-tenant" value="">
+      <div class="fg"><label>청구년월</label><input type="month" id="inv-month" style="font-size:12px;padding:5px 7px" onchange="_invAutoPreview()"></div>
       <div class="fg"><label>청구유형</label>
         <select id="inv-type" style="font-size:12px;padding:5px 7px">
           <option value="rent">임대료 청구서</option>
@@ -1207,7 +1219,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
         <button class="btn" onclick="printInvoice()">🖨 인쇄</button>
       </div>
     </div>
-    <div style="overflow-y:auto;padding:10px;background:var(--bg);display:flex;justify-content:center;align-items:flex-start">
+    <div style="flex:1;min-width:0;overflow-y:auto;padding:10px;background:var(--bg);display:flex;justify-content:center;align-items:flex-start">
       <div id="inv-preview" style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:30px 28px;width:600px;min-height:700px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
         <div class="empty">좌측에서 건물/층 선택 후 미리보기</div>
       </div>
@@ -1282,7 +1294,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <!-- 수도요금 -->
 <!-- 수도+전기 통합 -->
 <div class="page" id="pg-utility">
-  <div class="ph" style="padding:2px 10px 2px;gap:4px"><div style="margin-left:auto"><button class="btn sm" onclick="openEditHistory()" style="font-size:10px;padding:3px 8px" title="전체 수정 기록">📋 기록</button></div></div>
+  <div class="ph" style="padding:2px 10px 2px;gap:4px"></div>
   <div style="display:flex;gap:0;height:calc(100vh - 42px);min-height:calc(100vh - 42px);overflow:hidden">
     <!-- 좌: 전기 -->
     <div style="flex:1;min-width:0;border-right:1px solid var(--ln);overflow-y:auto;padding:20px 10px 20px">
@@ -2324,6 +2336,11 @@ function _stripBillImages(db){
         if(Array.isArray(v)) c.repPhotos[k]=v.map(function(p){ return (typeof p==='string'&&p.length>1000)?'__IMG_IN_LOCAL__':p; });
       });
     }
+    // driveFiles: base64 data 스트립
+    (c.driveFiles||[]).forEach(function(f){
+      if(f.storage){ delete f.data; }
+      else if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__';
+    });
     return c;
   }catch(e){ return db; }
 }
@@ -2379,6 +2396,13 @@ function _mergeLocalImages(cloud, local){
         }
       });
     }
+    // driveFiles 복원
+    (cloud.driveFiles||[]).forEach(function(cf){
+      if(cf.data==='__IMG_IN_LOCAL__'){
+        var lf=(local.driveFiles||[]).find(function(x){return x.id===cf.id;});
+        if(lf && lf.data && lf.data!=='__IMG_IN_LOCAL__') cf.data=lf.data;
+      }
+    });
   }catch(e){ console.warn('[mergeImg]', e); }
   return cloud;
 }
@@ -2667,6 +2691,7 @@ function _rtApplyRow(row){
   } else {
     ({lease:rdLease,expire:rdExpire,cal:rdCal,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,drive:rdDrive,admin:loadAdminUsers})[id]?.();
   }
+  try{_updateEditBadges();}catch(_){}
   _rtShowToast('🔄 다른 사용자가 업데이트함 — 반영됨');
 }
 // 모달 닫힐 때마다 호출: 큐에 있으면 반영
@@ -3318,6 +3343,7 @@ function _logEdit(section,detail,itemId){
     detail:detail||'',
     itemId:itemId||null
   });
+  try{_updateEditBadges();}catch(_){}
   // 섹션별 최대 500건 유지
   var secCount={};
   DB.editHistory.forEach(function(h){secCount[h.section]=(secCount[h.section]||0)+1;});
@@ -3332,8 +3358,47 @@ function _logEdit(section,detail,itemId){
     DB.editHistory=kept;
   }
 }
+// N 뱃지: 새 기록 카운트
+function _updateEditBadges(){
+  if(!DB.editHistory) return;
+  var seen={};
+  try{ seen=JSON.parse(localStorage.getItem('bsn_eh_seen')||'{}'); }catch(_){}
+  var counts={};
+  DB.editHistory.forEach(function(h){counts[h.section]=(counts[h.section]||0)+1;});
+  ['lease','exp','fixed','report'].forEach(function(sec){
+    var btn=document.getElementById('ehbtn-'+sec);
+    if(!btn) return;
+    var badge=btn.querySelector('.eh-badge');
+    if(!badge) return;
+    var cur=counts[sec]||0;
+    var prev=seen[sec]||0;
+    var diff=cur-prev;
+    if(diff>0){
+      badge.textContent='N';
+      badge.style.display='';
+    } else {
+      badge.style.display='none';
+    }
+  });
+}
+function _markEditSeen(sec){
+  var seen={};
+  try{ seen=JSON.parse(localStorage.getItem('bsn_eh_seen')||'{}'); }catch(_){}
+  if(sec){
+    var cnt=0;
+    (DB.editHistory||[]).forEach(function(h){if(h.section===sec)cnt++;});
+    seen[sec]=cnt;
+  } else {
+    var counts={};
+    (DB.editHistory||[]).forEach(function(h){counts[h.section]=(counts[h.section]||0)+1;});
+    Object.keys(counts).forEach(function(k){seen[k]=counts[k];});
+  }
+  try{ localStorage.setItem('bsn_eh_seen',JSON.stringify(seen)); }catch(_){}
+  _updateEditBadges();
+}
 // 수정 기록 모달
 function openEditHistory(filterSection){
+  _markEditSeen(filterSection);
   if(!DB.editHistory) DB.editHistory=[];
   var items=DB.editHistory.slice().reverse();
   if(filterSection) items=items.filter(function(h){return h.section===filterSection;});
@@ -3363,7 +3428,12 @@ function openEditHistory(filterSection){
       h+='<td style="padding:5px 8px;white-space:nowrap;color:#64748b;font-family:monospace;font-size:11px">'+ts+'</td>';
       h+='<td style="padding:5px 8px;font-weight:600">'+esc(hi.user||'')+'</td>';
       h+='<td style="padding:5px 8px;color:#3b82f6">'+(sectionNames[hi.section]||hi.section||'')+'</td>';
-      h+='<td style="padding:5px 8px;color:#334155;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(hi.detail||'')+'</td>';
+      var _det=esc(hi.detail||'');
+      var _arrowIdx=_det.indexOf(' → ');
+      if(_arrowIdx>0){
+        _det='<span style="background:#fef9c3;padding:1px 3px;border-radius:2px">'+_det.substring(0,_arrowIdx)+'</span> → <span style="background:#dcfce7;padding:1px 3px;border-radius:2px">'+_det.substring(_arrowIdx+3)+'</span>';
+      }
+      h+='<td style="padding:5px 8px;color:#334155;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" onclick="var s=this.style;if(s.whiteSpace===\'normal\'){s.whiteSpace=\'nowrap\';s.overflow=\'hidden\';}else{s.whiteSpace=\'normal\';s.overflow=\'visible\';}">'+_det+'</td>';
       h+='</tr>';
     });
     h+='</tbody></table>';
@@ -3774,7 +3844,7 @@ function gp(id,el){
 }
 function _gpDo(id,el){
   // ★ 탭 전환 전: 편집 중인 특이사항 강제 저장
-  try{ if(_spEditPending) _flushSpEdit(); }catch(_){}
+  try{ if(_spEditPending || _spEditActive) _flushSpEdit(); }catch(_){}
   // ★ 탭 전환 전: 현재 편집 중인 contenteditable 요소 강제 저장
   try{
     var activeEl=document.activeElement;
@@ -3814,6 +3884,7 @@ function _gpDo(id,el){
 function upBadges(){
   const y=$('nb-ex');
   if(y)y.textContent=DB.expires.filter(e=>dday(e.date)>=0&&dday(e.date)<=30).length;
+  try{_updateEditBadges();}catch(_){}
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────
@@ -4178,8 +4249,22 @@ function saveLease(){
       if(!confirm(msg)) return;
     }
   }
-  if(eid){const i=DB.leases.findIndex(l=>l.id==eid);if(i>=0)DB.leases[i]={...DB.leases[i],...o};_logEdit('lease',(o.tenant||'')+' '+o.floor+' 수정',eid);}
-  else{DB.leases.push({id:nid(),...o});_logEdit('lease',(o.tenant||'')+' '+o.floor+' 추가');}
+  if(eid){
+    const i=DB.leases.findIndex(l=>l.id==eid);
+    if(i>=0){
+      var _old=DB.leases[i];
+      var _diffs=[];
+      var _flds={tenant:'임차인',floor:'층',start:'시작일',end:'종료일',deposit:'보증금',rent:'임대료',mgmt:'관리비',paytype:'납부',payday:'납부일',phone:'연락처',note:'비고'};
+      Object.keys(_flds).forEach(function(k){
+        var ov=String(_old[k]||''), nv=String(o[k]||'');
+        if(k==='deposit'||k==='rent'||k==='mgmt'){ ov=fm(_old[k]||0); nv=fm(o[k]||0); }
+        if(ov!==nv) _diffs.push(_flds[k]+': '+(ov||'(없음)').slice(0,12)+' → '+(nv||'(삭제)').slice(0,12));
+      });
+      DB.leases[i]={...DB.leases[i],...o};
+      var _detail=(o.tenant||'')+' '+o.floor+' '+(_diffs.length?_diffs.join(', '):'수정');
+      _logEdit('lease',_detail,eid);
+    }
+  } else{DB.leases.push({id:nid(),...o});_logEdit('lease',(o.tenant||'')+' '+o.floor+' 추가');}
   _leaseFormSnap=''; // 저장 완료 → 미저장 경고 해제
   sv();closeMo('mo-lease');rdLease();upBadges();
 }
@@ -8964,7 +9049,7 @@ function _deduplicateElectricBills(skipConfirm, skipSave){
     var unique=[];
     e.bills.forEach(function(b){
       var amt=parseInt(String(b.amount||0).toString().replace(/,/g,''))||0;
-      var key=(b.period||'')+'_'+amt;
+      var key=(b.period||'')+'_'+amt+'_'+(b.mailDate||b.uploadedAt||'');
       if(!seen[key]){
         seen[key]=b;
         unique.push(b);
@@ -10553,7 +10638,8 @@ function saveExpSp(bId,val){
 function openNoteIE(evt,id,type){
   const e=DB.expires.find(e=>e.id===id);if(!e)return;
   const td=evt.target.closest('td');if(!td)return;
-  inlineEdit(td,v=>{if(v!==null){e.note=v;e._edit=editStamp();sv();}rdExpire();});
+  var _oldNote=e.note||'(없음)';
+  inlineEdit(td,v=>{if(v!==null){e.note=v;e._edit=editStamp();_logEdit('exp',bs(e.bId)+' '+(e.type||type||'만료일')+' 비고: '+_oldNote.slice(0,12)+' → '+(v||'(삭제)').slice(0,12),id);sv();}rdExpire();});
 }
 // 특이사항 새 항목 추가: 항목 종류 입력받음
 function addExpForOther(bId){
@@ -10604,8 +10690,8 @@ document.addEventListener('click',e=>{if(ieTarget&&!$('ie').contains(e.target))c
 function saveExpire(){
   const eid=$('exp-eid').value;
   const o={bId:parseInt($('fe-b').value),type:$('fe-t').value,date:$('fe-d').value,note:$('fe-n').value.trim()};
-  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0){DB.expires[i]={...DB.expires[i],...o,na:false,_edit:editStamp()};}}
-  else DB.expires.push({id:nid(),...o,_created:editStamp()});
+  if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0){var _oldE=DB.expires[i];var _oldD=_oldE.date||'(없음)';DB.expires[i]={...DB.expires[i],...o,na:false,_edit:editStamp()};_logEdit('exp',bs(o.bId)+' '+o.type+': '+_oldD+' → '+(o.date||'(삭제)'),eid);}}
+  else{DB.expires.push({id:nid(),...o,_created:editStamp()});_logEdit('exp',bs(o.bId)+' '+o.type+' 추가: '+(o.date||'(없음)'));}
   sv();closeMo('mo-expire');rdExpire();upBadges();
 }
 // "해당없음" 으로 저장: date=null, na=true
@@ -11169,6 +11255,8 @@ function moveFixTask(sId,ti){
   const nd=prompt('이동할 날짜 (1~31, 말일=99)',s.day);if(!nd)return;
   const d=parseInt(nd);if(isNaN(d)||(d<1)||(d>31&&d!==99))return alert('1~31 또는 99');
   // ★ 업무 + 특이사항 함께 이동
+  var _fromDay=s.dayLabel||s.day+'일';
+  var _toDay=d===99?'말일':d+'일';
   const task=s.tasks[ti];
   const spText=_extractSpForTask(s.special,ti);
   s.tasks.splice(ti,1);
@@ -11184,6 +11272,7 @@ function moveFixTask(sId,ti){
     var newSp=spText?(1+') '+spText):'';
     DB.fixedSchedules.push({id:nid(),day:d,dayLabel:d===99?'말일':d+'일',tasks:[task],special:newSp,_created:editStamp()});
   }
+  _logEdit('fixed',_fromDay+' → '+_toDay+' '+(ti+1)+'번 업무 이동: '+task.slice(0,20),sId);
   sv();rdFixed();
 }
 function saveTaskDirect(sId,ti,el){
@@ -11393,9 +11482,7 @@ function addFixedTask(day){
   const _ct=_getCurrentTeam();
   if(existing && (existing.team||2)===_ct){existing.tasks.push(task);existing._edit=editStamp();}
   else{DB.fixedSchedules.push({id:nid(),day,dayLabel:day===99?'말일':day+'일',tasks:[task],special:'',team:_ct,_created:editStamp()});}
-  var _fromDay=s.dayLabel||s.day+'일';
-  var _toDay=d===99?'말일':d+'일';
-  _logEdit('fixed',_fromDay+' → '+_toDay+' '+(ti+1)+'번 업무 이동: '+task.slice(0,20),sId);
+  _logEdit('fixed',(day===99?'말일':day+'일')+' 업무 추가: '+task.slice(0,20));
   sv();rdFixed();
 }
 function delFixTask(sId,ti){
@@ -12488,7 +12575,7 @@ function saveReport(){
     c13:parseInt($('frc13').value)||0,c14:parseInt($('frc14').value)||0,c15:parseInt($('frc15').value)||0,
     c15n:$('frc15n').value,maint:$('frmaint').value.trim(),tn:$('frtn').value.trim(),sp:$('frsp').value.trim(),idata:{}};
   var _rBName=(DB.buildings.find(function(b){return b.id===bId;})||{}).name||'';
-  if(eid){const i=DB.reports.findIndex(r=>r.id==eid);if(i>=0)DB.reports[i]={...DB.reports[i],...o,idata:DB.reports[i].idata||{}};_logEdit('report',_rBName+' '+o.year+'/'+o.month+' 보고서 수정',eid);}
+  if(eid){const i=DB.reports.findIndex(r=>r.id==eid);if(i>=0){var _old=DB.reports[i];var _rflds={ri1:'임대수입',ri2:'관리비수입',c1:'자산관리수수료',c2:'소방안전관리자',c3:'전기안전관리자',c4:'주차관리',c5:'주차기유지보수',c6:'승강기유지관리',c7:'미화관리',c8:'화재보험',c9:'분리수거',c10:'건물유지수선비',c11:'저수조청소',c12:'정화조청소',c13:'전기요금',c14:'수도요금',c15:'기타비용',c15n:'기타비용설명',maint:'특이사항',tn:'비고',sp:'특기사항'};var _rdiffs=[];Object.keys(_rflds).forEach(function(k){var ov=String(_old[k]||''),nv=String(o[k]||'');if(['ri1','ri2','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15'].indexOf(k)>=0){ov=fm(_old[k]||0);nv=fm(o[k]||0);}if(ov!==nv)_rdiffs.push(_rflds[k]+': '+(ov||'(없음)').slice(0,15)+' → '+(nv||'(삭제)').slice(0,15));});DB.reports[i]={..._old,...o,idata:_old.idata||{}};if(_rdiffs.length)_logEdit('report',_rBName+' '+o.year+'/'+o.month+' '+_rdiffs.join(', '),eid);else _logEdit('report',_rBName+' '+o.year+'/'+o.month+' 보고서 수정 (변경없음)',eid);}}
   else{DB.reports.push({id:nid(),...o});DB.ui.repBldgId=bId;_logEdit('report',_rBName+' '+o.year+'/'+o.month+' 보고서 추가');}
   sv();closeMo('mo-report');rdReport();
 }
@@ -13619,9 +13706,21 @@ function _checkMemoAutoRecover(){
           hasDiff=true;
           diffHtml+='<div style="margin-bottom:10px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden">';
           diffHtml+='<div style="padding:4px 8px;background:#f1f5f9;font-weight:600;font-size:12px">📝 '+(bp.name||'메모'+(i+1))+'</div>';
-          diffHtml+='<div style="display:flex;gap:0">';
-          diffHtml+='<div style="flex:1;padding:10px 12px;background:#fef2f2;border-right:1px solid #e2e8f0"><div style="font-size:12px;color:#dc2626;margin-bottom:5px;font-weight:600">변경 전</div><pre style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:13px;max-height:500px;overflow-y:auto;line-height:1.6">'+esc(before.substring(0,2000))+(before.length>2000?'...':'')+'</pre></div>';
-          diffHtml+='<div style="flex:1;padding:10px 12px;background:#f0fdf4"><div style="font-size:12px;color:#16a34a;margin-bottom:5px;font-weight:600">변경 후 (복구 내용)</div><pre style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:13px;max-height:500px;overflow-y:auto;line-height:1.6">'+esc(after.substring(0,2000))+(after.length>2000?'...':'')+'</pre></div>';
+          // 줄 단위 diff 하이라이트
+          var bLines=before.split('\n'), aLines=after.split('\n');
+          var maxL=Math.max(bLines.length,aLines.length);
+          diffHtml+='<div style="padding:8px 10px;max-height:400px;overflow-y:auto;font-size:12px;font-family:monospace;line-height:1.7">';
+          diffHtml+='<div style="font-size:11px;color:#64748b;margin-bottom:4px"><span style="background:#fee2e2;padding:1px 4px;border-radius:2px">빨강 = 마지막 저장</span> <span style="background:#dcfce7;padding:1px 4px;border-radius:2px">초록 = 저장 전 작성내용</span></div>';
+          for(var li=0;li<maxL;li++){
+            var ol=bLines[li]!==undefined?bLines[li]:'';
+            var nl=aLines[li]!==undefined?aLines[li]:'';
+            if(ol===nl){
+              diffHtml+='<div style="color:#64748b;padding:1px 4px;white-space:pre-wrap">  '+esc(ol||' ')+'</div>';
+            } else {
+              if(ol) diffHtml+='<div style="background:#fee2e2;color:#dc2626;padding:1px 4px;white-space:pre-wrap">- '+esc(ol)+'</div>';
+              if(nl) diffHtml+='<div style="background:#dcfce7;color:#16a34a;padding:1px 4px;white-space:pre-wrap">+ '+esc(nl)+'</div>';
+            }
+          }
           diffHtml+='</div></div>';
         }
       });
@@ -13631,11 +13730,11 @@ function _checkMemoAutoRecover(){
       var modal=document.createElement('div');
       modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px';
       modal.innerHTML='<div style="background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:900px;width:95%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column">'
-        +'<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🔄</span><span style="font-size:14px;font-weight:700">저장되지 않은 메모 복구</span><span style="margin-left:auto;font-size:11px;color:var(--t3)">'+new Date(saved.ts).toLocaleString()+'</span></div>'
+        +'<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🔄</span><div><span style="font-size:14px;font-weight:700">저장 안 된 메모 발견</span></div><span style="margin-left:auto;font-size:11px;color:var(--t3)">'+new Date(saved.ts).toLocaleString()+'</span></div>'
         +diffHtml
         +'<div style="padding:12px 18px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #e2e8f0">'
-        +'<button id="_recoverNo" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;font-family:inherit">무시</button>'
-        +'<button id="_recoverYes" style="padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">복구</button>'
+        +'<button id="_recoverNo" style="padding:8px 16px;border:none;border-radius:6px;background:#dc2626;color:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">마지막 저장 유지</button>'
+        +'<button id="_recoverYes" style="padding:8px 16px;border:none;border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">저장 전 내용 복구</button>'
         +'</div></div>';
       document.body.appendChild(modal);
       modal.querySelector('#_recoverYes').onclick=function(){
@@ -15019,17 +15118,62 @@ function _taxSelBldgWithPreview(bId){
 }
 
 function initInvoice(){
-  fillSel('inv-bldg');
   const now=new Date();$('inv-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  invBldgChange();
+  _renderInvBldgSidebar();
+  _renderInvFloorSidebar();
   if(!invItems.length){invItems=[{name:'임대료',amt:'',note:'선불'},{name:'관리비',amt:'',note:''},{name:'수도요금',amt:'',note:'후불'}];rdInvItems();}
+}
+function _renderInvBldgSidebar(){
+  var list=$('inv-bldg-list');if(!list)return;
+  var bldgs=_teamBuildings();
+  var curBId=parseInt($('inv-bldg').value)||0;
+  var h='';
+  bldgs.forEach(function(b){
+    var isOn=(b.id===curBId);
+    var tenants=DB.leases.filter(function(l){return l.bId===b.id&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
+    h+='<div onclick="_invSelectBldg('+b.id+')" style="padding:6px 8px;border-bottom:1px solid var(--ln2);cursor:pointer;font-size:11px;line-height:1.3;'+(isOn?'background:#dbeafe;font-weight:700;border-left:3px solid var(--bl)':'border-left:3px solid transparent')+'" title="'+esc(b.name)+'">';
+    h+='<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(b.name)+'</div>';
+    if(tenants.length) h+='<div style="font-size:9px;color:var(--t3);font-weight:400">'+tenants.length+'개 호실</div>';
+    h+='</div>';
+  });
+  list.innerHTML=h;
+}
+function _renderInvFloorSidebar(){
+  var list=$('inv-floor-list');if(!list)return;
+  var bId=parseInt($('inv-bldg').value)||0;
+  var curLId=parseInt($('inv-tenant').value)||0;
+  if(!bId){list.innerHTML='<div style="padding:12px;font-size:11px;color:var(--t3);text-align:center">건물을 먼저<br>선택하세요</div>';return;}
+  var ls=DB.leases.filter(function(l){return l.bId===bId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
+  if(!ls.length){list.innerHTML='<div style="padding:12px;font-size:11px;color:var(--t3);text-align:center">임차인 없음</div>';return;}
+  var h='';
+  ls.forEach(function(l){
+    var isOn=(l.id===curLId);
+    h+='<div onclick="_invSelectFloor('+l.id+')" style="padding:6px 8px;border-bottom:1px solid var(--ln2);cursor:pointer;font-size:11px;line-height:1.3;'+(isOn?'background:#dbeafe;font-weight:700;border-left:3px solid var(--bl)':'border-left:3px solid transparent')+'">';
+    h+='<div style="font-weight:600">'+esc(l.floor||'')+'</div>';
+    h+='<div style="font-size:10px;color:var(--t2);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(l.tenant||'')+'</div>';
+    h+='</div>';
+  });
+  list.innerHTML=h;
+}
+function _invSelectBldg(bId){
+  $('inv-bldg').value=bId;
+  _renderInvBldgSidebar();
+  invBldgChange();
+  _renderInvFloorSidebar();
+  // 첫 번째 임차인 자동 선택
+  var ls=DB.leases.filter(function(l){return l.bId===bId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
+  if(ls.length){$('inv-tenant').value=ls[0].id;_renderInvFloorSidebar();_invAutoPreview();}
+}
+function _invSelectFloor(lId){
+  $('inv-tenant').value=lId;
+  _renderInvFloorSidebar();
+  _invAutoPreview();
+}
+function _invAutoPreview(){
+  try{ genInvoice(); }catch(_){}
 }
 function invBldgChange(){
   const bId=parseInt($('inv-bldg').value);if(!bId)return;
-  const ls=DB.leases.filter(l=>l.bId===bId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실');
-  $('inv-tenant').innerHTML=ls.map(l=>`<option value="${l.id}">${l.floor} — ${l.tenant}</option>`).join('');
-  // Auto-fill account from memo
-  const cats=DB.memoCats[bId]||{};
   const b=DB.buildings.find(b=>b.id===bId);
   if(b&&b.addr)$('inv-acct').placeholder=b.addr;
 }
@@ -15046,7 +15190,7 @@ function rdInvItems(){
 }
 function addInvItem(){invItems.push({name:'',amt:'',note:''});rdInvItems();}
 function genInvoice(){
-  const bId=parseInt($('inv-bldg').value);if(!bId){alert('건물을 선택하세요');return;}
+  const bId=parseInt($('inv-bldg').value);if(!bId){$('inv-preview').innerHTML='<div class="empty">좌측에서 건물 선택</div>';return;}
   const lId=parseInt($('inv-tenant').value);
   const l=DB.leases.find(l=>l.id===lId);
   const b=DB.buildings.find(b=>b.id===bId);
@@ -15385,7 +15529,7 @@ function buildDemoDB(){
         {id:'sw33',bId:33,custNo:'029061055',custName:'주식회사 이노매트리얼',note:'홀수월 청구, 검침일 짝수월 22일, 1/2/3/4층 안분',meterCycle:'odd',meterDay:22,bills:[]},
         {id:'sw35',bId:35,custNo:'000483578',custName:'수인피니티주식회사',note:'홀수월 청구, 검침일 짝수월 29일',meterCycle:'odd',meterDay:29,bills:[]},
         {id:'sw36',bId:36,custNo:'',custName:'프로젝트에이스주식회사',note:'짝수월, 호수별 고객번호 있음',meterCycle:'even',meterDay:0,bills:[]},
-      ],
+    ],
     reports:[],
     repPhotos:{},repPhotoCaptions:{},
     expAdjustments:[],
@@ -16749,7 +16893,7 @@ function _dvRenderMain(){
         var bgMap={pdf:'#fef2f2',xlsx:'#f0fdf4',xls:'#f0fdf4',jpg:'#eff6ff',jpeg:'#eff6ff',png:'#eff6ff',doc:'#eff6ff',docx:'#eff6ff'};
         var bg=bgMap[ext]||'#f8fafc';
         var sz=f.size?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'—';
-        html+='<div style="background:var(--w);border:1px solid var(--ln);border-radius:8px;overflow:hidden;cursor:pointer;position:relative" onclick="_dvPreview(\''+f.id+'\')">';
+        html+='<div style="background:var(--w);border:1px solid var(--ln);border-radius:8px;overflow:hidden;cursor:pointer;position:relative" onclick="_dvPreview(\''+f.id+'\')" oncontextmenu="_dvContextMenu(event,\''+f.id+'\')">';
         html+='<div style="height:80px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:30px">'+icon+'</div>';
         html+='<div style="padding:6px 8px"><div style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+'</div>';
         html+='<div style="font-size:9px;color:#94a3b8;margin-top:2px;display:flex;justify-content:space-between"><span>'+sz+'</span><span>'+(f.uploadedAt||'').slice(2,10)+'</span></div></div>';
@@ -16764,7 +16908,7 @@ function _dvRenderMain(){
         var ext=(f.name||'').split('.').pop().toLowerCase();
         var icon=_dvFileIcon(ext);
         var sz=f.size?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'—';
-        html+='<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="_dvPreview(\''+f.id+'\')">';
+        html+='<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="_dvPreview(\''+f.id+'\')" oncontextmenu="_dvContextMenu(event,\''+f.id+'\')">';
         html+='<td style="padding:6px 8px;text-align:center;font-size:16px">'+icon+'</td>';
         html+='<td style="padding:6px;font-weight:600">'+f.name+'</td>';
         html+='<td style="padding:6px;color:#94a3b8;text-align:center">'+sz+'</td>';
@@ -16815,23 +16959,55 @@ function _dvToggleStar(fid){
   var f=_dvFiles.find(function(x){return x.id===fid;});
   if(f){f.starred=!f.starred;sv();rdDrive();}
 }
+var _dvCtxBusy=false;
 function _dvPreview(fid){
-  var f=_dvFiles.find(function(x){return x.id===fid;});
+  if(_dvCtxBusy) return;
+  var f=_dvFiles.find(function(x){return String(x.id)===String(fid);});
   if(!f) return;
   if(f.deleted){
     if(confirm(f.name+'\n\n복구하시겠습니까?')){f.deleted=false;sv();rdDrive();}
     return;
   }
-  // 컨텍스트 메뉴: 다운로드/삭제/이름변경
-  var act=prompt(f.name+'\n\n크기: '+(f.size?(f.size/1024).toFixed(0)+'KB':'—')+'\n업로드: '+(f.uploadedAt||'')+'\n\n1=다운로드  2=이름변경  3=삭제  (번호 입력)');
-  if(act==='1' && f.data){
-    var a=document.createElement('a');a.href=f.data;a.download=f.name;document.body.appendChild(a);a.click();document.body.removeChild(a);
-  } else if(act==='2'){
-    var nn=prompt('새 이름:',f.name);
-    if(nn){f.name=nn;sv();rdDrive();}
-  } else if(act==='3'){
-    if(confirm(f.name+' 삭제?')){f.deleted=true;sv();rdDrive();}
+  // 클릭: 외부 프로그램으로 열기 (Blob → 다운로드 → OS 기본 프로그램)
+  if(!f.data) return;
+  _dvDownloadFile(fid);
+}
+function _dvDownloadFile(fid){
+  var f=_dvFiles.find(function(x){return String(x.id)===String(fid);});
+  if(!f||!f.data) return;
+  try{
+    var parts=f.data.split(',');var mime=(parts[0].match(/:(.*?);/)||[])[1]||'application/octet-stream';
+    var raw=atob(parts[1]);var arr=new Uint8Array(raw.length);
+    for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+    var blob=new Blob([arr],{type:mime});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=f.name;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},3000);
+  }catch(e){
+    var a2=document.createElement('a');a2.href=f.data;a2.download=f.name;document.body.appendChild(a2);a2.click();document.body.removeChild(a2);
   }
+}
+function _dvContextMenu(e,fid){
+  e.preventDefault();e.stopPropagation();
+  _dvCtxBusy=true;
+  var f=_dvFiles.find(function(x){return String(x.id)===String(fid);});
+  if(!f){_dvCtxBusy=false;return;}
+  var old=document.getElementById('dv-ctx-menu');if(old)old.remove();
+  var menu=document.createElement('div');menu.id='dv-ctx-menu';
+  menu.style.cssText='position:fixed;left:'+e.clientX+'px;top:'+e.clientY+'px;z-index:10000;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:4px 0;min-width:140px;font-size:12px';
+  var items=[{t:'✏️ 이름변경',fn:function(){var nn=prompt('새 이름:',f.name);if(nn){f.name=nn;sv();rdDrive();}}},{t:'⬇️ 다운로드',fn:function(){_dvDownloadFile(fid);}},{t:'🗑️ 삭제',fn:function(){if(confirm(f.name+' 삭제?')){f.deleted=true;sv();rdDrive();}}}];
+  items.forEach(function(it){
+    var row=document.createElement('div');row.textContent=it.t;
+    row.style.cssText='padding:7px 14px;cursor:pointer;white-space:nowrap';
+    row.onmouseenter=function(){row.style.background='#f1f5f9';};
+    row.onmouseleave=function(){row.style.background='';};
+    row.onclick=function(ev){ev.stopPropagation();menu.remove();_dvCtxBusy=false;it.fn();};
+    menu.appendChild(row);
+  });
+  document.body.appendChild(menu);
+  var dismiss=function(ev){menu.remove();document.removeEventListener('click',dismiss);setTimeout(function(){_dvCtxBusy=false;},100);};
+  setTimeout(function(){document.addEventListener('click',dismiss);},0);
 }
 function _dvOpenFolder(fid){
   // 폴더 클릭 시 해당 폴더명을 경로에 추가 (향후 하위 폴더 지원)
