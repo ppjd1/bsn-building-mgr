@@ -2777,8 +2777,10 @@ function _onUserTyping(){
 document.addEventListener('input', _onUserTyping, {passive:true,capture:true});
 _resetIdleTimer();
 
+var _presenceRetry=0;
 function setupPresence(){
   if(!sbClient || _presenceChannel || !CURRENT_USER_ID) return;
+  if(_presenceRetry>=5){ console.warn('[Presence] 재시도 한도(5회) 초과 — 중단. 로컬 편집표시만 동작합니다.'); return; }
   try{
     _presenceChannel=sbClient.channel('bm_presence',{config:{presence:{key:CURRENT_USER_ID}}});
     _presenceChannel
@@ -2803,17 +2805,17 @@ function setupPresence(){
       .subscribe(async(status)=>{
         console.log('[Presence] subscribe status:',status);
         if(status==='SUBSCRIBED'){
+          _presenceRetry=0; // 성공 시 카운터 리셋
           await _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:null,status:'online',typing:false,at:Date.now()});
           console.log('[Presence] ✅ 트래킹 시작 — id:',CURRENT_USER_ID,'name:',CURRENT_USER_NAME);
-          // 접속 상태 사이드바에 즉시 반영
           _renderPresence();
         }
         if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
-          console.error('[Presence] ❌ 채널 연결 실패:',status,'— 5초 후 재시도');
+          _presenceRetry++;
+          console.warn('[Presence] 채널 연결 실패:',status,'('+_presenceRetry+'/5)');
           try{ _presenceChannel.unsubscribe(); }catch(_){}
           _presenceChannel=null;
-          // ★ 자동 재연결 (5초 후)
-          setTimeout(function(){ setupPresence(); },5000);
+          if(_presenceRetry<5) setTimeout(function(){ setupPresence(); },8000);
         }
       });
   }catch(e){ console.warn('Presence 구독 실패:',e.message); _presenceChannel=null; }
@@ -3339,7 +3341,17 @@ function openEditHistory(filterSection){
   var h='<div style="max-height:80vh;overflow-y:auto;padding:10px">';
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
   h+='<span style="font-size:15px;font-weight:700">📋 수정 기록'+(filterSection?' — '+(sectionNames[filterSection]||filterSection):'')+'</span>';
-  h+='<span style="font-size:11px;color:#94a3b8">최근 '+items.length+'건</span></div>';
+  // 섹션별 카운트/500 표시
+  var _editCountStr='';
+  if(filterSection){
+    var _secTotal=DB.editHistory.filter(function(x){return x.section===filterSection;}).length;
+    _editCountStr='<span style="font-size:11px;color:'+ (_secTotal>=450?'#dc2626':'#94a3b8') +';font-weight:500">'+_secTotal+'/500</span> · ';
+  } else {
+    var _allSec={};DB.editHistory.forEach(function(x){_allSec[x.section]=(_allSec[x.section]||0)+1;});
+    var _secParts=[];Object.keys(_allSec).forEach(function(k){_secParts.push((sectionNames[k]||k)+' '+_allSec[k]+'/500');});
+    if(_secParts.length) _editCountStr='<span style="font-size:10px;color:#94a3b8">'+_secParts.join(' · ')+'</span><br>';
+  }
+  h+=_editCountStr+'<span style="font-size:11px;color:#94a3b8">최근 '+items.length+'건</span></div>';
   if(!items.length){
     h+='<div style="text-align:center;padding:40px;color:#888">수정 기록이 없습니다.</div>';
   } else {
@@ -10502,7 +10514,7 @@ function rdExpire(){
       if(e.na)return`<td class="exp-cell ec-na" ondblclick="openExpEdit(${e.id})" title="더블클릭: 수정" data-presence-type="exp" data-presence-id="${e.id}" style="position:relative">해당없음</td><td class="exp-note-cell ec-na" ondblclick="openExpEdit(${e.id})">—</td>`;
       const d=dday(e.date),cls=expCls(d);
       const dStr=d<=30?` <span style="font-size:10px;font-weight:700">(D-${d})</span>`:'';
-      return`<td class="exp-cell ${cls}" ondblclick="openIE(event,${e.id},'${t}')">${fdS(e.date)}${dStr}</td><td class="exp-note-cell" ondblclick="openNoteIE(event,${e.id},'${t}')">${e.note||'—'}</td>`;
+      return`<td class="exp-cell ${cls}" ondblclick="openIE(event,${e.id},'${t}')" data-presence-type="exp" data-presence-id="${e.id}" style="position:relative">${fdS(e.date)}${dStr}</td><td class="exp-note-cell" ondblclick="openNoteIE(event,${e.id},'${t}')">${e.note||'—'}</td>`;
     }
     const others=DB.expires.filter(e=>e.bId==b.id&&!T.includes(e.type));
     // 특이사항: 각 항목을 줄별로 표시 + 더블클릭으로 개별 수정 + 추가버튼
@@ -10525,7 +10537,8 @@ function openIE(evt,id,type){
   // 배지 보존: 텍스트만 제거, presence-edit-badge는 유지
   Array.from(td.childNodes).forEach(function(n){if(!n.classList||!n.classList.contains('presence-edit-badge'))td.removeChild(n);});
   td.appendChild(inp);inp.focus();
-  const save=()=>{e.date=inp.value;e._edit=editStamp();_logEdit('exp',(e.type||type||'만료일')+' 날짜 변경: '+inp.value,id);sv();if(typeof stopEditing==='function')stopEditing();rdExpire();upBadges();};
+  var _oldDate=e.date||'(없음)';
+  const save=()=>{var _newDate=inp.value||'(삭제)';e.date=inp.value;e._edit=editStamp();_logEdit('exp',bs(e.bId)+' '+(e.type||type||'만료일')+': '+_oldDate+' → '+_newDate,id);sv();if(typeof stopEditing==='function')stopEditing();rdExpire();upBadges();};
   inp.addEventListener('blur',save);
   inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();save();}});
 }
@@ -11195,7 +11208,7 @@ function saveTaskDirect(sId,ti,el){
     } else { rdFixed(); }
     return;
   }
-  if(raw!==s.tasks[ti]){s.tasks[ti]=raw;s._edit=editStamp();DB.fixedHistory.push({sId,user:'나',date:editStamp()});_logEdit('fixed',(s.dayLabel||s.day+'일')+' '+(ti+1)+'번 업무 수정: '+raw.slice(0,30),sId);sv();}
+  if(raw!==s.tasks[ti]){var _oldTask=s.tasks[ti];s.tasks[ti]=raw;s._edit=editStamp();DB.fixedHistory.push({sId,user:'나',date:editStamp()});_logEdit('fixed',(s.dayLabel||s.day+'일')+' '+(ti+1)+'번 업무: '+_oldTask.slice(0,20)+' → '+raw.slice(0,20),sId);sv();}
 }
 function togFix(sId,ti){const key=fixKey(Number(sId),ti);DB.fixedDone[key]=!DB.fixedDone[key];sv();rdFixed();}
 function resetFixDone(){if(!confirm('이달 완료 체크 초기화?'))return;DB.fixedDone={};sv();rdFixed();}
@@ -11239,6 +11252,7 @@ function _flushSpEdit(){
   // pending이 있으면 우선
   if(_spEditPending){
     var p=_spEditPending; _spEditPending=null; _spEditActive=null;
+    _spLastSaveTime=Date.now(); // 중복 저장 방지용 타임스탬프
     _doSaveSpInline(p.sId,p.taskIdx,p.el.textContent);
     return;
   }
@@ -11247,14 +11261,22 @@ function _flushSpEdit(){
     var a=_spEditActive; _spEditActive=null;
     var cur=(a.el.textContent||'').trim();
     if(cur!==a.origText){
+      _spLastSaveTime=Date.now();
       _doSaveSpInline(a.sId,a.taskIdx,cur);
     }
   }
 }
+var _spLastSaveTime=0; // 특이사항 마지막 저장 시각 (중복 저장 방지)
 function saveSpInline(sId,taskIdx,el){
+  // ★ _flushSpEdit에서 이미 저장했으면 중복 저장 방지 (2초 이내)
+  if(Date.now()-_spLastSaveTime<2000){ console.log('[SP] 최근 flush 완료 — 중복 저장 스킵'); _spEditPending=null; _spEditActive=null; return; }
+  // el이 DOM에서 분리된 경우 (rdFixed 리렌더 후) → 스킵
+  if(typeof el==='object' && el && !el.isConnected){ console.log('[SP] 분리된 DOM 요소 — 저장 스킵'); _spEditPending=null; _spEditActive=null; return; }
   // el이 DOM 요소면 직접 읽기, 문자열이면 그대로 사용 (하위호환)
   var val=(typeof el==='string')?el:(el&&el.textContent)||'';
   _spEditPending=null; // 저장 완료이므로 pending 해제
+  _spEditActive=null;
+  _spLastSaveTime=Date.now();
   _doSaveSpInline(sId,taskIdx,val);
 }
 function _doSaveSpInline(sId,taskIdx,val){
@@ -11263,12 +11285,18 @@ function _doSaveSpInline(sId,taskIdx,val){
   var cleanVal=(val||'').trim();
   var pfxRe=new RegExp('^'+(taskIdx+1)+'\\)\\s*');
   cleanVal=cleanVal.replace(pfxRe,'').trim();
+  // ★ 기존 특이사항 텍스트 추출 (변경 전)
+  var _oldSpParts=[];var _colSp=false;
+  (s.special||'').split('\n').forEach(function(l){var lt=l.trim();if(lt.startsWith((taskIdx+1)+')')){_colSp=true;_oldSpParts.push(lt);}else if(/^\d+\)/.test(lt)){_colSp=false;}else if(_colSp&&lt){_oldSpParts.push(lt);}});
+  var _oldSpText=_oldSpParts.join(' ').replace(pfxRe,'').trim();
   const lines=(s.special||'').split('\n');
   let collecting=false;const idxs=[];
   lines.forEach((l,i)=>{const lt=l.trim();if(lt.startsWith((taskIdx+1)+')')){collecting=true;idxs.push(i);}else if(/^\d+\)/.test(lt)){collecting=false;}else if(collecting){idxs.push(i);}});
   const newLines=lines.filter((l,i)=>!idxs.includes(i));
   if(cleanVal){let ins=0;for(let i=0;i<newLines.length;i++){const m2=newLines[i].trim().match(/^(\d+)\)/);if(m2&&parseInt(m2[1])<=taskIdx+1)ins=i+1;}newLines.splice(ins,0,(taskIdx+1)+') '+cleanVal);}
-  s.special=newLines.join('\n');s._edit=editStamp();_logEdit('fixed',(s.dayLabel||s.day+'일')+' 특이사항 수정',sId);sv();rdFixed();
+  s.special=newLines.join('\n');s._edit=editStamp();
+  var _spLog=(s.dayLabel||s.day+'일')+' '+(taskIdx+1)+'번 특이사항: '+(_oldSpText||'(없음)').slice(0,15)+' → '+(cleanVal||'(삭제)').slice(0,15);
+  _logEdit('fixed',_spLog,sId);sv();rdFixed();
 }
 function editSpItem(sId,taskIdx){
   const s=DB.fixedSchedules.find(s=>s.id===sId);if(!s)return;
@@ -11365,6 +11393,9 @@ function addFixedTask(day){
   const _ct=_getCurrentTeam();
   if(existing && (existing.team||2)===_ct){existing.tasks.push(task);existing._edit=editStamp();}
   else{DB.fixedSchedules.push({id:nid(),day,dayLabel:day===99?'말일':day+'일',tasks:[task],special:'',team:_ct,_created:editStamp()});}
+  var _fromDay=s.dayLabel||s.day+'일';
+  var _toDay=d===99?'말일':d+'일';
+  _logEdit('fixed',_fromDay+' → '+_toDay+' '+(ti+1)+'번 업무 이동: '+task.slice(0,20),sId);
   sv();rdFixed();
 }
 function delFixTask(sId,ti){
@@ -12941,9 +12972,9 @@ function rdPMemo(){
     var _trashCnt=(md.deletedPages&&md.deletedPages.length)||0;
     /* 맞춤법 버튼 제거됨 */
     html+='<button id="pmemo-save-btn" onclick="_pmemoSaveAllDirty()" style="padding:5px 12px;font-size:12px;border:1px solid var(--ln);border-radius:6px;background:#16a34a;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;transition:background .2s" title="Ctrl+S">💾 저장</button>';
-    html+='<div onclick="openPMemoTrash()" style="padding:5px 12px;font-size:12px;color:'+((_trashCnt>0)?'#64748b':'#cbd5e1')+';cursor:pointer;border-radius:6px;font-weight:500;background:var(--w);border:1px solid var(--ln)" title="삭제된 메모 목록">🗑 휴지통('+_trashCnt+')</div>';
     html+='<span id="pmemo-save-ind" style="font-size:11px;color:#16a34a;font-weight:600;opacity:0;transition:opacity .3s;margin-left:4px">✓ 저장됨</span>';
     html+='<span style="margin-left:auto">'+upd+'</span>';
+    html+='<div onclick="openPMemoTrash()" style="padding:5px 12px;font-size:12px;color:'+((_trashCnt>0)?'#64748b':'#cbd5e1')+';cursor:pointer;border-radius:6px;font-weight:500;background:var(--w);border:1px solid var(--ln);flex-shrink:0" title="삭제된 메모 목록">🗑 휴지통('+_trashCnt+')</div>';
     html+='</div>';
 
     // 카드 그리드
@@ -13222,17 +13253,70 @@ function openPMemoTrash(){
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 }
+function _memoDiffHtml(oldText,newText){
+  // 줄 단위 비교, 다른 부분 하이라이트
+  var oldLines=(oldText||'').split('\n'), newLines=(newText||'').split('\n');
+  var maxLen=Math.max(oldLines.length,newLines.length);
+  var h='<div style="font-size:12px;font-family:monospace;max-height:300px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fafafa">';
+  for(var i=0;i<maxLen;i++){
+    var oL=oldLines[i]!==undefined?oldLines[i]:'';
+    var nL=newLines[i]!==undefined?newLines[i]:'';
+    if(oL===nL){
+      h+='<div style="color:#64748b;padding:1px 4px;white-space:pre-wrap">'+esc(oL||' ')+'</div>';
+    } else {
+      if(oL) h+='<div style="background:#fee2e2;color:#dc2626;padding:1px 4px;white-space:pre-wrap;text-decoration:line-through">- '+esc(oL)+'</div>';
+      if(nL) h+='<div style="background:#dcfce7;color:#16a34a;padding:1px 4px;white-space:pre-wrap">+ '+esc(nL)+'</div>';
+    }
+  }
+  h+='</div>';
+  return h;
+}
 function restorePMemoAt(idx){
   if(!CURRENT_USER_ID) return;
   var md=_pmemoData(CURRENT_USER_ID);
   var d=md.deletedPages[idx]; if(!d) return;
-  var restored={id:d.id||Date.now(),name:d.name,text:d.text||'',todos:d.todos||[],group:d.group||0};
-  md.pages.push(restored);
+  // 같은 이름 메모가 이미 있으면 diff 표시
+  var existing=md.pages.find(function(p){return p.name===d.name;});
+  if(existing && (existing.text||'')!==(d.text||'')){
+    var ov=$('pmemo-trash-overlay'); if(ov) ov.remove();
+    var overlay=document.createElement('div');
+    overlay.id='pmemo-diff-overlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10001;display:flex;align-items:center;justify-content:center';
+    overlay.onclick=function(e){if(e.target===overlay){overlay.remove();openPMemoTrash();}};
+    var box=document.createElement('div');
+    box.style.cssText='background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:400px;max-width:640px;width:90%;padding:16px';
+    var h2='<div style="font-size:14px;font-weight:700;margin-bottom:8px">📝 "'+esc(d.name)+'" 변경 비교</div>';
+    h2+='<div style="font-size:11px;color:#64748b;margin-bottom:8px"><span style="background:#fee2e2;color:#dc2626;padding:1px 4px;border-radius:3px">빨간색 = 현재 메모</span> <span style="background:#dcfce7;color:#16a34a;padding:1px 4px;border-radius:3px">초록색 = 복구할 메모</span></div>';
+    h2+=_memoDiffHtml(existing.text,d.text);
+    h2+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">';
+    h2+='<button onclick="document.getElementById(\'pmemo-diff-overlay\').remove();openPMemoTrash()" style="padding:6px 14px;border:1px solid #e2e8f0;background:#fff;border-radius:6px;cursor:pointer;font-size:12px">취소</button>';
+    h2+='<button onclick="_doRestorePMemo('+idx+',false)" style="padding:6px 14px;border:1px solid #3b82f6;background:#eff6ff;color:#2563eb;border-radius:6px;cursor:pointer;font-size:12px">새 메모로 복구</button>';
+    h2+='<button onclick="_doRestorePMemo('+idx+',true)" style="padding:6px 14px;border:none;background:#2563eb;color:#fff;border-radius:6px;cursor:pointer;font-size:12px">덮어쓰기 복구</button>';
+    h2+='</div>';
+    box.innerHTML=h2;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    return;
+  }
+  _doRestorePMemo(idx,false);
+}
+function _doRestorePMemo(idx,overwrite){
+  var ov2=$('pmemo-diff-overlay'); if(ov2) ov2.remove();
+  var ov=$('pmemo-trash-overlay'); if(ov) ov.remove();
+  if(!CURRENT_USER_ID) return;
+  var md=_pmemoData(CURRENT_USER_ID);
+  var d=md.deletedPages[idx]; if(!d) return;
+  if(overwrite){
+    var existing=md.pages.find(function(p){return p.name===d.name;});
+    if(existing){existing.text=d.text||'';existing.todos=d.todos||[];}
+  } else {
+    var restored={id:d.id||Date.now(),name:d.name,text:d.text||'',todos:d.todos||[],group:d.group||0};
+    md.pages.push(restored);
+  }
   md.deletedPages.splice(idx,1);
   md.updatedAt=_pmemoTs();
   sv(); rdPMemo(); _syncFloatIfOpen();
-  var ov=$('pmemo-trash-overlay'); if(ov) ov.remove();
-  if(md.deletedPages.length) openPMemoTrash(); // 다시 열기
+  if(md.deletedPages.length) openPMemoTrash();
 }
 function permDelPMemo(idx){
   if(!CURRENT_USER_ID) return;
@@ -15192,103 +15276,116 @@ function buildDemoDB(){
   const addDays=(n)=>{const d=new Date(today);d.setDate(d.getDate()+n);return fd(d);};
   return {
     buildings:[
-      {id:1,name:'1.샘플프라자',addr:'서울 강남구 테헤란로 100',bmStart:'2025-01-01',bmEnd:'2026-12-31',bmFee:500000},
-      {id:2,name:'2.데모타워',addr:'서울 서초구 반포대로 88',bmStart:'2025-03-15',bmEnd:'2027-03-14',bmFee:800000},
-      {id:3,name:'3.예시빌딩',addr:'서울 송파구 올림픽로 200',bmStart:'',bmEnd:'',bmFee:0},
-      {id:4,name:'4.가상오피스',addr:'서울 마포구 월드컵북로 50',bmStart:'2025-07-01',bmEnd:'2026-06-30',bmFee:350000},
+      {id:16,name:'16.트러스트힐',addr:'서초동 1555-2',team:2,bmStart:'2024-10-16',bmEnd:'2026-10-25',bmFee:0},
+      {id:19,name:'19.르포렘',addr:'역삼동 828-42',team:2,bmStart:'2024-10-30',bmEnd:'2026-10-29',bmFee:0},
+      {id:20,name:'20.청담4613',addr:'청담동 46-13',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:21,name:'21.르헤브빌딩',addr:'반포동 709-7',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:22,name:'22.성수동2가 310-64',addr:'성수동2가 310-64',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:24,name:'24.H473',addr:'',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:25,name:'25.당산동3가 522-3',addr:'당산동3가 522-3',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:26,name:'26.와이즈원',addr:'서교동 400-15',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:28,name:'28.하이원빌딩',addr:'방배동 896-7',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:29,name:'29.센타빌딩',addr:'신사동 560',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:30,name:'30.성은빌딩',addr:'신사동 553-26',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:31,name:'31.대치동914',addr:'대치동 914',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:32,name:'32.청담포레79',addr:'청담동 79-4',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:33,name:'33.논현동 213-10',addr:'논현동 213-10',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:34,name:'34.성수동1가 13-442',addr:'성수동1가 13-442',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:35,name:'35.인피니티타워',addr:'성수동1가 685-300',team:2,bmStart:'',bmEnd:'',bmFee:0},
+      {id:36,name:'36.더파크청담',addr:'청담동 61-10',team:2,bmStart:'',bmEnd:'',bmFee:0},
     ],
     leases:[
-      {id:1,bId:1,floor:'1층',tenant:'샘플카페',start:'2025-02-01',end:'2027-01-31',deposit:50000000,rent:4500000,mgmt:300000,paytype:'선불',payday:'1일',phone:'김대표 010-1111-2222',email:'cafe@sample.co.kr',note:'렌트프리(2개월)'},
-      {id:2,bId:1,floor:'2층',tenant:'가상디자인',start:'2024-06-01',end:'2026-05-31',deposit:60000000,rent:5000000,mgmt:400000,paytype:'선불',payday:'1일',phone:'박대표 010-2222-3333',email:'',note:''},
-      {id:3,bId:1,floor:'3층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
-      {id:4,bId:1,floor:'4층',tenant:'예시컨설팅',start:'2025-09-10',end:'2027-09-09',deposit:80000000,rent:6500000,mgmt:500000,paytype:'선불',payday:'10일',phone:'이대표 010-3333-4444',email:'info@example.co.kr',note:''},
-      {id:5,bId:2,floor:'지하1층',tenant:'데모식당',start:'2025-08-01',end:'2027-07-31',deposit:100000000,rent:7500000,mgmt:500000,paytype:'선불',payday:'1일',phone:'최사장 010-4444-5555',email:'',note:''},
-      {id:6,bId:2,floor:'1-3층',tenant:'주식회사 예시코퍼레이션',start:'2025-05-01',end:'2026-04-30',deposit:200000000,rent:15000000,mgmt:1000000,paytype:'후불',payday:'말일',phone:'정대표 010-5555-6666',email:'ceo@yesi-corp.com',note:'통임대'},
-      {id:7,bId:2,floor:'4층',tenant:'공실',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:''},
-      {id:8,bId:3,floor:'전체',tenant:'직영',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'직영',payday:'',phone:'',email:'',note:''},
-      {id:9,bId:4,floor:'1층',tenant:'테스트베이커리',start:'2025-10-01',end:'2027-09-30',deposit:40000000,rent:3800000,mgmt:250000,paytype:'선불',payday:'1일',phone:'010-6666-7777',email:'',note:''},
-      {id:10,bId:4,floor:'2층',tenant:'샘플IT',start:'2024-12-01',end:'2026-11-30',deposit:70000000,rent:6000000,mgmt:500000,paytype:'선불',payday:'1일',phone:'한대표 010-7777-8888',email:'hr@sample-it.com',note:''},
+      {id:1,bId:16,floor:'지하2층',tenant:'클래시카 서울',start:'2025-05-01',end:'2027-04-30',deposit:70000000,rent:5500000,mgmt:1000000,paytype:'선불',payday:'1일',phone:'김태환 대표',email:'',note:'렌트프리(3개월) 25.05~25.08'},
+      {id:2,bId:16,floor:'지하1층',tenant:'직영',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'직영',payday:'',phone:'',email:'',note:''},
+      {id:3,bId:16,floor:'2층',tenant:'법무법인 인율',start:'2025-01-10',end:'2027-01-09',deposit:100000000,rent:6500000,mgmt:500000,paytype:'선불',payday:'10일',phone:'대표님',email:'inyul@inyullaw.com',note:'렌트프리(3개월)'},
+      {id:4,bId:16,floor:'3층',tenant:'세무법인 펜타곤',start:'2025-04-21',end:'2027-04-20',deposit:100000000,rent:5500000,mgmt:500000,paytype:'선불',payday:'21일',phone:'대표님',email:'',note:'렌트프리(2개월)'},
+      {id:5,bId:16,floor:'4층',tenant:'세무법인 디엘지(DLG)',start:'2024-11-19',end:'2026-11-18',deposit:200000000,rent:12000000,mgmt:1000000,paytype:'선불',payday:'19일',phone:'대표님',email:'',note:''},
+      {id:6,bId:16,floor:'6층',tenant:'조준우(바디움)',start:'2024-05-16',end:'2026-05-15',deposit:150000000,rent:15000000,mgmt:2000000,paytype:'선불',payday:'16일',phone:'조준우 대표',email:'jina@bodium.co.kr',note:''},
+      {id:7,bId:16,floor:'8층',tenant:'주식회사바디움',start:'2024-05-16',end:'2026-05-15',deposit:50000000,rent:5000000,mgmt:1000000,paytype:'선불',payday:'16일',phone:'',email:'jina@bodium.co.kr',note:''},
+      {id:8,bId:19,floor:'전체',tenant:'(임대진행중)',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'렌트프리(1개월) 24.12.23~25.01.22'},
+      {id:9,bId:20,floor:'4층',tenant:'(임차인)',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'선불',payday:'',phone:'',email:'',note:'청구서 건물주/임차인 전달'},
+      {id:10,bId:21,floor:'B1~5층',tenant:'(딥러닝 등)',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'선불',payday:'',phone:'',email:'',note:'임대료 세금계산서 발행'},
+      {id:11,bId:31,floor:'1,3,4층',tenant:'(작심)',start:'',end:'',deposit:0,rent:0,mgmt:0,paytype:'선불',payday:'',phone:'임수진 팀장',email:'',note:'세금계산서 발행 요청'},
     ],
     expires:[
-      {id:1,bId:1,type:'승강기 보험',date:addDays(45),note:''},
-      {id:2,bId:1,type:'화재 보험',date:addDays(200),note:''},
-      {id:3,bId:1,type:'정화조 청소',date:addDays(90),note:''},
-      {id:4,bId:2,type:'승강기 보험',date:addDays(20),note:''},
-      {id:5,bId:2,type:'화재 보험',date:addDays(300),note:''},
-      {id:6,bId:3,type:'정화조 청소',date:addDays(-10),note:'지연됨'},
-      {id:7,bId:4,type:'승강기 보험',date:addDays(120),note:''},
-      {id:8,bId:4,type:'저수조 청소',date:addDays(60),note:'6개월 주기'},
+      {id:1,bId:16,type:'승강기 보험',date:'2026-09-06',note:''},
+      {id:2,bId:16,type:'화재 보험',date:'2026-08-29',note:''},
+      {id:3,bId:16,type:'주차기 보험',date:'2027-02-05',note:''},
+      {id:4,bId:16,type:'저수조 청소',date:'2026-09-09',note:'6개월 주기(26년 03/09완료)'},
+      {id:5,bId:16,type:'정화조 청소',date:'2026-10-23',note:''},
+      {id:50,bId:16,type:'화재 보험',date:'2040-08-29',note:'장기'},
+      {id:6,bId:19,type:'승강기 보험',date:'2026-10-26',note:''},
+      {id:7,bId:19,type:'화재 보험',date:'2039-10-24',note:''},
+      {id:8,bId:19,type:'주차기 보험',date:'',na:true,note:''},
+      {id:9,bId:19,type:'정화조 청소',date:'2026-10-01',note:''},
+      {id:10,bId:20,type:'승강기 보험',date:'2027-01-25',note:''},
+      {id:11,bId:20,type:'화재 보험',date:'2041-01-21',note:''},
+      {id:12,bId:20,type:'주차기 보험',date:'',na:true,note:''},
+      {id:13,bId:20,type:'저수조 청소',date:'2026-06-15',note:'6개월 주기'},
+      {id:14,bId:20,type:'정화조 청소',date:'2026-06-26',note:'연장함'},
+      {id:15,bId:21,type:'승강기 보험',date:'2027-01-09',note:''},
+      {id:16,bId:21,type:'화재 보험',date:'2033-01-20',note:''},
+      {id:17,bId:21,type:'주차기 보험',date:'',na:true,note:''},
+      {id:18,bId:21,type:'정화조 청소',date:'2026-05-10',note:''},
+      {id:19,bId:22,type:'승강기 보험',date:'',na:true,note:''},
+      {id:20,bId:22,type:'화재 보험',date:'2040-07-14',note:''},
+      {id:21,bId:22,type:'주차기 보험',date:'',na:true,note:''},
+      {id:22,bId:22,type:'정화조 청소',date:'2027-01-04',note:'26년 4월 마지막청소(9개월 주기)'},
+      {id:23,bId:24,type:'승강기 보험',date:'2027-01-08',note:'임차사측 가입'},
+      {id:24,bId:24,type:'화재 보험',date:'2034-01-08',note:''},
+      {id:25,bId:24,type:'주차기 보험',date:'',na:true,note:''},
+      {id:26,bId:24,type:'정화조 청소',date:'2026-12-01',note:''},
     ],
     fixedSchedules:[
-      {id:1,day:1,dayLabel:'1일',tasks:['월간보고서 송부','임대료 세금계산서 발행'],special:'샘플 메모입니다.'},
-      {id:2,day:5,dayLabel:'5일',tasks:['건물 순회 점검','공용부 청소 확인'],special:''},
-      {id:3,day:15,dayLabel:'15일',tasks:['중간 정산 확인'],special:''},
-      {id:4,day:99,dayLabel:'말일',tasks:['관리수수료 입금 확인','차월 일정 정리'],special:''},
+      {id:1,day:1,dayLabel:'1일',tasks:['월간보고서 송부','르헤브 B1~5층(딥러닝) 임대료 세금계산서 발행'],special:'2) 르헤브: @duckling11\n3) H473 : *h4735530'},
+      {id:2,day:2,dayLabel:'2일',tasks:['논현동 213-10 공용,공실 전기 청구서 건물주 전달'],special:'1) 논현동 213-10, 말일~월초에 청구서 나옴\n>4층도 박정도 메일로'},
+      {id:3,day:3,dayLabel:'3일',tasks:['건물전체, 3개월내 계약만료일 체크','건물메모 만료일 체크'],special:''},
+      {id:5,day:5,dayLabel:'5일',tasks:['청담4613, 4층 임대료 청구서 / 수도(홀수월) 건물주,임차인 전달'],special:'4613: ch4613!!bsn'},
+      {id:7,day:7,dayLabel:'7일',tasks:['대치동914 (1,3,4층), (2층) 계산서 발행 요청'],special:'1) 대치동914(임수진 팀장, 신승희 과장한테 세금계산서 발행요청)'},
+      {id:8,day:8,dayLabel:'8일',tasks:['H473, 1층만 수도검침 요청(짝수월)'],special:''},
+      {id:10,day:10,dayLabel:'10일',tasks:['아델로, 전기청구서 건물주 전달'],special:''},
+      {id:11,day:11,dayLabel:'11일',tasks:['대치동 914 빠른계좌조회 (임대료,관리비 입금확인) 1,3,4층'],special:'참고) 1,3,4층 매번 15일쯤 입금'},
+      {id:99,day:99,dayLabel:'말일',tasks:['관리수수료 입금 확인','차월 일정 정리'],special:''},
     ],
     fixedDone:{},
     fixedHistory:[],
     calEvents:[
-      {id:1,date:fd(today),bId:1,title:'엘리베이터 정기점검',status:'todo',user:'방문자',_created:'4/10 10:00'},
-      {id:2,date:fd(today),bId:2,title:'소방 안전점검',status:'done',user:'김관리',_created:'4/8 14:20'},
+      {id:1,date:fd(today),bId:16,title:'엘리베이터 정기점검',status:'todo',user:'방문자',_created:'4/10 10:00'},
+      {id:2,date:fd(today),bId:19,title:'소방 안전점검',status:'done',user:'방문자',_created:'4/8 14:20'},
       {id:3,date:addDays(1),bId:0,title:'건물전체 공지사항 전달',status:'todo',user:'방문자'},
-      {id:4,date:addDays(-1),bId:1,title:'3층 누수점검\n원인: 수도관 동파\n조치: 밸브 교체\n결과: 정상 복구',status:'todo',user:'이관리'},
-      {id:5,date:addDays(-3),bId:2,title:'임차인 미팅 - 계약갱신 협의',status:'done',user:'방문자'},
-      {id:6,date:addDays(-7),bId:4,title:'저수조 청소 업체 견적 요청',status:'todo',user:'박담당'},
-      {id:7,date:addDays(3),bId:3,title:'정화조 청소 일정 조율',status:'todo',user:'방문자'},
-      {id:8,date:addDays(7),bId:1,title:'월간보고서 송부',status:'todo',user:'방문자'},
-      {id:9,date:addDays(-14),bId:2,title:'CCTV 장비 점검 완료',status:'done',user:'김관리'},
-      {id:10,date:addDays(-5),bId:4,title:'주차기 센서 오작동 점검',status:'todo',user:'이관리'},
+      {id:4,date:addDays(-1),bId:16,title:'3층 누수점검',status:'todo',user:'방문자'},
+      {id:5,date:addDays(-3),bId:21,title:'임차인 미팅 - 계약갱신 협의',status:'done',user:'방문자'},
+      {id:6,date:addDays(-7),bId:20,title:'저수조 청소 업체 견적 요청',status:'todo',user:'방문자'},
+      {id:7,date:addDays(3),bId:22,title:'정화조 청소 일정 조율',status:'todo',user:'방문자'},
+      {id:8,date:addDays(7),bId:16,title:'월간보고서 송부',status:'todo',user:'방문자'},
     ],
     memos:{},
     memoCats:{
-      1:{password:'출입문: 1 → 확인 → 1234 → 확인\n(샘플 비밀번호입니다)',cctv:'데모CCTV 어플\nID: demo_user\nPW: demo1234!',fire:'소방안전관리자: 홍길동(건물주)',elevator:'승강기안전관리자: 방문자',water:'수도요금 청구서: 짝수월\n고객번호: 000000000, 샘플',etc:'방문자용 샘플 메모입니다.'},
-      2:{password:'메인게이트: 0000\n지하주차장: 1111\n옥상: 2222',cctv:'샘플 CCTV 시스템\nadmin / sample1234',fire:'소방관리자: 임차인',elevator:'승강기관리자: 방문자',water:'수도요금 청구서: 홀수월',etc:''},
-      3:{password:'샘플 출입정보',cctv:'데모 영상 시스템',fire:'(샘플)',elevator:'(샘플)',water:'(샘플)',etc:''},
-      4:{password:'정문: 9999\n후문: 8888',cctv:'데모 CCTV',fire:'소방관리: 건물주',elevator:'승강기관리: 방문자',water:'수도: 짝수월',etc:''},
+      16:{password:'',cctv:'',fire:'소방: 하이119, 02-6471-3119',elevator:'승강기: 현대el, 최재운 기사',water:'수도요금 청구서: 짝수월\n검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',etc:'전기안전관리자: 한빛티이씨\n주차기: 엡스\n저수조: 명성종합환경\n정화조: 성덕실업'},
+      19:{password:'',cctv:'',fire:'소방: 하이119',elevator:'승강기: 한승이엘',water:'수도요금 청구서: 짝수월\n검침일: 홀수월 24일\n고객번호: 032757520, 주식회사 히프나틱',etc:'정화조: 정익산업\n보안: 에스원'},
+      20:{password:'',cctv:'',fire:'',elevator:'',water:'수도요금 청구서: 짝수월\n검침일: 홀수월 29일\n고객번호: 029071835, 윤상수',etc:'시공사: 빌텍종합건설\n저수조: 강남수도사업소'},
+      21:{password:'',cctv:'',fire:'',elevator:'',water:'수도요금 청구서: 짝수월\n검침일: 홀수월 22일\n고객번호: 022818134, (주)엠케이컨텐츠\n1/n 안분',etc:''},
+      24:{password:'',cctv:'',fire:'소방: 하이119',elevator:'승강기: 현대엘리베이터',water:'수도요금 청구서: 짝수월\n검침일: 짝수월 8일\n고객번호: 033893045, 황순부',etc:''},
+      26:{password:'',cctv:'',fire:'소방: 하이119',elevator:'',water:'수도요금 청구서: 홀수월\n검침일: 짝수월 23일\n고객번호: 026611853, (주)엠앤와이즈',etc:''},
     },
-    waterBills:(function(){
-      // 샘플 청구서 이미지 생성 (Canvas → dataURL)
-      function _mkImg(txt,color){
-        var c=document.createElement('canvas');c.width=320;c.height=440;
-        var x=c.getContext('2d');
-        x.fillStyle='#f0f4ff';x.fillRect(0,0,320,440);
-        x.fillStyle=color||'#1e40af';x.font='bold 18px sans-serif';x.textAlign='center';
-        x.fillText('수도요금 청구서',160,40);
-        x.fillStyle='#334155';x.font='13px sans-serif';
-        x.fillText(txt,160,80);
-        x.fillStyle='#0f172a';x.font='bold 22px sans-serif';
-        x.fillText('납부금액: '+((Math.floor(Math.random()*80)+20)*1000).toLocaleString()+'원',160,140);
-        x.strokeStyle='#cbd5e1';x.lineWidth=1;
-        for(var i=0;i<8;i++){x.beginPath();x.moveTo(30,180+i*28);x.lineTo(290,180+i*28);x.stroke();
-          x.fillStyle='#64748b';x.font='11px sans-serif';x.textAlign='left';
-          x.fillText(['기본요금','물이용부담금','하수도사용료','수질개선부담금','구경별요금','부가세','합계','납기내금액'][i],40,175+i*28);
-          x.textAlign='right';x.fillText(((Math.floor(Math.random()*50)+5)*100).toLocaleString()+'원',280,175+i*28);
-        }
-        x.textAlign='center';x.fillStyle='#94a3b8';x.font='10px sans-serif';
-        x.fillText('※ 샘플 청구서 (테스트용)',160,420);
-        return c.toDataURL('image/jpeg',0.85);
-      }
-      var months=['2026-01','2026-02','2026-03','2026-04'];
-      var colors=['#1e40af','#7c3aed','#059669','#dc2626'];
-      function _mkBills(bName,cName,color){
-        return months.map(function(m,mi){
-          var amt=(Math.floor(Math.random()*80)+20)*1000;
-          var usg=Math.floor(Math.random()*25)+5;
-          var label=m.replace('-','년 ')+'월';
-          return {period:m,files:[{data:_mkImg(bName+' / '+cName+'\n'+label,colors[(mi+colors.indexOf(color))%4]),name:m+'_'+bName+'_'+cName+'.jpg',mime:'image/jpeg'}],amount:amt,usage:usg,uploadedAt:Date.now()};
-        });
-      }
-      return [
-        {id:'sw1',bId:1,custNo:'12345678',custName:'웨이곤주식회사',note:'',meterCycle:2,meterDay:15,
-          bills:_mkBills('샘플프라자','웨이곤주식회사','#1e40af')},
-        {id:'sw2',bId:1,custNo:'12345679',custName:'웨이곤주식회사2',note:'',meterCycle:2,meterDay:15,
-          bills:_mkBills('샘플프라자','웨이곤주식회사2','#7c3aed')},
-        {id:'sw3',bId:2,custNo:'55556666',custName:'데모타워수도',note:'',meterCycle:2,meterDay:10,
-          bills:_mkBills('데모타워','데모타워수도','#dc2626')},
-        {id:'sw4',bId:4,custNo:'98765432',custName:'청담수도',note:'',meterCycle:2,meterDay:20,
-          bills:_mkBills('가상오피스','청담수도','#059669')},
-      ];
-    })(),
+    waterBills:[
+        {id:'sw16',bId:16,custNo:'022741141',custName:'웨이굿주식회사',note:'짝수월 청구, 검침일 홀수월 23일',meterCycle:'even',meterDay:23,bills:[]},
+        {id:'sw19',bId:19,custNo:'032757520',custName:'주식회사 히프나틱',note:'짝수월 청구, 검침일 홀수월 24일',meterCycle:'even',meterDay:24,bills:[]},
+        {id:'sw20',bId:20,custNo:'029071835',custName:'윤상수',note:'짝수월 청구, 검침일 홀수월 29일',meterCycle:'even',meterDay:29,bills:[]},
+        {id:'sw21',bId:21,custNo:'022818134',custName:'(주)엠케이컨텐츠',note:'짝수월 청구, 검침일 홀수월 22일, 1/n 안분',meterCycle:'even',meterDay:22,bills:[]},
+        {id:'sw22',bId:22,custNo:'000444839',custName:'수앤준',note:'짝수월 청구, 검침일 홀수월 28일, 건물주 납부',meterCycle:'even',meterDay:28,bills:[]},
+        {id:'sw24',bId:24,custNo:'033893045',custName:'황순부',note:'짝수월 청구, 검침일 짝수월 8일',meterCycle:'even',meterDay:8,bills:[]},
+        {id:'sw25',bId:25,custNo:'042807600',custName:'(주)브렌트우드',note:'홀수월 청구, 검침일 홀수월 7일',meterCycle:'odd',meterDay:7,bills:[]},
+        {id:'sw26',bId:26,custNo:'026611853',custName:'(주)엠앤와이즈',note:'홀수월 청구, 검침일 짝수월 23일',meterCycle:'odd',meterDay:23,bills:[]},
+        {id:'sw28',bId:28,custNo:'022891658',custName:'라이드주식회사',note:'짝수월 청구, 검침일 홀수월 21일',meterCycle:'even',meterDay:21,bills:[]},
+        {id:'sw29',bId:29,custNo:'031112881',custName:'주식회사포도클럽',note:'홀수월 고지, 검침일 홀수월 7일 (가정용)',meterCycle:'odd',meterDay:7,bills:[]},
+        {id:'sw30',bId:30,custNo:'029056246',custName:'프로젝트에이스주식회사',note:'고지서 홀수월, 검침일 짝수월 25일 (일반용)',meterCycle:'odd',meterDay:25,bills:[]},
+        {id:'sw31',bId:31,custNo:'028634845',custName:'이현경',note:'홀수월 청구, 검침일 홀수월 7일, 수도안분 없음(건물주 납부)',meterCycle:'odd',meterDay:7,bills:[]},
+        {id:'sw32',bId:32,custNo:'029070196',custName:'아민코 주식회사',note:'짝수월 청구, 검침일 홀수월 21일 (공용)',meterCycle:'even',meterDay:21,bills:[]},
+        {id:'sw33',bId:33,custNo:'029061055',custName:'주식회사 이노매트리얼',note:'홀수월 청구, 검침일 짝수월 22일, 1/2/3/4층 안분',meterCycle:'odd',meterDay:22,bills:[]},
+        {id:'sw35',bId:35,custNo:'000483578',custName:'수인피니티주식회사',note:'홀수월 청구, 검침일 짝수월 29일',meterCycle:'odd',meterDay:29,bills:[]},
+        {id:'sw36',bId:36,custNo:'',custName:'프로젝트에이스주식회사',note:'짝수월, 호수별 고객번호 있음',meterCycle:'even',meterDay:0,bills:[]},
+      ],
     reports:[],
     repPhotos:{},repPhotoCaptions:{},
     expAdjustments:[],
