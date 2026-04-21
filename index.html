@@ -2450,6 +2450,14 @@ function _migrateMemoCats(){
   });
   if(changed) console.log('[migrate] memoCats 누락 키 보충 완료');
 }
+// ── Gmail Client ID 강제 고정: 기존에 저장된 잘못된 사용자 설정 제거 ──
+function _cleanupGmailClientId(){
+  if(DB&&DB.settings&&DB.settings.gmailClientId){
+    delete DB.settings.gmailClientId;
+    try{ sv(); }catch(e){}
+    console.log('[cleanup] 기존 Gmail Client ID 설정 제거 — 고정 ID 사용');
+  }
+}
 function _mergeDB(cloud, local){
   // 클라우드 기본, 배열은 id 기준 머지 (양쪽 항목 보존)
   var merged=JSON.parse(JSON.stringify(cloud));
@@ -7406,7 +7414,7 @@ function uploadElectricBillAppend(id, period){ _pickElectricBillFiles(id, period
 let _gmailToken=null; // {access_token, expires_at}
 var _BSN_GMAIL_CID='474471358069-i4aldj1b7f42cbr28jirgsoe1stlbkb4.apps.googleusercontent.com';
 function openGmailElectricImport(){
-  var cid=(DB.settings&&DB.settings.gmailClientId)||_BSN_GMAIL_CID;
+  var cid=_BSN_GMAIL_CID; // 고정 Client ID 사용 (사용자 설정 무시)
   var yrMo=$('mo-gmail-yr');
   if(!yrMo){
     yrMo=document.createElement('div'); yrMo.id='mo-gmail-yr'; yrMo.className='ov';
@@ -7788,7 +7796,7 @@ async function _gmailStartImport(clientId, filterYear){
     }
   }catch(err){
     console.error('[Gmail Import]', err);
-    setBody('<div style="text-align:center;padding:20px;color:#dc2626"><div style="font-size:32px;margin-bottom:10px">⚠️</div><b>오류 발생</b><div style="margin-top:8px;font-size:12px;color:var(--t2);word-break:break-all">'+esc(err.message)+'</div><div style="margin-top:12px;font-size:11.5px;color:var(--t3)">Client ID 또는 OAuth 동의 화면 설정을 확인해주세요.<br><button class="btn sm" onclick="_showGmailSetupModal()" style="margin-top:6px">설정 열기</button></div></div>');
+    setBody('<div style="text-align:center;padding:20px;color:#dc2626"><div style="font-size:32px;margin-bottom:10px">⚠️</div><b>오류 발생</b><div style="margin-top:8px;font-size:12px;color:var(--t2);word-break:break-all">'+esc(err.message)+'</div><div style="margin-top:12px;font-size:11.5px;color:var(--t3)">테스트 사용자에 등록된 Gmail 계정인지 확인 후 관리자에게 문의해주세요.</div></div>');
   }finally{
     _gmailImporting=false;
     _hideGmailBanner();
@@ -15695,6 +15703,7 @@ async function enterApp(){
         DB=_mergeLocalImages(DB, _localDB);
         if(_idbFull) DB=_mergeLocalImages(DB, _idbFull);
         _migrateMemoCats(); // 누락 카테고리 키 보충
+        _cleanupGmailClientId(); // Gmail Client ID 고정 (기존 잘못된 설정 제거)
         // ★ 전기청구서 중복 방지: cloud 머지 후 항상 dedup 실행 (skipSave: 이후 렌더에서 저장됨)
         try{ _deduplicateElectricBills(true, true); }catch(e){}
         var _initAfterDedup=0; (DB.electricBills||[]).forEach(function(e){_initAfterDedup+=(e.bills||[]).length;});
@@ -15737,9 +15746,11 @@ async function enterApp(){
     } else if(sbClient){
       // 클라우드 빈 상태(최초) — _cloudLoadOk 허용되면 로컬을 서버에 푸시
       _migrateMemoCats();
+      _cleanupGmailClientId();
       await sv();
     } else {
       _migrateMemoCats();
+      _cleanupGmailClientId();
     }
     // ★ 클라우드 로드 실패 시 자동 재시도 (8초 간격, 최대 12회)
     if(!_cloudLoadOk && sbClient){
