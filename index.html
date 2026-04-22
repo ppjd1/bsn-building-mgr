@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://mora-bot.kr https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://alcdn.msauth.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co https://*.sharepoint.com https://graph.microsoft.com; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://mora-bot.kr https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr https://login.microsoftonline.com https://graph.microsoft.com https://alcdn.msauth.net https://*.sharepoint.com; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com https://login.microsoftonline.com https://*.sharepoint.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -216,18 +216,20 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .lv-title{font-size:13px;flex:1;line-height:1.45;white-space:pre-wrap;word-break:break-word;min-width:0}.lv-title.done{text-decoration:line-through;color:var(--t3)}
 
 /* ========= FIXED ========= */
-.fix-tbl{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border:1px solid #e0e0e0;box-sizing:border-box}
+.fix-tbl{width:100%;border-collapse:collapse;table-layout:auto;background:#fff;border:1px solid #e0e0e0;box-sizing:border-box;zoom:1.1}
 .fix-tbl th{position:sticky;top:0;z-index:2;background:#f8f9fa;color:#555;font-size:11px;font-weight:600;padding:6px 8px;border-bottom:2px solid #ddd;border-right:1px solid #e8e8e8;text-align:center}
 .fix-tbl th:last-child{border-right:none}
 .fix-tbl th.th-status{width:52px;overflow:hidden}
-.fix-tbl th.th-bldg{width:50px}
-.fix-tbl th.th-task{width:38%;text-align:left}
+.fix-tbl th.th-bldg{width:auto;white-space:nowrap}
+.fix-tbl th.th-task{width:40%;text-align:left}
 .fix-tbl th.th-sp{text-align:left}
-.fix-tbl th.th-move{width:52px;font-size:10px;white-space:nowrap}
 .fix-tbl th.th-assign{width:46px}
 .fix-tbl td{padding:5px 8px;border-bottom:1px solid #ececec;border-right:1px solid #ececec;vertical-align:middle;font-size:12px;line-height:1.5}
 .fix-tbl td:last-child{border-right:none}
+.fix-day-sep-label{display:inline-flex;align-items:baseline;min-width:62px;text-align:left}
+.fix-day-num{display:inline-block;width:20px;text-align:right;font-variant-numeric:tabular-nums}
 .fix-tbl tr.fix-task-row:hover{background:#f8fafc}
+.fix-tbl tr.fix-day-first>td{border-top:2px solid #cbd5e1}
 /* 상태 드롭다운 — 색은 버튼 자체에만 */
 .fix-status-sel{width:44px;padding:3px 2px;border:1.5px solid #d0d5dd;border-radius:4px;font-size:9px;font-weight:600;font-family:inherit;cursor:pointer;text-align:center;background:#fff;box-sizing:border-box;-webkit-appearance:none;appearance:none}
 .fix-status-sel:focus{outline:none;border-color:#3b82f6}
@@ -235,14 +237,11 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .fix-status-sel.st-진행{background:#fef9c3;border-color:#fde047;color:#a16207}
 .fix-status-sel.st-미완료{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
 /* 건물 태그 */
-.fix-bldg-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
+.fix-bldg-tag{display:inline-block;padding:2px 4px;border-radius:4px;font-size:9px;font-weight:600;cursor:pointer;user-select:none;word-break:break-all;line-height:1.3;text-align:center}
 .fix-bldg-add{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:4px;font-size:13px;color:#bbb;cursor:pointer;text-align:center;border:1px dashed #d0d0d0;background:#fafafa}
 .fix-bldg-add:hover{color:#666;border-color:#999;background:#f0f0f0}
-.bt-1{background:#eff6ff;color:#3b82f6}.bt-2{background:#fdf2f8;color:#ec4899}.bt-3{background:#ecfdf5;color:#10b981}.bt-4{background:#fffbeb;color:#f59e0b}
-.bt-5{background:#fef2f2;color:#ef4444}.bt-6{background:#eef2ff;color:#6366f1}.bt-7{background:#faf5ff;color:#a855f7}.bt-8{background:#f0fdfa;color:#14b8a6}
-.bt-9{background:#fff7ed;color:#f97316}.bt-10{background:#f7fee7;color:#84cc16}.bt-11{background:#fefce8;color:#eab308}.bt-12{background:#f0f9ff;color:#0ea5e9}
-.bt-13{background:#fdf4ff;color:#d946ef}.bt-14{background:#f5f3ff;color:#8b5cf6}.bt-15{background:#ecfeff;color:#06b6d4}.bt-16{background:#fff1f2;color:#f43f5e}
-.bt-17{background:#f0fdf4;color:#22c55e}.bt-18{background:#fffbeb;color:#d97706}.bt-19{background:#fef2f2;color:#f87171}.bt-20{background:#f5f5f5;color:#888}
+.fix-bldg-tag{color:#111!important;font-weight:700;background:none!important;padding:0!important;font-size:10px;white-space:nowrap}
+.bt-1,.bt-2,.bt-3,.bt-4,.bt-5,.bt-6,.bt-7,.bt-8,.bt-9,.bt-10,.bt-11,.bt-12,.bt-13,.bt-14,.bt-15,.bt-16,.bt-17,.bt-18,.bt-19,.bt-20{background:none}
 /* 업무내용 셀 — 특이사항과 동일 타입 */
 .fix-task-td{font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word;cursor:pointer;background:transparent;padding:4px 10px;border-right:1px solid #ececec}
 .fix-task-td:hover{background:#fafbfc}
@@ -252,7 +251,7 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .fix-sp-td{font-size:11px;color:#888;font-style:italic;line-height:1.5;white-space:pre-wrap;word-break:break-word;cursor:pointer;background:transparent;padding:4px 10px;border-right:1px solid #ececec}
 .fix-sp-td:hover{background:#fafbfc}
 /* 담당 */
-.fix-assign-td{text-align:center;font-size:11px;color:#555;cursor:pointer;padding:4px 4px}
+.fix-assign-td{text-align:center;font-size:11px;color:#555;cursor:pointer;padding:4px 6px;min-width:50px;white-space:nowrap}
 .fix-assign-td:hover{background:#fafbfc}
 /* 액션 버튼 */
 .fix-actions{display:inline-flex;gap:3px;margin-left:4px;opacity:0;transition:.15s;vertical-align:middle}
@@ -262,6 +261,41 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .fix-act-btn.del:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
 .fix-task-edit{display:none;width:100%;padding:3px 6px;border:1px solid var(--bl);border-radius:3px;font-size:12px;font-family:inherit;background:var(--w);outline:none;resize:none}
 .fix-history{font-size:10px;color:var(--t4);font-style:italic;padding:2px 0;text-align:right}
+/* 고정일정 사이드바 + 날짜 컬럼 */
+.fix-layout{display:flex;height:100%;gap:0}
+.fix-sidebar{width:200px;min-width:170px;max-width:240px;background:#f8f9fb;border-right:1.5px solid #e2e5ea;overflow-y:auto;flex-shrink:0;padding:0}
+.fix-sidebar::-webkit-scrollbar{width:4px}.fix-sidebar::-webkit-scrollbar-thumb{background:#c8ccd4;border-radius:3px}
+.fix-side-week{margin:0;padding:0}
+.fix-side-week-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 12px 5px;cursor:pointer;user-select:none;position:sticky;top:0;z-index:2;background:#f8f9fb}
+.fix-side-week-hd:hover{background:#eef0f4}
+.fix-side-week-title{font-size:12px;font-weight:700;color:#374151;display:flex;align-items:center;gap:5px}
+.fix-side-week-title .now-badge{background:#fbbf24;color:#1e3a5f;font-size:8px;padding:1px 5px;border-radius:5px;font-weight:700}
+.fix-side-week-prog{font-size:10px;color:#6b7280;font-weight:600}
+.fix-side-week-bar{height:3px;margin:0 12px 4px;background:#e5e7eb;border-radius:2px;overflow:hidden}
+.fix-side-week-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.fix-side-day{display:flex;align-items:center;padding:6px 12px 6px 18px;cursor:pointer;border-left:3px solid transparent;transition:background .12s,border-color .12s;gap:6px}
+.fix-side-day:hover{background:#e8ecf2}
+.fix-side-day.active{background:#dbeafe;border-left-color:#2563eb}
+.fix-side-day.all-done{opacity:.7}
+.fix-side-day-label{font-size:12px;font-weight:600;color:#374151;min-width:48px}
+.fix-side-day-dow{font-size:10px;color:#9ca3af;min-width:18px}
+.fix-side-day-prog{font-size:10px;color:#6b7280;margin-left:auto;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.fix-side-day-prog .mini-bar{display:inline-block;height:3px;width:28px;background:#e5e7eb;border-radius:2px;overflow:hidden;vertical-align:middle}
+.fix-side-day-prog .mini-bar-fill{display:block;height:100%;border-radius:2px}
+.fix-side-day .warn-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0}
+.fix-main{flex:1;min-width:0;max-width:1100px;overflow:auto;padding:0}
+.fix-tbl th.th-date{width:62px;text-align:center;font-size:10px}
+.fix-date-cell{text-align:center;vertical-align:middle;background:#f8f9fb;border-right:2px solid #e2e5ea;border-top:2px solid #cbd5e1;padding:4px 2px;white-space:nowrap}
+.fix-date-cell .fd-day{font-size:14px;font-weight:800;line-height:1.2}
+.fix-date-cell .fd-dow{font-size:9px;color:#9ca3af;margin-top:1px}
+.fix-date-cell .fd-add{display:none;margin-top:3px;cursor:pointer;font-size:11px;color:#bbb;border:1px dashed #d0d0d0;border-radius:3px;padding:0 5px;line-height:16px}
+.fix-date-cell:hover .fd-add{display:inline-block}
+.fix-date-cell .fd-add:hover{color:#666;border-color:#999;background:#f0f0f0}
+/* 고정일정 우클릭 컨텍스트 메뉴 */
+.fix-ctx{position:fixed;z-index:9999;background:#fff;border:1px solid #d0d5dd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:4px 0;min-width:140px;font-size:12px}
+.fix-ctx-item{padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.fix-ctx-item:hover{background:#f0f4ff}
+.fix-ctx-sep{height:1px;background:#e5e7eb;margin:3px 0}
 
 /* ========= MEMO ========= */
 .memo-layout{display:grid;grid-template-columns:170px 1fr;gap:0;height:calc(100vh - 56px)}
@@ -985,8 +1019,8 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <!-- 건물 사이드바 -->
     <div class="split-left">
       <div style="padding:4px 7px;border-bottom:1px solid var(--ln);display:flex;gap:4px;flex-shrink:0">
-        <button class="btn pri sm" onclick="openMo('mo-lease')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 호실</button>
-        <button class="btn sm" onclick="openMo('mo-bldg')" style="flex:1;justify-content:center;font-size:10px;padding:4px 0">+ 건물</button>
+        <button class="btn sm" onclick="openMo('mo-bldg')" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:10px;padding:5px 0;gap:2px;line-height:1">+ 건물</button>
+        <button class="btn pri sm" onclick="openMo('mo-lease')" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:10px;padding:5px 0;gap:2px;line-height:1">+ 호실</button>
       </div>
       <div class="sb-items" id="lease-bldg-sb"></div>
     </div>
@@ -1136,8 +1170,13 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <input id="fixed-search" placeholder="검색..." oninput="rdFixed()" style="padding:3px 7px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;width:130px;margin-left:auto">
     <button class="btn sm" onclick="resetFixDone()">완료 초기화</button>
   </div>
-  <div style="padding:2px 4px;overflow:auto;height:calc(100vh - 56px);display:flex;justify-content:center">
-    <div style="padding:0;width:100%;max-width:1100px" id="fixed-list"></div>
+  <div class="fix-layout" style="height:calc(100vh - 56px)">
+    <div class="fix-sidebar" id="fix-sidebar"></div>
+    <div class="fix-main" id="fix-main-area">
+      <div style="padding:2px 4px">
+        <div style="padding:0;width:100%" id="fixed-list"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1401,34 +1440,14 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 <div class="page" id="pg-drive">
   <div class="ph" style="padding:6px 10px 4px;gap:8px"><h2>드라이브</h2><button class="btn sm" id="ehbtn-drive" onclick="openEditHistory('drive')" style="font-size:10px;padding:3px 8px;position:relative" title="수정 기록">📋 수정 기록<span class="eh-badge" style="display:none"></span></button></div>
   <div style="display:flex;height:calc(100vh - 56px);min-height:calc(100vh - 56px);overflow:hidden">
-    <!-- 좌: 사이드 패널 -->
-    <div id="drive-side" style="width:180px;flex-shrink:0;background:var(--w2);border-right:1px solid var(--ln);overflow-y:auto;padding:10px 8px;font-size:11px">
-      <div style="font-weight:800;font-size:13px;color:#1e3a5f;margin-bottom:10px;padding:4px 6px">📁 드라이브</div>
-      <div id="drive-nav" style="margin-bottom:10px"></div>
-      <div style="font-size:9px;font-weight:700;color:#94a3b8;padding:2px 8px;margin-bottom:4px">건물별</div>
-      <div id="drive-bldg-list"></div>
-      <div style="font-size:9px;font-weight:700;color:#94a3b8;padding:2px 8px;margin:10px 0 4px">문서유형</div>
-      <div id="drive-cat-list"></div>
-      <div id="drive-storage" style="margin-top:12px;padding:8px;background:var(--w);border-radius:6px;border:1px solid var(--ln)">
-        <div style="font-size:9px;color:#64748b;margin-bottom:3px">저장공간</div>
-        <div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div id="drive-usage-bar" style="height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);width:0%"></div></div>
-        <div id="drive-usage-text" style="font-size:9px;color:#64748b;margin-top:3px">계산중...</div>
-      </div>
-    </div>
-    <!-- 우: 메인 영역 -->
+    <!-- 사이드 패널 (숨김) -->
+    <div id="drive-side" style="display:none"><div id="drive-nav"></div><div id="drive-bldg-list"></div><div id="drive-cat-list"></div><div id="drive-storage"><div id="drive-usage-bar"></div><div id="drive-usage-text"></div></div></div>
+    <!-- OneDrive 메인 영역 -->
     <div style="flex:1;min-width:0;display:flex;flex-direction:column">
-      <div style="padding:8px 14px;background:var(--w);border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:8px">
-        <div id="drive-breadcrumb" style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:4px"></div>
-        <div style="flex:1"></div>
-        <input id="drive-search" type="text" placeholder="🔍 검색..." style="padding:4px 10px;border:1px solid var(--ln);border-radius:5px;font-size:11px;width:160px;font-family:inherit">
-        <button class="btn pri sm" onclick="_driveUpload()" style="font-size:11px">📤 업로드</button>
-        <button class="btn sm" onclick="_driveNewFolder()" style="font-size:11px">📁 새 폴더</button>
-        <div style="display:flex;gap:2px">
-          <span class="btn sm _dv-vt" data-v="grid" onclick="_driveView('grid')" style="padding:3px 6px;font-size:11px;background:var(--bl);color:#fff;border-color:var(--bl)">▦</span>
-          <span class="btn sm _dv-vt" data-v="list" onclick="_driveView('list')" style="padding:3px 6px;font-size:11px">≡</span>
-        </div>
+      <div id="drive-main" style="display:none"></div>
+      <div id="od-main" style="flex:1;padding:14px;overflow-y:auto">
+        <div id="od-panel"></div>
       </div>
-      <div id="drive-main" style="flex:1;padding:14px;overflow-y:auto"></div>
     </div>
   </div>
   <input type="file" id="drive-file-input" multiple style="display:none" onchange="_driveHandleFiles(this.files)">
@@ -1907,6 +1926,8 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
 </div>
 <div class="imgfull" id="imgfull" onclick="this.classList.remove('on')"><img id="imgfull-img" src=""></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SK='bm6v1';
@@ -2786,8 +2807,8 @@ function setupRealtimeSync(){
       .on('postgres_changes', {event:'UPDATE', schema:'public', table:'bm_data', filter:'id=eq.1'}, payload=>{
         const row = payload.new;
         if(!row || !row.data) return;
-        // ★ 이 탭이 최근 3초 내 저장했으면 자기 에코 무시 (다른 탭 업데이트는 수신)
-        if(window._lastSvTime && (Date.now()-window._lastSvTime)<3000){ console.log('[RT] ⛔ 이 탭 최근 저장 — 에코 무시'); return; }
+        // ★ 이 탭이 최근 10초 내 저장했으면 자기 에코 무시
+        if(window._lastSvTime && (Date.now()-window._lastSvTime)<10000){ console.log('[RT] ⛔ 이 탭 최근 저장 — 에코 무시'); return; }
         // ★ 캡처 중이거나 캡처 저장 직후면 realtime 무시
         if(_kepcoCapRunning){ console.log('[RT] ⛔ 캡처 중 — realtime 무시'); return; }
         if(window._capSaving && (Date.now()-window._capSaving)<5000){ console.log('[RT] ⛔ 캡처 저장 직후 — realtime 무시'); return; }
@@ -3095,6 +3116,13 @@ let _idbLoaded=false;
   }catch(e){}
 })();
 
+// 엑셀 데이터 자동 동기화 (버전 변경 시 재실행)
+setTimeout(function(){
+  if(localStorage.getItem('_leaseSync_v4')!=='2'){
+    try{ _syncLeaseFromExcel(); localStorage.setItem('_leaseSync_v4','2'); }catch(e){ console.warn('[sync]',e); }
+  }
+}, 3000);
+
 function mkDef(){
 const bldgs=[
   {id:1,name:'16.트러스트힐',addr:'서초동 1555-2'},
@@ -3111,6 +3139,24 @@ const bldgs=[
   {id:12,name:'32.청담포레79',addr:'청담동 79-4'},
   {id:13,name:'33.논현동 213-10',addr:''},
   {id:14,name:'36.더파크청담',addr:'청담동 61-10'},
+  {id:15,name:'1.데이지빌딩',addr:'신사동 511',team:1},
+  {id:16,name:'2.덕빌딩',addr:'논현동 63-3',team:1},
+  {id:17,name:'4.옥남빌딩',addr:'논현동 124-24',team:1},
+  {id:18,name:'5.논현동 177-18',addr:'',team:1},
+  {id:19,name:'6.브릿지빌딩',addr:'동교동 113-37',team:1},
+  {id:20,name:'7.UrbanCell',addr:'역삼동 724-1',team:1},
+  {id:21,name:'8.이레빌딩',addr:'반포동 736',team:1},
+  {id:22,name:'9.디와이',addr:'삼성동 118-5',team:1},
+  {id:23,name:'10.에스케이',addr:'청담동 19-12',team:1},
+  {id:24,name:'11.청담SS',addr:'청담동 58-22',team:1},
+  {id:25,name:'12.청담119',addr:'청담동 119',team:1},
+  {id:26,name:'13.정생빌딩',addr:'한강로2가 49-1',team:1},
+  {id:27,name:'14.디에이치빌딩',addr:'삼성동 152-32',team:1},
+  {id:28,name:'15.이현빌딩',addr:'삼전동 27-8',team:1},
+  {id:29,name:'17.동교동147-46',addr:'',team:1},
+  {id:30,name:'18.바로스빌딩',addr:'효창동 3-18',team:1},
+  {id:31,name:'23.이지빌딩',addr:'서교동 394-71',team:1},
+  {id:32,name:'27.엠제이빌딩',addr:'대치동 900-64',team:1},
 ];
 const defMemoCats={
   1:{password:'1층 정문, 승강기옆문(07시~22시 개방)\n>리더기3개 경비기능 꺼둠\n정문: 카드키,지문 필요(주차기 조작반에 카드키 있음)\n옆문 비번: 1552 > 확인 > 1552 > 확인',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 건물주에 권한 받아야함)\ncctv장비 로그인: admin / Secom100',fire:'소방안전관리자: 건물주 구태정',elevator:'승강기 안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',tax:'양부장님이 처리\n(세금계산서는 양부장님 처리)',account:'',contact:'',etc:'에스원\n트러스트카페\n(박정도, 비상연락망 등록함, b1,1층 경비 가능)\n트러스트빌딩은 출입통제 장비가 없어서 비상연락망 등록안됨\n\n참고사항:\n주차기 안전관리자: 전원성'},
@@ -3127,6 +3173,24 @@ const defMemoCats={
   12:{password:'비번: 6 > 확인 > 7904 > 확인\n(26.02.09 임차사 캡스로 변경됨)',cctv:'에스원\n계약번호: N6152121 아민코 / 맥주소: 000322901942\n녹화기명: VRN-10201 / 아이디: admin',fire:'소방안전관리자: (건물주 직원이 발행)',elevator:'승강기안전관리자: 박정도',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n수용가명: 아민코 주식회사',tax:'건물주 직원이 발행',account:'건물주 직원이 체크',contact:'',etc:'건물 열쇠뭉치 전달함 (26.01.19)'},
   13:{password:'1층 현관: 5577*\n1층 화장실: 2880\nb1,1층 전용부: 0710*(퇴거)\n3층: 1234*(퇴거)\n4층: 1234*(퇴거)',cctv:'없음',fire:'(없음)',elevator:'승강기 없음',water:'청구서: 홀수월\n검침일: 짝수월 22일\n고객번호: 029061055',tax:'건물주 측에서 발행',account:'',contact:'',etc:''},
   14:{password:'출입비번: 1 확인 6110 확인',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 권한 받아야함)\ncctv장비 로그인: admin / N6139618!',fire:'(없음)',elevator:'승강기안전관리자: 박정도',water:'짝수월\n수용가명: 프로젝트에이스주식회사',tax:'',account:'',contact:'',etc:''},
+  15:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  16:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  17:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  18:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  19:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  20:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  21:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  22:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  23:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  24:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  25:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  26:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  27:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  28:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  29:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  30:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  31:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
+  32:{password:'',cctv:'',fire:'',elevator:'',water:'',tax:'',account:'',contact:'',etc:''},
 };
 return{
 buildings:bldgs,
@@ -3204,6 +3268,24 @@ expires:[
   {id:39,bId:12,type:'승강기 보험',date:'2027-02-19',note:''},{id:40,bId:12,type:'화재 보험',date:'2041-02-24',note:''},{id:41,bId:12,type:'정화조 청소',date:'2027-02-28',note:''},
   {id:42,bId:13,type:'화재 보험',date:'2040-03-04',note:''},{id:43,bId:13,type:'정화조 청소',date:'2027-02-22',note:''},
   {id:44,bId:14,type:'승강기 보험',date:'2026-04-22',note:''},{id:45,bId:14,type:'화재 보험',date:'2041-01-14',note:''},{id:46,bId:14,type:'정화조 청소',date:'2026-05-02',note:''},
+  {id:100,bId:15,type:'승강기 보험',date:'2027-01-22',note:''},{id:101,bId:15,type:'화재 보험',date:'2027-02-02',note:''},{id:102,bId:15,type:'정화조 청소',date:'2026-05-31',note:'용도변경으로 6개월마다 청소필요'},
+  {id:103,bId:16,type:'승강기 보험',date:'2027-04-21',note:''},{id:104,bId:16,type:'화재 보험',date:'2031-01-23',note:''},{id:105,bId:16,type:'정화조 청소',date:'2026-09-12',note:''},
+  {id:106,bId:17,type:'승강기 보험',date:'2027-01-19',note:''},{id:107,bId:17,type:'화재 보험',date:'2041-01-19',note:''},{id:108,bId:17,type:'정화조 청소',date:'2026-08-10',note:''},
+  {id:109,bId:18,type:'승강기 보험',date:'2026-08-11',note:''},{id:110,bId:18,type:'화재 보험',date:'2028-09-27',note:''},{id:111,bId:18,type:'정화조 청소',date:'2026-06-29',note:''},
+  {id:112,bId:19,type:'화재 보험',date:'2040-11-14',note:''},{id:113,bId:19,type:'정화조 청소',date:'2026-09-30',note:'6개월 1회'},
+  {id:114,bId:20,type:'승강기 보험',date:'2026-08-14',note:''},{id:115,bId:20,type:'정화조 청소',date:'2026-09-10',note:''},
+  {id:116,bId:21,type:'승강기 보험',date:'2026-11-14',note:''},{id:117,bId:21,type:'화재 보험',date:'2038-05-12',note:''},{id:118,bId:21,type:'저수조 청소',date:'2026-06-16',note:'6개월 주기'},{id:119,bId:21,type:'주차기 보험',date:'2027-10-27',note:''},{id:120,bId:21,type:'정화조 청소',date:'2027-03-27',note:''},
+  {id:121,bId:22,type:'승강기 보험',date:'2026-05-18',note:''},{id:122,bId:22,type:'화재 보험',date:'2026-05-20',note:''},{id:123,bId:22,type:'정화조 청소',date:'2026-09-19',note:''},
+  {id:124,bId:23,type:'화재 보험',date:'2027-01-19',note:''},{id:125,bId:23,type:'정화조 청소',date:'2026-11-05',note:''},
+  {id:126,bId:24,type:'승강기 보험',date:'2026-06-18',note:''},{id:127,bId:24,type:'화재 보험',date:'2040-03-04',note:''},{id:128,bId:24,type:'정화조 청소',date:'2027-03-11',note:''},
+  {id:129,bId:25,type:'승강기 보험',date:'2026-07-30',note:''},{id:130,bId:25,type:'화재 보험',date:'2026-07-30',note:''},{id:131,bId:25,type:'정화조 청소',date:'2026-08-01',note:''},
+  {id:132,bId:26,type:'승강기 보험',date:'2026-06-02',note:''},{id:133,bId:26,type:'화재 보험',date:'2026-08-12',note:''},{id:134,bId:26,type:'정화조 청소',date:'2026-05-23',note:'6개월에 한번'},
+  {id:135,bId:27,type:'승강기 보험',date:'2026-08-11',note:''},{id:136,bId:27,type:'화재 보험',date:'2041-01-22',note:''},{id:137,bId:27,type:'정화조 청소',date:'2027-02-27',note:''},
+  {id:138,bId:28,type:'승강기 보험',date:'2026-10-23',note:''},{id:139,bId:28,type:'화재 보험',date:'2034-10-21',note:''},{id:140,bId:28,type:'저수조 청소',date:'2026-06-21',note:''},{id:141,bId:28,type:'정화조 청소',date:'2026-06-04',note:''},
+  {id:142,bId:29,type:'화재 보험',date:'2041-01-20',note:''},{id:143,bId:29,type:'정화조 청소',date:'2026-10-20',note:''},
+  {id:144,bId:30,type:'승강기 보험',date:'2027-02-28',note:''},{id:145,bId:30,type:'화재 보험',date:'2026-12-28',note:''},{id:146,bId:30,type:'정화조 청소',date:'2026-07-29',note:''},
+  {id:147,bId:31,type:'승강기 보험',date:'2026-12-19',note:''},{id:148,bId:31,type:'화재 보험',date:'2029-12-29',note:''},{id:149,bId:31,type:'정화조 청소',date:'2027-02-28',note:''},
+  {id:150,bId:32,type:'승강기 보험',date:'2027-02-01',note:''},{id:151,bId:32,type:'화재 보험',date:'2026-07-10',note:''},{id:152,bId:32,type:'정화조 청소',date:'2027-01-03',note:''},
 ],
 fixedSchedules:[
   {id:1,day:1,dayLabel:'1일',tasks:['월간보고서 송부','르헤브 b1층,1~5층(딥러닝) 임대료 세금계산서(공과금은 말일)','H473(슈퍼진스&보이드) 임대료 세금계산서(홀수월에 수도계산서), 건물주 전달','트러, 공과금 청구서/수도 홀수월에 청구(작성월 기준)\n  >양부장님, 임차인 전달\n  >주차소장한테 차량 방문일지 사진 요청 후 양부장님 전달','청담4613, 7층 임대료 청구서/수도(홀수월) 건물주, 임차인 전달','청담4613, 7층 임대료 세금계산서/수도계산서(홀수월)\n  >5월 수도계산서 발행 시 전층(4,7층) 메일 수정필요 cheongdam4613@gmail.com'],special:'1) 르헤브:@duckling11\n2) H473:*h4735530*\n3) 공과금 청구서 양부장님 전달\n   세금계산서는 양부장님이 처리\n   >방문주차비용 있을 시 해당층 임차인에게 정산내역 공유 필요\n4) 4613:ch4613!!bsn\n   임대료,관리비→미드미디앤씨\n   주차비→(주)미드미디앤디\n   >기본 주차1대\n   >추가 1대, 15만원 지불 후 사용'},
@@ -3228,6 +3310,31 @@ fixedSchedules:[
   {id:20,day:29,dayLabel:'29일',tasks:['청담4613 수도 검침일(홀수월)'],special:'1) p층 원격계량기함에서 전층 검침'},
   {id:21,day:30,dayLabel:'30일',tasks:['르포렘, 4층 임대료 청구서 및 수도(짝수월) 건물주, 임차인 전달'],special:''},
   {id:22,day:99,dayLabel:'말일',tasks:['2팀 건물 관리수수료 금액, 입금확인'],special:'1) 관리수수료 기본금+@\n   수수료 변동있을시 이종순부장님에게 안내\n   >관리수수료 입금확인 요청'},
+  {id:100,day:1,dayLabel:'1일',tasks:['[1팀] 월간보고서 송부'],special:'이레는 카톡으로 전달(이현빌딩,이윤교수님 이메일로 전달)'},
+  {id:101,day:2,dayLabel:'2일',tasks:['[1팀] 청담SS 수도 검침일(짝수월)'],special:'청담SS 추후 개별 임대시 체크'},
+  {id:102,day:3,dayLabel:'3일',tasks:['[1팀] 건물전체 3개월 내 계약만료일 체크','건물메모 만료일 체크','입금 내역 엑셀 출력 후 폴더링(3,6,9,12월)'],special:'공룡,브릿지,디와이,에스케이,청담SS,디에이치,이현,이지,엠제이\n>각 건물->기타->거래내역 폴더'},
+  {id:103,day:4,dayLabel:'4일',tasks:['[1팀] 임대 자료PPT 수정'],special:''},
+  {id:104,day:5,dayLabel:'5일',tasks:['[1팀] 디에이치 수도 검침일(짝수월)','디에이치 임대료 청구서'],special:'디에이치 b1층만 수도 검침요청(짝수월)'},
+  {id:105,day:6,dayLabel:'6일',tasks:['[1팀] 마포점검'],special:'월 2회 마포 점검'},
+  {id:106,day:7,dayLabel:'7일',tasks:['[1팀] 덕빌딩 수도 검침일(홀수월)','옥남빌딩 1~3,5층 임대료 청구서'],special:'동교동 임대료 청구서는 납입일 기준 일주일 전에 전달\n옥남 임대료 청구서 임대인, 임차인에 전달'},
+  {id:107,day:8,dayLabel:'8일',tasks:['[1팀] 청담SS 2~5층 임대료 청구서'],special:''},
+  {id:108,day:9,dayLabel:'9일',tasks:['[1팀] 청담119 임대료,관리비 청구서 발송'],special:'프라다 매월 20일에 다음달 임대료·관리비 선불입금\n3층 병원 매월 20일 입금(공용전기 안분 필요)'},
+  {id:109,day:10,dayLabel:'10일',tasks:['[1팀] 디와이 지하층,2층 임대료 청구서 발송','논현동 177-18 3층 임대료 청구서 발송'],special:''},
+  {id:110,day:12,dayLabel:'12일',tasks:['[1팀] 건물 전체 전기요금 폴더링','이현빌딩 402호,501호 임대료 청구서','논현동 177-18 수도요금 청구서(짝수월)','브릿지빌딩 임대료 청구서'],special:''},
+  {id:111,day:14,dayLabel:'14일',tasks:['[1팀] 옥남,동교동 147-46 수도요금 청구서(짝수월,건물주전달)','디에이치 수도요금 청구서 3개(짝수월)'],special:''},
+  {id:112,day:15,dayLabel:'15일',tasks:['[1팀] 데이지 3~4층 임대료 청구서 및 세금계산서','건물전체 수도요금 청구서 체크(사용량,미납)'],special:'데이지 홈택스 ID: daisybd / PW: disney77$'},
+  {id:113,day:16,dayLabel:'16일',tasks:['[1팀] 청담SS B1~1층 임대료 청구서','청담SS 수도요금 청구서(짝수월)','청담SS B2층 임대료, 전체 수도요금 청구서(짝수월)'],special:'2~5층 각층 분리해서 금액 청구 및 세금계산서 발행'},
+  {id:114,day:17,dayLabel:'17일',tasks:['[1팀] 건물점검 기간'],special:''},
+  {id:115,day:18,dayLabel:'18일',tasks:['[1팀] 마포점검'],special:''},
+  {id:116,day:20,dayLabel:'20일',tasks:['[1팀] 데이지 수도요금 청구서(홀수월)','이현 공용전기,수도요금 청구서(짝수월) 임대인 전달','이지빌딩 임대료 청구서(임대인,임차인)','이현빌딩 B1층 임대료 청구서'],special:''},
+  {id:117,day:21,dayLabel:'21일',tasks:['[1팀] 이레 임대료,관리비 청구서(건물주 공유)','이레 수도요금 청구서(짝수월)','덕빌딩 전기요금(매월),수도요금 청구서(홀수월)','옥남빌딩 수도 검침일(홀수월)'],special:'1층 카페 임대료,공용전기만 청구\n6층 수도는 24.08월부터 청구\n1,3,5층 검침'},
+  {id:118,day:22,dayLabel:'22일',tasks:['[1팀] 동교동147-46 수도 검침일(홀수월)(전층 요청필요)','동교동147-46 임대료 청구서(1층,3층)','옥남빌딩 전기요금 청구서 전달'],special:'동교동 147-46 임대료 청구서 임차인 발송일 표시해서 이윤교수님 이메일로 전송'},
+  {id:119,day:24,dayLabel:'24일',tasks:['[1팀] 논현동 177-18 2층 임대료 청구서 발송'],special:'4층 별도 언급전까지 청구서 미발송'},
+  {id:120,day:25,dayLabel:'25일',tasks:['[1팀] 이현 임대료,수도요금 3개(짝수월) 청구서 전달','이현빌딩 수도검침일(홀수월)(101,102,103호,3층 검침)','관리부 비용지출 정리(청담119)'],special:'세림(유송타일)임대료 청구서 임대인,임차인에 전달\n데이지 BSN건물관리 단톡방에 올리면 팀장님이 건물주에 전달'},
+  {id:121,day:28,dayLabel:'28일',tasks:['[1팀] 세금계산서 발행: 정생,디에이치,청담SS,이지빌딩,디와이','이레빌딩 수도검침일(홀수월)(1,6층 검침)','월간보고서 작성','사과먹는공룡 전기요금 청구서 임대인 전달'],special:'청담SS 2~5층 수도요금 분리발행 필요'},
+  {id:122,day:29,dayLabel:'29일',tasks:['[1팀] 에스케이,디에이치 임대료 입금 확인'],special:'미납내역 있을시 이상훈대표님에게 보고'},
+  {id:123,day:30,dayLabel:'30일',tasks:['[1팀] 데이지 수도검침일(짝수월)','옥남 관리수수료 금액안내(이종순부장님)'],special:'서주 b1층 술생 매니저에 수도 검침요청(짝수월)\n옥남 관리비 세금계산서 발행 후 월간과 같이 전달'},
+  {id:124,day:99,dayLabel:'말일',tasks:['[1팀] 전기,수도요금 입금확인(디에이치,이현)','주차기 점검결과 보고서 작성(이레빌딩,청담SS)','1팀,2팀 자산관리 비용 취합(승원)','데이지빌딩 월간보고서 수정(디자인)'],special:'이현,디에이치 전층 수도요금(짝수월)\n관리수수료 기본금+@'},
 ],
 fixedDone:{},
 fixedHistory:[],
@@ -3543,8 +3650,39 @@ function openEditHistory(filterSection){
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10000;display:flex;align-items:center;justify-content:center';
   overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
   var box=document.createElement('div');
-  box.style.cssText='background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:500px;max-width:800px;width:90%';
+  box.style.cssText='background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);min-width:500px;max-width:800px;width:90%;position:relative;cursor:default';
   box.innerHTML=h;
+  // 드래그 이동 기능
+  var titleBar=box.querySelector('div > div');
+  if(titleBar){
+    titleBar.style.cursor='move';
+    titleBar.style.userSelect='none';
+    var isDrag=false,dragX=0,dragY=0,boxX=0,boxY=0;
+    titleBar.addEventListener('mousedown',function(e){
+      if(e.target.tagName==='BUTTON'||e.target.tagName==='A')return;
+      isDrag=true;
+      // 첫 드래그 시 fixed 위치로 전환
+      if(!box.style.left){
+        var r=box.getBoundingClientRect();
+        box.style.position='fixed';
+        box.style.left=r.left+'px';
+        box.style.top=r.top+'px';
+        box.style.margin='0';
+        overlay.style.alignItems='flex-start';
+        overlay.style.justifyContent='flex-start';
+      }
+      dragX=e.clientX;dragY=e.clientY;
+      boxX=parseInt(box.style.left)||0;
+      boxY=parseInt(box.style.top)||0;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove',function mmv(e){
+      if(!isDrag)return;
+      box.style.left=(boxX+e.clientX-dragX)+'px';
+      box.style.top=(boxY+e.clientY-dragY)+'px';
+    });
+    document.addEventListener('mouseup',function mup(){isDrag=false;});
+  }
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 }
@@ -4049,6 +4187,7 @@ function closeMo(id){
 }
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeMo(o.id);}));
 
+var _EXCEL_LEASE_DATA=[{"bn":1,"f":"3~4층","t":"동일건축","s":"2026-03-21","e":"2026-06-20","d":30000000,"r":11000000,"mg":1350000,"pt":"선불","pd":"21","ph":"","em":"","n":"주차장 2대 추가사용 35만원(부가세별도) 관리비 추가","v":false,"dr":false},{"bn":2,"f":"지하2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":2,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":2,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":2,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":2,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":2,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":2,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":4,"f":"지하1층","t":"㈜지엘리코퍼레이션","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"-","ph":"홍동환 010-8706-8813 장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false},{"bn":4,"f":"1층","t":"","s":"","e":"","d":80000000,"r":7500000,"mg":1000000,"pt":"선불","pd":"14","ph":"","em":"","n":"","v":false,"dr":false},{"bn":4,"f":"2층","t":"","s":"","e":"","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14","ph":"","em":"","n":"~25.10.01 렌트프리 기간","v":false,"dr":false},{"bn":4,"f":"3층","t":"이화정","s":"","e":"","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13","ph":"010-5449-1113","em":"account@hyeins.com","n":"~25.03.12 렌트프리 기간","v":false,"dr":false},{"bn":4,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":4,"f":"5층","t":"하우스맨 박종호","s":"","e":"","d":80000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15","ph":"업무폰 010-4456-4150","em":"","n":"","v":false,"dr":false},{"bn":5,"f":"B1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":5,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":5,"f":"2층","t":"더와이디자인스튜디오(양준석)","s":"","e":"","d":20000000,"r":2150000,"mg":0,"pt":"선불","pd":"01","ph":"010-9904-8121","em":"theydesign02@gmail.com","n":"","v":false,"dr":false},{"bn":5,"f":"3층","t":"블링에스(김솔아)","s":"","e":"","d":20000000,"r":2300000,"mg":0,"pt":"후불","pd":"16","ph":"010-3441-3710","em":"","n":"","v":false,"dr":false},{"bn":5,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":6,"f":"지하1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},{"bn":6,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":6,"f":"2층","t":"한재민(태국수)","s":"2026-03-16","e":"2028-03-15","d":30000000,"r":3100000,"mg":100000,"pt":"선불","pd":"20","ph":"010-3380-4486","em":"","n":"임대료 310만원 인상 완","v":false,"dr":false},{"bn":6,"f":"3층","t":"곽병수(청23)","s":"2026-01-27","e":"2027-01-26","d":20000000,"r":1700000,"mg":100000,"pt":"선불","pd":"20","ph":"010-8230-0528","em":"","n":"","v":false,"dr":false},{"bn":6,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"namoocks@hanmail.net","n":"","v":true,"dr":false},{"bn":6,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"101호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"102호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"103호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"104호·105호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"106호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"201호·202호·301호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"302호·401호·402호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":7,"f":"501호","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":8,"f":"B2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":8,"f":"B1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":8,"f":"1층 카페","t":"정화용","s":"2022-12-24","e":"2027-12-24","d":40000000,"r":2000000,"mg":0,"pt":"후불","pd":"25","ph":"010-6222-2145","em":"","n":"발렛 50만원(vat별도), 공용전기 7.5%, 수도요금 청구","v":false,"dr":false},{"bn":8,"f":"1층 약국","t":"김민주","s":"2022-12-24","e":"2027-12-24","d":40000000,"r":0,"mg":0,"pt":"후불","pd":"25","ph":"010-7378-7455","em":"","n":"발렛 50만원(vat별도), 공용전기 7.5%, 수도요금 청구","v":false,"dr":false},{"bn":8,"f":"2~5층","t":"스페셜이비인후과, 박치열","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"010-9042-7728(건물주1)","em":"","n":"","v":false,"dr":false},{"bn":8,"f":"6층","t":"미케르","s":"2023-01-02","e":"2026-12-22","d":0,"r":2000000,"mg":500000,"pt":"후불","pd":"25","ph":"010-2766-4221(건물주2) 010-2737-7360(직원 업무폰)","em":"","n":"발렛 50만원(vat별도), 공용전기 15%, 수도요금 청구","v":false,"dr":false},{"bn":9,"f":"지하2층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15","ph":"김홍갑 대표 : 010-2821-2868 김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},{"bn":9,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":9,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":9,"f":"2층","t":"주식회사 제니트레이드","s":"2025-08-01","e":"2026-07-31","d":50000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15","ph":"010-4147-1777","em":"","n":"","v":false,"dr":false},{"bn":9,"f":"3층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01","ph":"담당자 010-6226-5042 여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},{"bn":9,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":9,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":9,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":10,"f":"B01호","t":"권형준","s":"2023-07-29","e":"2026-07-28","d":10000000,"r":860000,"mg":70000,"pt":"선불","pd":"29","ph":"010-7402-5683 010-7633-0589 여재민 (실 임차인) 010-8335-6709(실 임차인 지인)","em":"","n":"애완견 두 마리 / 주차불가/ 보증금 반환시 확인필요!","v":false,"dr":false},{"bn":10,"f":"B02호","t":"김지현","s":"2022-09-19","e":"2026-09-18","d":5000000,"r":735000,"mg":0,"pt":"선불","pd":"19","ph":"010-7188-8104","em":"","n":"월세에 관리비 수도요금/ 차량번호: 396구 2913","v":false,"dr":false},{"bn":10,"f":"101호","t":"최우진","s":"2025-06-20","e":"2026-06-19","d":10000000,"r":930000,"mg":150000,"pt":"선불","pd":"20","ph":"010-2763-9996","em":"","n":"","v":false,"dr":false},{"bn":10,"f":"102호","t":"이지수","s":"2023-10-28","e":"2026-10-27","d":10000000,"r":900000,"mg":50000,"pt":"선불","pd":"28","ph":"010-3523-7479","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},{"bn":10,"f":"201호","t":"임수정","s":"2026-03-27","e":"2027-03-26","d":34000000,"r":742000,"mg":70000,"pt":"선불","pd":"27","ph":"010-8824-8762","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},{"bn":10,"f":"202호","t":"이민숙","s":"2024-06-30","e":"2026-06-29","d":220500000,"r":0,"mg":70000,"pt":"선불","pd":"30","ph":"010-4080-8736","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},{"bn":10,"f":"3층","t":"이   훈","s":"2026-02-27","e":"2027-08-31","d":30000000,"r":1540000,"mg":100000,"pt":"선불","pd":"27","ph":"010-2679-8696","em":"","n":"관리비 수도요금 포함 / 주차 사용 중(계약서 명시X)","v":false,"dr":false},{"bn":10,"f":"옥탑","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":11,"f":"지하2층","t":"유노하나코리아","s":"2025-10-28","e":"2027-10-27","d":30000000,"r":4000000,"mg":0,"pt":"선불","pd":"28","ph":"","em":"","n":"~25.12.27 렌트프리 기간","v":false,"dr":false},{"bn":11,"f":"지하1층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23","ph":"여자 대표님 010-4326-0853","em":"","n":"","v":false,"dr":false},{"bn":11,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":11,"f":"2층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},{"bn":11,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":11,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":11,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":12,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":12,"f":"지상1층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25","ph":"변호사:010-7150-9684 배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},{"bn":12,"f":"지상2층","t":"","s":"2023-03-31","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":12,"f":"지상4층","t":"","s":"2024-01-29","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":12,"f":"지상5층","t":"","s":"2023-03-31","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":12,"f":"지상3층","t":"셀나인","s":"2024-03-05","e":"2027-03-04","d":300000000,"r":9270000,"mg":871000,"pt":"선불","pd":"20","ph":"김은지 원장 : 010-4199-8386 총괄실장:010-9164-5227","em":"","n":"26년 3월부터 매년 3% 인상","v":false,"dr":false},{"bn":12,"f":"지상6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":13,"f":"1층","t":"더블유더블유씨디","s":"2024-06-28","e":"2027-06-27","d":120000000,"r":9075000,"mg":300000,"pt":"선불","pd":"28","ph":"대표 010-5101-8666(연락은 매니저한테) 매니저 010-4976-4250(최신)","em":"","n":"2년 계약갱신완료(임대료 907,5만원 / 관리비 30만원 으로 인상)","v":false,"dr":false},{"bn":13,"f":"2층","t":"주식회사 하연옥","s":"2024-06-28","e":"2026-06-27","d":100000000,"r":8000000,"mg":300000,"pt":"선불","pd":"08","ph":"사장님 010-7208-0327","em":"","n":"2년 계약갱신완료(관리비 30만원 으로 인상)","v":false,"dr":false},{"bn":13,"f":"3층","t":"이즈디프런트 주식회사","s":"2023-08-21","e":"2027-08-20","d":80000000,"r":5000000,"mg":300000,"pt":"선불","pd":"21","ph":"대표 : 민동욱 담당자 심영준 팀장 : 010-5267-9398","em":"","n":"9월부터 주차 추가 안함","v":false,"dr":false},{"bn":13,"f":"4층","t":"㈜하늘을담다","s":"2024-06-20","e":"2026-06-19","d":80000000,"r":4200000,"mg":300000,"pt":"선불","pd":"20","ph":"대표 010-8586-3549  직원 010-4817-0259(담당)","em":"","n":"주차비 15만원 추가 납입. 2대 사용 중","v":false,"dr":false},{"bn":13,"f":"5층","t":"이즈디프런트 주식회사","s":"2025-02-21","e":"2027-02-20","d":30000000,"r":3000000,"mg":300000,"pt":"선불","pd":"21","ph":"담당자 심영준 팀장 : 010-5267-9398","em":"","n":"1년 갱신 07.18-","v":false,"dr":false},{"bn":14,"f":"B1호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":1000000,"mg":50000,"pt":"선불","pd":"21","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},{"bn":14,"f":"B2호","t":"","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":700000,"mg":50000,"pt":"선불","pd":"21","ph":"","em":"","n":"","v":false,"dr":false},{"bn":14,"f":"1층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11","ph":"","em":"","n":"","v":false,"dr":false},{"bn":14,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":14,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":14,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":15,"f":"B01호","t":"김수연","s":"2025-10-24","e":"2027-10-23","d":15000000,"r":1100000,"mg":100000,"pt":"선불","pd":"24","ph":"010-2115-5611","em":"","n":"mabuceo34@gmail.com","v":false,"dr":false},{"bn":15,"f":"101호","t":"살롱드유헤어","s":"2025-04-15","e":"2027-04-14","d":20000000,"r":1530000,"mg":50000,"pt":"후불","pd":"말","ph":"010-9542-0336","em":"","n":"","v":false,"dr":false},{"bn":15,"f":"102호","t":"신동민","s":"2024-09-19","e":"2026-09-18","d":15000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말","ph":"010-7738-8083","em":"","n":"10월분 납입함,11월부터 말일로 변경","v":false,"dr":false},{"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말","ph":"010-3894-7044","em":"","n":"렌트프리기간(1개월) 24.09.02 ~ 24.10.01","v":false,"dr":false},{"bn":15,"f":"201호","t":"아이디얼핏","s":"2026-01-02","e":"2028-01-01","d":20000000,"r":2020000,"mg":130000,"pt":"후불","pd":"말","ph":"010-3124-0120","em":"","n":"관리비=주차비 3만원 포함(vat별도),","v":false,"dr":false},{"bn":15,"f":"301호","t":"한울이앤씨(직영)","s":"2025-09-01","e":"2027-08-31","d":20000000,"r":2300000,"mg":100000,"pt":"후불","pd":"20","ph":"","em":"","n":"","v":false,"dr":false},{"bn":15,"f":"401호","t":"권효진(주택)","s":"2025-08-30","e":"2026-08-29","d":30000000,"r":1170000,"mg":100000,"pt":"후불","pd":"말","ph":"대표 010-5335-9493","em":"","n":"5/25 임대차 5% 인상안(3000/117/10/2년) 날인 완료","v":false,"dr":false},{"bn":15,"f":"402호","t":"하사도(주택)","s":"2025-09-20","e":"2026-09-19","d":10000000,"r":650000,"mg":50000,"pt":"후불","pd":"20","ph":"010-8563-4142","em":"","n":"","v":false,"dr":false},{"bn":15,"f":"501호","t":"김시현(주택)","s":"2026-02-14","e":"2027-02-13","d":30000000,"r":1100000,"mg":100000,"pt":"후불","pd":"14","ph":"010-9931-8193","em":"","n":"","v":false,"dr":false},{"bn":17,"f":"1층","t":"연남 허니 밀크","s":"2024-04-29","e":"2028-04-28","d":30000000,"r":2600000,"mg":250000,"pt":"선불","pd":"29","ph":"010-6330-8758(남편)","em":"","n":"랜트프리기간(1개월) 24.04.29 ~ 24.05.28","v":false,"dr":false},{"bn":17,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"~10.29 렌트프리 기간","v":false,"dr":false},{"bn":18,"f":"지하1층(A)","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":18,"f":"지하1층(B)","t":"","s":"","e":"","d":0,"r":1000000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},{"bn":18,"f":"1층(A)","t":"","s":"2025-08-04","e":"2027-08-03","d":0,"r":2500000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},{"bn":18,"f":"1층(B)","t":"퍼스널랭귀지","s":"2025-08-04","e":"2027-08-03","d":30000000,"r":2200000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},{"bn":18,"f":"2층","t":"(주)십사일동안","s":"2025-07-31","e":"","d":40000000,"r":4000000,"mg":300000,"pt":"","pd":"말","ph":"","em":"","n":"","v":false,"dr":false},{"bn":18,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"hansol.s@the14days.com","n":"","v":true,"dr":false},{"bn":18,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":18,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":23,"f":"지하1층","t":"","s":"2026-04-15","e":"2028-04-14","d":40000000,"r":3000000,"mg":500000,"pt":"선불","pd":"25","ph":"길현준 010-2925-8533","em":"","n":"","v":false,"dr":false},{"bn":23,"f":"1층","t":"안짱","s":"2024-09-23","e":"2026-09-22","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25","ph":"안태희대표 010-4600-2522 정혜진팀장 010-7139-4600","em":"hyejin@richnmedia.co.kr","n":"","v":false,"dr":false},{"bn":23,"f":"2층","t":"스튜디오에이콘","s":"2025-01-10","e":"2027-01-09","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25","ph":"김선구 010-9078-3538","em":"dotori@studioacorn.com","n":"주차 1대","v":false,"dr":false},{"bn":23,"f":"3층","t":"요쿠스","s":"2023-11-16","e":"2028-05-15","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25","ph":"최창훈대표 010-2537-4435 오종근이사 010-4966-4110","em":"changhoon.choi@jocoos.com","n":"주차 1대","v":false,"dr":false},{"bn":23,"f":"4층","t":"㈜인퓨라젠바이오","s":"2024-11-16","e":"2026-11-25","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25","ph":"김강훈대표 010-6630-5104  이승은매니저 010-9100-1343","em":"bhagwanshin@gmail.com","n":"주차 1대","v":false,"dr":false},{"bn":23,"f":"5층","t":"㈜스토리프트","s":"2025-09-15","e":"2026-09-14","d":40000000,"r":3400000,"mg":350000,"pt":"선불","pd":"25","ph":"소이성직원 010-2745-0921","em":"","n":"주차 1대","v":false,"dr":false},{"bn":23,"f":"6층","t":"㈜NYKO","s":"2025-10-30","e":"2027-10-29","d":30000000,"r":2100000,"mg":300000,"pt":"선불","pd":"25","ph":"010-9047-4400","em":"jgnyko@gmail.com","n":"","v":false,"dr":false},{"bn":27,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":27,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":27,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":27,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":27,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":27,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":16,"f":"지하2층","t":"클래시카 서울","s":"2025-05-01","e":"2027-04-30","d":70000000,"r":5500000,"mg":1000000,"pt":"선불","pd":"1","ph":"김태환, 공동대표1: 010-7357-1377 고연경, 공동대표2: 010-4383-1355","em":"","n":"렌트프리기간(3개월) 25.05.1 ~ 25.08.31 / 발렛비 말일 지불 퇴거 시 가스계량기 원복필요(계약서 폴더 참고)","v":false,"dr":false},{"bn":16,"f":"지하1층","t":"직영","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":true},{"bn":16,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":16,"f":"2층","t":"법무법인 인율","s":"2025-01-10","e":"2027-01-09","d":100000000,"r":6500000,"mg":500000,"pt":"선불","pd":"10","ph":"대표님 010-4040-2102","em":"inyul@inyullaw.com","n":"렌트프리기간(3개월) 25.01.10 ~ 25.04.09 / 발렛비 말일 지불","v":false,"dr":false},{"bn":16,"f":"3층","t":"세무법인 펜타곤","s":"2025-04-21","e":"2027-04-20","d":100000000,"r":5500000,"mg":500000,"pt":"선불","pd":"21","ph":"대표님 010-3211-3132","em":"","n":"렌트프리기간(2개월) 25.04.21 ~ 25.06.20 / 발렛비 말일 지불","v":false,"dr":false},{"bn":16,"f":"4층","t":"세무법인 디엘지(DLG)","s":"2024-11-19","e":"2026-11-18","d":200000000,"r":12000000,"mg":1000000,"pt":"선불","pd":"19","ph":"대표님 010-9344-1543","em":"","n":"랜트프리기간(2개월) 24.11.19 ~ 25.01.18 / 발렛비 말일 지불","v":false,"dr":false},{"bn":16,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":16,"f":"6층","t":"조준우(바디움대표)개인","s":"2024-05-16","e":"2026-05-15","d":150000000,"r":15000000,"mg":2000000,"pt":"선불","pd":"16","ph":"조준우 대표님 010-9285-3907","em":"jina@bodium.co.kr","n":"렌트프리기간(2개월) 24.05.16 ~ 24.07.15/ 발렛비 말일 지불","v":false,"dr":false},{"bn":16,"f":"7층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":16,"f":"8층","t":"주식회사바디움","s":"2024-05-16","e":"2026-05-15","d":50000000,"r":5000000,"mg":1000000,"pt":"선불","pd":"16","ph":"","em":"jina@bodium.co.kr","n":"렌트프리기간(2개월) 24.05.16 ~ 24.07.15/ 발렛비 말일 지불","v":false,"dr":false},{"bn":19,"f":"1층","t":"주식회사 누땡","s":"2023-12-26","e":"2026-12-25","d":100000000,"r":6000000,"mg":400000,"pt":"선불","pd":"26","ph":"010-9245-9943(연락은 이분)/ 공동대표 : 010-3388-3554 /  김지환 점장 : 010-2874-5864","em":"nuthang13@naver.com","n":"렌트프리(3개월) 23.12.26 ~ 24.03.24","v":false,"dr":false},{"bn":19,"f":"2층","t":"두보산업㈜","s":"2025-08-11","e":"2027-08-10","d":50000000,"r":4500000,"mg":400000,"pt":"선불","pd":"11","ph":"정영웅 대표 정경래 대표 : 010-9808-8725","em":"","n":"렌트프리(2개월) 25.08.11 ~ 25.10.10","v":false,"dr":false},{"bn":19,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":19,"f":"4층","t":"주식회사 비주얼인텔리전스","s":"2026-03-05","e":"2027-03-04","d":50000000,"r":4500000,"mg":300000,"pt":"선불","pd":"04","ph":"장세훈 대표님 010-9663-3214","em":"sehun.chang@visualint.co.kr","n":"렌트프리(1개월) 25.03.05 ~ 25.04.04","v":false,"dr":false},{"bn":19,"f":"5층","t":"주식회사 바오밥픽처스","s":"2024-09-23","e":"2026-09-22","d":60000000,"r":4200000,"mg":300000,"pt":"선불","pd":"23","ph":"김시영 대표 : 010-3322-7361 (실사용) 전재영 010-2934-4956","em":"","n":"","v":false,"dr":false},{"bn":20,"f":"지하2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"4층","t":"주식회사 아반투라","s":"2025-12-09","e":"2027-12-08","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"09","ph":"이승규 대표님 010-3152-7073 직원 010-2602-0479","em":"tax@avantura.co.kr","n":"렌트프리(1개월) 25.12.09 ~ 26.01.08 (렌트프리 기간 관리비도 무상임)","v":false,"dr":false},{"bn":20,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":20,"f":"7층","t":"주식회사 미드미디앤씨","s":"2025-09-05","e":"2027-09-04","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"05","ph":"이선민(부장:실무자) 010-4577-4780","em":"sunnnytax07@naver.com","n":"렌트프리(1개월) 25.09.05 ~ 25.10.04","v":false,"dr":false},{"bn":20,"f":"8층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":21,"f":"지하1층","t":"㈜비앤비인더스트리","s":"2026-01-31","e":"2027-01-30","d":30000000,"r":3350000,"mg":100000,"pt":"선불","pd":"01","ph":"010-6732-6486","em":"","n":"임대료 입금은 매월 1일","v":false,"dr":false},{"bn":21,"f":"1층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~ 연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},{"bn":21,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":21,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":21,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":21,"f":"5층","t":"한국딥러닝","s":"2025-11-19","e":"2027-03-17","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"01","ph":"","em":"","n":"25.12.18까지 렌트프리 / 12.19~31(납입)/ 이후26.1월부터 (1일 선납)","v":false,"dr":false},{"bn":22,"f":"1,2층(일부)·지층 전부","t":"주식회사 더기프팅컴퍼니","s":"2025-06-01","e":"2026-05-31","d":50000000,"r":8457750,"mg":500000,"pt":"후불","pd":"말","ph":"직영","em":"","n":"","v":false,"dr":false},{"bn":22,"f":"1층","t":"조경진(헤비스테이크)","s":"2025-06-30","e":"2026-06-29","d":20000000,"r":2335750,"mg":500000,"pt":"후불","pd":"말","ph":"010-6730-2243","em":"","n":"","v":false,"dr":false},{"bn":22,"f":"2층","t":"이기택(기러기둥지와인바)","s":"2025-11-30","e":"2026-11-29","d":20000000,"r":2335750,"mg":535000,"pt":"후불","pd":"말","ph":"010-9010-1842","em":"","n":"","v":false,"dr":false},{"bn":22,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},{"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20","ph":"010-4531-8498","em":"","n":"개인 미용실 렌트프리 (~12/19) 12/20부터 임대료 부과","v":false,"dr":false},{"bn":24,"f":"2층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1","ph":"최수만 팀장 010-3774-2328 슈퍼보이드 면적 - 151.57평 (지하1,2,3,5층) 슈퍼진스 - 23.24평(4층) 총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용 렌트프리 (24.06.03~24.07.31) 8/1부터 임대료 부과","v":false,"dr":false},{"bn":24,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1","ph":"","em":"","n":"","v":false,"dr":false},{"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},{"bn":25,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"7층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"8층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"9층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":25,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":28,"f":"지하1층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말","ph":"라이드 박채린실장 010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},{"bn":28,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":28,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":28,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":28,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":28,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":28,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":29,"f":"지하1층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간 2025-05-23 ~ 2025-08-22 (2025-08-23 부터 차임 선불 납부)  * 특약사항 (차임 조건) 2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도) 2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},{"bn":29,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":29,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":29,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":29,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":29,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":29,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":30,"f":"지하1층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"* 렌트프리기간 2025-10-31 ~ 2026-01-30","v":false,"dr":false},{"bn":30,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":30,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":30,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":30,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":30,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},{"bn":31,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":31,"f":"1층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":30000000,"r":3165000,"mg":200000,"pt":"선불","pd":"1","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},{"bn":31,"f":"2층","t":"나선영 (에이탑Atop)학원","s":"2024-11-10","e":"2026-11-09","d":30000000,"r":2850000,"mg":300000,"pt":"선불","pd":"10","ph":"010-5703-7164","em":"pdhnsy@gmail.com","n":"","v":false,"dr":false},{"bn":31,"f":"3층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":20000000,"r":3165000,"mg":200000,"pt":"선불","pd":"30","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},{"bn":31,"f":"4층","t":"","s":"2026-02-01","e":"2028-03-31","d":30000000,"r":3500000,"mg":200000,"pt":"선불","pd":"1","ph":"","em":"","n":"","v":false,"dr":false},{"bn":31,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":32,"f":"지하1층·~·5층","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"렌트프리기간 2026-01-07 ~ 2026-04-06","v":false,"dr":false},{"bn":33,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},{"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},{"bn":33,"f":"2층","t":"주식회사 이작디자인","s":"2025-03-27","e":"2026-03-26","d":1000000,"r":600000,"mg":0,"pt":"후불","pd":"말","ph":"양은주 010-6209-6657","em":"","n":"대표님 지인","v":false,"dr":false},{"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"퇴거완료","v":true,"dr":false},{"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"명도 완료","v":true,"dr":false},{"bn":33,"f":"지하2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"7층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"8층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"9층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"6층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"7층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"8층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":33,"f":"9층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":36,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":36,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":36,"f":"2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":36,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":36,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false},{"bn":36,"f":"5층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":true,"dr":false}];
 // ── LEASE ─────────────────────────────────────────────────────────────
 function rdLease(){
   const f=DB.ui.leaseF;
@@ -4310,6 +4449,120 @@ function fmtMoneyInput(el){
   // 커서 위치 보정
   const diff=next.length-old.length;
   try{el.setSelectionRange(Math.max(0,caret+diff),Math.max(0,caret+diff));}catch(e){}
+}
+// ── 공실 추가 ──
+// ── 엑셀 데이터 동기화 (2025-04 기준) ──
+function _syncLeaseFromExcel(){
+  var data=typeof _EXCEL_LEASE_DATA!=='undefined'?_EXCEL_LEASE_DATA:[];
+  if(!data.length){ return; }
+  // ── 1팀 건물 누락 시 추가 ──
+  var _t1b=[
+    {id:15,name:'1.데이지빌딩',addr:'신사동 511',team:1},{id:16,name:'2.덕빌딩',addr:'논현동 63-3',team:1},
+    {id:17,name:'4.옥남빌딩',addr:'논현동 124-24',team:1},{id:18,name:'5.논현동 177-18',addr:'',team:1},
+    {id:19,name:'6.브릿지빌딩',addr:'동교동 113-37',team:1},{id:20,name:'7.UrbanCell',addr:'역삼동 724-1',team:1},
+    {id:21,name:'8.이레빌딩',addr:'반포동 736',team:1},{id:22,name:'9.디와이',addr:'삼성동 118-5',team:1},
+    {id:23,name:'10.에스케이',addr:'청담동 19-12',team:1},{id:24,name:'11.청담SS',addr:'청담동 58-22',team:1},
+    {id:25,name:'12.청담119',addr:'청담동 119',team:1},{id:26,name:'13.정생빌딩',addr:'한강로2가 49-1',team:1},
+    {id:27,name:'14.디에이치빌딩',addr:'삼성동 152-32',team:1},{id:28,name:'15.이현빌딩',addr:'삼전동 27-8',team:1},
+    {id:29,name:'17.동교동147-46',addr:'',team:1},{id:30,name:'18.바로스빌딩',addr:'효창동 3-18',team:1},
+    {id:31,name:'23.이지빌딩',addr:'서교동 394-71',team:1},{id:32,name:'27.엠제이빌딩',addr:'대치동 900-64',team:1}
+  ];
+  var _exi={};DB.buildings.forEach(function(b){_exi[b.id]=1;});
+  _t1b.forEach(function(b){if(!_exi[b.id])DB.buildings.push(b); else { var eb=DB.buildings.find(function(x){return x.id===b.id;}); if(eb) eb.team=1; }});
+  // ── 1팀 만료일 추가 ──
+  var _t1exp=[
+    {id:100,bId:15,type:'승강기 보험',date:'2027-01-22',note:''},{id:101,bId:15,type:'화재 보험',date:'2027-02-02',note:''},{id:102,bId:15,type:'정화조 청소',date:'2026-05-31',note:'6개월마다'},
+    {id:103,bId:16,type:'승강기 보험',date:'2027-04-21',note:''},{id:104,bId:16,type:'화재 보험',date:'2031-01-23',note:''},{id:105,bId:16,type:'정화조 청소',date:'2026-09-12',note:''},
+    {id:106,bId:17,type:'승강기 보험',date:'2027-01-19',note:''},{id:107,bId:17,type:'화재 보험',date:'2041-01-19',note:''},{id:108,bId:17,type:'정화조 청소',date:'2026-08-10',note:''},
+    {id:109,bId:18,type:'승강기 보험',date:'2026-08-11',note:''},{id:110,bId:18,type:'화재 보험',date:'2028-09-27',note:''},{id:111,bId:18,type:'정화조 청소',date:'2026-06-29',note:''},
+    {id:112,bId:19,type:'화재 보험',date:'2040-11-14',note:''},{id:113,bId:19,type:'정화조 청소',date:'2026-09-30',note:'6개월 1회'},
+    {id:114,bId:20,type:'승강기 보험',date:'2026-08-14',note:''},{id:115,bId:20,type:'정화조 청소',date:'2026-09-10',note:''},
+    {id:116,bId:21,type:'승강기 보험',date:'2026-11-14',note:''},{id:117,bId:21,type:'화재 보험',date:'2038-05-12',note:''},{id:118,bId:21,type:'저수조 청소',date:'2026-06-16',note:'6개월'},{id:119,bId:21,type:'주차기 보험',date:'2027-10-27',note:''},{id:120,bId:21,type:'정화조 청소',date:'2027-03-27',note:''},
+    {id:121,bId:22,type:'승강기 보험',date:'2026-05-18',note:''},{id:122,bId:22,type:'화재 보험',date:'2026-05-20',note:''},{id:123,bId:22,type:'정화조 청소',date:'2026-09-19',note:''},
+    {id:124,bId:23,type:'화재 보험',date:'2027-01-19',note:''},{id:125,bId:23,type:'정화조 청소',date:'2026-11-05',note:''},
+    {id:126,bId:24,type:'승강기 보험',date:'2026-06-18',note:''},{id:127,bId:24,type:'화재 보험',date:'2040-03-04',note:''},{id:128,bId:24,type:'정화조 청소',date:'2027-03-11',note:''},
+    {id:129,bId:25,type:'승강기 보험',date:'2026-07-30',note:''},{id:130,bId:25,type:'화재 보험',date:'2026-07-30',note:''},{id:131,bId:25,type:'정화조 청소',date:'2026-08-01',note:''},
+    {id:132,bId:26,type:'승강기 보험',date:'2026-06-02',note:''},{id:133,bId:26,type:'화재 보험',date:'2026-08-12',note:''},{id:134,bId:26,type:'정화조 청소',date:'2026-05-23',note:'6개월'},
+    {id:135,bId:27,type:'승강기 보험',date:'2026-08-11',note:''},{id:136,bId:27,type:'화재 보험',date:'2041-01-22',note:''},{id:137,bId:27,type:'정화조 청소',date:'2027-02-27',note:''},
+    {id:138,bId:28,type:'승강기 보험',date:'2026-10-23',note:''},{id:139,bId:28,type:'화재 보험',date:'2034-10-21',note:''},{id:140,bId:28,type:'저수조 청소',date:'2026-06-21',note:''},{id:141,bId:28,type:'정화조 청소',date:'2026-06-04',note:''},
+    {id:142,bId:29,type:'화재 보험',date:'2041-01-20',note:''},{id:143,bId:29,type:'정화조 청소',date:'2026-10-20',note:''},
+    {id:144,bId:30,type:'승강기 보험',date:'2027-02-28',note:''},{id:145,bId:30,type:'화재 보험',date:'2026-12-28',note:''},{id:146,bId:30,type:'정화조 청소',date:'2026-07-29',note:''},
+    {id:147,bId:31,type:'승강기 보험',date:'2026-12-19',note:''},{id:148,bId:31,type:'화재 보험',date:'2029-12-29',note:''},{id:149,bId:31,type:'정화조 청소',date:'2027-02-28',note:''},
+    {id:150,bId:32,type:'승강기 보험',date:'2027-02-01',note:''},{id:151,bId:32,type:'화재 보험',date:'2026-07-10',note:''},{id:152,bId:32,type:'정화조 청소',date:'2027-01-03',note:''}
+  ];
+  var _exi2={};if(DB.expires)DB.expires.forEach(function(e){_exi2[e.id]=1;});
+  _t1exp.forEach(function(e){if(!_exi2[e.id]){if(!DB.expires)DB.expires=[];DB.expires.push(e);}});
+  // ── 1팀 고정일정 추가 ──
+  var _t1fs=[
+    {id:100,day:1,dayLabel:'1일',tasks:['[1팀] 월간보고서 송부'],special:'이레는 카톡으로 전달'},
+    {id:101,day:2,dayLabel:'2일',tasks:['[1팀] 청담SS 수도 검침일(짝수월)'],special:''},
+    {id:102,day:3,dayLabel:'3일',tasks:['[1팀] 건물전체 3개월내 계약만료일 체크','건물메모 만료일 체크'],special:''},
+    {id:103,day:5,dayLabel:'5일',tasks:['[1팀] 디에이치 수도 검침일(짝수월)','디에이치 임대료 청구서'],special:'b1층만 수도 검침요청(짝수월)'},
+    {id:104,day:7,dayLabel:'7일',tasks:['[1팀] 덕빌딩 수도 검침일(홀수월)','옥남빌딩 1~3,5층 임대료 청구서'],special:''},
+    {id:105,day:8,dayLabel:'8일',tasks:['[1팀] 청담SS 2~5층 임대료 청구서'],special:''},
+    {id:106,day:9,dayLabel:'9일',tasks:['[1팀] 청담119 임대료,관리비 청구서'],special:'프라다 매월 20일 선불입금'},
+    {id:107,day:10,dayLabel:'10일',tasks:['[1팀] 디와이 지하층,2층 임대료 청구서','논현동 177-18 3층 임대료 청구서'],special:''},
+    {id:108,day:12,dayLabel:'12일',tasks:['[1팀] 건물전체 전기요금 폴더링','이현 402호,501호 임대료 청구서','논현동 177-18 수도요금(짝수월)','브릿지빌딩 임대료 청구서'],special:''},
+    {id:109,day:14,dayLabel:'14일',tasks:['[1팀] 옥남,동교동 수도요금 청구서(짝수월)','디에이치 수도요금 청구서(짝수월)'],special:''},
+    {id:110,day:15,dayLabel:'15일',tasks:['[1팀] 데이지 3~4층 임대료 청구서 및 세금계산서','건물전체 수도요금 체크(사용량,미납)'],special:''},
+    {id:111,day:16,dayLabel:'16일',tasks:['[1팀] 청담SS B1~1층 임대료 청구서','청담SS 수도요금(짝수월)'],special:'2~5층 각층 분리 청구'},
+    {id:112,day:20,dayLabel:'20일',tasks:['[1팀] 데이지 수도요금(홀수월)','이현 공용전기,수도요금(짝수월)','이지빌딩 임대료 청구서','이현 B1층 임대료 청구서'],special:''},
+    {id:113,day:21,dayLabel:'21일',tasks:['[1팀] 이레 임대료,관리비 청구서','이레 수도요금(짝수월)','덕빌딩 전기,수도요금(홀수월)','옥남 수도 검침일(홀수월)'],special:''},
+    {id:114,day:22,dayLabel:'22일',tasks:['[1팀] 동교동 수도 검침일(홀수월)','동교동 임대료 청구서(1층,3층)','옥남 전기요금 청구서'],special:''},
+    {id:115,day:24,dayLabel:'24일',tasks:['[1팀] 논현동 177-18 2층 임대료 청구서'],special:'4층 별도 언급전까지 미발송'},
+    {id:116,day:25,dayLabel:'25일',tasks:['[1팀] 이현 임대료,수도요금(짝수월) 청구서','이현 수도검침일(홀수월)','관리부 비용지출 정리(청담119)'],special:''},
+    {id:117,day:28,dayLabel:'28일',tasks:['[1팀] 세금계산서: 정생,디에이치,청담SS,이지,디와이','이레 수도검침일(홀수월)','월간보고서 작성'],special:'청담SS 수도요금 분리발행'},
+    {id:118,day:29,dayLabel:'29일',tasks:['[1팀] 에스케이,디에이치 임대료 입금확인'],special:'미납시 이상훈대표님 보고'},
+    {id:119,day:30,dayLabel:'30일',tasks:['[1팀] 데이지 수도검침일(짝수월)','옥남 관리수수료 안내(이종순부장님)'],special:''},
+    {id:120,day:99,dayLabel:'말일',tasks:['[1팀] 전기,수도요금 입금확인(디에이치,이현)','주차기 점검보고서(이레,청담SS)','자산관리 비용 취합(승원)'],special:''}
+  ];
+  var _exi3={};if(DB.fixedSchedules)DB.fixedSchedules.forEach(function(f){_exi3[f.id]=1;});
+  _t1fs.forEach(function(f){if(!_exi3[f.id]){if(!DB.fixedSchedules)DB.fixedSchedules=[];DB.fixedSchedules.push(f);}});
+  // ── 건물 번호→ID 매핑 ──
+  var bnMap={};
+  DB.buildings.forEach(function(b){
+    var m=b.name.match(/^(\d+)/);
+    if(m) bnMap[parseInt(m[1])]=b.id;
+  });
+  var updated=0, added=0, skipped=0;
+  // 건물번호별 그룹
+  var byBn={};
+  data.forEach(function(d){ if(!byBn[d.bn]) byBn[d.bn]=[]; byBn[d.bn].push(d); });
+  Object.keys(byBn).forEach(function(bn){
+    var bId=bnMap[parseInt(bn)];
+    if(!bId){ skipped++; return; }
+    var items=byBn[bn];
+    // 기존 임대 중 이 건물 것
+    var oldLeases=DB.leases.filter(function(l){ return l.bId==bId; });
+    // 기존 첨부파일 보존용 맵 (층→lease)
+    var oldByFloor={};
+    oldLeases.forEach(function(l){ oldByFloor[l.floor]=l; });
+    // 기존 삭제
+    DB.leases=DB.leases.filter(function(l){ return l.bId!=bId; });
+    // 새로 추가
+    items.forEach(function(d){
+      var old=oldByFloor[d.f]||{};
+      var lease={
+        id:old.id||nid(), bId:bId, floor:d.f,
+        tenant:d.dr?'직영':(d.t||''), start:d.s||'', end:d.e||'',
+        deposit:d.d||0, rent:d.r||0, mgmt:d.mg||0,
+        paytype:d.dr?'직영':(d.pt||''), payday:d.pd||'',
+        phone:d.ph||'', email:d.em||'', note:d.n||''
+      };
+      // 기존 첨부파일/렌트프리/인상구간 보존
+      if(old.contract) lease.contract=old.contract;
+      if(old.contractFiles) lease.contractFiles=old.contractFiles;
+      if(old.contractName) lease.contractName=old.contractName;
+      if(old.rfStart) lease.rfStart=old.rfStart;
+      if(old.rfEnd) lease.rfEnd=old.rfEnd;
+      if(old.rfNone) lease.rfNone=old.rfNone;
+      if(old.rentSchedule) lease.rentSchedule=old.rentSchedule;
+      if(old.rentSchNone) lease.rentSchNone=old.rentSchNone;
+      DB.leases.push(lease);
+      if(old.id) updated++; else added++;
+    });
+  });
+  sv(); rdLease(); upBadges();
 }
 function saveLease(){
   const eid=$('lease-eid').value;
@@ -4782,18 +5035,40 @@ function rdWater(){
     }
   });
   html+='</tbody></table></div></div></div>';
-  // 건물없이 저장된 수도요금 (레거시)
-  const orphan=bills.filter(w=>!grp[w.bId]).filter(w=>{
+  // 건물없이 저장된 수도요금 (레거시) — 다른 팀 건물 제외, 미배정은 2팀에서만
+  const _wAllBIds=new Set(DB.buildings.map(b=>b.id));
+  const _wCurTeam=_getCurrentTeam();
+  const orphan=bills.filter(w=>{
+    if(!w.bId) return _wCurTeam===2;
+    return !grp[w.bId]&&!_wAllBIds.has(w.bId);
+  }).filter(w=>{
     if(!q) return true;
     return (w.custNo||'').toLowerCase().includes(q) || (w.custName||'').toLowerCase().includes(q) || (w.note||'').toLowerCase().includes(q);
   });
   if(orphan.length){
-    html+='<div style="margin-bottom:14px;background:#fef9c3;border:1px solid #eab308;border-radius:var(--r2);padding:10px 14px;font-size:11px;color:#854d0e">⚠ 건물 정보 없는 항목 '+orphan.length+'개 — 수정하여 건물을 지정하세요</div>';
+    html+='<div style="margin-bottom:14px;background:#fef9c3;border:1px solid #eab308;border-radius:var(--r2);padding:10px 14px;font-size:11px;color:#854d0e;display:flex;align-items:center;justify-content:space-between"><span>⚠ 건물 정보 없는 항목 '+orphan.length+'개 — 수정하여 건물을 지정하세요</span><button onclick="_delOrphanWaterBills()" style="font-size:10px;padding:3px 8px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;white-space:nowrap;flex-shrink:0">삭제</button></div>';
   }
   if(!html) html='<div style="padding:40px;text-align:center;color:var(--t3)">등록된 수도요금 고객정보가 없습니다. 우측 상단 "+ 추가" 버튼을 눌러 시작하세요.</div>';
   list.innerHTML=html;
 }
 let _waterFormSnap='';
+// 수도 미지정(orphan) 일괄 삭제
+function _delOrphanWaterBills(){
+  var grpIds=new Set(_teamBuildings().map(function(b){return b.id;}));
+  var allBIds=new Set(DB.buildings.map(function(b){return b.id;}));
+  var orphans=(DB.waterBills||[]).filter(function(w){
+    if(!w.bId) return _getCurrentTeam()===2;
+    return !grpIds.has(w.bId)&&!allBIds.has(w.bId);
+  });
+  if(!orphans.length){alert('삭제할 항목이 없습니다.');return;}
+  if(!confirm('건물 미지정 수도 항목 '+orphans.length+'건을 삭제하시겠습니까?'))return;
+  var delSet=new Set(orphans.map(function(w){return w.id||w.custNo||JSON.stringify(w);}));
+  DB.waterBills=(DB.waterBills||[]).filter(function(w){
+    var key=w.id||w.custNo||JSON.stringify(w);
+    return !delSet.has(key);
+  });
+  sv(); rdWater();
+}
 function _snapWater(){
   return ($('fw-id')?$('fw-id').value:'')+'|'+($('fw-b')?$('fw-b').value:'')+'|'+($('fw-cn')?$('fw-cn').value:'')+'|'+($('fw-mc')?$('fw-mc').value:'')+'|'+($('fw-cm')?$('fw-cm').value:'')+'|'+($('fw-note')?$('fw-note').value:'')+'|'+($('fw-mday')?$('fw-mday').value:'');
 }
@@ -4912,10 +5187,10 @@ function _autoFillWaterFromMemo(){
 }
 function openWaterModal(id, bId){
   const w=id?(DB.waterBills||[]).find(x=>x.id===id):null;
-  const bldgs=DB.buildings;
+  const bldgs=_teamBuildings();
   if(!bldgs.length){ alert('먼저 건물을 등록해주세요.'); return; }
   if(id && typeof startEditing==='function'){
-    const bb=DB.buildings.find(b=>b.id==(w?w.bId:bId));
+    const bb=bldgs.find(b=>b.id==(w?w.bId:bId));
     const label=(bb?bb.name:'')+' 수도요금';
     if(!startEditing('water',id,'전기·수도',label)) return;
   }
@@ -5138,7 +5413,12 @@ function openWaterSite(url, id){
 }
 // ── 수도요금 일괄조회 ──
 function _fetchWaterBulk(){
-  var bills=DB.waterBills||[];
+  var _fwTBids=new Set(_teamBuildings().map(function(b){return b.id;}));
+  var _fwCurTeam=_getCurrentTeam();
+  var bills=(DB.waterBills||[]).filter(function(w){
+    if(!w.bId) return _fwCurTeam===2;
+    return _fwTBids.has(w.bId);
+  });
   var curMonth=new Date().toISOString().slice(0,7);
   var curMon=parseInt(curMonth.split('-')[1]);
   // 현재 필터에 맞는 고객만 (or 전체)
@@ -5654,10 +5934,15 @@ function openWaterBillViewer(id){
 var _waterViewerPeriod=null;
 function _showWaterBillModal(selectedPeriod){
   // 월별 모아보기: 좌측=월 목록, 우측=해당 월 전체 고객 청구서
-  const bldgs=DB.buildings||[];
-  // 전체 청구서를 월별로 그룹
+  const bldgs=_teamBuildings();
+  var _swTBids=new Set(bldgs.map(function(b){return b.id;}));
+  var _swCurTeam=_getCurrentTeam();
+  // 전체 청구서를 월별로 그룹 (팀 필터 적용)
   const byMonth={};
-  (DB.waterBills||[]).forEach(function(w){
+  (DB.waterBills||[]).filter(function(w){
+    if(!w.bId) return _swCurTeam===2;
+    return _swTBids.has(w.bId);
+  }).forEach(function(w){
     const bldg=bldgs.find(function(b){return b.id===w.bId;});
     (w.bills||[]).forEach(function(bill){
       const p=bill.period||'';
@@ -7072,6 +7357,33 @@ function _learnBldgAddr(bId, eb){
 // ── ⚡ 전기요금: 한전 로그인 강제 → 이메일 첨부 업로드 플로우 ──
 // DB.electricBills[] = [{id, bId, custName, custNo('선택'), note, bills:[{period:"YYYY-MM", files:[{data,name,mime}], uploadedAt}]}]
 function _electricToast(msg,color){ try{ showSaveStatus(msg, color||'#f59e0b'); }catch(e){ console.log(msg); } }
+// 미지정/확인불가 전기 고객 일괄 삭제
+function _delUnmatchedElBills(type){
+  if(!DB.electricBills) return;
+  var targets=DB.electricBills.filter(function(e){ return !e.bId; });
+  if(type==='noinfo'){
+    targets=targets.filter(function(e){
+      var addr=e.note||e.addr||''; if(!addr&&e.bills&&e.bills[0])addr=e.bills[0].addr||'';
+      return !addr&&!e.custName;
+    });
+  } else {
+    targets=targets.filter(function(e){
+      var addr=e.note||e.addr||''; if(!addr&&e.bills&&e.bills[0])addr=e.bills[0].addr||'';
+      return !!(addr||e.custName);
+    });
+  }
+  if(!targets.length){ alert('삭제할 항목이 없습니다.'); return; }
+  if(!confirm((type==='noinfo'?'확인불가':'미지정')+' '+targets.length+'건을 삭제하시겠습니까?')) return;
+  var delIds=new Set(targets.map(function(e){return e.custNo||e.id||JSON.stringify(e);}));
+  DB.electricBills=DB.electricBills.filter(function(e){
+    if(!e.bId){
+      var key=e.custNo||e.id||JSON.stringify(e);
+      return !delIds.has(key);
+    }
+    return true;
+  });
+  sv(); rdElectric();
+}
 function _openElBldgViewer(bId){
   if(bId===0){
     _openUnmatchedAssignModal();
@@ -7082,9 +7394,13 @@ function _openElBldgViewer(bId){
   else _showElectricBillModal(0, null);
 }
 function _openUnmatchedAssignModal(){
-  var unmatched=(DB.electricBills||[]).filter(function(e){return !e.bId||e.bId===0;});
+  var _umCurTeam=_getCurrentTeam();
+  var unmatched=(DB.electricBills||[]).filter(function(e){
+    if(!e.bId||e.bId===0) return _umCurTeam===2;
+    return false;
+  });
   if(!unmatched.length){ alert('미지정 고객이 없습니다.'); return; }
-  var bldgs=DB.buildings||[];
+  var bldgs=_teamBuildings();
   // 두 그룹: 정보有(미지정) vs 정보無(확인불가)
   var hasInfo=[], noInfo=[];
   unmatched.forEach(function(eb){
@@ -7382,12 +7698,14 @@ function rdElectric(){
   _leftPanel+='<div style="font-size:10px;color:#94a3b8;margin-bottom:5px;letter-spacing:.5px">도구</div>';
   /* 미지정 고객 배치 — 청구서 폴더 탭에서 접근하도록 변경 */
   _leftPanel+='<button onclick="_showBillDiagnostic()" style="display:block;width:100%;padding:5px 8px;margin-bottom:4px;font-size:10.5px;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:5px;cursor:pointer">🔍 누락 체크</button>';
-  var _nlCnt=0;(DB.electricBills||[]).forEach(function(e){(e.bills||[]).forEach(function(b){if(!b.kepcoLink)_nlCnt++;});});
+  var _nlTBids2=new Set(bldgs.map(function(b){return b.id;}));var _nlCT2=_getCurrentTeam();
+  var _teamEbs=(DB.electricBills||[]).filter(function(e){if(!e.bId)return _nlCT2===2;return _nlTBids2.has(e.bId);});
+  var _nlCnt=0;_teamEbs.forEach(function(e){(e.bills||[]).forEach(function(b){if(!b.kepcoLink)_nlCnt++;});});
   var _lastNl=DB._lastNoLinkBills||[];
   // _lastNoLinkBills가 없으면 현재 DB에서 재생성
-  if(_lastNl.length===0 && (DB.electricBills||[]).length>0){
-    var _bldgs2=DB.buildings||[];
-    (DB.electricBills||[]).forEach(function(e){
+  if(_lastNl.length===0 && _teamEbs.length>0){
+    var _bldgs2=bldgs;
+    _teamEbs.forEach(function(e){
       var bldg=_bldgs2.find(function(bb){return bb.id===e.bId;});
       var bName=bldg?bldg.name:'(미지정)';
       (e.bills||[]).forEach(function(b){
@@ -7414,7 +7732,13 @@ function rdElectric(){
     const elGrp={};
     bldgs.forEach(b=>{ elGrp[b.id]={bldg:b, items:[]}; });
     (DB.electricBills||[]).forEach(e=>{ if(elGrp[e.bId]) elGrp[e.bId].items.push(e); });
-    const noBldgItems=(DB.electricBills||[]).filter(e=>!e.bId||!elGrp[e.bId]);
+    // 미배정: bId 없는 것은 2팀에서만 표시, 다른 팀 건물 배정은 제외
+    const _allBIds=new Set(DB.buildings.map(b=>b.id));
+    const _curTeam=_getCurrentTeam();
+    const noBldgItems=(DB.electricBills||[]).filter(e=>{
+      if(!e.bId) return _curTeam===2; // 미배정은 2팀에서만
+      return !elGrp[e.bId]&&!_allBIds.has(e.bId); // 어떤 건물에도 없는 것
+    });
     // 사용법 + 테이블을 flex로 나란히 배치
     html+='<div style="display:flex;padding:6px;gap:10px;align-items:flex-start">';
     html+=_leftPanel;
@@ -7471,20 +7795,20 @@ function rdElectric(){
       if(_noInfoItems.length){
         var niTotal=0;
         _noInfoItems.forEach(function(e){ var lb=(e.bills||[]).sort(function(a,b){return(b.period||'').localeCompare(a.period||'')})[0]; if(lb) niTotal+=(Number(lb.amount)||0); });
-        html+='<tr onclick="_openElBldgViewer(0)" style="border-top:2px solid #fca5a5;cursor:pointer;background:#fef2f2" title="주소/고객명 없음 — KEPCO 조회 필요">';
-        html+='<td style="padding:10px 14px;font-weight:700;font-size:12px;color:#dc2626;text-align:left"><span style="font-size:10px;margin-right:6px">🔴</span>확인불가 <span style="font-size:10px;font-weight:400;color:#b91c1c">— KEPCO 조회로 주소 확인 필요</span></td>';
-        html+='<td style="padding:10px 14px;font-size:12px;color:#dc2626;font-weight:600">'+_noInfoItems.length+'</td>';
-        html+='<td style="padding:10px 14px;font-size:12px;color:#dc2626;font-weight:600">'+(niTotal?niTotal.toLocaleString()+'원':'—')+'</td>';
+        html+='<tr style="border-top:2px solid #fca5a5;background:#fef2f2">';
+        html+='<td onclick="_openElBldgViewer(0)" style="padding:10px 14px;font-weight:700;font-size:12px;color:#dc2626;text-align:left;cursor:pointer"><span style="font-size:10px;margin-right:6px">🔴</span>확인불가 <span style="font-size:10px;font-weight:400;color:#b91c1c">— KEPCO 조회 필요</span></td>';
+        html+='<td onclick="_openElBldgViewer(0)" style="padding:10px 14px;font-size:12px;color:#dc2626;font-weight:600;cursor:pointer">'+_noInfoItems.length+'</td>';
+        html+='<td style="padding:10px 14px;font-size:12px;color:#dc2626;font-weight:600;display:flex;align-items:center;gap:6px">'+(niTotal?niTotal.toLocaleString()+'원':'—')+'<button onclick="event.stopPropagation();_delUnmatchedElBills(\'noinfo\')" style="font-size:9px;padding:2px 6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;white-space:nowrap">삭제</button></td>';
         html+='</tr>';
       }
       // 미지정 행 (파란 배경)
       if(_hasInfoItems.length){
         var hiTotal=0;
         _hasInfoItems.forEach(function(e){ var lb=(e.bills||[]).sort(function(a,b){return(b.period||'').localeCompare(a.period||'')})[0]; if(lb) hiTotal+=(Number(lb.amount)||0); });
-        html+='<tr onclick="_openElBldgViewer(0)" style="border-top:2px solid #93c5fd;cursor:pointer;background:#eff6ff" title="주소/고객명 있음 — 건물 매칭 필요">';
-        html+='<td style="padding:10px 14px;font-weight:700;font-size:12px;color:#2563eb;text-align:left"><span style="font-size:10px;margin-right:6px">🔵</span>미지정 <span style="font-size:10px;font-weight:400;color:#1e40af">— 건물 배치 시 같은 주소는 자동 매칭</span></td>';
-        html+='<td style="padding:10px 14px;font-size:12px;color:#2563eb;font-weight:600">'+_hasInfoItems.length+'</td>';
-        html+='<td style="padding:10px 14px;font-size:12px;color:#2563eb;font-weight:600">'+(hiTotal?hiTotal.toLocaleString()+'원':'—')+'</td>';
+        html+='<tr style="border-top:2px solid #93c5fd;background:#eff6ff">';
+        html+='<td onclick="_openElBldgViewer(0)" style="padding:10px 14px;font-weight:700;font-size:12px;color:#2563eb;text-align:left;cursor:pointer"><span style="font-size:10px;margin-right:6px">🔵</span>미지정 <span style="font-size:10px;font-weight:400;color:#1e40af">— 건물 배치 시 자동 매칭</span></td>';
+        html+='<td onclick="_openElBldgViewer(0)" style="padding:10px 14px;font-size:12px;color:#2563eb;font-weight:600;cursor:pointer">'+_hasInfoItems.length+'</td>';
+        html+='<td style="padding:10px 14px;font-size:12px;color:#2563eb;font-weight:600;display:flex;align-items:center;gap:6px">'+(hiTotal?hiTotal.toLocaleString()+'원':'—')+'<button onclick="event.stopPropagation();_delUnmatchedElBills(\'hasinfo\')" style="font-size:9px;padding:2px 6px;background:#dbeafe;color:#2563eb;border:1px solid #93c5fd;border-radius:4px;cursor:pointer;white-space:nowrap">삭제</button></td>';
         html+='</tr>';
       }
     }
@@ -7512,7 +7836,7 @@ function openElectricModal(id){
     mo.addEventListener('click',function(ev){ if(ev.target===mo) closeMo('mo-electric'); });
     document.body.appendChild(mo);
   }
-  const sel=$('el-b'); sel.innerHTML='<option value="">(선택)</option>'+(DB.buildings||[]).map(b=>'<option value="'+b.id+'">'+esc(b.name)+'</option>').join('');
+  const sel=$('el-b'); sel.innerHTML='<option value="">(선택)</option>'+_teamBuildings().map(b=>'<option value="'+b.id+'">'+esc(b.name)+'</option>').join('');
   $('mo-el-t').textContent=e?'전기요금 고객 수정':'전기요금 고객 추가';
   $('el-id').value=e?e.id:'';
   sel.value=e?(e.bId||''):'';
@@ -7636,7 +7960,7 @@ function _showGmailSetupModal(){
       '<div style="margin:10px 0 4px"><label style="font-size:11.5px;color:var(--t3);display:block;margin-bottom:4px">Google OAuth Client ID</label>'+
       '<input id="gm-cid" type="text" placeholder="xxxxx.apps.googleusercontent.com" style="width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:var(--r);font-size:12.5px;font-family:monospace"></div>'+
       '<div style="background:#ecfdf5;border:1px solid #6ee7b7;padding:8px 10px;border-radius:5px;margin-top:8px;font-size:11.5px;color:#065f46;line-height:1.5">'+
-      '<b>OAuth 동의 화면</b> 설정 시: 범위(scope)에 <code>gmail.readonly</code> 추가, 테스트 사용자에 본인 Gmail 추가'+
+      '<b>OAuth 동의 화면</b> 설정 시: 범위(scope)에 <code>gmail.modify</code> 추가, 테스트 사용자에 본인 Gmail 추가'+
       '</div>'+
       '</div>'+
       '<div class="mo-ft" style="padding:10px 18px 14px;display:flex;gap:8px"><button class="btn" style="padding:8px 14px;font-size:12.5px;min-height:36px;margin-left:auto" onclick="closeMo(\'mo-gmail-setup\')">취소</button><button class="btn pri" style="padding:8px 16px;font-size:12.5px;min-height:36px;background:#dc2626;border-color:#dc2626" onclick="_saveGmailClientId()">저장 후 연동 시작</button></div>'+
@@ -7682,7 +8006,7 @@ function _gmailGetToken(clientId){
     var hint=(DB.settings&&DB.settings.gmailAccount)||'';
     var opts={
       client_id: clientId,
-      scope: 'https://www.googleapis.com/auth/gmail.readonly',
+      scope: 'https://www.googleapis.com/auth/gmail.modify',
       callback: function(resp){
         if(resp.error){ reject(new Error(resp.error+': '+(resp.error_description||''))); return; }
         _gmailToken={access_token:resp.access_token, expires_at:Date.now()+(resp.expires_in||3600)*1000};
@@ -7698,12 +8022,21 @@ function _gmailGetToken(clientId){
   });
 }
 // ── Gmail API 헬퍼 ──
-async function _gmApi(token, path){
-  const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/'+path,{
-    headers:{'Authorization':'Bearer '+token}
-  });
+async function _gmApi(token, path, opts){
+  var fetchOpts={headers:{'Authorization':'Bearer '+token}};
+  if(opts){
+    fetchOpts.method=opts.method||'GET';
+    if(opts.body){fetchOpts.body=JSON.stringify(opts.body);fetchOpts.headers['Content-Type']='application/json';}
+  }
+  const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/'+path,fetchOpts);
   if(!r.ok) throw new Error('Gmail API '+r.status+': '+r.statusText);
   return r.json();
+}
+// ★ 메일 읽음 처리 (UNREAD 라벨 제거)
+async function _gmailMarkRead(token, msgId){
+  try{
+    await _gmApi(token, 'messages/'+msgId+'/modify', {method:'POST', body:{removeLabelIds:['UNREAD']}});
+  }catch(e){ console.warn('[Gmail] 읽음처리 실패:', msgId, e); }
 }
 // ── 로그인 계정 저장 (다음에 자동선택용) ──
 async function _gmailSaveAccount(token){
@@ -7841,6 +8174,8 @@ async function _gmailStartImport(clientId, filterYear){
       if(info){
         extracted.push(info);
         newProcessedIds.push(newMsgs[mi].id);
+        // ★ 읽음 처리
+        await _gmailMarkRead(token, newMsgs[mi].id);
       } else {
         failedMails.push({subject:subject,date:dateStr,reason:'파싱실패',msgId:newMsgs[mi].id});
       }
@@ -8935,7 +9270,12 @@ function _updateCapProgress(){
     if(prog){
       prog.innerHTML='<div style="font-size:24px;margin-bottom:8px">✅</div><b>'+_kepcoCapDone+'건 캡처 완료!</b>'+badHtml;
     }
+    // ★ 완료 시 하단 버튼을 "닫기"로 변경
     var mo=$('mo-kepco-cap');
+    if(mo){
+      var ft=mo.querySelector('.mo-ft');
+      if(ft) ft.innerHTML='<button class="btn pri" onclick="closeMo(\'mo-kepco-cap\');_kepcoCapRemoveMini();" style="padding:6px 20px">닫기</button>';
+    }
     if(!mo || !mo.classList.contains('on')){
       _showToast(badList.length?'⚠ '+_kepcoCapDone+'건 캡처 완료 ('+badList.length+'건 확인 필요)':'✅ '+_kepcoCapDone+'건 캡처 완료!', badList.length?'error':'ok');
       // 완료 시 모달 자동으로 다시 보여주기
@@ -9067,8 +9407,13 @@ function _showGmailFailed(){
 }
 // ── 누락 체크: 건물별 청구서 현황 + 미파싱 메일 ──
 function _showBillDiagnostic(){
-  var bldgs=DB.buildings||[];
-  var ebs=DB.electricBills||[];
+  var bldgs=_teamBuildings();
+  var _bdTBids=new Set(bldgs.map(function(b){return b.id;}));
+  var _bdCurTeam=_getCurrentTeam();
+  var ebs=(DB.electricBills||[]).filter(function(e){
+    if(!e.bId) return _bdCurTeam===2;
+    return _bdTBids.has(e.bId);
+  });
   var failed=DB._gmailFailed||[];
   // 건물별 고객수, 최근 청구기간 집계
   var bMap={};
@@ -9356,8 +9701,13 @@ function _startKepcoBillCapture(){
   var allLinks=[];
   var yearAll={};   // 전체 청구서 수
   var yearLink={};  // kepcoLink 있는 수
-  var bldgs=DB.buildings||[];
-  (DB.electricBills||[]).forEach(function(e){
+  var bldgs=_teamBuildings();
+  var _kcTBids=new Set(bldgs.map(function(b){return b.id;}));
+  var _kcCurTeam=_getCurrentTeam();
+  (DB.electricBills||[]).filter(function(e){
+    if(!e.bId) return _kcCurTeam===2;
+    return _kcTBids.has(e.bId);
+  }).forEach(function(e){
     var bldg=bldgs.find(function(bb){return bb.id===e.bId;});
     var bName=bldg?bldg.name:'';
     // 건물 이름에서 숫자 접두사 추출 (예: "25.G.1빌딩" → 25)
@@ -9384,7 +9734,7 @@ function _startKepcoBillCapture(){
   [String(curYr), String(curYr-1), String(curYr-2)].forEach(function(yr){ if(fixedYears.indexOf(yr)<0) fixedYears.push(yr); });
   fixedYears.sort(function(a,b){return b.localeCompare(a);});
   var gmailTotal=0;
-  (DB.electricBills||[]).forEach(function(e){ gmailTotal+=(e.bills||[]).length; });
+  (DB.electricBills||[]).filter(function(e){if(!e.bId)return _kcCurTeam===2;return _kcTBids.has(e.bId);}).forEach(function(e){ gmailTotal+=(e.bills||[]).length; });
   var capTotal=allLinks.length;
   var yrMo=$('mo-kepco-yr');
   if(!yrMo){
@@ -9446,8 +9796,13 @@ function _startKepcoBillCapture(){
 }
 function _showNoLinkBills(){
   var noLinks=[];
-  var bldgs=DB.buildings||[];
-  (DB.electricBills||[]).forEach(function(e){
+  var bldgs=_teamBuildings();
+  var _nlTBids=new Set(bldgs.map(function(b){return b.id;}));
+  var _nlCurTeam=_getCurrentTeam();
+  (DB.electricBills||[]).filter(function(e){
+    if(!e.bId) return _nlCurTeam===2;
+    return _nlTBids.has(e.bId);
+  }).forEach(function(e){
     var bldg=bldgs.find(function(bb){return bb.id===e.bId;});
     var bName=bldg?bldg.name:'(미지정)';
     (e.bills||[]).forEach(function(b){
@@ -9472,9 +9827,11 @@ function _showNoLinkBills(){
 }
 function _showNoLinkBillsPre(noLinks){
   if(!noLinks||!noLinks.length) return;
-  // 중복제거 후 DB에서 실제로 아직 링크없는 건만 체크
+  // 중복제거 후 DB에서 실제로 아직 링크없는 건만 체크 (팀 필터 적용)
+  var _npTBids=new Set(_teamBuildings().map(function(b){return b.id;}));
+  var _npCurTeam=_getCurrentTeam();
   var stillNoLink=0;
-  (DB.electricBills||[]).forEach(function(e){(e.bills||[]).forEach(function(b){if(!b.kepcoLink)stillNoLink++;});});
+  (DB.electricBills||[]).filter(function(e){if(!e.bId)return _npCurTeam===2;return _npTBids.has(e.bId);}).forEach(function(e){(e.bills||[]).forEach(function(b){if(!b.kepcoLink)stillNoLink++;});});
   var html='<div style="max-height:60vh;overflow-y:auto;padding:4px 0">';
   if(stillNoLink===0){
     html+='<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;margin-bottom:10px;font-size:12px">'
@@ -9608,7 +9965,18 @@ function _kepcoCapRemoveMini(){
 // ★ 미니 위젯 텍스트 갱신 (캡처 진행 시)
 function _kepcoCapUpdateMini(){
   var txt=$('kepco-mini-text');
-  if(txt) txt.textContent='📸 캡처 중 '+_kepcoCapDone+'/'+_kepcoCapTotal;
+  if(!txt) return;
+  if(_kepcoCapDone>=_kepcoCapTotal){
+    txt.textContent='✅ 캡처 완료 '+_kepcoCapDone+'/'+_kepcoCapTotal;
+    // 스피너도 제거
+    var mini=$('kepco-cap-mini');
+    if(mini){
+      var sp=mini.querySelector('.mv-spinner');if(sp)sp.remove();
+      mini.style.background='#16a34a';
+    }
+  } else {
+    txt.textContent='📸 캡처 중 '+_kepcoCapDone+'/'+_kepcoCapTotal;
+  }
 }
 // ★ 단건 캡처: 개별 청구서에서 바로 캡처
 function _captureSingleBill(custNo, period, kepcoLink){
@@ -9798,7 +10166,9 @@ function _rebuildEvList(curGrp, focusE, selectedPeriod, curYear, listEl){
 }
 function _showElectricBillModal(id, selectedPeriod){
   const focusE=id?(DB.electricBills||[]).find(x=>x.id===id):null;
-  const bldgs=DB.buildings||[];
+  const bldgs=_teamBuildings();
+  var _emTBids=new Set(bldgs.map(function(b){return b.id;}));
+  var _emCurTeam=_getCurrentTeam();
   const curYear=new Date().getFullYear().toString();
   // 건물별 그룹 — 고객 없는 건물도 포함
   const bldgGrp={};
@@ -9806,9 +10176,12 @@ function _showElectricBillModal(id, selectedPeriod){
   bldgs.forEach(function(b){
     bldgGrp[b.id]={bId:b.id, bldg:b, custs:[]};
   });
-  // 미지정(bId=0) 그룹
-  bldgGrp[0]={bId:0, bldg:null, custs:[]};
-  (DB.electricBills||[]).forEach(e=>{
+  // 미지정(bId=0) 그룹 — 2팀에서만 표시
+  if(_emCurTeam===2) bldgGrp[0]={bId:0, bldg:null, custs:[]};
+  (DB.electricBills||[]).filter(function(e){
+    if(!e.bId||e.bId===0) return _emCurTeam===2;
+    return _emTBids.has(e.bId);
+  }).forEach(e=>{
     var bid=e.bId||0;
     if(!bldgGrp[bid]) bldgGrp[bid]={bId:bid, bldg:bldgs.find(b=>b.id===bid), custs:[]};
     bldgGrp[bid].custs.push(e);
@@ -11041,13 +11414,16 @@ function rdCal(){
   const bf=DB.ui.calBldgF;
   const calSb=$('cal-bldg-f');
   if(calSb){
-    calSb.innerHTML=`<div class="sb-list-item${bf==='all'?' on':''}" onclick="setCBF('all')">전체 (양팀)</div>`+
-      DB.buildings.map(b=>`<div class="sb-list-item${bf==b.id?' on':''}" onclick="setCBF(${b.id})"><span style="font-size:9px;color:var(--t4);margin-right:2px">${b.team===1?'①':'②'}</span>${b.name}</div>`).join('');
+    calSb.innerHTML=`<div class="sb-list-item${bf==='all'?' on':''}" onclick="setCBF('all')">전체</div>`+
+      _teamBuildings().map(b=>`<div class="sb-list-item${bf==b.id?' on':''}" onclick="setCBF(${b.id})">${b.name}</div>`).join('');
   }
   const myOnly=$('cal-my')?.checked;
   const flt=DB.ui.calFlt;
+  const _calTBids=new Set(_teamBuildings().map(b=>b.id));
   let evs=DB.calEvents.filter(e=>{
     if(e._deleted)return false;
+    // 팀 필터: 특정 건물 일정은 현재 팀 건물만, 건물전체/미지정은 통과
+    if(e.bId&&e.bId!=='all'&&!_calTBids.has(Number(e.bId)))return false;
     if(bf!=='all'&&e.bId!=bf)return false;
     if(myOnly&&e.user!=='나')return false;
     if(flt==='todo'&&e.status==='done')return false;
@@ -11423,8 +11799,36 @@ function togEvDone(id){const e=DB.calEvents.find(e=>e.id===id);if(!e)return;if(!
 function delCalEv(id){const e=DB.calEvents.find(e=>e.id===id);if(!e)return;if(!canEditCalEv(e)){alert('작성자 본인만 삭제할 수 있습니다.');return;}if(!confirm('삭제?'))return;e._deleted=true;e._edit=editStamp();sv();rdCal();}
 
 // ── FIXED ─────────────────────────────────────────────────────────────
-const _fixBldgList=['르헤브','H473','청담4613','트러','논현동','대치동914','르포렘','아엘로','공통'];
-const _fixBldgColorMap={};_fixBldgList.forEach(function(b,i){_fixBldgColorMap[b]=(i<8?i+1:20);});
+// 건물 목록: DB.buildings에서 ID순 동적 생성 + '공통' 추가
+function _getFixUserList(){
+  var cached=window._fixUserListCache;
+  if(cached && cached.ts && Date.now()-cached.ts<60000) return cached.list;
+  var names=[];
+  try{
+    var allProfs=Object.values(DB.personalMemos||{});
+    allProfs.forEach(function(m){if(m && m.userName && m.userName!=='나') names.push(m.userName);});
+  }catch(_){}
+  if(!names.length && CURRENT_USER_NAME) names.push(CURRENT_USER_NAME);
+  // 중복 제거 + 정렬
+  var unique=[];var seen={};
+  names.forEach(function(n){if(!seen[n]){seen[n]=1;unique.push(n);}});
+  unique.sort();
+  window._fixUserListCache={list:unique,ts:Date.now()};
+  return unique;
+}
+function _getFixBldgList(){
+  var bldgs=(DB.buildings||[]).filter(function(b){return !b._deleted && (b.team||2)===_getCurrentTeam();});
+  bldgs.sort(function(a,b){return (a.id||0)-(b.id||0);});
+  var list=bldgs.map(function(b){return b.name||String(b.id);});
+  list.push('공통');
+  return list;
+}
+var _fixBldgColorMap={};
+function _refreshFixBldgColors(){
+  _fixBldgColorMap={};
+  var list=_getFixBldgList();
+  list.forEach(function(b,i){_fixBldgColorMap[b]=(i<list.length-1?((i%18)+1):20);});
+}
 // 고정일정 월 선택
 var _fixViewYear=new Date().getFullYear();
 var _fixViewMonth=new Date().getMonth(); // 0-based
@@ -11453,8 +11857,10 @@ function editFixBuilding(sId,taskIdx,td){
   var cur=DB.fixedBuildings[sId+'_'+taskIdx]||'';
   var sel=document.createElement('select');
   sel.style.cssText='width:100%;font-size:10px;padding:2px;border:1px solid var(--bl);border-radius:3px;box-sizing:border-box;text-align:center';
-  sel.innerHTML='<option value="">- 선택 -</option>'+_fixBldgList.map(function(b){return'<option value="'+b+'"'+(b===cur?' selected':'')+'>'+b+'</option>';}).join('');
+  var _bList=_getFixBldgList();
+  sel.innerHTML='<option value="">- 선택 -</option>'+_bList.map(function(b){return'<option value="'+b+'"'+(b===cur?' selected':'')+'>'+b+'</option>';}).join('');
   td.innerHTML='';td.appendChild(sel);sel.focus();
+  try{sel.showPicker();}catch(_){try{sel.click();}catch(_2){}}
   function doSave(){
     var val=sel.value;
     var oldVal=cur;
@@ -11474,6 +11880,7 @@ function rdFixed(){
   if(_spEditPending){ _flushSpEdit(); return; }
   var _editingEl=document.querySelector('#fixed-list [contenteditable="true"]');
   if(_editingEl){ console.log('[rdFixed] 인라인 편집중 — 리렌더 스킵'); return; }
+  _refreshFixBldgColors();
   const sqRaw=($('fixed-search')?.value||'').trim();
   const sq=sqRaw.toLowerCase();
   const hl=(txt)=>{
@@ -11521,24 +11928,41 @@ function rdFixed(){
     $('fixed-list').innerHTML='<div style="padding:40px;text-align:center;color:var(--t4);font-size:13px">검색 결과 없음</div>';
     return;
   }
-  // Group days into weeks
-  const weeks=[[],[],[],[],[]];
+  // Group days into calendar weeks (달력 기준 줄, 일요일 시작)
+  const _firstDow=new Date(_fixViewYear,_fixViewMonth,1).getDay(); // 0=일,1=월...6=토
+  const _lastDate=new Date(_fixViewYear,_fixViewMonth+1,0).getDate();
+  const _calWeekRanges=[];
+  // 첫째줄: 1일 ~ (7-요일번호)일 (일=0이면 7일, 수=3이면 4일)
+  var _firstEnd=_firstDow===0?7:(7-_firstDow);
+  if(_firstEnd>_lastDate) _firstEnd=_lastDate;
+  _calWeekRanges.push([1,_firstEnd]);
+  _wStart=_firstEnd+1;
+  while(_wStart<=_lastDate){
+    var _wEnd=Math.min(_wStart+6,_lastDate);
+    _calWeekRanges.push([_wStart,_wEnd]);
+    _wStart=_wEnd+1;
+  }
+  const weeks=_calWeekRanges.map(function(){return [];});
   allDays.forEach(d=>{
-    if(d<=7) weeks[0].push(d);
-    else if(d<=14) weeks[1].push(d);
-    else if(d<=21) weeks[2].push(d);
-    else if(d<=28) weeks[3].push(d);
-    else weeks[4].push(d);
+    if(d===99){ weeks[weeks.length-1].push(d); return; }
+    for(var wi=0;wi<_calWeekRanges.length;wi++){
+      if(d>=_calWeekRanges[wi][0]&&d<=_calWeekRanges[wi][1]){ weeks[wi].push(d); break; }
+    }
   });
-  // 현재 주차 계산 (선택 월이 이번달일때만)
+  // 현재 주차 계산 (달력 기준)
   const _isThisMonth=_fixViewYear===new Date().getFullYear()&&_fixViewMonth===new Date().getMonth();
   const _today=_isThisMonth?new Date().getDate():-1;
-  const _curWeek=_today<=0?-1:_today<=7?0:_today<=14?1:_today<=21?2:_today<=28?3:4;
+  var _curWeek=-1;
+  if(_today>0){
+    for(var _cwi=0;_cwi<_calWeekRanges.length;_cwi++){
+      if(_today>=_calWeekRanges[_cwi][0]&&_today<=_calWeekRanges[_cwi][1]){_curWeek=_cwi;break;}
+    }
+  }
   _fixMonthLabel();
   if(!window._fixWeekCollapsed) window._fixWeekCollapsed={};
-  // 주차 탭 바 (테이블 밖 가로 배치)
-  const _wkStarts=[1,8,15,22,29];
-  const _wkEnds=[7,14,21,28,'말일'];
+  // 주차 탭 바 날짜 범위
+  const _wkStarts=_calWeekRanges.map(function(r){return r[0];});
+  const _wkEnds=_calWeekRanges.map(function(r){return r[1]===_lastDate?'말일':r[1];});
   // 1단계: weekStats 먼저 계산
   var weekStats=[];
   weeks.forEach((weekDays,weekIdx)=>{
@@ -11564,91 +11988,117 @@ function rdFixed(){
   // 전체 펼침 상태 체크
   var _allExpanded=true;
   weeks.forEach((wd,wi)=>{if(wd.length===0)return;if(_fixIsCollapsed(wi))_allExpanded=false;});
-  var weekTabBar='<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
+
+  // ── 일별 진행도 사전계산 (사이드바+테이블 공용) ──
+  var dayStats={};
+  sorted.forEach(s=>{
+    const tasks=s.tasks||[];
+    const entries=sq
+      ? tasks.map((t,i)=>({t,i})).filter(x=>taskMatchMap[s.id]&&taskMatchMap[s.id].has(x.i))
+      : tasks.map((t,i)=>({t,i}));
+    let done=0;
+    entries.forEach(({t,i})=>{
+      const key=fixKey(s.id,i);const st=DB.fixedDone[key]||'';
+      if(st==='완료'||DB.fixedDone[key]===true) done++;
+    });
+    dayStats[s.day]={total:entries.length,done:done};
+  });
+
+  // ── 사이드바 렌더링 ──
+  var sideHtml='';
+  let totalAll=0,doneAll=0;
+  weeks.forEach((wd,wi)=>{const ws=weekStats[wi];if(ws){totalAll+=ws.total;doneAll+=ws.done;}});
+  const totalPct=totalAll>0?Math.round((doneAll/totalAll)*100):0;
+  sideHtml+=`<div style="padding:10px 12px 6px;border-bottom:1px solid #e2e5ea">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:11px;font-weight:700;color:#374151">전체 진행</span>
+      <span style="font-size:11px;font-weight:600;color:${totalPct===100?'#16a34a':'#6b7280'}">${doneAll}/${totalAll}</span>
+    </div>
+    <div style="height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden">
+      <div style="height:100%;width:${totalPct}%;background:${totalPct===100?'#4ade80':'#3b82f6'};border-radius:2px;transition:width .3s"></div>
+    </div>
+  </div>`;
   weeks.forEach((weekDays,weekIdx)=>{
     if(weekDays.length===0) return;
     const ws=weekStats[weekIdx];
-    const isCurWeek=weekIdx===_curWeek;
-    const isCollapsed=_fixIsCollapsed(weekIdx);
-    const isPastWeek=weekIdx<_curWeek;
-    const hasIncomplete=ws&&ws.total>0&&ws.done<ws.total;
-    const allDone=ws&&ws.total>0&&ws.done===ws.total;
-    const weekDateRange=`${_wkStarts[weekIdx]}~${typeof _wkEnds[weekIdx]==='number'?_wkEnds[weekIdx]:_wkEnds[weekIdx]}`;
-    // 펼침=진한색, 접힘=연한색, 현재주=파랑계열
-    const bg=isCollapsed?(isCurWeek?'#bfdbfe':'#e2e8f0'):(isCurWeek?'#2563eb':'#374151');
-    const color=isCollapsed?(isCurWeek?'#1e40af':'#475569'):'#fff';
-    weekTabBar+=`<div onclick="toggleFixWeek(${weekIdx})" style="cursor:pointer;user-select:none;padding:7px 14px;border-radius:8px;background:${bg};color:${color};font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap">`;
-    weekTabBar+=`<span>${weekIdx+1}주차</span>`;
-    weekTabBar+=`<span style="font-weight:400;font-size:11px;opacity:0.8">(${weekDateRange})</span>`;
-    weekTabBar+=`<span style="font-size:11px">${ws.done}/${ws.total}</span>`;
-    if(isCurWeek) weekTabBar+=`<span style="background:#fbbf24;color:#1e3a5f;font-size:9px;padding:1px 6px;border-radius:6px;font-weight:700">now</span>`;
-    // 이전 주차 미완료 → 항상 빨간점 표시
-    if(isPastWeek&&hasIncomplete) weekTabBar+=`<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;flex-shrink:0" title="미완료 업무 있음"></span>`;
-    // 완료된 주차 → 체크 표시
-    if(allDone) weekTabBar+=`<span style="color:${isCollapsed?'#16a34a':'#86efac'};font-size:11px">✓</span>`;
-    weekTabBar+=`</div>`;
+    const isCurWeek_s=weekIdx===_curWeek;
+    const isCollapsed_s=_fixIsCollapsed(weekIdx);
+    const isPastWeek_s=weekIdx<_curWeek;
+    const hasIncomplete_s=ws&&ws.total>0&&ws.done<ws.total;
+    const allDone_s=ws&&ws.total>0&&ws.done===ws.total;
+    const wkPct=ws&&ws.total>0?Math.round((ws.done/ws.total)*100):0;
+    const barColor_s=allDone_s?'#4ade80':isCurWeek_s?'#3b82f6':'#f97316';
+    sideHtml+=`<div class="fix-side-week">`;
+    const wkWarn=isPastWeek_s&&hasIncomplete_s;
+    sideHtml+=`<div class="fix-side-week-hd" onclick="toggleFixWeek(${weekIdx})" style="${wkWarn?'background:#fff5f5':isCurWeek_s?'background:#eff6ff':''}">
+      <span class="fix-side-week-title" style="${wkWarn?'color:#dc2626':''}">
+        <span style="font-size:10px;color:${wkWarn?'#dc2626':'#9ca3af'}">${isCollapsed_s?'▶':'▼'}</span>
+        ${weekIdx+1}주차
+        ${isCurWeek_s?'<span class="now-badge">now</span>':''}
+        ${wkWarn?'<span class="warn-dot"></span>':''}
+        ${allDone_s?'<span style="color:#16a34a;font-size:11px">✓</span>':''}
+      </span>
+      <span class="fix-side-week-prog" style="${wkWarn?'color:#dc2626':''}">${ws.done}/${ws.total}</span>
+    </div>`;
+    sideHtml+=`<div class="fix-side-week-bar"><div class="fix-side-week-bar-fill" style="width:${wkPct}%;background:${wkWarn?'#ef4444':barColor_s}"></div></div>`;
+    if(!isCollapsed_s){
+      weekDays.forEach(day=>{
+        const ds=dayStats[day];
+        const {dow:sdow,color:scolor}=getFixDow(day);
+        const dayLbl=day===99?'말일':day+'일';
+        const hasTasks=ds&&ds.total>0;
+        const dayAllDone_s=hasTasks&&ds.done===ds.total;
+        const dayPct_s=hasTasks?Math.round((ds.done/ds.total)*100):0;
+        const isToday_s=day===_today;
+        const dayBarColor_s=dayAllDone_s?'#4ade80':'#f97316';
+        const isPastDay=_isThisMonth&&day!==99&&day<_today;
+        const hasIncDay=hasTasks&&!dayAllDone_s;
+        sideHtml+=`<div class="fix-side-day${dayAllDone_s?' all-done':''}" onclick="scrollToFixDay(${day})" id="fix-sd-${day}" style="${isToday_s?'background:#eff6ff;border-left-color:#2563eb;font-weight:700':''}${isPastDay&&hasIncDay?'background:#fff5f5;border-left-color:#ef4444':''}">
+          <span class="fix-side-day-label" style="color:${isPastDay&&hasIncDay?'#dc2626':scolor}">${dayLbl}</span>
+          <span class="fix-side-day-dow" style="color:${isPastDay&&hasIncDay?'#dc2626':scolor}">${sdow}</span>`;
+        if(hasTasks){
+          sideHtml+=`<span class="fix-side-day-prog">${isPastDay&&hasIncDay?'<span class="warn-dot"></span>':''}${ds.done}/${ds.total}
+            <span class="mini-bar"><span class="mini-bar-fill" style="width:${dayPct_s}%;background:${dayBarColor_s}"></span></span>
+          </span>`;
+        } else {
+          sideHtml+=`<span class="fix-side-day-prog"><span onclick="event.stopPropagation();addFixedTask(${day})" style="cursor:pointer;color:#aaa;font-size:11px;border:1px dashed #ccc;border-radius:3px;padding:0 4px" title="업무 추가">+</span></span>`;
+        }
+        sideHtml+=`</div>`;
+      });
+    }
+    sideHtml+=`</div>`;
   });
-  // 전체 펼치기/접기 버튼
-  weekTabBar+=`<div onclick="toggleFixWeekAll()" style="cursor:pointer;user-select:none;padding:7px 14px;border-radius:8px;background:${_allExpanded?'#f97316':'#10b981'};color:#fff;font-size:12px;font-weight:600;white-space:nowrap;margin-left:4px">${_allExpanded?'전체 접기':'전체 펼치기'}</div>`;
-  weekTabBar+='</div>';
+  var sideEl=$('fix-sidebar');
+  if(sideEl) sideEl.innerHTML=sideHtml;
+
+  // ── 테이블 렌더링 (날짜 컬럼을 상태 왼쪽에 rowspan으로 배치) ──
   var tblRows='';
   weeks.forEach((weekDays,weekIdx)=>{
     if(weekDays.length===0) return;
-    const ws=weekStats[weekIdx];
-    const isCurWeek=weekIdx===_curWeek;
     const isCollapsed=_fixIsCollapsed(weekIdx);
-    if(isCollapsed) return; // 접힌 주차는 테이블에 안 그림
-    // Render each day in the week
+    if(isCollapsed) return;
     weekDays.forEach(day=>{
       const s=schedMap[day];
-      const {dow,color}=getFixDow(day);
-      const dayLabel=day===99?'말일':day+'일';
-      const dayDow=day===99?'':'('+dow+')';
-      if(!s){
-        tblRows+=`<tr class="fix-wk-${weekIdx}" style="background:#f0f1f3;height:30px">
-          <td colspan="6" style="padding:0;border:none;border-top:2px solid #cbd5e1"><div style="padding:6px 8px;color:#444;font-weight:700;font-size:12px;display:flex;align-items:center">
-            <span class="fix-day-sep-label">${dayLabel} ${dayDow}</span><button class="btn sm" onclick="addFixedTask(${day})" style="font-size:9px;padding:1px 5px;color:var(--t4);margin-left:6px">+</button>
-          </div></td>
-        </tr>`;
-        return;
-      }
+      if(!s) return;
+      const {dow,color:dowColor}=getFixDow(day);
       const allTasks=s.tasks||[];
       const spLines=(s.special||'').split('\n');
       const assigns=s.assignees||{};
       const taskEntries=sq
         ? allTasks.map((t,i)=>({t,i})).filter(x=>taskMatchMap[s.id]&&taskMatchMap[s.id].has(x.i))
         : allTasks.map((t,i)=>({t,i}));
-      if(taskEntries.length===0){
-        tblRows+=`<tr class="fix-wk-${weekIdx}" style="background:#f0f1f3;height:30px">
-          <td colspan="6" style="padding:0;border:none;border-top:2px solid #cbd5e1"><div style="padding:6px 8px;color:#444;font-weight:700;font-size:12px;display:flex;align-items:center">
-            <span class="fix-day-sep-label">${dayLabel} ${dayDow}</span><button class="btn sm" onclick="addFixedTask(${s.day})" style="font-size:9px;padding:1px 5px;color:var(--t4);margin-left:6px">+</button>
-          </div></td>
-        </tr>`;
-        return;
-      }
-      let dayDone=0;
-      taskEntries.forEach(({t,i})=>{
-        const key=fixKey(s.id,i);
-        const status=DB.fixedDone[key]||'';
-        if(status==='완료'||DB.fixedDone[key]===true) dayDone++;
-      });
-      const allDayComplete=dayDone===taskEntries.length&&taskEntries.length>0;
-      const dayProgressPercent=taskEntries.length>0?Math.round((dayDone/taskEntries.length)*100):0;
-      const dayDowClass=dow==='토'?'fix-day-sep-sat':dow==='일'?'fix-day-sep-sun':'';
-      tblRows+=`<tr class="fix-wk-${weekIdx} fix-day-sep${allDayComplete?' all-done':''}" style="${allDayComplete?'background:#e8f5e9':'background:#f0f1f3'};height:30px">
-        <td colspan="6" style="padding:0;border:none;border-top:2px solid #cbd5e1"><div style="padding:6px 12px;display:flex;align-items:center;justify-content:space-between;${allDayComplete?'color:#10b981':'color:#444'};font-weight:700;font-size:12px">
-          <span style="display:flex;align-items:center;gap:8px">
-            <span class="fix-day-sep-label"><span class="${dayDowClass}">${dayLabel} ${dayDow}</span></span>
-            <span class="fix-day-sep-count ${allDayComplete?'all-done':dayDone>0?'partial':'none'}" style="font-size:11px">${dayDone}/${taskEntries.length}</span>
-            <span style="display:inline-block;height:4px;width:40px;background:#e5e7eb;border-radius:2px;overflow:hidden">
-              <span style="display:block;height:100%;width:${dayProgressPercent}%;background:${allDayComplete?'#4ade80':'#f97316'};border-radius:2px"></span>
-            </span>
-            <button class="btn sm" onclick="addFixedTask(${s.day})" style="font-size:9px;padding:1px 5px;color:var(--t4)">+</button>
-          </span>
-        </div></td>
-      </tr>`;
+      if(taskEntries.length===0) return;
+      const ds=dayStats[day];
+      const dayAllDone=ds&&ds.total>0&&ds.done===ds.total;
+      const dayPct=ds&&ds.total>0?Math.round((ds.done/ds.total)*100):0;
+      const dayBarColor=dayAllDone?'#4ade80':'#f97316';
+      const rowCount=taskEntries.length;
+      const dayLbl=day===99?'말일':day;
+      const isToday=day===_today;
+      const todayBg=isToday?'background:#eff6ff;':'';
+      const doneBg=dayAllDone?'background:#f0fdf4;':'';
       // Task rows
-      taskEntries.forEach(({t,i})=>{
+      taskEntries.forEach(({t,i},rowIdx)=>{
         const key=fixKey(s.id,i);
         const status=DB.fixedDone[key];
         const statusVal=(status==='완료'||status===true)?'완료':(status==='진행'?'진행':'미완료');
@@ -11665,26 +12115,33 @@ function rdFixed(){
         let bldgNum=_fixBldgColorMap[building]||0;
         if(!bldgNum&&building){var _bl=building.trim();for(var _bk in _fixBldgColorMap){if(_bl.indexOf(_bk)>=0||_bk.indexOf(_bl)>=0){bldgNum=_fixBldgColorMap[_bk];break;}}}
         const stCls=statusVal?'st-'+statusVal:'';
-        tblRows+=`<tr class="fix-wk-${weekIdx} fix-task-row" id="ft-${s.id}-${i}" data-presence-type="fixed" data-presence-id="${s.id}_${i}">
-          <td style="text-align:center;padding:4px">
+        const isFirst=rowIdx===0;
+        tblRows+=`<tr class="fix-wk-${weekIdx} fix-task-row${isFirst?' fix-day-first':''}" id="${isFirst?'fix-day-row-'+day:'ft-'+s.id+'-'+i}" data-presence-type="fixed" data-presence-id="${s.id}_${i}" oncontextmenu="openFixCtx(event,${s.id},${i})">`;
+        // 날짜 셀 (첫 행만 rowspan)
+        if(isFirst){
+          tblRows+=`<td class="fix-date-cell" rowspan="${rowCount}" style="${todayBg}${doneBg}">
+            <div class="fd-day" style="color:${dowColor}">${dayLbl}</div>
+            <div class="fd-dow" style="color:${dowColor}">${dow}</div>
+            <span class="fd-add" onclick="addFixedTask(${s.day})" title="업무 추가">+</span>
+          </td>`;
+        }
+        tblRows+=`<td style="text-align:center;padding:4px">
             <select class="fix-status-sel ${stCls}" onchange="togFix('${s.id}',${i},this.value)">
               <option value="미완료" ${statusVal==='미완료'?'selected':''}>미완료</option>
-              <option value="진행" ${statusVal==='진행'?'selected':''}>진행</option>
               <option value="완료" ${statusVal==='완료'?'selected':''}>완료</option>
             </select>
           </td>
           <td style="text-align:center;padding:4px">
-            ${building?`<span class="fix-bldg-tag bt-${bldgNum||20}" ondblclick="editFixBuilding(${s.id},${i},this.parentElement)" title="더블클릭하여 수정">${esc(building)}</span>`:`<span class="fix-bldg-add" onclick="editFixBuilding(${s.id},${i},this.parentElement)" title="클릭하여 건물 추가">+</span>`}
+            ${building?`<span class="fix-bldg-tag bt-${bldgNum||20}" ondblclick="editFixBuilding(${s.id},${i},this.parentElement)" title="${esc(building)}">${esc(building.replace(/^\d+\./,''))}</span>`:`<span class="fix-bldg-add" onclick="editFixBuilding(${s.id},${i},this.parentElement)" title="클릭하여 건물 추가">+</span>`}
           </td>
-          <td class="fix-task-td" ondblclick="if(typeof startEditing==='function')startEditing('fixed','${s.id}_${i}','고정일정','${s.day}일 ${i+1}번');_beginTaskEdit(this,${s.id},${i})" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"><span class="fix-task-txt${statusVal==='완료'?' done':''}">${i+1}. ${hl(t)}</span></td>
+          <td class="fix-task-td" ondblclick="if(typeof startEditing==='function')startEditing('fixed','${s.id}_${i}','고정일정','${s.day}일 ${i+1}번');_beginTaskEdit(this,${s.id},${i})" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"><span class="fix-task-txt${statusVal==='완료'?' done':''}">${hl(t)}</span></td>
           <td class="fix-sp-td" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed','${s.id}_sp${i}','고정일정','${s.day}일 ${i+1}번 특이사항');_spEditActive={sId:${s.id},taskIdx:${i},el:this,origText:(this.textContent||'').trim()};beginEditOnDblClick(this)" oninput="_spEditPending={sId:${s.id},taskIdx:${i},el:this};_spLastText=this.textContent" onblur="saveSpInline(${s.id},${i},this);_spEditActive=null;if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정">${hl(spText)}</td>
-          <td style="text-align:center;padding:2px"><span class="fix-act-btn" onclick="moveFixTask(${s.id},${i})" title="날짜 이동" style="cursor:pointer;font-size:14px">↕</span></td>
           <td class="fix-assign-td" ondblclick="editFixAssign(${s.id},${i},this)" title="더블클릭하여 수정">${esc(assignee)}</td>
         </tr>`;
       });
     });
   });
-  $('fixed-list').innerHTML=weekTabBar+`<table class="fix-tbl"><thead><tr><th class="th-status">상태</th><th class="th-bldg">건물</th><th class="th-task">업무내용</th><th class="th-sp">특이사항</th><th class="th-move">일정이동</th><th class="th-assign">담당</th></tr></thead><tbody>${tblRows}</tbody></table>`;
+  $('fixed-list').innerHTML=`<table class="fix-tbl"><thead><tr><th class="th-date">날짜</th><th class="th-status">상태</th><th class="th-bldg">건물</th><th class="th-task">업무내용</th><th class="th-sp">특이사항</th><th class="th-assign">담당</th></tr></thead><tbody>${tblRows}</tbody></table>`;
   try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
 }
 // ★ 업무내용 전체 셀 편집
@@ -11743,16 +12200,29 @@ function _getFixWeekState(wi){
   if(!window._fixWeekCollapsed) window._fixWeekCollapsed={};
   if(window._fixWeekCollapsed[wi]!==undefined) return window._fixWeekCollapsed[wi];
   var _isThisM=_fixViewYear===new Date().getFullYear()&&_fixViewMonth===new Date().getMonth();
-  if(!_isThisM) return false; // 과거/미래 월은 전체 펼침
+  if(!_isThisM) return false;
+  // 달력 기준 현재 주차 계산 (일요일 시작)
   var _today=new Date().getDate();
-  var _curWk=_today<=7?0:_today<=14?1:_today<=21?2:_today<=28?3:4;
+  var _fd=new Date(_fixViewYear,_fixViewMonth,1).getDay();
+  var _firstEnd=_fd===0?7:(7-_fd);
+  var _curWk=0;
+  if(_today>_firstEnd){
+    _curWk=Math.floor((_today-_firstEnd-1)/7)+1;
+  }
   return wi!==_curWk;
+}
+function _getFixCalWeekCount(){
+  var _fd=new Date(_fixViewYear,_fixViewMonth,1).getDay();
+  var _lastDate=new Date(_fixViewYear,_fixViewMonth+1,0).getDate();
+  var _firstEnd=_fd===0?7:(7-_fd);
+  return 1+Math.ceil((_lastDate-_firstEnd)/7);
 }
 function toggleFixWeekAll(){
   if(!window._fixWeekCollapsed) window._fixWeekCollapsed={};
+  var wc=_getFixCalWeekCount();
   var anyCollapsed=false;
-  for(var i=0;i<5;i++){ if(_getFixWeekState(i)){anyCollapsed=true;break;} }
-  for(var i=0;i<5;i++) window._fixWeekCollapsed[i]=!anyCollapsed;
+  for(var i=0;i<wc;i++){ if(_getFixWeekState(i)){anyCollapsed=true;break;} }
+  for(var i=0;i<wc;i++) window._fixWeekCollapsed[i]=!anyCollapsed;
   rdFixed();
 }
 function toggleFixWeek(weekIdx){
@@ -11760,16 +12230,59 @@ function toggleFixWeek(weekIdx){
   window._fixWeekCollapsed[weekIdx]=!_getFixWeekState(weekIdx);
   rdFixed();
 }
+function scrollToFixDay(day){
+  document.querySelectorAll('.fix-side-day').forEach(function(el){el.classList.remove('active');});
+  var sdEl=document.getElementById('fix-sd-'+day);
+  if(sdEl) sdEl.classList.add('active');
+  var rowEl=document.getElementById('fix-day-row-'+day);
+  if(rowEl){
+    rowEl.scrollIntoView({behavior:'smooth',block:'start'});
+    rowEl.style.transition='background .3s';
+    rowEl.style.background='#dbeafe';
+    setTimeout(function(){ rowEl.style.background=''; },1200);
+  }
+}
+// ★ 우클릭 컨텍스트 메뉴
+function openFixCtx(ev,sId,taskIdx){
+  ev.preventDefault();
+  closeFixCtx();
+  var s=DB.fixedSchedules.find(function(x){return x.id===sId;});
+  var taskName=s?(s.tasks||[])[taskIdx]||'':'';
+  var dayLbl=s?(s.dayLabel||s.day+'일'):'';
+  var menu=document.createElement('div');
+  menu.className='fix-ctx';
+  menu.id='fix-ctx-menu';
+  menu.innerHTML=`
+    <div class="fix-ctx-item" onclick="closeFixCtx();moveFixTask(${sId},${taskIdx})">↕ 날짜 이동</div>
+    <div class="fix-ctx-item" onclick="closeFixCtx();delFixTask(${sId},${taskIdx})">🗑 삭제</div>
+  `;
+  document.body.appendChild(menu);
+  // 위치 조정 (화면 밖 방지)
+  var x=ev.clientX,y=ev.clientY;
+  var mw=menu.offsetWidth,mh=menu.offsetHeight;
+  if(x+mw>window.innerWidth) x=window.innerWidth-mw-4;
+  if(y+mh>window.innerHeight) y=window.innerHeight-mh-4;
+  menu.style.left=x+'px';menu.style.top=y+'px';
+  setTimeout(function(){document.addEventListener('click',closeFixCtx,{once:true});},0);
+}
+function closeFixCtx(){
+  var m=document.getElementById('fix-ctx-menu');
+  if(m) m.remove();
+}
 // ★ 담당자 편집
 function editFixAssign(sId,taskIdx,td){
   if(typeof startEditing==='function')startEditing('fixed',sId+'_a'+taskIdx,'고정일정','담당자');
   var cur=td.textContent.trim();
-  var inp=document.createElement('input');
-  inp.type='text';inp.value=cur;inp.placeholder='담당자';
-  inp.style.cssText='width:100%;font-size:11px;padding:2px 4px;border:1px solid var(--bl);border-radius:3px;text-align:center;box-sizing:border-box';
-  td.textContent='';td.appendChild(inp);inp.focus();inp.select();
+  var sel=document.createElement('select');
+  sel.style.cssText='width:auto;min-width:100%;font-size:11px;padding:2px 4px;border:1px solid var(--bl);border-radius:3px;box-sizing:border-box;text-align:center;text-align-last:center';
+  var userList=_getFixUserList();
+  sel.innerHTML='<option value="">- 선택 -</option>'+userList.map(function(n){return'<option value="'+esc(n)+'"'+(n===cur?' selected':'')+'>'+esc(n)+'</option>';}).join('');
+  td.innerHTML='';td.appendChild(sel);sel.focus();
+  try{sel.showPicker();}catch(_){try{sel.click();}catch(_2){}}
+  var saved=false;
   function doSave(){
-    var val=inp.value.trim();
+    if(saved)return;saved=true;
+    var val=sel.value;
     td.textContent=val;
     var s=DB.fixedSchedules.find(x=>x.id===sId);
     if(s){
@@ -11785,11 +12298,8 @@ function editFixAssign(sId,taskIdx,td){
     }
     if(typeof stopEditing==='function')stopEditing();
   }
-  inp.addEventListener('blur',doSave);
-  inp.addEventListener('keydown',function(ev){
-    if(ev.key==='Enter'){ev.preventDefault();inp.blur();}
-    if(ev.key==='Escape'){inp.value=cur;inp.blur();}
-  });
+  sel.addEventListener('change',doSave);
+  sel.addEventListener('blur',doSave);
 }
 // ★ 특이사항 추출: taskIdx번 업무의 특이사항 텍스트 추출
 function _extractSpForTask(special,taskIdx){
@@ -12159,9 +12669,9 @@ function rdMemo(){
     else{$('mp-title').textContent='항목을 선택하세요';$('memo-cats').innerHTML='';}
   }else{
     $('memo-search').placeholder='건물 검색...';
-    const items=DB.buildings.filter(b=>!sq||b.name.toLowerCase().includes(sq)||(b.addr||'').toLowerCase().includes(sq));
+    const items=_teamBuildings().filter(b=>!sq||b.name.toLowerCase().includes(sq)||(b.addr||'').toLowerCase().includes(sq));
     if(!DB.ui.selBldg&&items.length)DB.ui.selBldg=items[0].id;
-    if(DB.ui.selBldg&&!DB.buildings.find(b=>b.id===DB.ui.selBldg))DB.ui.selBldg=items[0]?.id||null;
+    if(DB.ui.selBldg&&!_teamBuildings().find(b=>b.id===DB.ui.selBldg))DB.ui.selBldg=items[0]?.id||null;
     $('memo-cat-list').innerHTML=items.map(b=>`<div class="mi${DB.ui.selBldg===b.id?' on':''}" onclick="selMemoBldg(${b.id})">
       <div class="mi-name">${b.name}</div><div class="mi-addr">${b.addr||''}</div>
     </div>`).join('');
@@ -12178,7 +12688,7 @@ function rdMemoByCategory(catKey){
   const cat=MC.find(c=>c.key===catKey);
   $('mp-title').textContent=cat?cat.label:'';
   if(!cat){$('memo-cats').innerHTML='';return;}
-  const bldgs=DB.buildings;
+  const bldgs=_teamBuildings();
   if(!bldgs.length){$('memo-cats').innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:11px">등록된 건물이 없습니다</div>';return;}
   const cw=memoColW();
   const colTpl=`${cw}px 1fr`;
@@ -12293,7 +12803,7 @@ function rdAllBMemo(){
   }
   const cats=MC.filter(c=>_bmemoAllCatFilter==='all'||c.key===_bmemoAllCatFilter);
   const ico={password:'🔐',cctv:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PGxpbmUgeDE9JzE3JyB5MT0nMycgeDI9JzE3JyB5Mj0nOCcgc3Ryb2tlPScjOWNhM2FmJyBzdHJva2Utd2lkdGg9JzIuNScgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJy8+PHJlY3QgeD0nNCcgeT0nOCcgd2lkdGg9JzE2JyBoZWlnaHQ9JzknIHJ4PSc0LjUnIGZpbGw9JyNlNWU3ZWInIHN0cm9rZT0nIzZiNzI4MCcgc3Ryb2tlLXdpZHRoPScuOCcvPjxjaXJjbGUgY3g9JzknIGN5PScxMi41JyByPSczJyBmaWxsPScjMzc0MTUxJyBzdHJva2U9JyM2YjcyODAnIHN0cm9rZS13aWR0aD0nLjUnLz48Y2lyY2xlIGN4PSc5JyBjeT0nMTIuNScgcj0nMS41JyBmaWxsPScjNjQ3NDhiJy8+PGNpcmNsZSBjeD0nOScgY3k9JzEyLjUnIHI9Jy42JyBmaWxsPScjZDFkNWRiJy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',fire:'🧯',elevator:'<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHJlY3QgeD0nMicgeT0nNCcgd2lkdGg9JzIwJyBoZWlnaHQ9JzE4JyByeD0nMicgZmlsbD0nIzhiOWNiNycgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9JzEnLz48cmVjdCB4PSc0JyB5PSc2JyB3aWR0aD0nNycgaGVpZ2h0PScxNCcgcng9Jy41JyBmaWxsPScjYzVkMmUwJyBzdHJva2U9JyM0YTU1NjgnIHN0cm9rZS13aWR0aD0nLjgnLz48cmVjdCB4PScxMycgeT0nNicgd2lkdGg9JzcnIGhlaWdodD0nMTQnIHJ4PScuNScgZmlsbD0nI2M1ZDJlMCcgc3Ryb2tlPScjNGE1NTY4JyBzdHJva2Utd2lkdGg9Jy44Jy8+PGNpcmNsZSBjeD0nMTEuNScgY3k9JzEzJyByPScuNycgZmlsbD0nIzRhNTU2OCcvPjxjaXJjbGUgY3g9JzEyLjUnIGN5PScxMycgcj0nLjcnIGZpbGw9JyM0YTU1NjgnLz48cG9seWdvbiBwb2ludHM9JzcsMyA1LjUsNSA4LjUsNScgZmlsbD0nIzRhNTU2OCcvPjxwb2x5Z29uIHBvaW50cz0nMTcsNSAxNS41LDMgMTguNSwzJyBmaWxsPScjNGE1NTY4Jy8+PC9zdmc+" style="width:1em;height:1em;vertical-align:middle">',water:'💧',electric:'⚡',parking:'🚗',insurance:'📋',etc:'📌',contact:'📞'};
-  const bldgs=DB.buildings.slice();
+  const bldgs=_teamBuildings().slice();
   if(!bldgs.length){ body.innerHTML='<div style="padding:40px;text-align:center;color:var(--t4);font-size:13px">표시할 건물이 없습니다.</div>'; return; }
   const mgrLabel={fire:'소방안전관리자',elevator:'승강기 안전관리자'};
   const isSingleCat=_bmemoAllCatFilter!=='all';
@@ -12394,7 +12904,7 @@ function switchBMemo(bId){
 function _renderBMemoSide(activeBId){
   const side=$('bmemo-side'); if(!side) return;
   side.innerHTML=`<button onclick="closeMo('mo-bmemo');openAllBMemo()" style="padding:10px 10px;font-size:13px;font-weight:700;border:none;background:#fef3c7;color:#92400e;cursor:pointer;font-family:inherit;text-align:center;width:100%;border-bottom:2px solid #f59e0b;flex-shrink:0" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">📋 전체보기</button>`+
-    DB.buildings.map(bb=>{
+    _teamBuildings().map(bb=>{
       const on=bb.id===activeBId;
       return `<button data-bid="${bb.id}" onclick="switchBMemo(${bb.id})" style="padding:9px 10px;font-size:13px;border:none;cursor:pointer;text-align:left;font-family:inherit;background:${on?'#fff':'transparent'};color:${on?'var(--bl)':'var(--t2)'};font-weight:${on?700:400};border-left:${on?'3px solid var(--bl)':'3px solid transparent'};transition:.12s" onmouseover="if(!this.dataset.bid||+this.dataset.bid!==${activeBId})this.style.background='#e8ecf1'" onmouseout="if(!this.dataset.bid||+this.dataset.bid!==${activeBId})this.style.background='${on?'#fff':'transparent'}'">${esc(bb.name)}</button>`;
     }).join('');
@@ -14228,6 +14738,8 @@ function _pmemoSaveAllDirty(){
   md.updatedAt=_pmemoTs();
   _pmemoDirtySet={};
   sv(); _showPMemoSaved(); _syncFloatIfOpen();
+  // 저장 완료 후 autosave 백업 제거 (다음 로드 시 복구 다이얼로그 방지)
+  try{ localStorage.removeItem('bsn_memo_autosave'); }catch(e){}
   var pb=document.getElementById('pmemo-save-btn');if(pb)pb.style.background='#16a34a';
 }
 function _pmemoHasDirty(){ return Object.keys(_pmemoDirtySet).length>0; }
@@ -16983,10 +17495,10 @@ function rdDash(){
   var expEl=document.getElementById('dash-expiring');
   if(expEl&&DB.leases){
     var today=fd(now);
-    var soon=DB.leases.filter(function(l){var d=dday(l.end);return d>=0&&d<=30;});
+    var soon=DB.leases.filter(function(l){var d=dday(l.end);return _tBids.has(l.bId)&&d>=0&&d<=30;});
     if(soon.length===0) expEl.innerHTML='<span style="color:var(--gn)">✓ 30일 이내 만료 예정 없음</span>';
     else expEl.innerHTML=soon.map(function(l){
-      var bldg=DB.buildings.find(function(b){return b.id===l.building_id;});
+      var bldg=DB.buildings.find(function(b){return b.id===l.bId;});
       return '<div style="padding:3px 0;display:flex;gap:6px;align-items:center"><span class="bg bg-rd">D-'+dday(l.end)+'</span><span>'+(bldg?bldg.name:'')+' '+l.floor+' '+(l.tenant||'')+'</span></div>';
     }).join('');
   }
@@ -16994,7 +17506,7 @@ function rdDash(){
   var todayEl=document.getElementById('dash-today');
   if(todayEl&&DB.events){
     var todayStr=fd(now);
-    var todayEvts=DB.events.filter(function(e){return e.date===todayStr;});
+    var todayEvts=DB.events.filter(function(e){return e.date===todayStr&&(!e.bId||_tBids.has(e.bId));});
     if(todayEvts.length===0) todayEl.innerHTML='<span style="color:var(--t4)">오늘 일정 없음</span>';
     else todayEl.innerHTML=todayEvts.map(function(e){
       return '<div style="padding:3px 0">• '+(e.title||e.memo||'')+'</div>';
@@ -17425,15 +17937,23 @@ var _dvTeamFilter='all'; // 'all', 1, 2 — 드라이브 내부 팀 필터
 var _dvFiles=[];  // DB.driveFiles 참조
 
 function rdDrive(){
+  // OneDrive 전용 모드 — 바로 OneDrive 로드
+  var odMain=$('od-main');
+  if(odMain) odMain.style.display='';
+  var driveMain=$('drive-main');
+  if(driveMain) driveMain.style.display='none';
+  if(!_odMsal) _odBootstrap();
+  else _odRenderFiles();
+  // 기존 Supabase 드라이브 (하위 호환용)
   if(!DB.driveFiles) DB.driveFiles=[];
   _dvFiles=DB.driveFiles;
   var nav$=$('drive-nav'), bldg$=$('drive-bldg-list'), cat$=$('drive-cat-list');
   if(!nav$) return;
   // 네비게이션
   var navItems=[
-    {id:'all',ico:'🏠',label:'전체 파일'},
+    {id:'all',ico:'💻',label:'내 파일'},
     {id:'starred',ico:'⭐',label:'즐겨찾기'},
-    {id:'recent',ico:'🕐',label:'최근 파일'},
+    {id:'recent',ico:'🕐',label:'최근 항목'},
     {id:'trash',ico:'🗑',label:'휴지통'}
   ];
   nav$.innerHTML=navItems.map(function(n){
@@ -17521,8 +18041,8 @@ function _dvRenderMain(){
   var html='';
   // 드래그앤드롭 영역
   html+='<div id="drive-drop" style="border:2px dashed #d1d5db;border-radius:10px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;transition:.15s" onclick="$(\'drive-file-input\').click()">';
-  html+='<div style="font-size:28px;margin-bottom:4px">📤</div>';
-  html+='<div style="font-size:11px;color:#64748b">파일을 여기에 끌어다 놓거나 클릭하여 업로드</div></div>';
+  html+='<div style="font-size:28px;margin-bottom:4px">📂</div>';
+  html+='<div style="font-size:11px;color:#64748b">파일을 여기로 끌어다 놓거나 클릭하여 추가</div></div>';
   if(files.length===0){
     html+='<div style="text-align:center;padding:40px;color:var(--t3);font-size:12px">파일이 없습니다</div>';
     main$.innerHTML=html; return;
@@ -17550,8 +18070,9 @@ function _dvRenderMain(){
         var sz=f.size?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'—';
         html+='<div style="background:var(--w);border:1px solid var(--ln);border-radius:8px;overflow:hidden;cursor:pointer;position:relative" onclick="_dvPreview(\''+f.id+'\')" oncontextmenu="_dvContextMenu(event,\''+f.id+'\')">';
         html+='<div style="height:80px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:30px">'+icon+'</div>';
-        html+='<div style="padding:6px 8px"><div style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+'</div>';
-        html+='<div style="font-size:9px;color:#94a3b8;margin-top:2px;display:flex;justify-content:space-between"><span>'+sz+'</span><span>'+(f.uploadedAt||'').slice(2,10)+'</span></div></div>';
+        var _pn=_dvProgName(ext).replace(/로$/,'');
+      html+='<div style="padding:6px 8px"><div style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+f.name+'">'+f.name+'</div>';
+        html+='<div style="font-size:9px;color:#94a3b8;margin-top:2px;display:flex;justify-content:space-between"><span>'+sz+'</span><span style="color:#b0b8c4">'+_pn+'</span></div></div>';
         html+='<span onclick="event.stopPropagation();_dvToggleStar(\''+f.id+'\')" style="position:absolute;top:4px;right:6px;font-size:12px;cursor:pointer;opacity:'+(f.starred?'1':'.3')+'">'+(f.starred?'⭐':'☆')+'</span>';
         html+='</div>';
       });
@@ -17583,8 +18104,12 @@ function _dvRenderMain(){
   }
 }
 function _dvFileIcon(ext){
-  var m={pdf:'📄',xlsx:'📊',xls:'📊',doc:'📝',docx:'📝',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',zip:'📦',hwp:'📃'};
+  var m={pdf:'📄',xlsx:'📊',xls:'📊',doc:'📝',docx:'📝',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',zip:'📦',hwp:'📃',txt:'📝',csv:'📊',pptx:'📊',ppt:'📊',mp4:'🎬',mp3:'🎵'};
   return m[ext]||'📄';
+}
+function _dvProgName(ext){
+  var m={pdf:'PDF 뷰어로',xlsx:'Excel로',xls:'Excel로',doc:'Word로',docx:'Word로',hwp:'한글로',txt:'메모장으로',jpg:'사진 뷰어로',jpeg:'사진 뷰어로',png:'사진 뷰어로',gif:'사진 뷰어로',pptx:'PowerPoint로',ppt:'PowerPoint로',csv:'Excel로',mp4:'동영상 플레이어로',mp3:'음악 플레이어로',zip:'압축 프로그램으로'};
+  return m[ext]||'연결 프로그램으로';
 }
 function _driveView(v){ _dvView=v; document.querySelectorAll('._dv-vt').forEach(function(b){b.style.background=b.dataset.v===v?'var(--bl)':'';b.style.color=b.dataset.v===v?'#fff':'';b.style.borderColor=b.dataset.v===v?'var(--bl)':'';});_dvRenderMain(); }
 function _driveUpload(){ $('drive-file-input').click(); }
@@ -17623,9 +18148,356 @@ function _dvPreview(fid){
     if(confirm(f.name+'\n\n복구하시겠습니까?')){f.deleted=false;sv();rdDrive();}
     return;
   }
-  // 클릭: 외부 프로그램으로 열기 (Blob → 다운로드 → OS 기본 프로그램)
   if(!f.data) return;
-  _dvDownloadFile(fid);
+  _dvOpenFile(fid);
+}
+function _dvMakeBlobUrl(f){
+  var parts=f.data.split(',');var mime=(parts[0].match(/:(.*?);/)||[])[1]||'application/octet-stream';
+  var raw=atob(parts[1]);var arr=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+  var blob=new Blob([arr],{type:mime});
+  return URL.createObjectURL(blob);
+}
+function _dvOpenFile(fid){
+  var f=_dvFiles.find(function(x){return String(x.id)===String(fid);});
+  if(!f||!f.data) return;
+  var ext=(f.name||'').split('.').pop().toLowerCase();
+  // MIME 타입도 확인 (확장자 없는 파일 대비)
+  var mime=(f.data.match(/^data:(.*?);/)||[])[1]||'';
+  var imgExts=['jpg','jpeg','png','gif','bmp','svg','webp'];
+  if(imgExts.indexOf(ext)>=0 || mime.indexOf('image/')===0){ _dvShowPreviewModal(f,'image'); return; }
+  if(ext==='pdf' || mime==='application/pdf'){ _dvShowPreviewModal(f,'pdf'); return; }
+  var txtExts=['txt','csv','json','xml','html','htm','log','md'];
+  if(txtExts.indexOf(ext)>=0 || mime.indexOf('text/')===0){ _dvShowPreviewModal(f,'text'); return; }
+  var vidExts=['mp4','webm','ogg'];
+  if(vidExts.indexOf(ext)>=0 || mime.indexOf('video/')===0){ _dvShowPreviewModal(f,'video'); return; }
+  var audExts=['mp3','wav'];
+  if(audExts.indexOf(ext)>=0 || mime.indexOf('audio/')===0){ _dvShowPreviewModal(f,'audio'); return; }
+  // Office 파일 → Office Online 뷰어 / PDF → 브라우저 뷰어
+  var officeOnlineExts=['xlsx','xls','docx','doc','pptx','ppt'];
+  if(officeOnlineExts.indexOf(ext)>=0){
+    _dvOpenOfficeOnline(f);
+    return;
+  }
+  // 한글 등 → 다운로드
+  var officeExts=['hwp','hwpx'];
+  if(officeExts.indexOf(ext)>=0){
+    _dvOpenWithProgram(f);
+  } else {
+    _dvDownloadFile(fid);
+  }
+}
+// ★ 앱 내 미리보기 모달 (윈도우 사진앱 스타일: 휠 확대축소 + 드래그 이동)
+function _dvShowPreviewModal(f,type){
+  var old=document.getElementById('dv-preview-modal');if(old)old.remove();
+  var url=_dvMakeBlobUrl(f);
+  var modal=document.createElement('div');modal.id='dv-preview-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.85);display:flex;flex-direction:column';
+  // 상단 바
+  var bar=document.createElement('div');
+  bar.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 16px;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;background:rgba(0,0,0,.5);z-index:2';
+  bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%">'+esc(f.name)+'</span>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +(type==='image'?'<span id="dv-zoom-label" style="font-size:11px;color:#94a3b8;min-width:40px;text-align:center">100%</span><button onclick="_dvZoomBtn(-1)" style="background:#374151;color:#fff;border:none;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-family:inherit">−</button><button onclick="_dvZoomBtn(1)" style="background:#374151;color:#fff;border:none;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-family:inherit">+</button><button onclick="_dvZoomBtn(0)" style="background:#374151;color:#fff;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:10px;font-family:inherit">맞춤</button>':'')
+    +'<button onclick="_dvDownloadFile(\''+f.id+'\')" style="background:#374151;color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit">⬇ 다운로드</button>'
+    +'<button onclick="document.getElementById(\'dv-preview-modal\').remove()" style="background:#ef4444;color:#fff;border:none;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-family:inherit">✕</button></div>';
+  modal.appendChild(bar);
+  // 배경/사이드 클릭 시 닫기 (이미지·PDF 본문 제외)
+  modal.addEventListener('mousedown',function(e){modal._mdTarget=e.target;});
+  modal.addEventListener('click',function(e){
+    // 드래그 후 놓은 것은 무시 (이미지 이동 시 오작동 방지)
+    if(modal._mdTarget!==e.target) return;
+    // bar 내부 클릭은 무시
+    if(bar.contains(e.target)) return;
+    // 이미지/PDF/콘텐츠 내부 클릭은 무시
+    var t=e.target;
+    if(t.tagName==='IMG'||t.tagName==='CANVAS'||t.tagName==='IFRAME'||t.tagName==='EMBED'||t.tagName==='VIDEO'||t.tagName==='AUDIO'||t.tagName==='PRE'||t.tagName==='BUTTON') return;
+    modal.remove();
+  });
+  // 콘텐츠 영역
+  var viewport=document.createElement('div');
+  viewport.style.cssText='flex:1;overflow:hidden;position:relative;cursor:default';
+  viewport.id='dv-pv-viewport';
+  if(type==='image'){
+    // 이미지: 확대축소+드래그 이동
+    var wrap=document.createElement('div');wrap.id='dv-pv-wrap';
+    wrap.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform-origin:0 0';
+    var img=document.createElement('img');img.src=url;img.id='dv-pv-img';
+    img.style.cssText='max-width:100%;max-height:100%;user-select:none;-webkit-user-drag:none;transition:none';
+    img.draggable=false;
+    wrap.appendChild(img);viewport.appendChild(wrap);
+    // 줌/팬 상태
+    var _z={scale:1,x:0,y:0,dragging:false,sx:0,sy:0,ox:0,oy:0,fitted:true};
+    window._dvZoomState=_z;
+    function applyT(){
+      img.style.transform='translate('+_z.x+'px,'+_z.y+'px) scale('+_z.scale+')';
+      img.style.maxWidth=_z.fitted?'100%':'none';
+      img.style.maxHeight=_z.fitted?'100%':'none';
+      var lbl=document.getElementById('dv-zoom-label');
+      if(lbl) lbl.textContent=Math.round(_z.scale*100)+'%';
+    }
+    // 휠 확대축소
+    viewport.addEventListener('wheel',function(e){
+      e.preventDefault();
+      var rect=viewport.getBoundingClientRect();
+      var mx=e.clientX-rect.left, my=e.clientY-rect.top;
+      var oldS=_z.scale;
+      var delta=e.deltaY>0?0.85:1.18;
+      _z.scale=Math.max(0.1,Math.min(20,_z.scale*delta));
+      if(_z.fitted&&_z.scale!==1){_z.fitted=false;_z.x=0;_z.y=0;}
+      // 마우스 위치 기준 확대
+      var ratio=_z.scale/oldS;
+      _z.x=mx-(mx-_z.x)*ratio;
+      _z.y=my-(my-_z.y)*ratio;
+      applyT();
+    },{passive:false});
+    // 드래그 이동
+    viewport.addEventListener('mousedown',function(e){
+      if(e.button!==0)return;
+      _z.dragging=true;_z.sx=e.clientX;_z.sy=e.clientY;_z.ox=_z.x;_z.oy=_z.y;
+      viewport.style.cursor='grabbing';
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove',function _pvMv(e){
+      if(!_z.dragging)return;
+      _z.x=_z.ox+(e.clientX-_z.sx);
+      _z.y=_z.oy+(e.clientY-_z.sy);
+      applyT();
+    });
+    window.addEventListener('mouseup',function _pvUp(){
+      if(_z.dragging){_z.dragging=false;viewport.style.cursor='grab';}
+    });
+    viewport.style.cursor='grab';
+    // 더블클릭: 원본크기/맞춤 토글
+    viewport.addEventListener('dblclick',function(){
+      if(_z.scale===1&&_z.fitted){_z.scale=2;_z.fitted=false;_z.x=0;_z.y=0;}
+      else{_z.scale=1;_z.x=0;_z.y=0;_z.fitted=true;}
+      applyT();
+    });
+  } else if(type==='pdf'){
+    // PDF.js canvas 기반 인앱 뷰어 (다운로드 없음)
+    var pdfBox=document.createElement('div');
+    pdfBox.style.cssText='width:100%;height:100%;overflow:auto;background:#525659;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:8px';
+    viewport.appendChild(pdfBox);
+    viewport.style.overflow='hidden';
+    if(typeof pdfjsLib==='undefined'){
+      // PDF.js 미로드 시 iframe fallback
+      pdfBox.style.padding='0';pdfBox.style.gap='0';
+      var ifr=document.createElement('iframe');ifr.src=url;
+      ifr.style.cssText='width:100%;height:100%;border:none;background:#fff';
+      pdfBox.appendChild(ifr);
+    } else {
+      var parts2=f.data.split(',');var raw2=atob(parts2[1]);
+      var arr2=new Uint8Array(raw2.length);for(var i2=0;i2<raw2.length;i2++)arr2[i2]=raw2.charCodeAt(i2);
+      pdfjsLib.getDocument({data:arr2}).promise.then(function(pdf){
+        var _pdfScale=1.5;
+        // 페이지 수 표시
+        var pgInfo=document.createElement('div');
+        pgInfo.style.cssText='color:#94a3b8;font-size:11px;padding:8px;text-align:center';
+        pgInfo.textContent='총 '+pdf.numPages+'페이지';
+        pdfBox.appendChild(pgInfo);
+        function renderPage(num){
+          pdf.getPage(num).then(function(page){
+            var vp2=page.getViewport({scale:_pdfScale});
+            var cvs=document.createElement('canvas');
+            cvs.width=vp2.width; cvs.height=vp2.height;
+            cvs.style.cssText='display:block;box-shadow:0 2px 8px rgba(0,0,0,.3);background:#fff';
+            pdfBox.appendChild(cvs);
+            page.render({canvasContext:cvs.getContext('2d'),viewport:vp2}).promise.then(function(){
+              if(num<pdf.numPages) renderPage(num+1);
+            });
+          });
+        }
+        renderPage(1);
+      }).catch(function(e){
+        pdfBox.innerHTML='<p style="color:#fff;padding:40px;text-align:center">PDF 로드 실패: '+e.message+'</p>';
+      });
+    }
+  } else if(type==='text'){
+    try{
+      var parts=f.data.split(',');var raw=atob(parts[1]);
+      var bytes=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+      var txt=new TextDecoder('utf-8').decode(bytes);
+      viewport.innerHTML='<pre style="padding:20px;font-size:12px;white-space:pre-wrap;word-break:break-all;height:100%;overflow:auto;margin:0;font-family:monospace;color:#e2e8f0;background:transparent">'+esc(txt)+'</pre>';
+    }catch(_){viewport.innerHTML='<div style="padding:20px;color:#94a3b8;text-align:center">텍스트를 표시할 수 없습니다</div>';}
+  } else if(type==='video'){
+    viewport.style.display='flex';viewport.style.alignItems='center';viewport.style.justifyContent='center';
+    viewport.innerHTML='<video src="'+url+'" controls style="max-width:100%;max-height:100%;border-radius:4px"></video>';
+  } else if(type==='audio'){
+    viewport.style.display='flex';viewport.style.alignItems='center';viewport.style.justifyContent='center';viewport.style.flexDirection='column';viewport.style.gap='16px';
+    viewport.innerHTML='<div style="font-size:60px">🎵</div><div style="font-size:14px;color:#fff;font-weight:600">'+esc(f.name)+'</div><audio src="'+url+'" controls style="width:320px"></audio>';
+  }
+  modal.appendChild(viewport);
+  // 배경 클릭(viewport 빈곳)으로 닫기 — 이미지/미디어 클릭은 제외
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  // ESC 닫기
+  function _pvEsc(e){if(e.key==='Escape'){modal.remove();document.removeEventListener('keydown',_pvEsc);}}
+  document.addEventListener('keydown',_pvEsc);
+  document.body.appendChild(modal);
+}
+// 줌 버튼 핸들러
+function _dvZoomBtn(dir){
+  var _z=window._dvZoomState;if(!_z)return;
+  if(dir===0){_z.scale=1;_z.x=0;_z.y=0;_z.fitted=true;}
+  else{_z.fitted=false;var d=dir>0?1.3:0.75;_z.scale=Math.max(0.1,Math.min(20,_z.scale*d));}
+  var img=document.getElementById('dv-pv-img');
+  if(img){
+    img.style.transform='translate('+_z.x+'px,'+_z.y+'px) scale('+_z.scale+')';
+    img.style.maxWidth=_z.fitted?'100%':'none';img.style.maxHeight=_z.fitted?'100%':'none';
+  }
+  var lbl=document.getElementById('dv-zoom-label');if(lbl)lbl.textContent=Math.round(_z.scale*100)+'%';
+}
+// ★ 연결 프로그램 선택 (윈도우 스타일)
+function _dvShowOpenWith(f){
+  var old=document.getElementById('dv-openwith');if(old)old.remove();
+  var ext=(f.name||'').split('.').pop().toLowerCase();
+  var fid=f.id;
+  // 앱 내 뷰어로 열 수 있는 타입 판별
+  var imgExts=['jpg','jpeg','png','gif','bmp','svg','webp'];
+  var txtExts=['txt','csv','json','xml','html','htm','log','md'];
+  var isImg=imgExts.indexOf(ext)>=0;
+  var isPdf=ext==='pdf';
+  var isTxt=txtExts.indexOf(ext)>=0;
+  var officeExts2=['xlsx','xls','doc','docx','pptx','ppt','hwp','hwpx','csv'];
+  var isOffice=officeExts2.indexOf(ext)>=0;
+  // 기본 앱 클릭 핸들러: 뷰어 지원 파일은 뷰어로, Office는 프로그램으로, 나머지는 다운로드
+  function defaultAction(){
+    if(isImg) _dvShowPreviewModal(f,'image');
+    else if(isPdf) _dvShowPreviewModal(f,'pdf');
+    else if(isTxt) _dvShowPreviewModal(f,'text');
+    else if(isOffice) _dvOpenWithProgram(f);
+    else _dvDownloadFile(fid);
+  }
+  // 확장자별 프로그램 목록 (fn: 클릭 시 실행할 함수)
+  var allProgs={
+    jpg:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[{n:'그림판',i:'🎨'},{n:'포토샵',i:'🖌'}],etc:[]},
+    jpeg:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[{n:'그림판',i:'🎨'}],etc:[]},
+    png:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[{n:'그림판',i:'🎨'}],etc:[]},
+    gif:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[],etc:[]},
+    bmp:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[],etc:[]},
+    svg:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[],etc:[]},
+    webp:{def:{n:'사진',i:'🖼',fn:function(){_dvShowPreviewModal(f,'image');}},rec:[],etc:[]},
+    pdf:{def:{n:'알PDF',i:'📄',fn:function(){_dvShowPreviewModal(f,'pdf');}},rec:[{n:'Chrome',i:'🌐'},{n:'Edge',i:'🌐'}],etc:[]},
+    txt:{def:{n:'메모장',i:'📝',fn:function(){_dvShowPreviewModal(f,'text');}},rec:[{n:'Visual Studio Code',i:'💻'}],etc:[]},
+    csv:{def:{n:'Excel',i:'📊',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'메모장',i:'📝',fn:function(){_dvShowPreviewModal(f,'text');}}],etc:[]},
+    xlsx:{def:{n:'Excel',i:'📊',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'한셀(Hancel)',i:'📊',fn:function(){_dvOpenWithProgram(f);}}],etc:[{n:'메모장',i:'📝'}]},
+    xls:{def:{n:'Excel',i:'📊',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'한셀(Hancel)',i:'📊',fn:function(){_dvOpenWithProgram(f);}}],etc:[]},
+    doc:{def:{n:'Word',i:'📝',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'한글(HWP)',i:'📃',fn:function(){_dvOpenWithProgram(f);}}],etc:[]},
+    docx:{def:{n:'Word',i:'📝',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'한글(HWP)',i:'📃',fn:function(){_dvOpenWithProgram(f);}}],etc:[]},
+    hwp:{def:{n:'한글(HWP)',i:'📃',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'Word',i:'📝',fn:function(){_dvOpenWithProgram(f);}}],etc:[]},
+    pptx:{def:{n:'PowerPoint',i:'📊',fn:function(){_dvOpenWithProgram(f);}},rec:[{n:'한쇼(Hanshow)',i:'📊',fn:function(){_dvOpenWithProgram(f);}}],etc:[]},
+    ppt:{def:{n:'PowerPoint',i:'📊',fn:function(){_dvOpenWithProgram(f);}},rec:[],etc:[]},
+    zip:{def:{n:'알집(ALZip)',i:'📦'},rec:[{n:'반디집',i:'📦'}],etc:[]},
+    rar:{def:{n:'알집(ALZip)',i:'📦'},rec:[{n:'반디집',i:'📦'}],etc:[]},
+    '7z':{def:{n:'알집(ALZip)',i:'📦'},rec:[{n:'반디집',i:'📦'}],etc:[]}
+  };
+  var prog=allProgs[ext]||{def:{n:'기본 프로그램',i:'📄'},rec:[],etc:[]};
+  var modal=document.createElement('div');modal.id='dv-openwith';
+  modal.style.cssText='position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
+  var box=document.createElement('div');
+  box.style.cssText='background:#f3f3f3;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.25);min-width:320px;max-width:380px;overflow:hidden;border:1px solid #d1d1d1;font-family:inherit';
+  var hdr=document.createElement('div');
+  hdr.style.cssText='padding:20px 24px 12px;font-size:14px;font-weight:600;color:#1a1a1a';
+  hdr.textContent='이 .'+ext+' 파일을 열 앱 선택';
+  box.appendChild(hdr);
+  // 선택된 앱 핸들러 (기본: 다운로드)
+  var _selectedFn=prog.def.fn||function(){_dvDownloadFile(fid);};
+  function makeSection(title,apps,highlight){
+    if(apps.length===0)return;
+    var sec=document.createElement('div');sec.style.cssText='padding:0 16px';
+    if(title){var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:#666;padding:6px 8px 4px;font-weight:600';lbl.textContent=title;sec.appendChild(lbl);}
+    apps.forEach(function(p){
+      var row=document.createElement('div');
+      row.style.cssText='padding:8px 12px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;color:#1a1a1a;margin-bottom:2px'+(highlight?';background:#cce4f7;border:2px solid #005a9e':'');
+      row.innerHTML='<span style="font-size:22px;min-width:28px;text-align:center">'+p.i+'</span><span style="font-weight:'+(highlight?'700':'500')+'">'+p.n+'</span>';
+      row.onmouseenter=function(){if(!highlight)row.style.background='#e5e5e5';};
+      row.onmouseleave=function(){row.style.background=highlight?'#cce4f7':'';};
+      var appFn=p.fn||function(){_dvDownloadFile(fid);};
+      row.onclick=function(e){e.stopPropagation();modal.remove();appFn();};
+      sec.appendChild(row);
+    });
+    box.appendChild(sec);
+  }
+  makeSection('기본 앱',[prog.def],true);
+  makeSection('추천 앱',prog.rec,false);
+  if(prog.etc.length>0) makeSection('기타 옵션',prog.etc,false);
+  // 다운로드 옵션 항상 추가
+  var dlSec=document.createElement('div');dlSec.style.cssText='padding:0 16px';
+  var dlLbl=document.createElement('div');dlLbl.style.cssText='font-size:10px;color:#666;padding:6px 8px 4px;font-weight:600';dlLbl.textContent='기타';dlSec.appendChild(dlLbl);
+  var dlRow=document.createElement('div');
+  dlRow.style.cssText='padding:8px 12px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;color:#1a1a1a;margin-bottom:2px';
+  dlRow.innerHTML='<span style="font-size:22px;min-width:28px;text-align:center">⬇</span><span style="font-weight:500">다운로드 후 직접 열기</span>';
+  dlRow.onmouseenter=function(){dlRow.style.background='#e5e5e5';};
+  dlRow.onmouseleave=function(){dlRow.style.background='';};
+  dlRow.onclick=function(e){e.stopPropagation();modal.remove();_dvDownloadFile(fid);};
+  dlSec.appendChild(dlRow);
+  box.appendChild(dlSec);
+  // 하단 버튼
+  var foot=document.createElement('div');
+  foot.style.cssText='padding:16px 24px;display:flex;justify-content:flex-end;gap:8px;margin-top:8px';
+  var btnCancel=document.createElement('button');
+  btnCancel.textContent='취소';
+  btnCancel.style.cssText='padding:6px 24px;background:#e5e5e5;color:#1a1a1a;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;font-family:inherit';
+  btnCancel.onclick=function(e){e.stopPropagation();modal.remove();};
+  foot.appendChild(btnCancel);
+  box.appendChild(foot);
+  modal.appendChild(box);
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
+// Office 파일 → 다운로드 (정상 파일명 유지, 웹에서는 직접 프로그램 실행 불가)
+// ★ Office Online 뷰어로 열기 (Supabase Storage 임시 업로드 → 공개 URL → Office 뷰어)
+async function _dvOpenOfficeOnline(f){
+  if(!f) return;
+  var ext=(f.name||'').split('.').pop().toLowerCase();
+  // 1) 공개 URL 확보
+  var publicUrl='';
+  if(f.storage){
+    publicUrl=_stUrl(f.storage);
+  } else if(f.data && sbClient){
+    // Supabase Storage에 임시 업로드
+    try{
+      var spath='drive_temp/'+f.id+'/'+f.name;
+      await _stUpload(spath, f.data);
+      f.storage=spath;
+      publicUrl=_stUrl(spath);
+    }catch(e){
+      console.warn('[Office Online] 업로드 실패:', e);
+      _dvDownloadFile(f.id);
+      return;
+    }
+  }
+  if(!publicUrl){ _dvDownloadFile(f.id); return; }
+  // 2) Office Online 뷰어 URL 생성
+  var viewerUrl='https://view.officeapps.live.com/op/embed.aspx?src='+encodeURIComponent(publicUrl);
+  // 3) 앱 내 모달로 표시
+  _dvShowOfficeModal(f, viewerUrl);
+}
+function _dvShowOfficeModal(f, viewerUrl){
+  var old=document.getElementById('dv-preview-modal');if(old)old.remove();
+  var modal=document.createElement('div');modal.id='dv-preview-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.85);display:flex;flex-direction:column';
+  var bar=document.createElement('div');
+  bar.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 16px;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;background:rgba(0,0,0,.5);z-index:2';
+  bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%">'+esc(f.name)+'</span>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +'<button onclick="_dvDownloadFile(\''+f.id+'\')" style="background:#374151;color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit">⬇ 다운로드</button>'
+    +'<button onclick="window.open(\''+viewerUrl.replace(/'/g,"\\'")+'\',\'_blank\')" style="background:#374151;color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit">↗ 새탭</button>'
+    +'<button onclick="document.getElementById(\'dv-preview-modal\').remove()" style="background:#ef4444;color:#fff;border:none;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-family:inherit">✕</button></div>';
+  modal.appendChild(bar);
+  var iframe=document.createElement('iframe');
+  iframe.src=viewerUrl;
+  iframe.style.cssText='flex:1;border:none;background:#fff';
+  iframe.setAttribute('allowfullscreen','true');
+  modal.appendChild(iframe);
+  modal.addEventListener('keydown',function(ev){if(ev.key==='Escape')modal.remove();});
+  modal.setAttribute('tabindex','-1');
+  document.body.appendChild(modal);
+  setTimeout(function(){modal.focus();},50);
+}
+function _dvOpenWithProgram(f){
+  if(!f||!f.data) return;
+  _dvDownloadFile(f.id);
 }
 function _dvDownloadFile(fid){
   var f=_dvFiles.find(function(x){return String(x.id)===String(fid);});
@@ -17651,12 +18523,26 @@ function _dvContextMenu(e,fid){
   var old=document.getElementById('dv-ctx-menu');if(old)old.remove();
   var menu=document.createElement('div');menu.id='dv-ctx-menu';
   menu.style.cssText='position:fixed;left:'+e.clientX+'px;top:'+e.clientY+'px;z-index:10000;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:4px 0;min-width:140px;font-size:12px';
-  var items=[{t:'열기',fn:function(){_dvCtxBusy=false;_dvDownloadFile(fid);}},{t:'이름 바꾸기',fn:function(){var nn=prompt('새 이름:',f.name);if(nn){f.name=nn;sv();rdDrive();}}},{t:'다운로드',fn:function(){_dvDownloadFile(fid);}},{t:'───',fn:null},{t:'삭제',fn:function(){if(confirm(f.name+' 삭제?')){f.deleted=true;sv();rdDrive();}}}];
+  var ext=(f.name||'').split('.').pop().toLowerCase();
+  var _progLabel=_dvProgName(ext);
+  var items=[
+    {t:'열기(O)',fn:function(){_dvCtxBusy=false;_dvOpenFile(fid);}},
+    {t:'연결 프로그램 선택...',fn:function(){_dvCtxBusy=false;var _f=_dvFiles.find(function(x){return String(x.id)===String(fid);});if(_f)_dvShowOpenWith(_f);},sub:true},
+    {t:'───',fn:null},
+    {t:'다운로드(D)',fn:function(){_dvDownloadFile(fid);}},
+    {t:'즐겨찾기 '+(f.starred?'해제':'추가'),fn:function(){f.starred=!f.starred;sv();rdDrive();}},
+    {t:'───',fn:null},
+    {t:'이름 바꾸기(R)',fn:function(){var nn=prompt('새 이름:',f.name);if(nn){f.name=nn;sv();rdDrive();}}},
+    {t:'───',fn:null},
+    {t:'삭제(Del)',fn:function(){if(confirm(f.name+' 삭제?')){f.deleted=true;sv();rdDrive();}},danger:true}
+  ];
   items.forEach(function(it){
     if(!it.fn){var sep=document.createElement('div');sep.style.cssText='border-top:1px solid #e2e8f0;margin:3px 0';menu.appendChild(sep);return;}
     var row=document.createElement('div');row.textContent=it.t;
-    row.style.cssText='padding:6px 14px;cursor:pointer;white-space:nowrap;font-size:12px';
-    row.onmouseenter=function(){row.style.background='#e8f0fe';};
+    var rowColor=it.danger?'color:#dc2626':'';
+    var rowFont=it.sub?'font-size:11px;color:#64748b;padding-left:24px':'font-size:12px';
+    row.style.cssText='padding:6px 14px;cursor:pointer;white-space:nowrap;'+rowFont+';'+rowColor;
+    row.onmouseenter=function(){row.style.background=it.danger?'#fef2f2':'#e8f0fe';};
     row.onmouseleave=function(){row.style.background='';};
     row.onclick=function(ev){ev.stopPropagation();menu.remove();_dvCtxBusy=false;it.fn();};
     menu.appendChild(row);
@@ -17693,6 +18579,616 @@ function _dvOpenFolder(fid){
   <div id="float-memo-subtabs" style="display:flex;align-items:center;gap:2px;padding:3px 8px;background:#fff;border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;flex-wrap:nowrap"></div>
   <div class="float-memo-body" id="float-memo-body"></div>
 </div>
+
+<!-- MSAL.js 2.x for OneDrive Integration -->
+<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+<script>
+// ============================================================
+// OneDrive Integration (MSAL + Microsoft Graph API)
+// ============================================================
+var _odMsal=null,_odCurrentUser=null,_odFolderId="root",_odToken=null,_odTokenExp=null;
+var _odDriveId=null; // shared folder의 driveId
+var _odNavStack=[{id:"root",name:"BSN케어팀"}];
+var _odFwdStack=[]; // 앞으로가기 스택
+var _dvSrc='app';
+
+function _dvSwitchSrc(src){
+  _dvSrc=src;
+  var appBtn=$('dv-src-app'),odBtn=$('dv-src-od');
+  var driveMain=$('drive-main'),odMain=$('od-main');
+  if(!appBtn||!odBtn) return;
+  if(src==='app'){
+    appBtn.style.cssText='flex:1;padding:4px 0;font-size:9px;border:1px solid #3b82f6;background:#eff6ff;color:#2563eb;border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit';
+    odBtn.style.cssText='flex:1;padding:4px 0;font-size:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit';
+    if(driveMain)driveMain.style.display='';
+    if(odMain)odMain.style.display='none';
+    ['drive-nav','drive-bldg-list','drive-cat-list','drive-storage'].forEach(function(id){var e=$(id);if(e)e.style.display='';});
+    var lbl1=document.querySelector('#drive-side [style*="건물별"]');if(lbl1)lbl1.style.display='';
+    var lbl2=document.querySelector('#drive-side [style*="문서유형"]');if(lbl2)lbl2.style.display='';
+  } else {
+    odBtn.style.cssText='flex:1;padding:4px 0;font-size:9px;border:1px solid #0078d4;background:#e8f4fd;color:#0078d4;border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit';
+    appBtn.style.cssText='flex:1;padding:4px 0;font-size:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;border-radius:4px;cursor:pointer;font-weight:600;font-family:inherit';
+    if(driveMain)driveMain.style.display='none';
+    if(odMain)odMain.style.display='';
+    ['drive-nav','drive-bldg-list','drive-cat-list','drive-storage'].forEach(function(id){var e=$(id);if(e)e.style.display='none';});
+    var lbl1=document.querySelector('#drive-side [style*="건물별"]');if(lbl1)lbl1.style.display='none';
+    var lbl2=document.querySelector('#drive-side [style*="문서유형"]');if(lbl2)lbl2.style.display='none';
+    if(!_odMsal) _odBootstrap();
+    else _odRenderFiles();
+  }
+}
+
+async function _odBootstrap(){
+  var panel=$('od-panel');
+  if(!panel) return;
+  panel.innerHTML='<div style="text-align:center;padding:40px;color:#64748b;font-size:12px">OneDrive 초기화 중...</div>';
+  try {
+    _odMsal=new msal.PublicClientApplication({
+      auth:{clientId:"28c7fe12-c694-4666-aeba-7a66e7487faf",authority:"https://login.microsoftonline.com/organizations",redirectUri:location.origin+location.pathname,navigateToLoginRequestUrl:false},
+      cache:{cacheLocation:"localStorage",storeAuthStateInCookie:true},
+      system:{loggerOptions:{loggerCallback:function(){},piiLoggingEnabled:false,logLevel:3}}
+    });
+    await _odMsal.initialize();
+    var accounts=_odMsal.getAllAccounts();
+    if(accounts.length>0){
+      _odCurrentUser=accounts[0];
+      await _odRefreshToken();
+      _odRenderFiles();
+    } else {
+      _odRenderLogin();
+    }
+  } catch(e){
+    panel.innerHTML='<div style="text-align:center;padding:40px;color:#ef4444;font-size:12px">OneDrive 오류: '+e.message+'</div>';
+  }
+}
+
+async function _odRefreshToken(){
+  try{if(!_odMsal||!_odCurrentUser) return null;
+    var r=await _odMsal.acquireTokenSilent({scopes:["Files.ReadWrite.All","User.Read"],account:_odCurrentUser,forceRefresh:false});
+    _odToken=r.accessToken;_odTokenExp=r.expiresOn;return r.accessToken;
+  }catch(e){return null;}
+}
+
+async function _odGetToken(){
+  if(!_odToken||((_odTokenExp)&&new Date()>_odTokenExp)) await _odRefreshToken();
+  return _odToken;
+}
+
+async function _odGraphCall(endpoint,method,body){
+  var tk=await _odGetToken();
+  if(!tk){
+    // 토큰 만료/없음 → 자동 로그인 시도
+    try{
+      var r2=await _odMsal.loginPopup({scopes:["Files.ReadWrite.All","User.Read"],prompt:"none"});
+      _odCurrentUser=r2.account;_odToken=r2.accessToken;_odTokenExp=r2.expiresOn;tk=r2.accessToken;
+    }catch(e2){
+      _odRenderLogin();throw new Error("__login__");
+    }
+  }
+  var opts={method:method||"GET",headers:{Authorization:"Bearer "+tk,"Content-Type":"application/json"}};
+  if(body) opts.body=JSON.stringify(body);
+  var r=await fetch("https://graph.microsoft.com/v1.0"+endpoint,opts);
+  if(method==="DELETE"&&r.status===204) return{};
+  if(!r.ok){var d=await r.json();throw new Error((d.error&&d.error.message)||("API오류:"+r.status));}
+  return await r.json();
+}
+
+function _odRenderLogin(){
+  var panel=$('od-panel');if(!panel) return;
+  panel.innerHTML='<div style="text-align:center;padding:60px 20px">'
+    +'<div style="font-size:40px;margin-bottom:12px">☁️</div>'
+    +'<div style="font-size:13px;color:#475569;margin-bottom:16px">Microsoft 계정으로 로그인하여<br>OneDrive 파일에 접근하세요</div>'
+    +'<button onclick="_odDoLogin()" style="padding:10px 24px;background:linear-gradient(135deg,#0078d4,#106ebe);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,120,212,.3)">🔐 Microsoft 로그인</button>'
+    +'</div>';
+}
+
+async function _odDoLogin(){
+  try{var r=await _odMsal.loginPopup({scopes:["Files.ReadWrite.All","User.Read"],prompt:"select_account"});
+    _odCurrentUser=r.account;_odToken=r.accessToken;_odTokenExp=r.expiresOn;_odRenderFiles();
+  }catch(e){alert("로그인 실패: "+e.message);}
+}
+
+async function _odDoLogout(){
+  try{await _odMsal.logoutPopup({account:_odCurrentUser});
+    _odCurrentUser=null;_odToken=null;_odTokenExp=null;_odFolderId="root";_odDriveId=null;
+    _odNavStack=[{id:"root",name:"BSN케어팀"}];_odRenderLogin();
+  }catch(e){}
+}
+
+async function _odRenderFiles(){
+  var panel=$('od-panel');if(!panel) return;
+  // 토큰 없으면 로그인 화면
+  if(!_odCurrentUser||!_odToken){
+    await _odRefreshToken();
+    if(!_odToken){_odRenderLogin();return;}
+  }
+  var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--ln)">';
+  // breadcrumb
+  html+='<div style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:4px;flex:1">';
+  _odNavStack.forEach(function(n,i){
+    if(i>0) html+='<span style="color:#cbd5e1"> / </span>';
+    if(i<_odNavStack.length-1) html+='<a style="color:#3b82f6;cursor:pointer;text-decoration:none" onclick="_odGoNav('+i+')">'+n.name+'</a>';
+    else html+='<span style="color:#1e293b;font-weight:600">'+n.name+'</span>';
+  });
+  html+='</div>';
+  html+='<span style="font-size:10px;color:#64748b">👤 '+(_odCurrentUser?_odCurrentUser.username:'')+'</span>';
+  html+='<button onclick="_odDoLogout()" style="font-size:9px;padding:3px 8px;border:1px solid #e2e8f0;background:#fff;border-radius:4px;cursor:pointer;color:#64748b;font-family:inherit">로그아웃</button>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:6px;margin-bottom:10px">';
+  html+='<input id="od-search" type="text" placeholder="🔍 검색..." style="padding:4px 10px;border:1px solid var(--ln);border-radius:5px;font-size:11px;width:160px;font-family:inherit">';
+  html+='<button onclick="$(\'od-file-input\').click()" class="btn pri sm" style="font-size:11px">📤 업로드</button>';
+  html+='<button onclick="_odNewFolder()" class="btn sm" style="font-size:11px">📁 새 폴더</button>';
+  html+='<button onclick="_odRenderFiles()" class="btn sm" style="font-size:11px">🔄</button>';
+  html+='</div>';
+  html+='<input type="file" id="od-file-input" multiple style="display:none" onchange="_odHandleUpload(this.files)">';
+  html+='<div id="od-file-list"><div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">로딩 중...</div></div>';
+  panel.innerHTML=html;
+  var si=$('od-search');if(si)si.addEventListener('input',function(){_odFilterList(si.value);});
+  try{
+    var items=[];
+    if(_odFolderId==="root"){
+      // 공유됨 파일 목록에서 BSN케어팀 폴더 자동 진입
+      var data=await _odGraphCall("/me/drive/sharedWithMe?$top=200");
+      var allItems=(data.value||[]);
+      // BSN케어팀 폴더 찾기
+      var bsnFolder=null;
+      for(var si=0;si<allItems.length;si++){
+        var it=allItems[si];var ri=it.remoteItem||{};
+        var nm=ri.name||it.name||'';
+        var isFldr=!!(ri.folder||it.folder);
+        if(nm.indexOf('BSN케어팀')>=0 && isFldr){
+          var fId=ri.id||it.id;
+          // driveId 추출: 가능한 모든 위치 탐색
+          var drId=null;
+          if(ri.parentReference&&ri.parentReference.driveId) drId=ri.parentReference.driveId;
+          if(!drId&&it.parentReference&&it.parentReference.driveId) drId=it.parentReference.driveId;
+          // remoteItem 자체에서 driveId 찾기 (일부 응답 구조)
+          if(!drId&&ri.shared&&ri.shared.owner&&ri.shared.owner.driveId) drId=ri.shared.owner.driveId;
+          // 최후수단: JSON에서 b! 패턴 driveId 추출
+          if(!drId){
+            var raw=JSON.stringify(it);
+            var m=raw.match(/"driveId"\s*:\s*"([^"]+)"/);
+            if(m) drId=m[1];
+          }
+          console.log('[OD] BSN케어팀:','id='+fId,'driveId='+drId,'raw=',JSON.stringify(it).substring(0,500));
+          bsnFolder={id:fId,name:nm,driveId:drId};break;
+        }
+      }
+      if(bsnFolder){
+        // BSN케어팀 폴더 자동 진입
+        _odFolderId=bsnFolder.id;
+        _odDriveId=bsnFolder.driveId;
+        _odNavStack=[{id:bsnFolder.id,name:"BSN케어팀"}];
+        var ep2=_odDriveId?"/drives/"+_odDriveId+"/items/"+_odFolderId+"/children":"/me/drive/items/"+_odFolderId+"/children";
+        console.log('[OD] Auto-enter EP:',ep2,'driveId:',_odDriveId,'folderId:',_odFolderId);
+        var data2=await _odGraphCall(ep2+"?$top=200&$orderby=name");
+        items=(data2.value||[]).map(function(it2){
+          return{id:it2.id,name:it2.name,size:it2.size||0,modified:it2.lastModifiedDateTime,isFolder:!!it2.folder,
+            downloadUrl:it2["@microsoft.graph.downloadUrl"]||null,webUrl:it2.webUrl||null,driveId:_odDriveId};
+        });
+        // breadcrumb 다시 렌더
+        var bc$=panel.querySelector('div[style*="font-size:11px"][style*="color:#64748b"]');
+        if(bc$){var bh='';_odNavStack.forEach(function(n,i){
+          if(i>0)bh+='<span style="color:#cbd5e1"> / </span>';
+          if(i<_odNavStack.length-1)bh+='<a style="color:#3b82f6;cursor:pointer;text-decoration:none" onclick="_odGoNav('+i+')">'+n.name+'</a>';
+          else bh+='<span style="color:#1e293b;font-weight:600">'+n.name+'</span>';
+        });bc$.innerHTML=bh;}
+      } else {
+        // BSN케어팀 못 찾으면 전체 공유 목록 표시
+        items=allItems.map(function(it){
+          var ri=it.remoteItem||it;
+          var drId=(ri.parentReference&&ri.parentReference.driveId)||null;
+          return{id:ri.id,name:ri.name||it.name,size:ri.size||0,modified:ri.lastModifiedDateTime||it.lastModifiedDateTime,
+            isFolder:!!(ri.folder||it.folder),downloadUrl:ri["@microsoft.graph.downloadUrl"]||it["@microsoft.graph.downloadUrl"]||null,
+            webUrl:ri.webUrl||it.webUrl||null,driveId:drId};
+        });
+      }
+    } else {
+      // 하위 폴더 탐색 (driveId 사용)
+      var ep=_odDriveId?"/drives/"+_odDriveId+"/items/"+_odFolderId+"/children":"/me/drive/items/"+_odFolderId+"/children";
+      var data=await _odGraphCall(ep+"?$top=200&$orderby=name");
+      items=(data.value||[]).map(function(it){
+        return{id:it.id,name:it.name,size:it.size||0,modified:it.lastModifiedDateTime,isFolder:!!it.folder,
+          downloadUrl:it["@microsoft.graph.downloadUrl"]||null,webUrl:it.webUrl||null,driveId:_odDriveId};
+      });
+    }
+    items.sort(function(a,b){if(a.isFolder!==b.isFolder) return b.isFolder-a.isFolder; return a.name.localeCompare(b.name);});
+    window._odItems=items;_odRenderList(items);
+  }catch(e){if(e.message==='__login__')return;$('od-file-list').innerHTML='<div style="text-align:center;padding:30px;color:#ef4444;font-size:12px">오류: '+e.message+'</div>';}
+}
+
+function _odIsOffice(name){
+  var ext=(name||'').split('.').pop().toLowerCase();
+  return ['xlsx','xls','xlsm','csv','docx','doc','docm','pptx','ppt','pptm'].indexOf(ext)>=0;
+}
+function _odIsImage(name){
+  var ext=(name||'').split('.').pop().toLowerCase();
+  return ['jpg','jpeg','png','gif','bmp','webp','svg','tiff','tif','ico','heic'].indexOf(ext)>=0;
+}
+function _odIsPdf(name){return (name||'').split('.').pop().toLowerCase()==='pdf';}
+
+// 이미지 뷰어 (윈도우 사진 앱처럼 좌우 넘기기)
+var _odImgViewerIdx=-1;
+var _odImgList=[];
+function _odOpenImageViewer(idx){
+  // 현재 폴더 내 이미지 파일 목록
+  _odImgList=(window._odItems||[]).filter(function(f){return !f.isFolder&&_odIsImage(f.name)&&f.downloadUrl;});
+  _odImgViewerIdx=-1;
+  for(var i=0;i<_odImgList.length;i++){
+    if(_odImgList[i].id===(window._odItems||[])[idx].id){_odImgViewerIdx=i;break;}
+  }
+  if(_odImgViewerIdx<0) return;
+  _odShowImageViewer();
+}
+function _odShowImageViewer(){
+  if(_odImgViewerIdx<0||_odImgViewerIdx>=_odImgList.length) return;
+  var f=_odImgList[_odImgViewerIdx];
+  var old=$('od-img-viewer');if(old) old.remove();
+  var overlay=document.createElement('div');
+  overlay.id='od-img-viewer';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center';
+  // 상단바: 파일명 + 카운터 + 닫기
+  var topBar='<div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;padding:12px 20px;color:#fff;font-size:12px;background:linear-gradient(rgba(0,0,0,.6),transparent)">'
+    +'<span style="flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+'</span>'
+    +'<span style="margin-right:12px;color:#94a3b8">'+(_odImgViewerIdx+1)+' / '+_odImgList.length+'</span>'
+    +'<button onclick="_odCloseImgViewer()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px">&times;</button>'
+    +'</div>';
+  // 좌우 화살표
+  var leftBtn='<button onclick="_odImgPrev()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:28px;cursor:pointer;padding:12px 16px;border-radius:50%;backdrop-filter:blur(4px)'
+    +(_odImgViewerIdx<=0?';opacity:.3;pointer-events:none':'')+'">&#8249;</button>';
+  var rightBtn='<button onclick="_odImgNext()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:28px;cursor:pointer;padding:12px 16px;border-radius:50%;backdrop-filter:blur(4px)'
+    +(_odImgViewerIdx>=_odImgList.length-1?';opacity:.3;pointer-events:none':'')+'">&#8250;</button>';
+  // 이미지
+  var img='<img src="'+f.downloadUrl+'" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px;box-shadow:0 4px 32px rgba(0,0,0,.5)" onclick="event.stopPropagation()">';
+  overlay.innerHTML=topBar+leftBtn+rightBtn+img;
+  overlay.onclick=function(e){if(e.target===overlay)_odCloseImgViewer();};
+  document.body.appendChild(overlay);
+}
+function _odImgPrev(){if(_odImgViewerIdx>0){_odImgViewerIdx--;_odShowImageViewer();}}
+function _odImgNext(){if(_odImgViewerIdx<_odImgList.length-1){_odImgViewerIdx++;_odShowImageViewer();}}
+function _odCloseImgViewer(){var v=$('od-img-viewer');if(v)v.remove();_odImgViewerIdx=-1;_odImgList=[];}
+// 이미지 뷰어 키보드: 좌우 화살표, Esc
+document.addEventListener('keydown',function(ev){
+  if(_odImgViewerIdx<0) return;
+  if(ev.key==='ArrowLeft'){ev.preventDefault();_odImgPrev();}
+  if(ev.key==='ArrowRight'){ev.preventDefault();_odImgNext();}
+  if(ev.key==='Escape'){ev.preventDefault();_odCloseImgViewer();}
+});
+
+// 선택 관리
+var _odSelected={}; // {id: true}
+var _odLastClickIdx=-1;
+
+function _odClearSel(){_odSelected={};_odLastClickIdx=-1;_odUpdateSelUI();}
+
+function _odToggleSel(idx,ev){
+  var items=window._odItems||[];if(idx<0||idx>=items.length) return;
+  var f=items[idx];
+  if(ev&&ev.ctrlKey){
+    // Ctrl+클릭: 토글
+    if(_odSelected[f.id]) delete _odSelected[f.id]; else _odSelected[f.id]=true;
+  } else if(ev&&ev.shiftKey&&_odLastClickIdx>=0){
+    // Shift+클릭: 범위 선택
+    var from=Math.min(_odLastClickIdx,idx),to=Math.max(_odLastClickIdx,idx);
+    for(var si=from;si<=to;si++) _odSelected[items[si].id]=true;
+  } else {
+    // 일반 클릭: 단일 선택
+    _odSelected={};_odSelected[f.id]=true;
+  }
+  _odLastClickIdx=idx;
+  _odUpdateSelUI();
+}
+
+function _odSelCount(){return Object.keys(_odSelected).length;}
+
+function _odUpdateSelUI(){
+  var rows=document.querySelectorAll('[data-od-idx]');
+  rows.forEach(function(r){
+    var idx=parseInt(r.getAttribute('data-od-idx'));
+    var items=window._odItems||[];
+    if(idx>=0&&idx<items.length){
+      var sel=!!_odSelected[items[idx].id];
+      r.style.background=sel?'#dbeafe':'var(--w)';
+      r.style.borderColor=sel?'#93c5fd':'var(--ln)';
+    }
+  });
+  // 선택 개수 표시
+  var cnt$=$('od-sel-count');
+  var n=_odSelCount();
+  if(cnt$) cnt$.textContent=n>0?n+'개 선택':'';
+}
+
+function _odGetSelItems(){
+  var items=window._odItems||[];
+  return items.filter(function(f){return _odSelected[f.id];});
+}
+
+// 뒤로가기 (마우스 button 3 / Backspace)
+function _odGoBack(){
+  if(_odNavStack.length>1){
+    var cur=_odNavStack.pop(); // 현재 위치를 forward 스택에 저장
+    _odFwdStack.push({id:cur.id,name:cur.name,driveId:_odDriveId});
+    var prev=_odNavStack[_odNavStack.length-1];
+    _odFolderId=prev.id;
+    if(_odNavStack.length<=1){_odDriveId=null;} // 루트로 돌아가면 driveId 초기화
+    _odRenderFiles();
+  }
+}
+// 앞으로가기 (마우스 button 4)
+function _odGoForward(){
+  if(_odFwdStack.length>0){
+    var fwd=_odFwdStack.pop();
+    _odFolderId=fwd.id;
+    if(fwd.driveId) _odDriveId=fwd.driveId;
+    _odNavStack.push({id:fwd.id,name:fwd.name});
+    _odRenderFiles();
+  }
+}
+
+// 삭제
+async function _odDeleteSelected(){
+  var sel=_odGetSelItems();if(!sel.length) return;
+  var names=sel.map(function(f){return f.name;}).join(', ');
+  if(!confirm(sel.length+'개 항목을 삭제하시겠습니까?\n\n'+names)) return;
+  var base=_odDriveId?"/drives/"+_odDriveId:"/me/drive";
+  for(var i=0;i<sel.length;i++){
+    try{await _odGraphCall(base+"/items/"+sel[i].id,"DELETE");}
+    catch(e){alert(sel[i].name+" 삭제 실패: "+e.message);}
+  }
+  _odSelected={};_odRenderFiles();
+}
+
+// 이름 바꾸기
+async function _odRenameSelected(){
+  var sel=_odGetSelItems();if(sel.length!==1) return;
+  var f=sel[0];
+  var newName=prompt('새 이름:',f.name);if(!newName||!newName.trim()||newName===f.name) return;
+  try{
+    var base=_odDriveId?"/drives/"+_odDriveId:"/me/drive";
+    await _odGraphCall(base+"/items/"+f.id,"PATCH",{name:newName.trim()});
+    _odSelected={};_odRenderFiles();
+  }catch(e){alert("이름 변경 실패: "+e.message);}
+}
+
+// 복사/이동용 클립보드
+var _odClipboard=null; // {items:[], action:'copy'|'cut'}
+function _odCopy(){var s=_odGetSelItems();if(s.length)_odClipboard={items:s,action:'copy'};}
+function _odCut(){var s=_odGetSelItems();if(s.length)_odClipboard={items:s,action:'cut'};}
+async function _odPaste(){
+  if(!_odClipboard||!_odClipboard.items.length) return;
+  var base=_odDriveId?"/drives/"+_odDriveId:"/me/drive";
+  var destRef=_odFolderId==="root"?{path:"/drive/root"}:{driveId:_odDriveId||"me",id:_odFolderId};
+  for(var i=0;i<_odClipboard.items.length;i++){
+    var f=_odClipboard.items[i];
+    try{
+      var srcBase=(f.driveId)?"/drives/"+f.driveId:"/me/drive";
+      if(_odClipboard.action==='copy'){
+        await _odGraphCall(srcBase+"/items/"+f.id+"/copy","POST",{parentReference:destRef,name:f.name});
+      } else {
+        await _odGraphCall(srcBase+"/items/"+f.id,"PATCH",{parentReference:destRef});
+      }
+    }catch(e){alert(f.name+" 붙여넣기 실패: "+e.message);}
+  }
+  if(_odClipboard.action==='cut') _odClipboard=null;
+  _odRenderFiles();
+}
+
+// 우클릭 컨텍스트 메뉴
+function _odShowCtx(ev,idx){
+  ev.preventDefault();ev.stopPropagation();
+  // idx가 있으면 해당 항목 선택 확인
+  if(idx!==undefined&&idx>=0){
+    var items=window._odItems||[];
+    if(items[idx]&&!_odSelected[items[idx].id]){
+      _odSelected={};_odSelected[items[idx].id]=true;_odLastClickIdx=idx;_odUpdateSelUI();
+    }
+  }
+  _odHideCtx();
+  var sel=_odGetSelItems();var n=sel.length;
+  var menu=document.createElement('div');
+  menu.id='od-ctx-menu';
+  menu.style.cssText='position:fixed;left:'+ev.clientX+'px;top:'+ev.clientY+'px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:4px 0;z-index:9999;min-width:160px;font-size:11px';
+  var items_menu=[];
+  if(n>0){
+    if(n===1&&sel[0].isFolder) items_menu.push({label:'📂 열기',fn:function(){_odHideCtx();_odOpenFolder(sel[0].id,sel[0].name,sel[0].driveId||'');}});
+    if(n===1&&!sel[0].isFolder) items_menu.push({label:'📄 열기',fn:function(){_odHideCtx();_odOpenFile(sel[0].webUrl,sel[0].name);}});
+    if(n===1&&!sel[0].isFolder&&sel[0].webUrl) items_menu.push({label:'↗ 웹에서 열기',fn:function(){_odHideCtx();window.open(sel[0].webUrl,'_blank');}});
+    if(n===1&&!sel[0].isFolder&&sel[0].downloadUrl) items_menu.push({label:'↓ 다운로드',fn:function(){_odHideCtx();var a=document.createElement('a');a.href=sel[0].downloadUrl;a.download=sel[0].name;a.click();}});
+    items_menu.push({label:'---'});
+    items_menu.push({label:'✂️ 잘라내기 (Ctrl+X)',fn:function(){_odHideCtx();_odCut();}});
+    items_menu.push({label:'📋 복사 (Ctrl+C)',fn:function(){_odHideCtx();_odCopy();}});
+  }
+  if(_odClipboard&&_odClipboard.items.length) items_menu.push({label:'📌 붙여넣기 (Ctrl+V)',fn:function(){_odHideCtx();_odPaste();}});
+  if(n>0){
+    items_menu.push({label:'---'});
+    if(n===1) items_menu.push({label:'✏️ 이름 바꾸기 (F2)',fn:function(){_odHideCtx();_odRenameSelected();}});
+    items_menu.push({label:'🗑 삭제 (Delete)',fn:function(){_odHideCtx();_odDeleteSelected();}});
+  }
+  items_menu.push({label:'---'});
+  items_menu.push({label:'📤 업로드',fn:function(){_odHideCtx();$('od-file-input').click();}});
+  items_menu.push({label:'📁 새 폴더',fn:function(){_odHideCtx();_odNewFolder();}});
+  items_menu.push({label:'🔄 새로고침',fn:function(){_odHideCtx();_odRenderFiles();}});
+
+  items_menu.forEach(function(m){
+    if(m.label==='---'){
+      var hr=document.createElement('div');hr.style.cssText='height:1px;background:#e2e8f0;margin:4px 0';menu.appendChild(hr);
+    } else {
+      var btn=document.createElement('div');
+      btn.textContent=m.label;
+      btn.style.cssText='padding:6px 14px;cursor:pointer;white-space:nowrap;color:#334155';
+      btn.onmouseover=function(){this.style.background='#f0f9ff';};
+      btn.onmouseout=function(){this.style.background='';};
+      btn.onclick=m.fn;
+      menu.appendChild(btn);
+    }
+  });
+  document.body.appendChild(menu);
+  // 화면 밖으로 나가지 않게
+  setTimeout(function(){
+    var r=menu.getBoundingClientRect();
+    if(r.right>window.innerWidth) menu.style.left=(window.innerWidth-r.width-4)+'px';
+    if(r.bottom>window.innerHeight) menu.style.top=(window.innerHeight-r.height-4)+'px';
+  },0);
+}
+function _odHideCtx(){var m=$('od-ctx-menu');if(m)m.remove();}
+
+// 전역 이벤트 (드라이브 탭 활성화 시)
+document.addEventListener('mousedown',function(ev){
+  if(ev.button===0||ev.button===2) _odHideCtx(); // 좌클릭/우클릭 시 메뉴 닫기
+  // 마우스 뒤로가기 버튼 (button 3)
+  if(ev.button===3){
+    var panel=$('od-panel');
+    if(panel&&panel.offsetParent!==null&&_odNavStack.length>1){
+      ev.preventDefault();_odGoBack();
+    }
+  }
+  // 마우스 앞으로가기 버튼 (button 4)
+  if(ev.button===4){
+    var panel=$('od-panel');
+    if(panel&&panel.offsetParent!==null&&_odFwdStack.length>0){
+      ev.preventDefault();_odGoForward();
+    }
+  }
+});
+document.addEventListener('keydown',function(ev){
+  var panel=$('od-panel');if(!panel||panel.offsetParent===null) return;
+  // od-search 입력 중이면 단축키 무시 (Delete, Backspace 등)
+  var ae=document.activeElement;
+  var isInput=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.isContentEditable);
+
+  if(ev.key==='Delete'&&!isInput){ev.preventDefault();_odDeleteSelected();}
+  if(ev.key==='F2'&&!isInput){ev.preventDefault();_odRenameSelected();}
+  if(ev.key==='Backspace'&&!isInput){ev.preventDefault();_odGoBack();}
+  if(ev.key==='Escape'){_odClearSel();_odHideCtx();}
+  if(ev.key==='a'&&ev.ctrlKey&&!isInput){
+    ev.preventDefault();
+    var items=window._odItems||[];items.forEach(function(f){_odSelected[f.id]=true;});_odUpdateSelUI();
+  }
+  if(ev.key==='c'&&ev.ctrlKey&&!isInput){ev.preventDefault();_odCopy();}
+  if(ev.key==='x'&&ev.ctrlKey&&!isInput){ev.preventDefault();_odCut();}
+  if(ev.key==='v'&&ev.ctrlKey&&!isInput){ev.preventDefault();_odPaste();}
+  if(ev.key==='Enter'&&!isInput){
+    var sel=_odGetSelItems();
+    if(sel.length===1){
+      ev.preventDefault();
+      if(sel[0].isFolder) _odOpenFolder(sel[0].id,sel[0].name,sel[0].driveId||'');
+      else _odOpenFile(sel[0].webUrl,sel[0].name);
+    }
+  }
+});
+// 브라우저 뒤로가기 방지 (마우스 뒤로버튼이 브라우저 뒤로가기 대신 폴더 뒤로가기)
+window.addEventListener('mouseup',function(ev){
+  if(ev.button===3||ev.button===4){var panel=$('od-panel');if(panel&&panel.offsetParent!==null){ev.preventDefault();}}
+},{capture:true});
+
+function _odRenderList(items){
+  var list$=$('od-file-list');if(!list$) return;
+  _odSelected={};_odLastClickIdx=-1;
+  if(!items||items.length===0){list$.innerHTML='<div style="text-align:center;padding:40px;color:#94a3b8;font-size:12px">파일이 없습니다</div>';return;}
+  var html='';
+  items.forEach(function(f,idx){
+    var ext=(f.name||'').split('.').pop().toLowerCase();
+    var icon=f.isFolder?'📂':(typeof _dvFileIcon==='function'?_dvFileIcon(ext):'📄');
+    var sz=f.size>0?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'';
+    var dt=f.modified?(f.modified||'').slice(2,10):'';
+    html+='<div data-od-idx="'+idx+'" style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--w);border:1px solid var(--ln);border-radius:6px;margin-bottom:3px;cursor:pointer;transition:.12s;user-select:none" '
+      +'onclick="_odToggleSel('+idx+',event)" '
+      +'ondblclick="'+(f.isFolder?'_odOpenFolder(\''+f.id+'\',\''+(f.name||'').replace(/'/g,"\\'")+'\',\''+(f.driveId||'').replace(/'/g,"\\'")+'\')':'_odOpenFile(\''+(f.webUrl||'').replace(/'/g,"\\'")+'\',\''+f.name.replace(/'/g,"\\'")+'\')' )+'" '
+      +'oncontextmenu="_odShowCtx(event,'+idx+')" '
+      +'onmouseover="if(!_odSelected[\''+f.id+'\'])this.style.background=\'#f8fafc\'" onmouseout="if(!_odSelected[\''+f.id+'\'])this.style.background=\'var(--w)\'">';
+    html+='<span style="font-size:18px;min-width:24px;text-align:center">'+icon+'</span>';
+    html+='<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+'</div>';
+    html+='<div style="font-size:9px;color:#94a3b8">'+dt+(sz?' · '+sz:'')+'</div></div>';
+    if(!f.isFolder){
+      // 파일 유형 표시
+      var typeLabel=_odIsImage(f.name)?'이미지':_odIsPdf(f.name)?'PDF':_odIsOffice(f.name)?ext.toUpperCase():'';
+      if(typeLabel) html+='<span style="font-size:8px;color:#94a3b8;padding:2px 5px;background:#f1f5f9;border-radius:3px">'+typeLabel+'</span>';
+    }
+    html+='</div>';
+  });
+  html+='<div id="od-sel-count" style="text-align:center;padding:4px;font-size:10px;color:#64748b"></div>';
+  list$.innerHTML=html;
+}
+
+function _odFilterList(q){if(!window._odItems) return;q=(q||'').toLowerCase();
+  var f=q?window._odItems.filter(function(f){return(f.name||'').toLowerCase().includes(q);}):window._odItems;_odRenderList(f);}
+
+function _odOpenFolder(id,name,driveId){_odFolderId=id;if(driveId)_odDriveId=driveId;_odNavStack.push({id:id,name:name});_odFwdStack=[];_odRenderFiles();}
+
+function _odGoNav(idx){_odNavStack=_odNavStack.slice(0,idx+1);_odFolderId=_odNavStack[_odNavStack.length-1].id;if(idx===0){_odDriveId=null;}_odRenderFiles();}
+
+function _odFindItem(webUrl,name){
+  var items=window._odItems||[];
+  for(var i=0;i<items.length;i++){
+    if(items[i].name===name&&items[i].webUrl===webUrl) return {item:items[i],idx:i};
+  }
+  return null;
+}
+
+function _odOpenFile(webUrl,name){
+  if(!webUrl&&!name) return;
+  var found=_odFindItem(webUrl,name);
+  var ext=(name||'').split('.').pop().toLowerCase();
+
+  // ── 이미지: 앱 내 뷰어 (윈도우 사진 앱처럼 좌우 넘기기) ──
+  if(_odIsImage(name)&&found){
+    _odOpenImageViewer(found.idx);return;
+  }
+
+  // ── PDF: 앱 내 뷰어 ──
+  if(_odIsPdf(name)&&found&&found.item.downloadUrl){
+    _odOpenPdfViewer(found.item);return;
+  }
+
+  // ── Office 파일 (엑셀/워드/PPT): SharePoint에서 데스크톱 앱으로 열기 ──
+  if(_odIsOffice(name)&&webUrl){
+    // webUrl에 action=default → SharePoint가 데스크톱 앱 실행 유도
+    var openUrl=webUrl;
+    if(openUrl.indexOf('?')>=0) openUrl+='&action=default';
+    else openUrl+='?action=default';
+    window.open(openUrl,'_blank');
+    return;
+  }
+
+  // ── 기타 파일: 웹에서 열기 ──
+  if(webUrl) window.open(webUrl,'_blank');
+}
+
+// ── PDF 인앱 뷰어 ──
+function _odOpenPdfViewer(fileItem){
+  var old=$('od-pdf-viewer');if(old) old.remove();
+  var overlay=document.createElement('div');
+  overlay.id='od-pdf-viewer';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10000;display:flex;flex-direction:column';
+  overlay.innerHTML='<div style="display:flex;align-items:center;padding:10px 20px;color:#fff;font-size:12px;background:rgba(0,0,0,.5)">'
+    +'<span style="flex:1;font-weight:600">'+fileItem.name+'</span>'
+    +'<button onclick="$(\'od-pdf-viewer\').remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px">&times;</button>'
+    +'</div>'
+    +'<iframe src="'+fileItem.downloadUrl+'" style="flex:1;border:none;background:#fff"></iframe>';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  document.body.appendChild(overlay);
+}
+// PDF뷰어 Esc 닫기
+document.addEventListener('keydown',function(ev){
+  if(ev.key==='Escape'&&$('od-pdf-viewer')){ev.preventDefault();$('od-pdf-viewer').remove();}
+});
+
+async function _odNewFolder(){var name=prompt('새 폴더 이름:');if(!name||!name.trim()) return;
+  try{var base=_odDriveId?"/drives/"+_odDriveId:"/me/drive";
+    var ep=_odFolderId==="root"?base+"/root/children":base+"/items/"+_odFolderId+"/children";
+    await _odGraphCall(ep,"POST",{name:name.trim(),folder:{},"@microsoft.graph.conflictBehavior":"rename"});_odRenderFiles();
+  }catch(e){alert("폴더 생성 실패: "+e.message);}}
+
+async function _odHandleUpload(fileList){if(!fileList||!fileList.length) return;
+  for(var i=0;i<fileList.length;i++){var file=fileList[i];
+    try{var tk=await _odGetToken();
+      var base=_odDriveId?"/drives/"+_odDriveId:"/me/drive";
+      var ep=_odFolderId==="root"?base+"/root:/"+encodeURIComponent(file.name)+":/content":base+"/items/"+_odFolderId+":/"+encodeURIComponent(file.name)+":/content";
+      var r=await fetch("https://graph.microsoft.com/v1.0"+ep,{method:"PUT",headers:{Authorization:"Bearer "+tk,"Content-Type":"application/octet-stream"},body:file});
+      if(!r.ok) throw new Error("업로드 실패");
+    }catch(e){alert(file.name+" 업로드 실패: "+e.message);}}
+  $('od-file-input').value='';_odRenderFiles();}
+</script>
 
 </body>
 </html>
