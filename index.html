@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://alcdn.msauth.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co https://*.sharepoint.com https://static2.sharepointonline.com https://graph.microsoft.com; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://mora-bot.kr https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr https://login.microsoftonline.com https://graph.microsoft.com https://alcdn.msauth.net https://*.sharepoint.com https://*.1drv.com; media-src 'self' blob: https://*.sharepoint.com https://graph.microsoft.com https://*.1drv.com https://*.onedrive.com; frame-src blob: 'self' https://*.onedrive.live.com https://*.onedrive.com https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com https://login.microsoftonline.com https://*.sharepoint.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://alcdn.msauth.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co https://*.sharepoint.com https://static2.sharepointonline.com https://graph.microsoft.com https://*.svc.ms; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://mora-bot.kr https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr https://login.microsoftonline.com https://graph.microsoft.com https://alcdn.msauth.net https://*.sharepoint.com https://*.1drv.com https://*.svc.ms; media-src 'self' blob: https://*.sharepoint.com https://graph.microsoft.com https://*.1drv.com https://*.onedrive.com https://*.svc.ms; frame-src blob: 'self' https://*.onedrive.live.com https://*.onedrive.com https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com https://login.microsoftonline.com https://*.sharepoint.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1771,6 +1771,35 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <div class="mo-ft" style="justify-content:space-between"><button class="btn del" id="lease-del-btn" style="display:none" onclick="delLeaseFromModal()">삭제</button><div style="display:flex;gap:6px;margin-left:auto"><button class="btn" onclick="closeMo('mo-lease')">취소</button><button class="btn pri" onclick="saveLease()">저장</button></div></div>
   </div>
 </div>
+<div class="ov" id="mo-renew-lease">
+  <div class="modal" style="width:min(520px,95vw)">
+    <div class="mo-hd"><h3 id="mo-renew-t">계약 연장</h3><button onclick="closeMo('mo-renew-lease')">×</button></div>
+    <div style="padding:12px 16px;font-size:13px;line-height:1.7">
+      <div style="background:var(--w2);border-radius:6px;padding:10px 12px;margin-bottom:12px" id="renew-cur-info"></div>
+      <div style="font-weight:600;margin-bottom:6px;font-size:13px">임대료 조건</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div id="rn-btn-freeze" onclick="_rnPick('freeze')" style="flex:1;padding:10px;border:1.5px solid var(--ln);border-radius:6px;text-align:center;cursor:pointer"><div style="font-weight:500;font-size:13px">동결</div><div style="font-size:11px;color:var(--t2)">현행 유지</div></div>
+        <div id="rn-btn-inc" onclick="_rnPick('increase')" style="flex:1;padding:10px;border:1.5px solid var(--ln);border-radius:6px;text-align:center;cursor:pointer"><div style="font-weight:500;font-size:13px">인상</div><div style="font-size:11px;color:var(--t2)">금액 직접 입력</div></div>
+      </div>
+      <div id="rn-inc-fields" style="display:none;margin-bottom:12px">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><label style="width:50px;font-size:12px;color:var(--t2)">임대료</label><span id="rn-cr" style="font-size:12px;color:var(--t2);min-width:80px;text-align:right"></span><span style="color:var(--t2);font-size:12px">→</span><input id="rn-nr" style="flex:1" oninput="_rnCalc()"></div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><label style="width:50px;font-size:12px;color:var(--t2)">관리비</label><span id="rn-cm" style="font-size:12px;color:var(--t2);min-width:80px;text-align:right"></span><span style="color:var(--t2);font-size:12px">→</span><input id="rn-nm" style="flex:1" oninput="_rnCalc()"></div>
+        <div style="display:flex;gap:6px;align-items:center"><label style="width:50px;font-size:12px;color:var(--t2)">보증금</label><span id="rn-cd" style="font-size:12px;color:var(--t2);min-width:80px;text-align:right"></span><span style="color:var(--t2);font-size:12px">→</span><input id="rn-nd" style="flex:1" oninput="_rnCalc()"></div>
+      </div>
+      <div style="font-weight:600;margin-bottom:6px;font-size:13px">연장 기간</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1"><label style="font-size:11px;color:var(--t2)">시작일</label><input type="date" id="rn-ds" lang="en" data-native="1" onchange="_rnCalc()"></div>
+        <div style="flex:1"><label style="font-size:11px;color:var(--t2)">만료일</label><input type="date" id="rn-de" lang="en" data-native="1" onchange="_rnCalc()"></div>
+      </div>
+      <div id="rn-preview" style="display:none;background:#eaf3de;border:1px solid #97c459;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;line-height:1.7"></div>
+      <div id="rn-history-wrap" style="display:none;margin-bottom:12px">
+        <div style="font-weight:600;margin-bottom:4px;font-size:12px;color:var(--t2)">계약 이력</div>
+        <div id="rn-history-body" style="font-size:11px;max-height:120px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div class="mo-ft"><button class="btn" onclick="closeMo('mo-renew-lease')">취소</button><button class="btn pri" onclick="_rnConfirm()">연장 확정</button></div>
+  </div>
+</div>
 <div class="ov" id="mo-bldg">
   <div class="modal" style="width:min(1280px,97vw);height:94vh;display:flex;flex-direction:column">
     <div class="mo-hd"><h3 id="mo-bldg-t">건물 추가</h3><button onclick="closeMo('mo-bldg')">×</button></div>
@@ -2491,7 +2520,9 @@ function _mergeLocalImages(cloud, local){
 function _mergeArrayById(cloudArr, localArr){
   if(!Array.isArray(cloudArr)) return localArr||[];
   if(!Array.isArray(localArr)) return cloudArr;
+  // ★ 순서 보존: 클라우드 배열 순서 기준, 로컬에만 있는 항목은 뒤에 추가
   var map={};
+  var seen={};
   cloudArr.forEach(function(item){ if(item&&item.id!=null) map[item.id]=item; });
   localArr.forEach(function(item){
     if(!item||item.id==null) return;
@@ -2502,7 +2533,11 @@ function _mergeArrayById(cloudArr, localArr){
     var lTime=(item._edit||item._created||'');
     if(lTime>cTime) map[item.id]=item;
   });
-  return Object.values(map);
+  // 클라우드 순서 유지 + 로컬 전용 항목 뒤에 추가
+  var result=[];
+  cloudArr.forEach(function(item){ if(item&&item.id!=null&&map[item.id]){result.push(map[item.id]);seen[item.id]=1;} });
+  localArr.forEach(function(item){ if(item&&item.id!=null&&!seen[item.id]&&map[item.id]){result.push(map[item.id]);seen[item.id]=1;} });
+  return result;
 }
 // ── memoCats 마이그레이션: defMemoCats에 있는데 DB에 없는 카테고리 키 자동 보충 ──
 function _migrateMemoCats(){
@@ -3116,18 +3151,20 @@ let _idbLoaded=false;
         DB=full;
         _idbLoaded=true;
       }
-      // IDB 로드 후 항상 sync 실행 (오래된 IDB 데이터 정리)
-      try{_syncLeaseFromExcel();localStorage.setItem('_leaseSync_v22','22');}catch(e){}
+      // IDB 로드 후 버전 체크 후 sync (이미 실행했으면 유저 수정 보존)
+      if(localStorage.getItem('_leaseSync_v24')!=='24'){
+        try{_syncLeaseFromExcel();localStorage.setItem('_leaseSync_v24','24');}catch(e){}
+      }
       try{ if(typeof _renderCurrentTab==='function' && typeof _tab!=='undefined') _renderCurrentTab(_tab); }catch(e){}
     }).catch(function(e){ console.warn('[IDB]',e); });
   }catch(e){}
 })();
 
 // 이전 sync 버전 정리 + 자동 동기화 (폴백)
-(function(){for(var i=1;i<=21;i++)localStorage.removeItem('_leaseSync_v'+i);})();
+(function(){for(var i=1;i<=23;i++)localStorage.removeItem('_leaseSync_v'+i);})();
 setTimeout(function(){
-  if(localStorage.getItem('_leaseSync_v22')!=='22'){
-    try{ _syncLeaseFromExcel(); localStorage.setItem('_leaseSync_v22','22'); }catch(e){ console.warn('[sync]',e); }
+  if(localStorage.getItem('_leaseSync_v24')!=='24'){
+    try{ _syncLeaseFromExcel(); localStorage.setItem('_leaseSync_v24','24'); }catch(e){ console.warn('[sync]',e); }
   }
 }, 5000);
 
@@ -3216,7 +3253,7 @@ leases:[
   {id:11,bId:3,floor:'4층',tenant:'주식회사 아반투라',start:'2025-12-09',end:'2027-12-08',deposit:80000000,rent:5000000,mgmt:500000,paytype:'선불',payday:'9일',phone:'이승규 010-3152-7073',email:'tax@avantura.co.kr',note:'렌트프리(1개월)'},
   {id:12,bId:3,floor:'7층',tenant:'미드미디앤씨',start:'2025-09-05',end:'2027-09-04',deposit:80000000,rent:5000000,mgmt:500000,paytype:'선불',payday:'5일',phone:'이선민 010-4577-4780',email:'sunnnytax07@naver.com',note:''},
   {id:13,bId:4,floor:'지하1층',tenant:'㈜비앤비인더스트리',start:'2026-01-31',end:'2027-01-30',deposit:30000000,rent:3350000,mgmt:100000,paytype:'선불',payday:'1일',phone:'010-6732-6486',email:'',note:''},
-  {id:14,bId:4,floor:'1층',tenant:'한국딥러닝',start:'2026-03-18',end:'2027-03-17',deposit:150000000,rent:14000000,mgmt:1200000,paytype:'선불',payday:'1일',phone:'010-9210-3213',email:'fin@koreadeep.com',note:'연장완료'},
+  {id:14,bId:4,floor:'1~4층',tenant:'한국딥러닝',start:'2026-03-18',end:'2027-03-17',deposit:150000000,rent:14000000,mgmt:1200000,paytype:'선불',payday:'1일',phone:'010-9210-3213',email:'fin@koreadeep.com',note:'연장완료'},
   {id:15,bId:4,floor:'5층',tenant:'한국딥러닝',start:'2025-11-19',end:'2027-03-17',deposit:30000000,rent:2400000,mgmt:100000,paytype:'선불',payday:'1일',phone:'',email:'',note:'25.12.18까지 렌트프리'},
   {id:16,bId:5,floor:'1,2층(일부)',tenant:'더기프팅컴퍼니',start:'2025-06-01',end:'2026-05-31',deposit:50000000,rent:8457750,mgmt:500000,paytype:'후불',payday:'말일',phone:'',email:'',note:''},
   {id:17,bId:5,floor:'1층',tenant:'조경진(헤비스테이크)',start:'2025-06-30',end:'2026-06-29',deposit:20000000,rent:2335750,mgmt:500000,paytype:'후불',payday:'말일',phone:'010-6730-2243',email:'',note:''},
@@ -3701,7 +3738,7 @@ function ddBg(d,type){
 function expCls(d){return d<=30?'ec-rd':'';} // only red for <=30
 // ── 팀 전환 ─────────────────────────────────────────────────────────────
 function _getCurrentTeam(){ return DB.ui.currentTeam||2; }
-function _teamBuildings(){ return DB.buildings.filter(function(b){ return (b.team||2)===_getCurrentTeam(); }); }
+function _teamBuildings(){ return DB.buildings.filter(function(b){ return (b.team||2)===_getCurrentTeam(); }).sort(function(a,b){ return (a.id||0)-(b.id||0); }); }
 function switchTeam(t){
   DB.ui.currentTeam=t;
   try{ localStorage.setItem('bm_currentTeam',String(t)); }catch(_){}
@@ -4253,16 +4290,13 @@ var _EXCEL_LEASE_DATA=[
 {"bn":20,"f":"4층","t":"주식회사 아반투라","s":"2025-12-09","e":"2027-12-08","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"09일","ph":"이승규 대표님 010-3152-7073\n직원 010-2602-0479","em":"tax@avantura.co.kr","n":"","v":false,"dr":false,"rfS":"2025-12-09","rfE":"2026-01-08"},
 {"bn":20,"f":"7층","t":"주식회사 미드미디앤씨","s":"2025-09-05","e":"2027-09-04","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"05일","ph":"이선민(부장:실무자) 010-4577-4780","em":"sunnnytax07@naver.com","n":"","v":false,"dr":false,"rfS":"2025-09-05","rfE":"2025-10-04"},
 {"bn":21,"f":"지하1층","t":"㈜비앤비인더스트리","s":"2026-01-31","e":"2027-01-30","d":30000000,"r":3350000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-6732-6486","em":"","n":"임대료 입금은 매월 1일","v":false,"dr":false},
-{"bn":21,"f":"1층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"2층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"3층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"4층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
+{"bn":21,"f":"1~4층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
 {"bn":21,"f":"5층","t":"한국딥러닝","s":"2025-11-19","e":"2027-03-17","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"12.19~31(납입)\n이후26.1월부터 (1일 선납)","v":false,"dr":false},
 {"bn":22,"f":"1\n2층(일부)\n지층 전부","t":"주식회사 더기프팅컴퍼니","s":"2025-06-01","e":"2026-05-31","d":50000000,"r":8457750,"mg":500000,"pt":"후불","pd":"말일","ph":"직영","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"1층","t":"조경진(헤비스테이크)","s":"2025-06-30","e":"2026-06-29","d":20000000,"r":2335750,"mg":500000,"pt":"후불","pd":"말일","ph":"010-6730-2243","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"2층","t":"이기택(기러기둥지와인바)","s":"2025-11-30","e":"2026-11-29","d":20000000,"r":2335750,"mg":535000,"pt":"후불","pd":"말일","ph":"010-9010-1842","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"건물주 사용","v":true,"dr":false},
-{"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},
+{"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},
 {"bn":24,"f":"2층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":24,"f":"3층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
@@ -4357,16 +4391,13 @@ var _EXCEL_LEASE_DATA=[
 {"bn":20,"f":"4층","t":"주식회사 아반투라","s":"2025-12-09","e":"2027-12-08","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"09일","ph":"이승규 대표님 010-3152-7073\n직원 010-2602-0479","em":"tax@avantura.co.kr","n":"","v":false,"dr":false,"rfS":"2025-12-09","rfE":"2026-01-08"},
 {"bn":20,"f":"7층","t":"주식회사 미드미디앤씨","s":"2025-09-05","e":"2027-09-04","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"05일","ph":"이선민(부장:실무자) 010-4577-4780","em":"sunnnytax07@naver.com","n":"","v":false,"dr":false,"rfS":"2025-09-05","rfE":"2025-10-04"},
 {"bn":21,"f":"지하1층","t":"㈜비앤비인더스트리","s":"2026-01-31","e":"2027-01-30","d":30000000,"r":3350000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-6732-6486","em":"","n":"임대료 입금은 매월 1일","v":false,"dr":false},
-{"bn":21,"f":"1층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"2층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"3층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"4층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
+{"bn":21,"f":"1~4층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
 {"bn":21,"f":"5층","t":"한국딥러닝","s":"2025-11-19","e":"2027-03-17","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"12.19~31(납입)\n이후26.1월부터 (1일 선납)","v":false,"dr":false},
 {"bn":22,"f":"1\n2층(일부)\n지층 전부","t":"주식회사 더기프팅컴퍼니","s":"2025-06-01","e":"2026-05-31","d":50000000,"r":8457750,"mg":500000,"pt":"후불","pd":"말일","ph":"직영","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"1층","t":"조경진(헤비스테이크)","s":"2025-06-30","e":"2026-06-29","d":20000000,"r":2335750,"mg":500000,"pt":"후불","pd":"말일","ph":"010-6730-2243","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"2층","t":"이기택(기러기둥지와인바)","s":"2025-11-30","e":"2026-11-29","d":20000000,"r":2335750,"mg":535000,"pt":"후불","pd":"말일","ph":"010-9010-1842","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"건물주 사용","v":true,"dr":false},
-{"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},
+{"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},
 {"bn":24,"f":"2층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":24,"f":"3층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
@@ -4490,9 +4521,9 @@ function rdLease(){
       const ptBg=l.paytype==='선불'?'background:#fff8d0;':l.paytype==='후불'?'background:#e4f3ea;':'';
       html+=`<tr ondblclick="editLease(${l.id})" style="cursor:pointer;${isV?'background:var(--w2);opacity:.75':''}" title="더블클릭 수정" data-presence-type="lease" data-presence-id="${l.id}">
         <td style="text-align:center;white-space:normal;word-break:keep-all;line-height:1.25">${fmtFloor(l.floor)}</td>
-        <td style="padding:2px 3px;min-width:70px;max-width:120px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':l.tenant}</td>
+        <td style="padding:2px 3px;min-width:70px;max-width:120px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':(l.tenant+(l.renewCount?` <span onclick="event.stopPropagation();openRenewLease(${l.id})" style="cursor:pointer;font-size:9px;color:#3C3489;background:#EEEDFE;border-radius:3px;padding:1px 4px;font-weight:500" title="계약 이력 보기">${l.renewCount}회</span>`:''))}</td>
         <td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.start)}</td><td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.end)}</td>
-        <td class="narrow-col">${l.end&&!isV&&!isDr?ddBg(d,'lease'):'—'}</td>
+        <td class="narrow-col">${l.end&&!isV&&!isDr?(ddBg(d,'lease')+(d<=90?`<div style="margin-top:2px"><span onclick="event.stopPropagation();openRenewLease(${l.id})" style="cursor:pointer;font-size:9px;color:#185FA5;background:#e6f1fb;border:1px solid #85b7eb;border-radius:3px;padding:1px 5px;font-weight:600;white-space:nowrap">연장</span></div>`:'')):'—'}</td>
         <td class="mono right money-col wide">${fm(l.deposit)}</td><td class="mono right money-col">${fm(l.rent)}</td><td class="mono right money-col">${fm(l.mgmt)}</td>
         <td class="mono right money-col wide" style="font-weight:600">${vat>0?fm(Math.round(vat)):'—'}</td>
         <td class="narrow-col" style="${ptBg}">${l.paytype||''}</td><td class="narrow-col" style="${ptBg}">${l.payday||''}</td>
@@ -4754,51 +4785,6 @@ function _syncLeaseFromExcel(){
       }
     });
   });
-  // ── 전기/수도 테스트 데이터 정리 (실제 첨부 없는 항목 삭제) ──
-  ['waterBills','electricBills'].forEach(function(k){
-    if(!DB[k]) return;
-    DB[k]=DB[k].filter(function(item){
-      // 실제 bills(청구서 첨부)가 있으면 유지
-      if(item.bills && item.bills.length>0) return true;
-      // bills 없는 빈 껍데기는 삭제 (테스트 데이터)
-      return false;
-    });
-  });
-  // ── 수도 고객정보 자동생성 (메모 기반) ──
-  if(DB.memoCats){
-    if(!DB.waterBills) DB.waterBills=[];
-    var _existCust={};
-    DB.waterBills.forEach(function(w){if(w.custNo) _existCust[w.custNo]=1;});
-    DB.buildings.forEach(function(b){
-      var mc=DB.memoCats[b.id];
-      if(!mc||!mc.water) return;
-      var w=mc.water;
-      // parse billCycle, meterCycle, meterDay (common for building)
-      var bc='',mec='',md=0;
-      if(/(?:청구서|청구)[:\s]*짝수월/.test(w)) bc='even';
-      else if(/(?:청구서|청구)[:\s]*홀수월/.test(w)) bc='odd';
-      if(/검침[일]?[:\s]*짝수월/.test(w)) mec='even';
-      else if(/검침[일]?[:\s]*홀수월/.test(w)) mec='odd';
-      var dm=w.match(/검침일?[:\s]*(?:홀수월|짝수월)?\s*(\d{1,2})\s*일/);
-      if(dm) md=parseInt(dm[1]);
-      // parse all customer numbers
-      var lines=w.split('\n');
-      var gName='';
-      var gnM=w.match(/고객명[:\s]+([^\n]+)/);
-      if(gnM) gName=gnM[1].trim();
-      lines.forEach(function(line){
-        line=line.trim();
-        if(/철거/.test(line)||/따로 요금없음/.test(line)) return;
-        var m=line.match(/고객번호[:\s]*(\d{6,12})[,\s]+([^\n]+)/);
-        if(!m) m=line.match(/고객번호[:\s]*(\d{6,12})\s*$/);
-        if(!m){var m3=line.match(/(일반용|가정용)[:\s]*(\d{6,12})/);if(m3)m={1:m3[2],2:m3[1]};}
-        if(m && m[1] && !_existCust[m[1]]){
-          DB.waterBills.push({id:nid(),bId:b.id,custNo:m[1],custName:(m[2]||gName||'').trim(),billCycle:bc,meterCycle:mec,meterDay:md,note:'',bills:[]});
-          _existCust[m[1]]=1;
-        }
-      });
-    });
-  }
   // ── 1팀 건물 메모 카테고리 데이터 동기화 ──
   if(!DB.memoCats) DB.memoCats={};
   var _t1memos={
@@ -4824,6 +4810,112 @@ function _syncLeaseFromExcel(){
   Object.keys(_t1memos).forEach(function(bid){
     DB.memoCats[bid]=_t1memos[bid];
   });
+  // ── 전기/수도 테스트 데이터 정리 (실제 첨부 없는 항목 삭제) ──
+  ['waterBills','electricBills'].forEach(function(k){
+    if(!DB[k]) return;
+    DB[k]=DB[k].filter(function(item){
+      // 실제 bills(청구서 첨부)가 있으면 유지
+      if(item.bills && item.bills.length>0) return true;
+      // bills 없는 빈 껍데기는 삭제 (테스트 데이터)
+      return false;
+    });
+  });
+  // ── 수도 고객정보 자동생성 (메모 기반) ──
+  if(DB.memoCats){
+    if(!DB.waterBills) DB.waterBills=[];
+    var _existCust={};
+    DB.waterBills.forEach(function(w){if(w.custNo) _existCust[w.custNo]=1;});
+    DB.buildings.forEach(function(b){
+      var mc=DB.memoCats[b.id];
+      if(!mc||!mc.water) return;
+      var w=mc.water.replace(/\\n/g,'\n'); // 리터럴 \n → 실제 줄바꿈
+      // parse billCycle, meterCycle, meterDay (common for building)
+      var bc='',mec='',md=0;
+      if(/(?:청구서|청구)[:\s]*짝수월/.test(w)) bc='even';
+      else if(/(?:청구서|청구)[:\s]*홀수월/.test(w)) bc='odd';
+      if(/검침[일]?[:\s]*짝수월/.test(w)) mec='even';
+      else if(/검침[일]?[:\s]*홀수월/.test(w)) mec='odd';
+      var dm=w.match(/검침일?[:\s]*(?:홀수월|짝수월)?\s*(\d{1,2})\s*일/);
+      if(dm) md=parseInt(dm[1]);
+      // parse all customer numbers
+      var lines=w.split('\n');
+      var gName='';
+      var gnM=w.match(/고객명[:\s]+([^\n]+)/);
+      if(gnM) gName=gnM[1].trim();
+      lines.forEach(function(line,li){
+        line=line.trim();
+        if(/철거/.test(line)||/따로 요금없음/.test(line)) return;
+        var m=line.match(/고객번호[:\s]*(\d{6,12})[,\s]+([^\n]+)/);
+        if(!m){
+          var m2=line.match(/고객번호[:\s]*(\d{6,12})\s*$/);
+          if(m2){
+            // 다음 줄에 고객명이 있으면 가져오기
+            var nextName='';
+            if(li+1<lines.length){var nl=lines[li+1].trim();if(nl&&!/고객번호/.test(nl)&&!/^\d{6,12}$/.test(nl)&&!/철거/.test(nl))nextName=nl;}
+            m={1:m2[1],2:nextName||gName||''};
+          }
+        }
+        if(!m){var m3=line.match(/(일반용|가정용)[:\s]*(\d{6,12})/);if(m3)m={1:m3[2],2:m3[1]};}
+        if(m && m[1] && !_existCust[m[1]]){
+          // custName에서 고객번호 패턴 제거 (혼입 방지)
+          var cName=(m[2]||gName||'').trim().replace(/^\d{6,12}[,\s]*/,'');
+          DB.waterBills.push({id:nid(),bId:b.id,custNo:m[1],custName:cName,billCycle:bc,meterCycle:mec,meterDay:md,note:'',bills:[]});
+          _existCust[m[1]]=1;
+        }
+      });
+    });
+  }
+  // ── 수도 기존 데이터 고객번호/고객명 정리 ──
+  if(DB.waterBills){
+    var _wcFixed=0;
+    DB.waterBills.forEach(function(w){
+      if(!w.custName) return;
+      // custName에 고객번호가 섞여있으면 분리
+      var nm=w.custName.match(/^(\d{6,12})[,\s]+(.+)$/);
+      if(nm){
+        if(!w.custNo) w.custNo=nm[1];
+        w.custName=nm[2].trim();
+        _wcFixed++;
+      }
+      // custName이 순수 숫자면 custNo로 이동
+      if(/^\d{6,12}$/.test(w.custName.trim())){
+        if(!w.custNo) w.custNo=w.custName.trim();
+        w.custName='';
+        _wcFixed++;
+      }
+      // custName에서 앞의 고객번호 패턴 제거
+      w.custName=w.custName.replace(/^\d{6,12}[,\s]+/,'').trim();
+    });
+    // custName이 비어있는데 메모에서 이름을 가져올 수 있으면 채우기
+    DB.waterBills.forEach(function(w){
+      if(w.custName || !w.custNo || !w.bId) return;
+      var info=_parseBldgWaterInfo(w.bId);
+      if(!info || !Array.isArray(info)) return;
+      info.forEach(function(r){
+        if(r.custNo===w.custNo && r.custName){
+          w.custName=r.custName.replace(/^\d{6,12}[,\s]+/,'').trim();
+          _wcFixed++;
+        }
+      });
+    });
+    if(_wcFixed>0){ console.log('[migrate] 수도 고객명 '+_wcFixed+'건 정리완료'); }
+  }
+  // ── 만료일 중복 제거 (같은 건물+타입 중복 시 최신 편집본만 유지) ──
+  if(DB.expires&&DB.expires.length){
+    var _expSeen={},_expDups=0;
+    // 먼저 _edit 기준 역순 정렬 → 최신이 먼저 seen에 등록됨
+    var _expSorted=DB.expires.slice().sort(function(a,b){ return (b._edit||b._created||'').localeCompare(a._edit||a._created||''); });
+    var _expKeep=new Set();
+    _expSorted.forEach(function(e){
+      var key=e.bId+'_'+e.type;
+      if(!_expSeen[key]){ _expSeen[key]=1; _expKeep.add(e.id); }
+      else { _expDups++; }
+    });
+    if(_expDups>0){
+      DB.expires=DB.expires.filter(function(e){ return _expKeep.has(e.id); });
+      console.log('[migrate] 만료일 중복 '+_expDups+'건 제거');
+    }
+  }
   // ── 건물 번호→ID 매핑 ──
   var bnMap={};
   DB.buildings.forEach(function(b){
@@ -4984,7 +5076,7 @@ function saveLease(){
       Object.keys(_flds).forEach(function(k){
         var ov=String(_old[k]||''), nv=String(o[k]||'');
         if(k==='deposit'||k==='rent'||k==='mgmt'){ ov=fm(_old[k]||0); nv=fm(o[k]||0); }
-        if(ov!==nv) _diffs.push(_flds[k]+': '+(ov||'(없음)').slice(0,12)+' → '+(nv||'(삭제)').slice(0,12));
+        if(ov!==nv) _diffs.push(_flds[k]+': '+(ov||'(없음)')+' → '+(nv||'(삭제)'));
       });
       DB.leases[i]={...DB.leases[i],...o};
       var _detail=(o.tenant||'')+' '+o.floor+' '+(_diffs.length?_diffs.join(', '):'수정');
@@ -4993,6 +5085,98 @@ function saveLease(){
   } else{DB.leases.push({id:nid(),...o});_logEdit('lease',(o.tenant||'')+' '+o.floor+' 추가');}
   _leaseFormSnap=''; // 저장 완료 → 미저장 경고 해제
   sv();closeMo('mo-lease');rdLease();upBadges();
+}
+// ── 계약 연장 ──
+var _rnId=null,_rnChoice='';
+function openRenewLease(id){
+  var l=DB.leases.find(x=>x.id===id);if(!l)return;
+  _rnId=id;_rnChoice='';
+  var bldg=DB.buildings.find(b=>b.id==l.bId);
+  $('mo-renew-t').textContent=(bldg?bldg.name+' ':'')+(l.floor||'')+' '+(l.tenant||'')+' 연장';
+  $('renew-cur-info').innerHTML='<div style="font-size:12px;color:var(--t2);margin-bottom:4px">현재 계약</div>'
+    +'<table style="width:100%;font-size:13px;border-collapse:collapse"><tr><td style="padding:2px 0;color:var(--t2);width:60px">보증금</td><td style="padding:2px 0;font-weight:500">'+fm(l.deposit||0)+'원</td></tr>'
+    +'<tr><td style="padding:2px 0;color:var(--t2)">임대료</td><td style="padding:2px 0;font-weight:500">'+fm(l.rent||0)+'원</td></tr>'
+    +'<tr><td style="padding:2px 0;color:var(--t2)">관리비</td><td style="padding:2px 0;font-weight:500">'+fm(l.mgmt||0)+'원</td></tr>'
+    +'<tr><td style="padding:2px 0;color:var(--t2)">계약기간</td><td style="padding:2px 0;font-weight:500">'+(l.start||'?')+' ~ '+(l.end||'?')+'</td></tr></table>';
+  var ed=l.end?new Date(l.end):new Date();
+  var ns=new Date(ed);ns.setDate(ns.getDate()+1);
+  var ne=new Date(ns);ne.setFullYear(ne.getFullYear()+2);
+  $('rn-ds').value=ns.toISOString().slice(0,10);
+  $('rn-de').value=ne.toISOString().slice(0,10);
+  $('rn-cr').textContent=fm(l.rent||0);
+  $('rn-cm').textContent=fm(l.mgmt||0);
+  $('rn-cd').textContent=fm(l.deposit||0);
+  $('rn-nr').value=fmtMoney(l.rent||0);
+  $('rn-nm').value=fmtMoney(l.mgmt||0);
+  $('rn-nd').value=fmtMoney(l.deposit||0);
+  $('rn-btn-freeze').style.borderColor='var(--ln)';$('rn-btn-freeze').style.background='';
+  $('rn-btn-inc').style.borderColor='var(--ln)';$('rn-btn-inc').style.background='';
+  $('rn-inc-fields').style.display='none';
+  $('rn-preview').style.display='none';
+  // 이력 표시
+  var hist=l.renewHistory||[];
+  if(hist.length>0){
+    var hh='<table style="width:100%;border-collapse:collapse"><tr style="background:var(--w2)"><th style="padding:3px 6px;text-align:left;font-size:10px">구분</th><th style="padding:3px 6px;text-align:left;font-size:10px">기간</th><th style="padding:3px 6px;text-align:right;font-size:10px">임대료</th><th style="padding:3px 6px;text-align:right;font-size:10px">관리비</th></tr>';
+    hist.forEach(function(h,i){
+      hh+='<tr style="border-bottom:1px solid var(--ln)"><td style="padding:3px 6px;font-size:10px">'+(i===0?'<span style="background:#EEEDFE;color:#3C3489;padding:1px 4px;border-radius:3px;font-size:9px">최초</span>':'<span style="font-size:9px;color:var(--t2)">'+(i)+'차</span>')+'</td><td style="padding:3px 6px;font-size:10px;white-space:nowrap">'+(h.start||'')+' ~ '+(h.end||'')+'</td><td style="padding:3px 6px;font-size:10px;text-align:right">'+fm(h.rent||0)+'</td><td style="padding:3px 6px;font-size:10px;text-align:right">'+fm(h.mgmt||0)+'</td></tr>';
+    });
+    hh+='<tr style="background:#e6f1fb"><td style="padding:3px 6px;font-size:10px"><span style="background:#e6f1fb;color:#185FA5;padding:1px 4px;border-radius:3px;font-size:9px;font-weight:600">현재</span></td><td style="padding:3px 6px;font-size:10px;white-space:nowrap">'+(l.start||'')+' ~ '+(l.end||'')+'</td><td style="padding:3px 6px;font-size:10px;text-align:right">'+fm(l.rent||0)+'</td><td style="padding:3px 6px;font-size:10px;text-align:right">'+fm(l.mgmt||0)+'</td></tr>';
+    hh+='</table>';
+    $('rn-history-body').innerHTML=hh;
+    $('rn-history-wrap').style.display='block';
+  } else {
+    $('rn-history-wrap').style.display='none';
+  }
+  openMo('mo-renew-lease');
+}
+function _rnPick(c){
+  _rnChoice=c;
+  var l=DB.leases.find(x=>x.id===_rnId);if(!l)return;
+  $('rn-btn-freeze').style.borderColor=c==='freeze'?'#185FA5':'var(--ln)';
+  $('rn-btn-freeze').style.background=c==='freeze'?'#e6f1fb':'';
+  $('rn-btn-inc').style.borderColor=c==='increase'?'#185FA5':'var(--ln)';
+  $('rn-btn-inc').style.background=c==='increase'?'#e6f1fb':'';
+  $('rn-inc-fields').style.display=c==='increase'?'block':'none';
+  if(c==='freeze'){$('rn-nr').value=fmtMoney(l.rent||0);$('rn-nm').value=fmtMoney(l.mgmt||0);$('rn-nd').value=fmtMoney(l.deposit||0);}
+  _rnCalc();
+}
+function _rnDiffStr(o,n){if(n>o)return' <span style="color:#A32D2D;font-size:11px">(+'+fm(n-o)+')</span>';if(n<o)return' <span style="color:#185FA5;font-size:11px">('+fm(n-o)+')</span>';return' <span style="color:var(--t2);font-size:11px">(동결)</span>';}
+function _rnCalc(){
+  if(!_rnChoice)return;
+  var l=DB.leases.find(x=>x.id===_rnId);if(!l)return;
+  var nr=parseMoney($('rn-nr').value),nm=parseMoney($('rn-nm').value),nd=parseMoney($('rn-nd').value);
+  var ds=$('rn-ds').value,de=$('rn-de').value;
+  var h='<div style="font-weight:600;font-size:11px;color:#3B6D11;margin-bottom:4px">변경 내역</div>';
+  h+='<div>기간: '+ds+' ~ '+de+'</div>';
+  h+='<div>임대료: '+fm(nr)+'원'+_rnDiffStr(l.rent||0,nr)+'</div>';
+  h+='<div>관리비: '+fm(nm)+'원'+_rnDiffStr(l.mgmt||0,nm)+'</div>';
+  h+='<div>보증금: '+fm(nd)+'원'+_rnDiffStr(l.deposit||0,nd)+'</div>';
+  h+='<div style="margin-top:4px;color:#3B6D11">합계(VAT포함): '+fm(Math.round((nr+nm)*1.1))+'원</div>';
+  $('rn-preview').innerHTML=h;$('rn-preview').style.display='block';
+}
+function _rnConfirm(){
+  if(!_rnChoice){alert('동결 또는 인상을 선택해주세요.');return;}
+  var l=DB.leases.find(x=>x.id===_rnId);if(!l)return;
+  var nr=parseMoney($('rn-nr').value),nm=parseMoney($('rn-nm').value),nd=parseMoney($('rn-nd').value);
+  var ds=$('rn-ds').value,de=$('rn-de').value;
+  if(!ds||!de){alert('연장 기간을 입력해주세요.');return;}
+  // 기존 계약 이력에 저장
+  if(!l.renewHistory) l.renewHistory=[];
+  l.renewHistory.push({start:l.start,end:l.end,rent:l.rent,mgmt:l.mgmt,deposit:l.deposit,paytype:l.paytype,type:_rnChoice==='freeze'?'동결':'인상'});
+  // 새 계약으로 갱신
+  var oldRent=l.rent,oldMgmt=l.mgmt,oldDep=l.deposit,oldStart=l.start,oldEnd=l.end;
+  l.start=ds;l.end=de;l.rent=nr;l.mgmt=nm;l.deposit=nd;
+  l.renewCount=(l.renewCount||0)+1;
+  // 수정기록
+  var bldg=DB.buildings.find(b=>b.id==l.bId);
+  var label=(bldg?bldg.name+' ':'')+(l.floor||'')+' '+(l.tenant||'');
+  var detail=label+' 계약연장 ('+(_rnChoice==='freeze'?'동결':'인상')+')';
+  detail+=', 기간: '+oldStart+'~'+oldEnd+' → '+ds+'~'+de;
+  if(nr!==oldRent) detail+=', 임대료: '+fm(oldRent)+' → '+fm(nr);
+  if(nm!==oldMgmt) detail+=', 관리비: '+fm(oldMgmt)+' → '+fm(nm);
+  if(nd!==oldDep) detail+=', 보증금: '+fm(oldDep)+' → '+fm(nd);
+  _logEdit('lease',detail,_rnId);
+  sv();closeMo('mo-renew-lease');rdLease();upBadges();
 }
 function editLease(id){
   const l=DB.leases.find(l=>l.id===id);if(!l)return;
@@ -5480,7 +5664,7 @@ function _parseBldgWaterInfo(bId){
   try{
     var cats=DB.memoCats||{};
     var info=cats[bId]; if(!info||!info.water) return null;
-    var w=info.water;
+    var w=info.water.replace(/\\n/g,'\n'); // 리터럴 \n → 실제 줄바꿈
     var base={};
     // 청구서 주기 (billCycle)
     var billEven=/(?:청구서|청구)[:\s]*짝수월/.test(w);
@@ -5527,10 +5711,13 @@ function _parseBldgWaterInfo(bId){
         results.push({custNo:m1[1],custName:cname,note:floorNote});
         continue;
       }
-      // 패턴2: "고객번호 : 029053766" (고객명 별도)
+      // 패턴2: "고객번호 : 029053766" (고객명 다음줄)
       var m2=line.match(/고객번호[:\s]*(\d{6,12})\s*$/);
       if(m2){
-        results.push({custNo:m2[1],custName:'',note:''});
+        var _nextCn='';
+        if(li+1<lines.length){var _nl=lines[li+1].trim();if(_nl&&!/고객번호/.test(_nl)&&!/^\d{6,12}$/.test(_nl)&&!/철거/.test(_nl)&&!/검침/.test(_nl)&&!/청구/.test(_nl))_nextCn=_nl;}
+        results.push({custNo:m2[1],custName:_nextCn||globalName||'',note:''});
+        if(_nextCn) li++; // 다음줄 소비
         continue;
       }
       // 패턴3: "일반용: 029132875" 또는 "가정용: 031112881"
@@ -11597,7 +11784,14 @@ function rdExpire(){
   </div>`}).join(''):'<div class="empty" style="font-size:10px">90일 이내 만료 없음</div>';}
   // Right: expire table
   const T=['승강기 보험','화재 보험','주차기 보험','저수조 청소','정화조 청소'];
-  const getE=(bId,t)=>DB.expires.find(e=>e.bId==bId&&e.type===t);
+  // ★ 같은 bId+type 중복 시 최신 편집본 우선 (순서 꼬임 방지)
+  const getE=(bId,t)=>{
+    var matches=DB.expires.filter(e=>e.bId==bId&&e.type===t);
+    if(matches.length<=1) return matches[0]||undefined;
+    // 중복 존재: _edit 타임스탬프가 가장 최신인 것 반환
+    matches.sort(function(a,b){ return (b._edit||b._created||'').localeCompare(a._edit||a._created||''); });
+    return matches[0];
+  };
   var _expEditStyle_unused=0; /* v3: _expSty로 이동됨 */
   $('expire-body').innerHTML=_teamBuildings().map(b=>{
     function dateCell(t){
@@ -20587,46 +20781,64 @@ async function _odOpenPdfPreview(fileItem){
 // ── 동영상 플레이어 (downloadUrl → preview embed → webUrl fallback) ──
 async function _odOpenVideoPlayer(fileItem){
   var ov=document.createElement('div');ov.id='od-video-player';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10000;display:flex;align-items:center;justify-content:center;user-select:none';
   ov.innerHTML='<div style="color:#fff;font-size:12px">동영상 로딩 중...</div>';
   ov.addEventListener('click',function(ev){if(ev.target===ov) _odCloseVideoPlayer();});
   document.body.appendChild(ov);
-  var keyH=function(ev){if(ev.key==='Escape') _odCloseVideoPlayer();if(ev.key==='f'||ev.key==='F'){var v=document.getElementById('od-video-el');if(v&&v.requestFullscreen) v.requestFullscreen();}};
+  window._odVideoRotation=0;window._odVideoScale=1;
+  var keyH=function(ev){
+    if(ev.key==='Escape') _odCloseVideoPlayer();
+    if(ev.key==='r'||ev.key==='R') _odVideoRotate();
+    if(ev.key===' '){ev.preventDefault();var ifr=document.getElementById('od-video-el');if(ifr) ifr.focus();}
+  };
   document.addEventListener('keydown',keyH);window._odVideoKeyHandler=keyH;
   var base=(fileItem.driveId)?"/drives/"+fileItem.driveId:(_odDriveId?"/drives/"+_odDriveId:"/me/drive");
-  var topH='<div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 14px;color:#fff;font-size:12px;z-index:2;background:rgba(0,0,0,.5)">'
-    +'<span style="opacity:.8;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+fileItem.name+'</span>'
-    +'<div style="display:flex;gap:6px">'
-    +'<button onclick="var v=document.getElementById(\'od-video-el\');if(v&&v.requestFullscreen)v.requestFullscreen();" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px">전체화면</button>'
-    +'<button onclick="_odCloseVideoPlayer()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:15px">✕</button>'
-    +'</div></div>';
-  // 1차: downloadUrl → video 태그 직접 재생
-  var vidUrl=fileItem.downloadUrl;
-  if(!vidUrl){try{var d=await _odGraphCall(base+"/items/"+fileItem.id);vidUrl=d["@microsoft.graph.downloadUrl"];if(vidUrl) fileItem.downloadUrl=vidUrl;}catch(e){}}
-  if(vidUrl){
-    ov.innerHTML=topH+'<video id="od-video-el" controls autoplay style="max-width:95vw;max-height:90vh;outline:none" onclick="event.stopPropagation()"><source src="'+vidUrl+'"></video>';
-    var vel=document.getElementById('od-video-el');
-    if(vel) vel.onerror=function(){_odVideoFallback(ov,base,fileItem,topH,keyH);};
-    return;
-  }
-  // downloadUrl 없으면 바로 fallback
-  await _odVideoFallback(ov,base,fileItem,topH,keyH);
-}
-async function _odVideoFallback(ov,base,fileItem,topH,keyH){
-  // 2차: preview API embed
+  // 1차: preview API embed (5초 타임아웃)
   try{
-    var data=await _odGraphCall(base+"/items/"+fileItem.id+"/preview","POST",{});
-    if(data.getUrl){
-      ov.innerHTML=topH+'<iframe src="'+data.getUrl+'" style="width:92vw;height:88vh;border:none;border-radius:6px" allowfullscreen></iframe>';
-      return;
+    var pp=_odGraphCall(base+"/items/"+fileItem.id+"/preview","POST",{});
+    var tp=new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);});
+    var data=await Promise.race([pp,tp]);
+    if(data&&data.getUrl){
+      _odVideoRenderEmbed(ov,data.getUrl);return;
     }
   }catch(e){console.warn('[OD Video] preview failed:',e);}
-  // 3차: webUrl로 새 탭
+  // 2차: webUrl → 새 탭
   if(fileItem.webUrl){
     ov.remove();document.removeEventListener('keydown',keyH);window._odVideoKeyHandler=null;
     window.open(fileItem.webUrl,'_blank');return;
   }
   ov.innerHTML='<div style="color:#ef4444;font-size:12px;text-align:center">동영상을 열 수 없습니다<br><button onclick="_odCloseVideoPlayer()" style="margin-top:8px;padding:5px 14px;border:1px solid #555;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:11px">닫기</button></div>';
+}
+function _odVideoRenderEmbed(ov,embedUrl){
+  // 비디오 정보/의견 패널 숨기기 파라미터 추가
+  var sep=embedUrl.indexOf('?')>=0?'&':'?';
+  var cleanUrl=embedUrl+sep+'nb=true&chromeless=1&wdHideHeaders=True&wdHideSheetTabs=True';
+  ov.innerHTML='<div id="od-video-wrap" style="position:relative;transition:transform .3s;transform-origin:center center;resize:both;overflow:hidden;width:88vw;height:86vh;border:2px solid transparent;border-radius:8px">'
+    +'<iframe id="od-video-el" src="'+cleanUrl+'" style="width:calc(100% + 80px);height:100%;border:none;border-radius:6px;pointer-events:auto" allowfullscreen allow="autoplay; fullscreen"></iframe>'
+    +'</div>'
+    +'<div id="od-video-btns" style="position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2">'
+    +'<button onclick="_odVideoRotate();this.blur();" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px" title="회전 (R)">⟲</button>'
+    +'<button onclick="_odCloseVideoPlayer()" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px">✕</button>'
+    +'</div>';
+  // 리사이즈 핸들 hover시 테두리 표시
+  var wrap=document.getElementById('od-video-wrap');
+  wrap.addEventListener('mouseenter',function(){wrap.style.borderColor='rgba(255,255,255,.25)';});
+  wrap.addEventListener('mouseleave',function(){wrap.style.borderColor='transparent';});
+}
+function _odVideoRotate(){
+  window._odVideoRotation=((window._odVideoRotation||0)+90)%360;
+  _odVideoApplyTransform();
+}
+function _odVideoZoom(dir){
+  var s=window._odVideoScale||1;
+  s=Math.max(0.3,Math.min(3,s+(dir>0?0.15:-0.15)));
+  window._odVideoScale=s;
+  _odVideoApplyTransform();
+}
+function _odVideoApplyTransform(){
+  var wrap=document.getElementById('od-video-wrap');if(!wrap) return;
+  var r=window._odVideoRotation||0, s=window._odVideoScale||1;
+  wrap.style.transform='rotate('+r+'deg) scale('+s.toFixed(2)+')';
 }
 function _odCloseVideoPlayer(){
   var ov=document.getElementById('od-video-player');if(ov) ov.remove();
