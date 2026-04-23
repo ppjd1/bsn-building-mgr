@@ -3153,7 +3153,7 @@ let _idbLoaded=false;
       }
       // IDB 로드 후 버전 체크 후 sync (이미 실행했으면 유저 수정 보존)
       if(localStorage.getItem('_leaseSync_v24')!=='24'){
-        try{_syncLeaseFromExcel();localStorage.setItem('_leaseSync_v24','24');}catch(e){}
+        try{_syncLeaseFromExcel();localStorage.setItem('_leaseSync_v25','25');}catch(e){}
       }
       try{ if(typeof _renderCurrentTab==='function' && typeof _tab!=='undefined') _renderCurrentTab(_tab); }catch(e){}
     }).catch(function(e){ console.warn('[IDB]',e); });
@@ -3161,10 +3161,10 @@ let _idbLoaded=false;
 })();
 
 // 이전 sync 버전 정리 + 자동 동기화 (폴백)
-(function(){for(var i=1;i<=23;i++)localStorage.removeItem('_leaseSync_v'+i);})();
+(function(){for(var i=1;i<=24;i++)localStorage.removeItem('_leaseSync_v'+i);})();
 setTimeout(function(){
   if(localStorage.getItem('_leaseSync_v24')!=='24'){
-    try{ _syncLeaseFromExcel(); localStorage.setItem('_leaseSync_v24','24'); }catch(e){ console.warn('[sync]',e); }
+    try{ _syncLeaseFromExcel(); localStorage.setItem('_leaseSync_v25','25'); }catch(e){ console.warn('[sync]',e); }
   }
 }, 5000);
 
@@ -4302,7 +4302,6 @@ var _EXCEL_LEASE_DATA=[
 {"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","v":false,"dr":false,"rfS":"2024-09-20","rfE":"2024-12-19"},
 {"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
-{"bn":28,"f":"통임대","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
 {"bn":29,"f":"통임대","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
 {"bn":30,"f":"통임대","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
@@ -4403,7 +4402,6 @@ var _EXCEL_LEASE_DATA=[
 {"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","v":false,"dr":false,"rfS":"2024-09-20","rfE":"2024-12-19"},
 {"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
-{"bn":28,"f":"통임대","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
 {"bn":29,"f":"통임대","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
 {"bn":30,"f":"통임대","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
@@ -11840,7 +11838,20 @@ function _expParseD(v){if(!v)return '';v=v.trim();
   if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)){var p=v.split('-');return _vd(p[0],p[1],p[2]);}
   return v;}
 function _expShortD(v){if(!v)return '';var m=v.match(/^20(\d{2})-(\d{2})-(\d{2})$/);return m?m[1]+'-'+m[2]+'-'+m[3]:v;}
-function _expAutoFmt(inp){inp.addEventListener('input',function(){var v=inp.value.replace(/[^0-9]/g,'');if(v.length>6)v=v.slice(0,6);var f='';if(v.length<=2)f=v;else if(v.length<=4)f=v.slice(0,2)+'-'+v.slice(2);else f=v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4);inp.value=f;});}
+function _expAutoFmt(inp){inp.addEventListener('input',function(ev){
+  var pos=inp.selectionStart,oldLen=inp.value.length;
+  // 삭제 시에는 재포맷하지 않음 (숫자 위치 꼬임 방지)
+  if(ev.inputType&&ev.inputType.indexOf('delete')>=0){
+    inp.value=inp.value.replace(/[^0-9-]/g,'').slice(0,8);return;
+  }
+  var v=inp.value.replace(/[^0-9]/g,'');if(v.length>6)v=v.slice(0,6);
+  var f='';if(v.length<=2)f=v;else if(v.length<=4)f=v.slice(0,2)+'-'+v.slice(2);else f=v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4);
+  inp.value=f;
+  // 커서 위치 보존
+  var newPos=pos+(f.length-oldLen);
+  if(newPos<0)newPos=0;if(newPos>f.length)newPos=f.length;
+  try{inp.setSelectionRange(newPos,newPos);}catch(_){}
+});}
 function _expShowPopup(anchor,html,onMount){
   _expClosePopup();
   var r=anchor.getBoundingClientRect();
