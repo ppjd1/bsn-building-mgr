@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://alcdn.msauth.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co https://*.sharepoint.com https://static2.sharepointonline.com https://graph.microsoft.com; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://mora-bot.kr https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr https://login.microsoftonline.com https://graph.microsoft.com https://alcdn.msauth.net https://*.sharepoint.com; frame-src blob: 'self' https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com https://login.microsoftonline.com https://*.sharepoint.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://alcdn.msauth.net https://accounts.google.com https://apis.google.com https://t1.daumcdn.net https://m.search.naver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://kvfvmckbpqjdllrkvrsj.supabase.co https://*.sharepoint.com https://static2.sharepointonline.com https://graph.microsoft.com; connect-src 'self' https://cdn.jsdelivr.net https://kvfvmckbpqjdllrkvrsj.supabase.co wss://kvfvmckbpqjdllrkvrsj.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com https://www.googleapis.com https://postcode.map.daum.net https://m.search.naver.com https://mora-bot.kr https://corsproxy.io https://api.allorigins.win https://speller.cs.pusan.ac.kr https://login.microsoftonline.com https://graph.microsoft.com https://alcdn.msauth.net https://*.sharepoint.com https://*.1drv.com; media-src 'self' blob: https://*.sharepoint.com https://graph.microsoft.com https://*.1drv.com https://*.onedrive.com; frame-src blob: 'self' https://*.onedrive.live.com https://*.onedrive.com https://postcode.map.daum.net https://postcode.map.kakao.com http://postcode.map.kakao.com https://login.microsoftonline.com https://*.sharepoint.com; base-uri 'self'; form-action 'self'; object-src blob: 'self'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -263,12 +263,12 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .fix-history{font-size:10px;color:var(--t4);font-style:italic;padding:2px 0;text-align:right}
 /* 고정일정 사이드바 + 날짜 컬럼 */
 .fix-layout{display:flex;height:100%;gap:0}
-.fix-sidebar{width:200px;min-width:170px;max-width:240px;background:#f8f9fb;border-right:1.5px solid #e2e5ea;overflow-y:auto;flex-shrink:0;padding:0}
+.fix-sidebar{width:175px;min-width:155px;max-width:200px;background:#f8f9fb;border-right:1.5px solid #e2e5ea;overflow-y:auto;flex-shrink:0;padding:0}
 .fix-sidebar::-webkit-scrollbar{width:4px}.fix-sidebar::-webkit-scrollbar-thumb{background:#c8ccd4;border-radius:3px}
 .fix-side-week{margin:0;padding:0}
 .fix-side-week-hd{display:flex;align-items:center;justify-content:space-between;padding:5px 12px 3px;cursor:pointer;user-select:none;position:sticky;top:0;z-index:2;background:#f8f9fb}
 .fix-side-week-hd:hover{background:#eef0f4}
-.fix-side-week-title{font-size:12px;font-weight:700;color:#374151;display:flex;align-items:center;gap:5px}
+.fix-side-week-title{font-size:13px;font-weight:700;color:#374151;display:flex;align-items:center;gap:5px}
 .fix-side-week-title .now-badge{background:#fbbf24;color:#1e3a5f;font-size:8px;padding:1px 5px;border-radius:5px;font-weight:700}
 .fix-side-week-prog{font-size:10px;color:#6b7280;font-weight:600}
 .fix-side-week-bar{height:3px;margin:0 12px 2px;background:#e5e7eb;border-radius:2px;overflow:hidden}
@@ -277,9 +277,9 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .fix-side-day:hover{background:#e8ecf2}
 .fix-side-day.active{background:#dbeafe;border-left-color:#2563eb}
 .fix-side-day.all-done{opacity:.7}
-.fix-side-day-label{font-size:12px;font-weight:600;color:#374151;min-width:48px}
-.fix-side-day-dow{font-size:10px;color:#9ca3af;min-width:18px}
-.fix-side-day-prog{font-size:10px;color:#6b7280;margin-left:auto;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.fix-side-day-label{font-size:13px;font-weight:600;color:#374151;min-width:38px}
+.fix-side-day-dow{font-size:11px;color:#9ca3af;min-width:14px}
+.fix-side-day-prog{font-size:11px;color:#6b7280;margin-left:auto;white-space:nowrap;display:flex;align-items:center;gap:2px}
 .fix-side-day-prog .mini-bar{display:inline-block;height:3px;width:28px;background:#e5e7eb;border-radius:2px;overflow:hidden;vertical-align:middle}
 .fix-side-day-prog .mini-bar-fill{display:block;height:100%;border-radius:2px}
 .fix-side-day .warn-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0}
@@ -1167,12 +1167,14 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <button class="btn sm" onclick="fixMonthNav(1)" style="font-size:11px;padding:2px 6px">▶</button>
     <button class="btn sm" onclick="fixMonthNav(0)" style="font-size:10px;padding:2px 8px;color:var(--bl)">이번달</button>
     <button class="btn sm" id="ehbtn-fixed" onclick="openEditHistory('fixed')" style="font-size:10px;padding:3px 8px;position:relative" title="수정 기록">📋 수정 기록<span class="eh-badge" style="display:none"></span></button>
+    <span style="margin-left:auto"></span>
+    <button class="btn sm" onclick="resetFixDone()" style="font-size:10px;padding:2px 8px">완료 초기화</button>
+    <input id="fixed-search" placeholder="🔍 검색..." oninput="window._fixSearchVal=this.value;rdFixed()" style="padding:3px 8px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;width:130px">
   </div>
-  <div class="fix-layout" style="height:calc(100vh - 42px)">
+  <div class="fix-layout" style="height:calc(100vh - 36px)">
     <div class="fix-sidebar" id="fix-sidebar"></div>
     <div class="fix-main" id="fix-main-area">
       <div style="padding:0 4px">
-        <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;padding:0 0 1px"><button class="btn sm" onclick="resetFixDone()" style="font-size:10px;padding:2px 8px">완료 초기화</button><input id="fixed-search" placeholder="🔍 검색..." oninput="window._fixSearchVal=this.value;rdFixed()" style="padding:3px 8px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;width:150px"></div>
         <div style="padding:0;width:100%" id="fixed-list"></div>
       </div>
     </div>
@@ -1451,7 +1453,7 @@ input:focus,textarea:focus{caret-color:var(--bl)!important}
     <!-- OneDrive 메인 영역 -->
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;background:#fff">
       <div id="drive-main" style="display:none"></div>
-      <div id="od-main" style="flex:1;padding:6px 8px;overflow-y:auto" onclick="if(event.target===this||event.target.id==='od-panel'){_odClearSel();}">
+      <div id="od-main" style="flex:1;padding:6px 8px;overflow-y:auto" onclick="if(window._odDragJustEnded) return;if(!event.target.closest('[data-od-idx]')&&!event.target.closest('#od-iv-toolbar')&&!event.target.closest('button')&&!event.target.closest('input')&&!event.target.closest('select')){_odClearSel();}">
         <div id="od-panel"></div>
       </div>
     </div>
@@ -3336,19 +3338,26 @@ function dday(s){if(!s)return 9999;return Math.ceil((new Date(s)-t0())/86400000)
 // 연락처 자동 줄바꿈: "이름 010-XXXX-XXXX 이름2 010-YYYY-YYYY" → 이름+번호 쌍별로 줄 분리
 function fmtPhone(p){
   if(!p) return '';
-  if(p.includes('\n')) return p;  // 이미 줄바꿈 있으면 그대로
-  // ① 번호 뒤에 공백+한글(이름)이 오면 그 한글 앞에서 줄바꿈
-  //    예: "대표 010-1111-2222 사장 010-3333-4444" → "대표 010-1111-2222\n사장 010-3333-4444"
-  let out = p.replace(/(\d{4})\s+(?=[가-힣])/g, '$1\n');
-  if(out !== p) return out;
-  // ② 이름 없이 번호만 여러 개인 경우: 번호 앞에서 줄바꿈
-  const nums = p.match(/01[016789][-\s]?\d{3,4}[-\s]?\d{4}/g);
-  if(!nums || nums.length < 2) return p;
-  let res = p;
-  for(let i=1; i<nums.length; i++){
-    res = res.replace(nums[i], '\n'+nums[i]);
-  }
-  return res;
+  // 이미 줄바꿈 있으면 각 줄에 대해 긴 줄 처리만
+  var lines = p.split('\n');
+  var result = [];
+  lines.forEach(function(line){
+    line = line.trim();
+    if(!line) return;
+    // 번호 뒤에 공백+한글(이름)이 오면 줄바꿈
+    line = line.replace(/(\d{4})\s+(?=[가-힣])/g, '$1\n');
+    // 한 줄이 20자 넘고 이름+번호 패턴이면 → 이름/번호 분리
+    line.split('\n').forEach(function(sub){
+      if(sub.length > 20){
+        var m = sub.match(/^(.+?)\s+(01[016789][-\s]?\d{3,4}[-\s]?\d{4}.*)$/);
+        if(m){ result.push(m[1]); result.push(m[2]); return; }
+        m = sub.match(/^(.+?)\s+(0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{4}.*)$/);
+        if(m){ result.push(m[1]); result.push(m[2]); return; }
+      }
+      result.push(sub);
+    });
+  });
+  return result.join('\n');
 }
 // 입력창에서 "이름 010-XXXX-XXXX" 완성되고 다음 한글이 오면 자동 줄바꿈
 function autoWrapPhone(el){
@@ -3600,7 +3609,7 @@ function openEditHistory(filterSection){
         }).join('<br>');
         var _first=_parts[0];var _fai=_first.indexOf(' → ');
         var _shortFirst=_fai>0?_ehHL(_ehCut(_first.substring(0,_fai),_MV),_ehCut(_first.substring(_fai+3),_MV)):_first;
-        _detShort=_shortFirst+' <span style="color:#94a3b8;font-size:10px">외 '+(_parts.length-1)+'건 ▼</span>';
+        _detShort=_shortFirst+' <span style="color:#94a3b8;font-size:10px">외 '+(_parts.length-1)+'건</span>';
       } else {
         var _arrowIdx=_rawDet.indexOf(' → ');
         if(_arrowIdx>0){
@@ -3608,10 +3617,10 @@ function openEditHistory(filterSection){
           _detShort=_ehHL(_ehCut(_rawDet.substring(0,_arrowIdx),_MV),_ehCut(_rawDet.substring(_arrowIdx+3),_MV));
         } else {
           _detFull=_rawDet;
-          _detShort=_ehCut(_rawDet,80);
+          _detShort=_ehCut(_rawDet,40);
         }
       }
-      var _needExpand=_detShort!==_detFull;
+      var _needExpand=_rawDet.length>40 || _detShort!==_detFull;
       h+='<td style="padding:5px 8px;color:#334155;max-width:500px;line-height:1.4;cursor:pointer" onclick="var d=this.querySelector(\'._eh-full\');if(d){var v=d.style.display;d.style.display=v===\'none\'?\'block\':\'none\';this.querySelector(\'._eh-short\').style.display=v===\'none\'?\'none\':\'block\';}">';
       if(_needExpand){
         var _expandBtn=' <span style="color:#3b82f6;font-size:10px;font-weight:600;background:#eff6ff;padding:1px 5px;border-radius:3px;white-space:nowrap">펼쳐보기 ▼</span>';
@@ -4172,15 +4181,13 @@ document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.
 
 var _EXCEL_LEASE_DATA=[
 {"bn":1,"f":"3~4층","t":"동일건축","s":"2026-03-21","e":"2026-06-20","d":30000000,"r":11000000,"mg":1350000,"pt":"선불","pd":"21","ph":"","em":"","n":"주차장 2대 추가사용 35만원(부가세별도) 관리비 추가","v":false,"dr":false},
-{"bn":4,"f":"지하1층","t":"㈜지엘리코퍼레이션","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"-","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false},
 {"bn":4,"f":"1층","t":"㈜지엘리코퍼레이션","s":"2025.02.14","e":"2027.02.13","d":80000000,"r":7500000,"mg":1000000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false},
-{"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","rfS":"2025.07.02","rfE":"2025-10-01","v":false,"dr":false},
-{"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"","rfS":"2025.01.13","rfE":"2025-03-12","v":false,"dr":false},
+{"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false,"rfS":"2025.07.02","rfE":"2025-10-01"},
+{"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"","v":false,"dr":false,"rfS":"2025.01.13","rfE":"2025-03-12"},
 {"bn":4,"f":"5층","t":"하우스맨 박종호","s":"2025.03.15","e":"2027.03.14","d":80000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"업무폰 010-4456-4150","em":"","n":"","v":false,"dr":false},
 {"bn":5,"f":"2층","t":"더와이디자인스튜디오(양준석)","s":"2025.07.28","e":"2026.07.31","d":20000000,"r":2150000,"mg":0,"pt":"선불","pd":"01일","ph":"010-9904-8121","em":"theydesign02@gmail.com","n":"","v":false,"dr":false},
 {"bn":5,"f":"3층","t":"블링에스(김솔아)","s":"2025.07.16","e":"2026.07.15","d":20000000,"r":2300000,"mg":0,"pt":"후불","pd":"16일","ph":"010-3441-3710","em":"","n":"","v":false,"dr":false},
-{"bn":6,"f":"지하1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
-{"bn":6,"f":"1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
+{"bn":6,"f":"통임대","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
 {"bn":6,"f":"2층","t":"한재민(태국수)","s":"2026-03-16","e":"2028-03-15","d":30000000,"r":3100000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-3380-4486","em":"","n":"임대료 310만원 인상 완","v":false,"dr":false},
 {"bn":6,"f":"3층","t":"곽병수(청23)","s":"2026-01-27","e":"2027-01-26","d":20000000,"r":1700000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-8230-0528","em":"","n":"","v":false,"dr":false},
 {"bn":8,"f":"B2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"기계실","v":true,"dr":false},
@@ -4192,8 +4199,7 @@ var _EXCEL_LEASE_DATA=[
 {"bn":9,"f":"지하2층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
 {"bn":9,"f":"지하1층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
 {"bn":9,"f":"2층","t":"주식회사 제니트레이드","s":"2025-08-01","e":"2026-07-31","d":50000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"010-4147-1777","em":"","n":"","v":false,"dr":false},
-{"bn":9,"f":"3층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
-{"bn":9,"f":"4층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
+{"bn":9,"f":"통임대","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
 {"bn":10,"f":"B01호","t":"권형준","s":"2023-07-29","e":"2026-07-28","d":10000000,"r":860000,"mg":70000,"pt":"선불","pd":"29일","ph":"010-7402-5683\n010-7633-0589 여재민 (실 임차인)\n010-8335-6709(실 임차인 지인)","em":"","n":"애완견 두 마리 / 주차불가/ 보증금 반환시 확인필요!","v":false,"dr":false},
 {"bn":10,"f":"B02호","t":"김지현","s":"2022-09-19","e":"2026-09-18","d":5000000,"r":735000,"mg":0,"pt":"선불","pd":"19일","ph":"010-7188-8104","em":"","n":"월세에 관리비 수도요금/ 차량번호: 396구 2913","v":false,"dr":false},
 {"bn":10,"f":"101호","t":"최우진","s":"2025-06-20","e":"2026-06-19","d":10000000,"r":930000,"mg":150000,"pt":"선불","pd":"20일","ph":"010-2763-9996","em":"","n":"","v":false,"dr":false},
@@ -4202,40 +4208,29 @@ var _EXCEL_LEASE_DATA=[
 {"bn":10,"f":"202호","t":"이민숙","s":"2024-06-30","e":"2026-06-29","d":220500000,"r":0,"mg":70000,"pt":"선불","pd":"30일","ph":"010-4080-8736","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},
 {"bn":10,"f":"3층","t":"이   훈","s":"2026-02-27","e":"2027-08-31","d":30000000,"r":1540000,"mg":100000,"pt":"선불","pd":"27일","ph":"010-2679-8696","em":"","n":"관리비 수도요금 포함 / 주차 사용 중(계약서 명시X)","v":false,"dr":false},
 {"bn":10,"f":"옥탑","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"주기적으로 확인요망","v":true,"dr":false},
-{"bn":11,"f":"지하2층","t":"유노하나코리아","s":"2025-10-28","e":"2027-10-27","d":30000000,"r":4000000,"mg":0,"pt":"선불","pd":"28일","ph":"","em":"","n":"","rfS":"2025-10-28","rfE":"2025-12-27","v":false,"dr":false},
-{"bn":11,"f":"지하1층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
-{"bn":11,"f":"1층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
-{"bn":11,"f":"2층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15일","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},
-{"bn":11,"f":"3층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15일","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},
-{"bn":11,"f":"4층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15일","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},
-{"bn":11,"f":"5층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15일","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},
-{"bn":12,"f":"지상1층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
-{"bn":12,"f":"지상2층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
-{"bn":12,"f":"지상4층","t":"프라다","s":"2024-01-29","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
-{"bn":12,"f":"지상5층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
+{"bn":11,"f":"지하2층","t":"유노하나코리아","s":"2025-10-28","e":"2027-10-27","d":30000000,"r":4000000,"mg":0,"pt":"선불","pd":"28일","ph":"","em":"","n":"","v":false,"dr":false,"rfS":"2025-10-28","rfE":"2025-12-27"},
+{"bn":11,"f":"통임대","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
+{"bn":12,"f":"통임대","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
 {"bn":12,"f":"지상3층","t":"셀나인","s":"2024-03-05","e":"2027-03-04","d":300000000,"r":9270000,"mg":871000,"pt":"선불","pd":"20일","ph":"김은지 원장 : 010-4199-8386\n총괄실장:010-9164-5227","em":"","n":"26년 3월부터 매년 3% 인상","v":false,"dr":false},
 {"bn":13,"f":"1층","t":"더블유더블유씨디","s":"2024-06-28","e":"2027-06-27","d":120000000,"r":9075000,"mg":300000,"pt":"선불","pd":"28일","ph":"대표 010-5101-8666(연락은 매니저한테)\n매니저 010-4976-4250(최신)","em":"","n":"2년 계약갱신완료(임대료 907,5만원 / 관리비 30만원 으로 인상)","v":false,"dr":false},
 {"bn":13,"f":"2층","t":"주식회사 하연옥","s":"2024-06-28","e":"2026-06-27","d":100000000,"r":8000000,"mg":300000,"pt":"선불","pd":"08일","ph":"사장님 010-7208-0327","em":"","n":"2년 계약갱신완료(관리비 30만원 으로 인상)","v":false,"dr":false},
 {"bn":13,"f":"3층","t":"이즈디프런트 주식회사","s":"2023-08-21","e":"2027-08-20","d":80000000,"r":5000000,"mg":300000,"pt":"선불","pd":"21일","ph":"대표 : 민동욱\n담당자 심영준 팀장 : 010-5267-9398","em":"","n":"9월부터 주차 추가 안함","v":false,"dr":false},
-{"bn":13,"f":"4층","t":"㈜하늘을담다","s":"2024-06-20","e":"2026-06-19","d":80000000,"r":4200000,"mg":300000,"pt":"선불","pd":"20일","ph":"대표 010-8586-3549\n직원 010-4817-0259(담당)","em":"","n":"주차비 15만원 추가 납입. 2대 사용 중","v":false,"dr":false},
 {"bn":13,"f":"5층","t":"이즈디프런트 주식회사","s":"2025-02-21","e":"2027-02-20","d":30000000,"r":3000000,"mg":300000,"pt":"선불","pd":"21일","ph":"담당자 심영준 팀장 : 010-5267-9398","em":"","n":"1년 갱신 07.18-","v":false,"dr":false},
+{"bn":13,"f":"4층","t":"㈜하늘을담다","s":"2024-06-20","e":"2026-06-19","d":80000000,"r":4200000,"mg":300000,"pt":"선불","pd":"20일","ph":"대표 010-8586-3549\n직원 010-4817-0259(담당)","em":"","n":"주차비 15만원 추가 납입. 2대 사용 중","v":false,"dr":false},
 {"bn":14,"f":"B1호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":1000000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
 {"bn":14,"f":"B2호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":700000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
-{"bn":14,"f":"1층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
-{"bn":14,"f":"2층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
-{"bn":14,"f":"3층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
-{"bn":14,"f":"4층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":14,"f":"통임대","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"B01호","t":"김수연","s":"2025-10-24","e":"2027-10-23","d":15000000,"r":1100000,"mg":100000,"pt":"선불","pd":"24일","ph":"010-2115-5611","em":"","n":"mabuceo34@gmail.com","v":false,"dr":false},
 {"bn":15,"f":"101호","t":"살롱드유헤어","s":"2025-04-15","e":"2027-04-14","d":20000000,"r":1530000,"mg":50000,"pt":"후불","pd":"말일","ph":"010-9542-0336","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"102호","t":"신동민","s":"2024-09-19","e":"2026-09-18","d":15000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-7738-8083","em":"","n":"10월분 납입함,11월부터 말일로 변경","v":false,"dr":false},
-{"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"","rfS":"2024-09-02","rfE":"2024-10-01","v":false,"dr":false},
+{"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"","v":false,"dr":false,"rfS":"2024-09-02","rfE":"2024-10-01"},
 {"bn":15,"f":"201호","t":"아이디얼핏","s":"2026-01-02","e":"2028-01-01","d":20000000,"r":2020000,"mg":130000,"pt":"후불","pd":"말일","ph":"010-3124-0120","em":"","n":"관리비=주차비 3만원 포함(vat별도),","v":false,"dr":false},
 {"bn":15,"f":"301호","t":"한울이앤씨(직영)","s":"2025-09-01","e":"2027-08-31","d":20000000,"r":2300000,"mg":100000,"pt":"후불","pd":"20일","ph":"","em":"","n":"","v":false,"dr":true},
 {"bn":15,"f":"401호","t":"권효진(주택)","s":"2025-08-30","e":"2026-08-29","d":30000000,"r":1170000,"mg":100000,"pt":"후불","pd":"말일","ph":"대표 010-5335-9493","em":"","n":"5/25 임대차 5% 인상안(3000/117/10/2년) 날인 완료","v":false,"dr":false},
 {"bn":15,"f":"402호","t":"하사도(주택)","s":"2025-09-20","e":"2026-09-19","d":10000000,"r":650000,"mg":50000,"pt":"후불","pd":"20일","ph":"010-8563-4142","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"501호","t":"김시현(주택)","s":"2026-02-14","e":"2027-02-13","d":30000000,"r":1100000,"mg":100000,"pt":"후불","pd":"14일","ph":"010-9931-8193","em":"","n":"","v":false,"dr":false},
-{"bn":17,"f":"1층","t":"연남 허니 밀크","s":"2024-04-29","e":"2028-04-28","d":30000000,"r":2600000,"mg":250000,"pt":"선불","pd":"29일","ph":"010-6330-8758(남편)","em":"","n":"랜트프리기간(1개월) 24.04.29 ~ 24.05.28","v":false,"dr":false},
-{"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"~10.29 렌트프리 기간","rfS":"2024-09-30","rfE":"2024-10-29","v":false,"dr":false},
+{"bn":17,"f":"1층","t":"연남 허니 밀크","s":"2024-04-29","e":"2028-04-28","d":30000000,"r":2600000,"mg":250000,"pt":"선불","pd":"29일","ph":"010-6330-8758(남편)","em":"","n":"","v":false,"dr":false},
+{"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"","v":false,"dr":false,"rfS":"2024-09-30","rfE":"2024-10-29"},
 {"bn":18,"f":"1층(B)","t":"퍼스널랭귀지","s":"2025-08-04","e":"2027-08-03","d":30000000,"r":2200000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":18,"f":"2층","t":"(주)십사일동안","s":"2025-07-31","e":"2027-06.30","d":40000000,"r":4000000,"mg":300000,"pt":"","pd":"말일","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":23,"f":"1층","t":"안짱","s":"2024-09-23","e":"2026-09-22","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25일","ph":"안태희대표 010-4600-2522\n정혜진팀장 010-7139-4600","em":"hyejin@richnmedia.co.kr","n":"","v":false,"dr":false},
@@ -4244,71 +4239,159 @@ var _EXCEL_LEASE_DATA=[
 {"bn":23,"f":"4층","t":"㈜인퓨라젠바이오","s":"2024-11-16","e":"2026-11-25","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25일","ph":"김강훈대표 010-6630-5104\n이승은매니저 010-9100-1343","em":"bhagwanshin@gmail.com","n":"주차 1대","v":false,"dr":false},
 {"bn":23,"f":"5층","t":"㈜스토리프트","s":"2025-09-15","e":"2026-09-14","d":40000000,"r":3400000,"mg":350000,"pt":"선불","pd":"25일","ph":"소이성직원 010-2745-0921","em":"","n":"주차 1대","v":false,"dr":false},
 {"bn":23,"f":"6층","t":"㈜NYKO","s":"2025-10-30","e":"2027-10-29","d":30000000,"r":2100000,"mg":300000,"pt":"선불","pd":"25일","ph":"010-9047-4400","em":"jgnyko@gmail.com","n":"","v":false,"dr":false},
-{"bn":16,"f":"지하2층","t":"클래시카 서울","s":"2025-05-01","e":"2027-04-30","d":70000000,"r":5500000,"mg":1000000,"pt":"선불","pd":"1일","ph":"김태환, 공동대표1: 010-7357-1377\n고연경, 공동대표2: 010-4383-1355","em":"","n":"발렛비 말일 지불\n퇴거 시 가스계량기 원복필요(계약서 폴더 참고)","rfS":"2025-05-01","rfE":"2025-08-31","v":false,"dr":false},
-{"bn":16,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"직영","v":false,"dr":true},
+{"bn":16,"f":"지하2층","t":"클래시카 서울","s":"2025-05-01","e":"2027-04-30","d":70000000,"r":5500000,"mg":1000000,"pt":"선불","pd":"1일","ph":"김태환, 공동대표1: 010-7357-1377\n고연경, 공동대표2: 010-4383-1355","em":"","n":"발렛비 말일 지불\n퇴거 시 가스계량기 원복필요(계약서 폴더 참고)","v":false,"dr":false,"rfS":"2025-05-01","rfE":"2025-08-31"},
 {"bn":16,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"직영","v":false,"dr":true},
-{"bn":16,"f":"2층","t":"법무법인 인율","s":"2025-01-10","e":"2027-01-09","d":100000000,"r":6500000,"mg":500000,"pt":"선불","pd":"10일","ph":"대표님 010-4040-2102","em":"inyul@inyullaw.com","n":"발렛비 말일 지불","rfS":"2025-01-10","rfE":"2025-04-09","v":false,"dr":false},
-{"bn":16,"f":"3층","t":"세무법인 펜타곤","s":"2025-04-21","e":"2027-04-20","d":100000000,"r":5500000,"mg":500000,"pt":"선불","pd":"21일","ph":"대표님 010-3211-3132","em":"","n":"발렛비 말일 지불","rfS":"2025-04-21","rfE":"2025-06-20","v":false,"dr":false},
-{"bn":16,"f":"4층","t":"세무법인 디엘지(DLG)","s":"2024-11-19","e":"2026-11-18","d":200000000,"r":12000000,"mg":1000000,"pt":"선불","pd":"19일","ph":"대표님 010-9344-1543","em":"","n":"랜트프리기간(2개월) 24.11.19 ~ 25.01.18 / 발렛비 말일 지불","v":false,"dr":false},
-{"bn":16,"f":"5층","t":"세무법인 디엘지(DLG)","s":"2024-11-19","e":"2026-11-18","d":200000000,"r":12000000,"mg":1000000,"pt":"선불","pd":"19일","ph":"대표님 010-9344-1543","em":"","n":"랜트프리기간(2개월) 24.11.19 ~ 25.01.18 / 발렛비 말일 지불","v":false,"dr":false},
-{"bn":16,"f":"6,7층","t":"조준우(바디움대표)개인","s":"2024-05-16","e":"2026-05-15","d":150000000,"r":15000000,"mg":2000000,"pt":"선불","pd":"16일","ph":"조준우 대표님 010-9285-3907","em":"jina@bodium.co.kr","n":"발렛비 말일 지불","rfS":"2024-05-16","rfE":"2024-07-15","v":false,"dr":false},
-{"bn":16,"f":"8층","t":"주식회사바디움","s":"2024-05-16","e":"2026-05-15","d":50000000,"r":5000000,"mg":1000000,"pt":"선불","pd":"16일","ph":"","em":"jina@bodium.co.kr","n":"발렛비 말일 지불","rfS":"2024-05-16","rfE":"2024-07-15","v":false,"dr":false},
-{"bn":19,"f":"1층","t":"주식회사 누땡","s":"2023-12-26","e":"2026-12-25","d":100000000,"r":6000000,"mg":400000,"pt":"선불","pd":"26일","ph":"010-9245-9943(연락은 이분)/\n공동대표 : 010-3388-3554 /\n김지환 점장 : 010-2874-5864","em":"nuthang13@naver.com","n":"","rfS":"2023-12-26","rfE":"2024-03-24","v":false,"dr":false},
-{"bn":19,"f":"2층","t":"두보산업㈜","s":"2025-08-11","e":"2027-08-10","d":50000000,"r":4500000,"mg":400000,"pt":"선불","pd":"11일","ph":"정영웅 대표\n정경래 대표 : 010-9808-8725","em":"","n":"","rfS":"2025-08-11","rfE":"2025-10-10","v":false,"dr":false},
-{"bn":19,"f":"4층","t":"주식회사 비주얼인텔리전스","s":"2026-03-05","e":"2027-03-04","d":50000000,"r":4500000,"mg":300000,"pt":"선불","pd":"04일","ph":"장세훈 대표님 010-9663-3214","em":"sehun.chang@visualint.co.kr","n":"","rfS":"2025-03-05","rfE":"2025-04-04","v":false,"dr":false},
+{"bn":16,"f":"2층","t":"법무법인 인율","s":"2025-01-10","e":"2027-01-09","d":100000000,"r":6500000,"mg":500000,"pt":"선불","pd":"10일","ph":"대표님 010-4040-2102","em":"inyul@inyullaw.com","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2025-01-10","rfE":"2025-04-09"},
+{"bn":16,"f":"3층","t":"세무법인 펜타곤","s":"2025-04-21","e":"2027-04-20","d":100000000,"r":5500000,"mg":500000,"pt":"선불","pd":"21일","ph":"대표님 010-3211-3132","em":"","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2025-04-21","rfE":"2025-06-20"},
+{"bn":16,"f":"통임대","t":"세무법인 디엘지(DLG)","s":"2024-11-19","e":"2026-11-18","d":200000000,"r":12000000,"mg":1000000,"pt":"선불","pd":"19일","ph":"대표님 010-9344-1543","em":"","n":"발렛비 말일 지불","v":false,"dr":false},
+{"bn":16,"f":"6\n7층","t":"조준우(바디움대표)개인","s":"2024-05-16","e":"2026-05-15","d":150000000,"r":15000000,"mg":2000000,"pt":"선불","pd":"16일","ph":"조준우 대표님 010-9285-3907","em":"jina@bodium.co.kr","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2024-05-16","rfE":"2024-07-15"},
+{"bn":16,"f":"8층","t":"주식회사바디움","s":"2024-05-16","e":"2026-05-15","d":50000000,"r":5000000,"mg":1000000,"pt":"선불","pd":"16일","ph":"","em":"jina@bodium.co.kr","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2024-05-16","rfE":"2024-07-15"},
+{"bn":19,"f":"1층","t":"주식회사 누땡","s":"2023-12-26","e":"2026-12-25","d":100000000,"r":6000000,"mg":400000,"pt":"선불","pd":"26일","ph":"010-9245-9943(연락은 이분)/\n공동대표 : 010-3388-3554 /\n김지환 점장 : 010-2874-5864","em":"nuthang13@naver.com","n":"","v":false,"dr":false,"rfS":"2023-12-26","rfE":"2024-03-24"},
+{"bn":19,"f":"2층","t":"두보산업㈜","s":"2025-08-11","e":"2027-08-10","d":50000000,"r":4500000,"mg":400000,"pt":"선불","pd":"11일","ph":"정영웅 대표\n정경래 대표 : 010-9808-8725","em":"","n":"","v":false,"dr":false,"rfS":"2025-08-11","rfE":"2025-10-10"},
+{"bn":19,"f":"4층","t":"주식회사 비주얼인텔리전스","s":"2026-03-05","e":"2027-03-04","d":50000000,"r":4500000,"mg":300000,"pt":"선불","pd":"04일","ph":"장세훈 대표님 010-9663-3214","em":"sehun.chang@visualint.co.kr","n":"","v":false,"dr":false,"rfS":"2025-03-05","rfE":"2025-04-04"},
 {"bn":19,"f":"5층","t":"주식회사 바오밥픽처스","s":"2024-09-23","e":"2026-09-22","d":60000000,"r":4200000,"mg":300000,"pt":"선불","pd":"23일","ph":"김시영 대표 : 010-3322-7361\n(실사용) 전재영 010-2934-4956","em":"","n":"","v":false,"dr":false},
-{"bn":20,"f":"4층","t":"주식회사 아반투라","s":"2025-12-09","e":"2027-12-08","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"09일","ph":"이승규 대표님 010-3152-7073\n직원 010-2602-0479","em":"tax@avantura.co.kr","n":"","rfS":"2025-12-09","rfE":"2026-01-08","v":false,"dr":false},
-{"bn":20,"f":"7층","t":"주식회사 미드미디앤씨","s":"2025-09-05","e":"2027-09-04","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"05일","ph":"이선민(부장:실무자) 010-4577-4780","em":"sunnnytax07@naver.com","n":"","rfS":"2025-09-05","rfE":"2025-10-04","v":false,"dr":false},
+{"bn":20,"f":"4층","t":"주식회사 아반투라","s":"2025-12-09","e":"2027-12-08","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"09일","ph":"이승규 대표님 010-3152-7073\n직원 010-2602-0479","em":"tax@avantura.co.kr","n":"","v":false,"dr":false,"rfS":"2025-12-09","rfE":"2026-01-08"},
+{"bn":20,"f":"7층","t":"주식회사 미드미디앤씨","s":"2025-09-05","e":"2027-09-04","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"05일","ph":"이선민(부장:실무자) 010-4577-4780","em":"sunnnytax07@naver.com","n":"","v":false,"dr":false,"rfS":"2025-09-05","rfE":"2025-10-04"},
 {"bn":21,"f":"지하1층","t":"㈜비앤비인더스트리","s":"2026-01-31","e":"2027-01-30","d":30000000,"r":3350000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-6732-6486","em":"","n":"임대료 입금은 매월 1일","v":false,"dr":false},
 {"bn":21,"f":"1층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
 {"bn":21,"f":"2층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
 {"bn":21,"f":"3층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
 {"bn":21,"f":"4층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
-{"bn":21,"f":"5층","t":"한국딥러닝","s":"2025-11-19","e":"2027-03-17","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"25.12.18까지 렌트프리 / 12.19~31(납입)/ 이후26.1월부터 (1일 선납)","v":false,"dr":false},
-{"bn":22,"f":"1,2층(일부)\n지층 전부","t":"주식회사 더기프팅컴퍼니","s":"2025-06-01","e":"2026-05-31","d":50000000,"r":8457750,"mg":500000,"pt":"후불","pd":"말일","ph":"직영","em":"","n":"","v":false,"dr":false},
+{"bn":21,"f":"5층","t":"한국딥러닝","s":"2025-11-19","e":"2027-03-17","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"12.19~31(납입)\n이후26.1월부터 (1일 선납)","v":false,"dr":false},
+{"bn":22,"f":"1\n2층(일부)\n지층 전부","t":"주식회사 더기프팅컴퍼니","s":"2025-06-01","e":"2026-05-31","d":50000000,"r":8457750,"mg":500000,"pt":"후불","pd":"말일","ph":"직영","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"1층","t":"조경진(헤비스테이크)","s":"2025-06-30","e":"2026-06-29","d":20000000,"r":2335750,"mg":500000,"pt":"후불","pd":"말일","ph":"010-6730-2243","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"2층","t":"이기택(기러기둥지와인바)","s":"2025-11-30","e":"2026-11-29","d":20000000,"r":2335750,"mg":535000,"pt":"후불","pd":"말일","ph":"010-9010-1842","em":"","n":"","v":false,"dr":false},
 {"bn":22,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"건물주 사용","v":true,"dr":false},
 {"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},
-{"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","rfS":"2024-09-20","rfE":"2024-12-19","v":false,"dr":false},
-{"bn":24,"f":"2층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","rfS":"2024-06-03","rfE":"2024-07-31","v":false,"dr":false},
-{"bn":24,"f":"3층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","rfS":"2024-06-03","rfE":"2024-07-31","v":false,"dr":false},
-{"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","rfS":"2024-06-03","rfE":"2024-07-31","v":false,"dr":false},
-{"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","rfS":"2024-06-03","rfE":"2024-07-31","v":false,"dr":false},
-{"bn":28,"f":"지하1층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":28,"f":"1층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":28,"f":"2층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":28,"f":"3층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":28,"f":"4층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":28,"f":"5층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":28,"f":"6층","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
-{"bn":29,"f":"지하1층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":29,"f":"1층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":29,"f":"2층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":29,"f":"3층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":29,"f":"4층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":29,"f":"5층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":29,"f":"6층","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 렌트프리기간\n2025-05-23 ~ 2025-08-22\n(2025-08-23 부터 차임 선불 납부)\n\n* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":30,"f":"지하1층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"* 렌트프리기간\n2025-10-31 ~ 2026-01-30","v":false,"dr":false},
-{"bn":30,"f":"1층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"* 렌트프리기간\n2025-10-31 ~ 2026-01-30","v":false,"dr":false},
-{"bn":30,"f":"2층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"* 렌트프리기간\n2025-10-31 ~ 2026-01-30","v":false,"dr":false},
-{"bn":30,"f":"3층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"* 렌트프리기간\n2025-10-31 ~ 2026-01-30","v":false,"dr":false},
-{"bn":30,"f":"4층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"* 렌트프리기간\n2025-10-31 ~ 2026-01-30","v":false,"dr":false},
+{"bn":24,"f":"2층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":24,"f":"3층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","v":false,"dr":false,"rfS":"2024-09-20","rfE":"2024-12-19"},
+{"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":28,"f":"통임대","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
+{"bn":29,"f":"통임대","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
+{"bn":30,"f":"통임대","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"지하1층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"1층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":30000000,"r":3165000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
-{"bn":31,"f":"2층","t":"나선영 (에이탑Atop)학원","s":"2024-11-10","e":"2026-11-09","d":30000000,"r":2850000,"mg":300000,"pt":"선불","pd":"10일","ph":"010-5703-7164","em":"pdhnsy@gmail.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"3층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":20000000,"r":3165000,"mg":200000,"pt":"선불","pd":"30일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"4층","t":"오수진 (GLP) 아카데미","s":"2026-02-01","e":"2028-03-31","d":30000000,"r":3500000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
-{"bn":32,"f":"지하1층\n~\n5층","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07일","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"렌트프리기간\n2026-01-07 ~ 2026-04-06","v":false,"dr":false},
+{"bn":31,"f":"2층","t":"나선영 (에이탑Atop)학원","s":"2024-11-10","e":"2026-11-09","d":30000000,"r":2850000,"mg":300000,"pt":"선불","pd":"10일","ph":"010-5703-7164","em":"pdhnsy@gmail.com","n":"","v":false,"dr":false},
+{"bn":32,"f":"통임대","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07일","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"","v":false,"dr":false},
+{"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},
+{"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"퇴거완료","v":true,"dr":false},
+{"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"명도 완료","v":true,"dr":false},
+{"bn":33,"f":"2층","t":"주식회사 이작디자인","s":"2025-03-27","e":"2026-03-26","d":1000000,"r":600000,"mg":0,"pt":"후불","pd":"말일","ph":"양은주 010-6209-6657","em":"","n":"대표님 지인","v":false,"dr":false},
+{"bn":1,"f":"3~4층","t":"동일건축","s":"2026-03-21","e":"2026-06-20","d":30000000,"r":11000000,"mg":1350000,"pt":"선불","pd":"21","ph":"","em":"","n":"주차장 2대 추가사용 35만원(부가세별도) 관리비 추가","v":false,"dr":false},
+{"bn":4,"f":"지하1층","t":"㈜지엘리코퍼레이션","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"-","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false},
+{"bn":4,"f":"1층","t":"㈜지엘리코퍼레이션","s":"2025.02.14","e":"2027.02.13","d":80000000,"r":7500000,"mg":1000000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false},
+{"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false,"rfS":"2025.07.02","rfE":"2025-10-01"},
+{"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"","v":false,"dr":false,"rfS":"2025.01.13","rfE":"2025-03-12"},
+{"bn":4,"f":"5층","t":"하우스맨 박종호","s":"2025.03.15","e":"2027.03.14","d":80000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"업무폰 010-4456-4150","em":"","n":"","v":false,"dr":false},
+{"bn":5,"f":"2층","t":"더와이디자인스튜디오(양준석)","s":"2025.07.28","e":"2026.07.31","d":20000000,"r":2150000,"mg":0,"pt":"선불","pd":"01일","ph":"010-9904-8121","em":"theydesign02@gmail.com","n":"","v":false,"dr":false},
+{"bn":5,"f":"3층","t":"블링에스(김솔아)","s":"2025.07.16","e":"2026.07.15","d":20000000,"r":2300000,"mg":0,"pt":"후불","pd":"16일","ph":"010-3441-3710","em":"","n":"","v":false,"dr":false},
+{"bn":6,"f":"통임대","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
+{"bn":6,"f":"2층","t":"한재민(태국수)","s":"2026-03-16","e":"2028-03-15","d":30000000,"r":3100000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-3380-4486","em":"","n":"임대료 310만원 인상 완","v":false,"dr":false},
+{"bn":6,"f":"3층","t":"곽병수(청23)","s":"2026-01-27","e":"2027-01-26","d":20000000,"r":1700000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-8230-0528","em":"","n":"","v":false,"dr":false},
+{"bn":8,"f":"B2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"기계실","v":true,"dr":false},
+{"bn":8,"f":"B1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"건물주 사용","v":true,"dr":false},
+{"bn":8,"f":"1층 카페","t":"정화용","s":"2022-12-24","e":"2027-12-24","d":40000000,"r":2000000,"mg":0,"pt":"후불","pd":"25일","ph":"010-6222-2145","em":"","n":"발렛 50만원(vat별도), 공용전기 7.5%, 수도요금 청구","v":false,"dr":false},
+{"bn":8,"f":"1층 약국","t":"김민주","s":"2022-12-24","e":"2027-12-24","d":40000000,"r":0,"mg":0,"pt":"후불","pd":"25일","ph":"010-7378-7455","em":"","n":"발렛 50만원(vat별도), 공용전기 7.5%, 수도요금 청구","v":false,"dr":false},
+{"bn":8,"f":"2~5층","t":"스페셜이비인후과, 박치열","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"010-9042-7728(건물주1)","em":"","n":"건물주 사용","v":false,"dr":false},
+{"bn":8,"f":"6층","t":"미케르","s":"2023-01-02","e":"2026-12-22","d":0,"r":2000000,"mg":500000,"pt":"후불","pd":"25일","ph":"010-2766-4221(건물주2)\n010-2737-7360(직원 업무폰)","em":"","n":"발렛 50만원(vat별도), 공용전기 15%, 수도요금 청구","v":false,"dr":false},
+{"bn":9,"f":"지하2층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
+{"bn":9,"f":"지하1층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
+{"bn":9,"f":"2층","t":"주식회사 제니트레이드","s":"2025-08-01","e":"2026-07-31","d":50000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"010-4147-1777","em":"","n":"","v":false,"dr":false},
+{"bn":9,"f":"통임대","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
+{"bn":10,"f":"B01호","t":"권형준","s":"2023-07-29","e":"2026-07-28","d":10000000,"r":860000,"mg":70000,"pt":"선불","pd":"29일","ph":"010-7402-5683\n010-7633-0589 여재민 (실 임차인)\n010-8335-6709(실 임차인 지인)","em":"","n":"애완견 두 마리 / 주차불가/ 보증금 반환시 확인필요!","v":false,"dr":false},
+{"bn":10,"f":"B02호","t":"김지현","s":"2022-09-19","e":"2026-09-18","d":5000000,"r":735000,"mg":0,"pt":"선불","pd":"19일","ph":"010-7188-8104","em":"","n":"월세에 관리비 수도요금/ 차량번호: 396구 2913","v":false,"dr":false},
+{"bn":10,"f":"101호","t":"최우진","s":"2025-06-20","e":"2026-06-19","d":10000000,"r":930000,"mg":150000,"pt":"선불","pd":"20일","ph":"010-2763-9996","em":"","n":"","v":false,"dr":false},
+{"bn":10,"f":"102호","t":"이지수","s":"2023-10-28","e":"2026-10-27","d":10000000,"r":900000,"mg":50000,"pt":"선불","pd":"28일","ph":"010-3523-7479","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},
+{"bn":10,"f":"201호","t":"임수정","s":"2026-03-27","e":"2027-03-26","d":34000000,"r":742000,"mg":70000,"pt":"선불","pd":"27일","ph":"010-8824-8762","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},
+{"bn":10,"f":"202호","t":"이민숙","s":"2024-06-30","e":"2026-06-29","d":220500000,"r":0,"mg":70000,"pt":"선불","pd":"30일","ph":"010-4080-8736","em":"","n":"관리비 수도요금 포함 /주차불가","v":false,"dr":false},
+{"bn":10,"f":"3층","t":"이   훈","s":"2026-02-27","e":"2027-08-31","d":30000000,"r":1540000,"mg":100000,"pt":"선불","pd":"27일","ph":"010-2679-8696","em":"","n":"관리비 수도요금 포함 / 주차 사용 중(계약서 명시X)","v":false,"dr":false},
+{"bn":10,"f":"옥탑","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"주기적으로 확인요망","v":true,"dr":false},
+{"bn":11,"f":"지하2층","t":"유노하나코리아","s":"2025-10-28","e":"2027-10-27","d":30000000,"r":4000000,"mg":0,"pt":"선불","pd":"28일","ph":"","em":"","n":"","v":false,"dr":false,"rfS":"2025-10-28","rfE":"2025-12-27"},
+{"bn":11,"f":"통임대","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
+{"bn":12,"f":"통임대","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
+{"bn":12,"f":"지상3층","t":"셀나인","s":"2024-03-05","e":"2027-03-04","d":300000000,"r":9270000,"mg":871000,"pt":"선불","pd":"20일","ph":"김은지 원장 : 010-4199-8386\n총괄실장:010-9164-5227","em":"","n":"26년 3월부터 매년 3% 인상","v":false,"dr":false},
+{"bn":13,"f":"1층","t":"더블유더블유씨디","s":"2024-06-28","e":"2027-06-27","d":120000000,"r":9075000,"mg":300000,"pt":"선불","pd":"28일","ph":"대표 010-5101-8666(연락은 매니저한테)\n매니저 010-4976-4250(최신)","em":"","n":"2년 계약갱신완료(임대료 907,5만원 / 관리비 30만원 으로 인상)","v":false,"dr":false},
+{"bn":13,"f":"2층","t":"주식회사 하연옥","s":"2024-06-28","e":"2026-06-27","d":100000000,"r":8000000,"mg":300000,"pt":"선불","pd":"08일","ph":"사장님 010-7208-0327","em":"","n":"2년 계약갱신완료(관리비 30만원 으로 인상)","v":false,"dr":false},
+{"bn":13,"f":"3층","t":"이즈디프런트 주식회사","s":"2023-08-21","e":"2027-08-20","d":80000000,"r":5000000,"mg":300000,"pt":"선불","pd":"21일","ph":"대표 : 민동욱\n담당자 심영준 팀장 : 010-5267-9398","em":"","n":"9월부터 주차 추가 안함","v":false,"dr":false},
+{"bn":13,"f":"5층","t":"이즈디프런트 주식회사","s":"2025-02-21","e":"2027-02-20","d":30000000,"r":3000000,"mg":300000,"pt":"선불","pd":"21일","ph":"담당자 심영준 팀장 : 010-5267-9398","em":"","n":"1년 갱신 07.18-","v":false,"dr":false},
+{"bn":13,"f":"4층","t":"㈜하늘을담다","s":"2024-06-20","e":"2026-06-19","d":80000000,"r":4200000,"mg":300000,"pt":"선불","pd":"20일","ph":"대표 010-8586-3549\n직원 010-4817-0259(담당)","em":"","n":"주차비 15만원 추가 납입. 2대 사용 중","v":false,"dr":false},
+{"bn":14,"f":"B1호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":1000000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
+{"bn":14,"f":"B2호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":700000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
+{"bn":14,"f":"통임대","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":15,"f":"B01호","t":"김수연","s":"2025-10-24","e":"2027-10-23","d":15000000,"r":1100000,"mg":100000,"pt":"선불","pd":"24일","ph":"010-2115-5611","em":"","n":"mabuceo34@gmail.com","v":false,"dr":false},
+{"bn":15,"f":"101호","t":"살롱드유헤어","s":"2025-04-15","e":"2027-04-14","d":20000000,"r":1530000,"mg":50000,"pt":"후불","pd":"말일","ph":"010-9542-0336","em":"","n":"","v":false,"dr":false},
+{"bn":15,"f":"102호","t":"신동민","s":"2024-09-19","e":"2026-09-18","d":15000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-7738-8083","em":"","n":"10월분 납입함,11월부터 말일로 변경","v":false,"dr":false},
+{"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"","v":false,"dr":false,"rfS":"2024-09-02","rfE":"2024-10-01"},
+{"bn":15,"f":"201호","t":"아이디얼핏","s":"2026-01-02","e":"2028-01-01","d":20000000,"r":2020000,"mg":130000,"pt":"후불","pd":"말일","ph":"010-3124-0120","em":"","n":"관리비=주차비 3만원 포함(vat별도),","v":false,"dr":false},
+{"bn":15,"f":"301호","t":"한울이앤씨(직영)","s":"2025-09-01","e":"2027-08-31","d":20000000,"r":2300000,"mg":100000,"pt":"후불","pd":"20일","ph":"","em":"","n":"","v":false,"dr":true},
+{"bn":15,"f":"401호","t":"권효진(주택)","s":"2025-08-30","e":"2026-08-29","d":30000000,"r":1170000,"mg":100000,"pt":"후불","pd":"말일","ph":"대표 010-5335-9493","em":"","n":"5/25 임대차 5% 인상안(3000/117/10/2년) 날인 완료","v":false,"dr":false},
+{"bn":15,"f":"402호","t":"하사도(주택)","s":"2025-09-20","e":"2026-09-19","d":10000000,"r":650000,"mg":50000,"pt":"후불","pd":"20일","ph":"010-8563-4142","em":"","n":"","v":false,"dr":false},
+{"bn":15,"f":"501호","t":"김시현(주택)","s":"2026-02-14","e":"2027-02-13","d":30000000,"r":1100000,"mg":100000,"pt":"후불","pd":"14일","ph":"010-9931-8193","em":"","n":"","v":false,"dr":false},
+{"bn":17,"f":"1층","t":"연남 허니 밀크","s":"2024-04-29","e":"2028-04-28","d":30000000,"r":2600000,"mg":250000,"pt":"선불","pd":"29일","ph":"010-6330-8758(남편)","em":"","n":"","v":false,"dr":false},
+{"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"","v":false,"dr":false,"rfS":"2024-09-30","rfE":"2024-10-29"},
+{"bn":18,"f":"1층(B)","t":"퍼스널랭귀지","s":"2025-08-04","e":"2027-08-03","d":30000000,"r":2200000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":18,"f":"2층","t":"(주)십사일동안","s":"2025-07-31","e":"2027-06.30","d":40000000,"r":4000000,"mg":300000,"pt":"","pd":"말일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":23,"f":"1층","t":"안짱","s":"2024-09-23","e":"2026-09-22","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25일","ph":"안태희대표 010-4600-2522\n정혜진팀장 010-7139-4600","em":"hyejin@richnmedia.co.kr","n":"","v":false,"dr":false},
+{"bn":23,"f":"2층","t":"스튜디오에이콘","s":"2025-01-10","e":"2027-01-09","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25일","ph":"김선구 010-9078-3538","em":"dotori@studioacorn.com","n":"주차 1대","v":false,"dr":false},
+{"bn":23,"f":"3층","t":"요쿠스","s":"2023-11-16","e":"2028-05-15","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25일","ph":"최창훈대표 010-2537-4435\n오종근이사 010-4966-4110","em":"changhoon.choi@jocoos.com","n":"주차 1대","v":false,"dr":false},
+{"bn":23,"f":"4층","t":"㈜인퓨라젠바이오","s":"2024-11-16","e":"2026-11-25","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25일","ph":"김강훈대표 010-6630-5104\n이승은매니저 010-9100-1343","em":"bhagwanshin@gmail.com","n":"주차 1대","v":false,"dr":false},
+{"bn":23,"f":"5층","t":"㈜스토리프트","s":"2025-09-15","e":"2026-09-14","d":40000000,"r":3400000,"mg":350000,"pt":"선불","pd":"25일","ph":"소이성직원 010-2745-0921","em":"","n":"주차 1대","v":false,"dr":false},
+{"bn":23,"f":"6층","t":"㈜NYKO","s":"2025-10-30","e":"2027-10-29","d":30000000,"r":2100000,"mg":300000,"pt":"선불","pd":"25일","ph":"010-9047-4400","em":"jgnyko@gmail.com","n":"","v":false,"dr":false},
+{"bn":16,"f":"지하2층","t":"클래시카 서울","s":"2025-05-01","e":"2027-04-30","d":70000000,"r":5500000,"mg":1000000,"pt":"선불","pd":"1일","ph":"김태환, 공동대표1: 010-7357-1377\n고연경, 공동대표2: 010-4383-1355","em":"","n":"발렛비 말일 지불\n퇴거 시 가스계량기 원복필요(계약서 폴더 참고)","v":false,"dr":false,"rfS":"2025-05-01","rfE":"2025-08-31"},
+{"bn":16,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"직영","v":false,"dr":true},
+{"bn":16,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"직영","v":false,"dr":true},
+{"bn":16,"f":"2층","t":"법무법인 인율","s":"2025-01-10","e":"2027-01-09","d":100000000,"r":6500000,"mg":500000,"pt":"선불","pd":"10일","ph":"대표님 010-4040-2102","em":"inyul@inyullaw.com","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2025-01-10","rfE":"2025-04-09"},
+{"bn":16,"f":"3층","t":"세무법인 펜타곤","s":"2025-04-21","e":"2027-04-20","d":100000000,"r":5500000,"mg":500000,"pt":"선불","pd":"21일","ph":"대표님 010-3211-3132","em":"","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2025-04-21","rfE":"2025-06-20"},
+{"bn":16,"f":"통임대","t":"세무법인 디엘지(DLG)","s":"2024-11-19","e":"2026-11-18","d":200000000,"r":12000000,"mg":1000000,"pt":"선불","pd":"19일","ph":"대표님 010-9344-1543","em":"","n":"발렛비 말일 지불","v":false,"dr":false},
+{"bn":16,"f":"6\n7층","t":"조준우(바디움대표)개인","s":"2024-05-16","e":"2026-05-15","d":150000000,"r":15000000,"mg":2000000,"pt":"선불","pd":"16일","ph":"조준우 대표님 010-9285-3907","em":"jina@bodium.co.kr","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2024-05-16","rfE":"2024-07-15"},
+{"bn":16,"f":"8층","t":"주식회사바디움","s":"2024-05-16","e":"2026-05-15","d":50000000,"r":5000000,"mg":1000000,"pt":"선불","pd":"16일","ph":"","em":"jina@bodium.co.kr","n":"발렛비 말일 지불","v":false,"dr":false,"rfS":"2024-05-16","rfE":"2024-07-15"},
+{"bn":19,"f":"1층","t":"주식회사 누땡","s":"2023-12-26","e":"2026-12-25","d":100000000,"r":6000000,"mg":400000,"pt":"선불","pd":"26일","ph":"010-9245-9943(연락은 이분)/\n공동대표 : 010-3388-3554 /\n김지환 점장 : 010-2874-5864","em":"nuthang13@naver.com","n":"","v":false,"dr":false,"rfS":"2023-12-26","rfE":"2024-03-24"},
+{"bn":19,"f":"2층","t":"두보산업㈜","s":"2025-08-11","e":"2027-08-10","d":50000000,"r":4500000,"mg":400000,"pt":"선불","pd":"11일","ph":"정영웅 대표\n정경래 대표 : 010-9808-8725","em":"","n":"","v":false,"dr":false,"rfS":"2025-08-11","rfE":"2025-10-10"},
+{"bn":19,"f":"4층","t":"주식회사 비주얼인텔리전스","s":"2026-03-05","e":"2027-03-04","d":50000000,"r":4500000,"mg":300000,"pt":"선불","pd":"04일","ph":"장세훈 대표님 010-9663-3214","em":"sehun.chang@visualint.co.kr","n":"","v":false,"dr":false,"rfS":"2025-03-05","rfE":"2025-04-04"},
+{"bn":19,"f":"5층","t":"주식회사 바오밥픽처스","s":"2024-09-23","e":"2026-09-22","d":60000000,"r":4200000,"mg":300000,"pt":"선불","pd":"23일","ph":"김시영 대표 : 010-3322-7361\n(실사용) 전재영 010-2934-4956","em":"","n":"","v":false,"dr":false},
+{"bn":20,"f":"4층","t":"주식회사 아반투라","s":"2025-12-09","e":"2027-12-08","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"09일","ph":"이승규 대표님 010-3152-7073\n직원 010-2602-0479","em":"tax@avantura.co.kr","n":"","v":false,"dr":false,"rfS":"2025-12-09","rfE":"2026-01-08"},
+{"bn":20,"f":"7층","t":"주식회사 미드미디앤씨","s":"2025-09-05","e":"2027-09-04","d":80000000,"r":5000000,"mg":500000,"pt":"선불","pd":"05일","ph":"이선민(부장:실무자) 010-4577-4780","em":"sunnnytax07@naver.com","n":"","v":false,"dr":false,"rfS":"2025-09-05","rfE":"2025-10-04"},
+{"bn":21,"f":"지하1층","t":"㈜비앤비인더스트리","s":"2026-01-31","e":"2027-01-30","d":30000000,"r":3350000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-6732-6486","em":"","n":"임대료 입금은 매월 1일","v":false,"dr":false},
+{"bn":21,"f":"1층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
+{"bn":21,"f":"2층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
+{"bn":21,"f":"3층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
+{"bn":21,"f":"4층","t":"한국딥러닝","s":"2026-03-18","e":"2027-03-17","d":150000000,"r":14000000,"mg":1200000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"최초:24.03.18~\n연장완료 : 26.3.18 ~ 27.3.17","v":false,"dr":false},
+{"bn":21,"f":"5층","t":"한국딥러닝","s":"2025-11-19","e":"2027-03-17","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"01일","ph":"010-9210-3213","em":"fin@koreadeep.com","n":"12.19~31(납입)\n이후26.1월부터 (1일 선납)","v":false,"dr":false},
+{"bn":22,"f":"1\n2층(일부)\n지층 전부","t":"주식회사 더기프팅컴퍼니","s":"2025-06-01","e":"2026-05-31","d":50000000,"r":8457750,"mg":500000,"pt":"후불","pd":"말일","ph":"직영","em":"","n":"","v":false,"dr":false},
+{"bn":22,"f":"1층","t":"조경진(헤비스테이크)","s":"2025-06-30","e":"2026-06-29","d":20000000,"r":2335750,"mg":500000,"pt":"후불","pd":"말일","ph":"010-6730-2243","em":"","n":"","v":false,"dr":false},
+{"bn":22,"f":"2층","t":"이기택(기러기둥지와인바)","s":"2025-11-30","e":"2026-11-29","d":20000000,"r":2335750,"mg":535000,"pt":"후불","pd":"말일","ph":"010-9010-1842","em":"","n":"","v":false,"dr":false},
+{"bn":22,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"건물주 사용","v":true,"dr":false},
+{"bn":24,"f":"지하1층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용","v":false,"dr":false},
+{"bn":24,"f":"2층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":24,"f":"3층","t":"슈퍼보이드","s":"2024-06-03","e":"2026-06-02","d":224000000,"r":18000000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":24,"f":"5층","t":"슈퍼보이드","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","v":false,"dr":false,"rfS":"2024-09-20","rfE":"2024-12-19"},
+{"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328\n슈퍼보이드 면적 - 151.57평\n(지하1,2,3,5층)\n슈퍼진스 - 23.24평(4층)\n총 : 174.81(12.87만원)","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
+{"bn":28,"f":"통임대","t":"라이드주식회사","s":"2024-03-29","e":"2026-03-28","d":350000000,"r":31000000,"mg":0,"pt":"후불","pd":"말일","ph":"라이드 박채린실장\n010-8285-8546","em":"chaerin.pak@rideoffice.kr","n":"","v":false,"dr":false},
+{"bn":29,"f":"통임대","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
+{"bn":30,"f":"통임대","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
+{"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
+{"bn":31,"f":"지하1층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
+{"bn":31,"f":"1층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":30000000,"r":3165000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
+{"bn":31,"f":"3층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":20000000,"r":3165000,"mg":200000,"pt":"선불","pd":"30일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
+{"bn":31,"f":"4층","t":"오수진 (GLP) 아카데미","s":"2026-02-01","e":"2028-03-31","d":30000000,"r":3500000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
+{"bn":31,"f":"2층","t":"나선영 (에이탑Atop)학원","s":"2024-11-10","e":"2026-11-09","d":30000000,"r":2850000,"mg":300000,"pt":"선불","pd":"10일","ph":"010-5703-7164","em":"pdhnsy@gmail.com","n":"","v":false,"dr":false},
+{"bn":32,"f":"지하1층\n~\n5층","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07일","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"","v":false,"dr":false},
 {"bn":33,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},
 {"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},
-{"bn":33,"f":"2층","t":"주식회사 이작디자인","s":"2025-03-27","e":"2026-03-26","d":1000000,"r":600000,"mg":0,"pt":"후불","pd":"말일","ph":"양은주 010-6209-6657","em":"","n":"대표님 지인","v":false,"dr":false},
 {"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"퇴거완료","v":true,"dr":false},
-{"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"명도 완료","v":true,"dr":false}
+{"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"명도 완료","v":true,"dr":false},
+{"bn":33,"f":"2층","t":"주식회사 이작디자인","s":"2025-03-27","e":"2026-03-26","d":1000000,"r":600000,"mg":0,"pt":"후불","pd":"말일","ph":"양은주 010-6209-6657","em":"","n":"대표님 지인","v":false,"dr":false}
 ];
 // ── LEASE ─────────────────────────────────────────────────────────────
 function rdLease(){
+  // ── 렌더 전 중복 층 자동 정리 (줄바꿈→콤마 통일 후 중복 제거) ──
+  (function(){DB.leases.forEach(function(l){if(l.floor&&l.floor.indexOf('\n')>=0)l.floor=l.floor.replace(/\n/g,',');});var dk={},clean=[];DB.leases.forEach(function(l){var k=l.bId+'_'+l.floor;if(dk[k]){var p=dk[k],sp=(p.tenant?1:0)+(p.start?1:0)+(p.deposit?1:0)+(p.rfStart?1:0),sn=(l.tenant?1:0)+(l.start?1:0)+(l.deposit?1:0)+(l.rfStart?1:0);if(sn>sp){if(!l.rfStart&&p.rfStart){l.rfStart=p.rfStart;l.rfEnd=p.rfEnd;}clean[clean.indexOf(p)]=l;dk[k]=l;}else{if(!p.rfStart&&l.rfStart){p.rfStart=l.rfStart;p.rfEnd=l.rfEnd;}}}else{dk[k]=l;clean.push(l);}});if(clean.length<DB.leases.length){DB.leases=clean;sv();}})();
   const f=DB.ui.leaseF;
   let _showBm=false; try{_showBm=localStorage.getItem('bm_showBm')==='1';}catch(e){}
   const _hideBm=!_showBm;
@@ -4461,20 +4544,28 @@ function rdLease(){
             if(l.rfNone) return '<span title="해당없음 (확인됨)" style="display:inline-block;padding:1px 6px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:3px;color:#6b7280;font-weight:500;font-size:10px">없음</span>';
             return '<span title="미입력 (확인 필요)" style="color:#d97706;font-weight:600;font-size:12px">?</span>';
           }
-          // 렌트프리 일수 계산 (시작일~종료일 포함)
-          let days='';
-          try{
-            const s=new Date(rfFull(l.rfStart)), e=new Date(rfFull(l.rfEnd));
-            if(!isNaN(s)&&!isNaN(e)){
-              const d=Math.round((e-s)/86400000)+1;
-              if(d>0) days='<span style="font-size:9px;color:#92400e;font-weight:500;margin-top:1px">('+d+'일)</span>';
-            }
-          }catch(_){}
-          return `<span style="display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:2px 7px;background:#fef3c7;border:1px solid #fbbf24;border-radius:4px;color:#92400e;font-weight:600;white-space:nowrap;font-family:'Pretendard',sans-serif"><span>${rfLabelDay(l.rfStart)}<br>~ ${rfLabelDay(l.rfEnd)}</span>${days}</span>`;
+          return `<span style="display:inline-flex;flex-direction:column;align-items:center;gap:0;padding:2px 6px;background:#fef3c7;border:1px solid #fbbf24;border-radius:4px;color:#92400e;font-weight:600;white-space:nowrap;font-family:'Pretendard',sans-serif;line-height:1.2"><span>${rfLabelDay(l.rfStart)}</span><span style="font-size:10px;line-height:1">~</span><span>${rfLabelDay(l.rfEnd)}</span></span>`;
         })()}</td>
         <td style="font-size:11px;white-space:pre-line;line-height:1.3;padding:2px 6px;width:130px;min-width:110px;word-break:keep-all">${isV&&l.note?'<span style="color:#b45309;font-weight:500">'+l.note+'</span>':l.note||''}</td>
       </tr>`;
     });
+    // ── 건물별 합계 행 ──
+    if(ls.length>0){
+      const actLs=ls.filter(l=>l.tenant&&l.tenant!=='공실'&&l.paytype!=='직영');
+      if(actLs.length>0){
+        const sDep=actLs.reduce((s,l)=>s+(l.deposit||0),0);
+        const sRent=actLs.reduce((s,l)=>s+(l.rent||0),0);
+        const sMgmt=actLs.reduce((s,l)=>s+(l.mgmt||0),0);
+        const sVat=Math.round((sRent+sMgmt)*1.1);
+        html+=`<tr style="background:#f8fafc;border-top:2px solid #cbd5e1;font-weight:700;font-size:12px">
+          <td style="text-align:center;color:#64748b">합계</td><td colspan="4"></td>
+          <td class="mono right money-col wide" style="color:#1e40af">${fm(sDep)}</td>
+          <td class="mono right money-col" style="color:#1e40af">${fm(sRent)}</td>
+          <td class="mono right money-col" style="color:#1e40af">${fm(sMgmt)}</td>
+          <td class="mono right money-col wide" style="color:#1e40af">${fm(sVat)}</td>
+          <td colspan="8"></td></tr>`;
+      }
+    }
   });
   $('lease-body').innerHTML=html||'<tr><td colspan="17" class="empty">데이터 없음</td></tr>';
   // 건물관리비 합계 표시
@@ -4796,6 +4887,18 @@ function _syncLeaseFromExcel(){
           var _rf4=lease.note.match(/~\s*(\d{1,2})[.\-\/](\d{1,2})\s*렌트프리/);
           if(_rf4){var _yr=lease.start?lease.start.substring(0,4):'2025';lease.rfStart=lease.start||'';lease.rfEnd=_yr+'-'+('0'+_rf4[1]).slice(-2)+'-'+('0'+_rf4[2]).slice(-2);}
         }
+        // 렌트프리 추출 성공 시 비고에서 렌트프리 관련 텍스트 삭제
+        if(lease.rfStart && lease.rfEnd){
+          var _nl=lease.note.split('\n'),_cl=[];
+          _nl.forEach(function(_l){var _t=_l.trim();if(/렌트프리/.test(_t)){var _ps=_t.split(/\s*\/\s*/);_ps.forEach(function(_p){if(!/렌트프리/.test(_p)&&_p.trim())_cl.push(_p.trim());});}else if(/^\(\d{4}-\d{2}-\d{2}\s*부터\s*차임/.test(_t)||/^\d{4}-\d{2}-\d{2}\s*~\s*\d{4}-\d{2}-\d{2}\s*$/.test(_t)){}else if(_t)_cl.push(_l);});
+          lease.note=_cl.join('\n').trim();
+        }
+      }
+      // 비고에 렌트프리 텍스트 남아있으면 항상 정리
+      if(lease.rfStart && lease.rfEnd && lease.note && lease.note.indexOf('렌트프리')>=0){
+        var _nl2=lease.note.split('\n'),_cl2=[];
+        _nl2.forEach(function(_l){var _t=_l.trim();if(/렌트프리/.test(_t)){var _ps=_t.split(/\s*\/\s*/);_ps.forEach(function(_p){if(!/렌트프리/.test(_p)&&_p.trim())_cl2.push(_p.trim());});}else if(/^\(\d{4}-\d{2}-\d{2}\s*부터\s*차임/.test(_t)||/^\d{4}-\d{2}-\d{2}\s*~\s*\d{4}-\d{2}-\d{2}\s*$/.test(_t)){}else if(_t)_cl2.push(_l);});
+        lease.note=_cl2.join('\n').trim();
       }
       DB.leases.push(lease);
       if(old.id) updated++; else added++;
@@ -4807,7 +4910,31 @@ function _syncLeaseFromExcel(){
     var vbId=bnMap[vbn];
     if(vbId) DB.leases=DB.leases.filter(function(l){return l.bId!=vbId;});
   });
-  sv(); rdLease(); upBadges();
+  // ── 중복 층 제거 (같은 건물+같은 층 → 데이터 많은 쪽 유지) ──
+  var _dk={},_dedup=[];
+  DB.leases.forEach(function(l){
+    var k=l.bId+'_'+l.floor;
+    if(_dk[k]){
+      // 기존 것과 비교, 데이터 많은 쪽 유지
+      var prev=_dk[k];
+      var sp=(prev.tenant?1:0)+(prev.start?1:0)+(prev.deposit?1:0)+(prev.rfStart?1:0)+(prev.contractFiles?1:0);
+      var sn=(l.tenant?1:0)+(l.start?1:0)+(l.deposit?1:0)+(l.rfStart?1:0)+(l.contractFiles?1:0);
+      if(sn>sp){
+        // 새것이 더 풍부 → 교체 (rfStart/contract 병합)
+        if(!l.rfStart&&prev.rfStart){l.rfStart=prev.rfStart;l.rfEnd=prev.rfEnd;}
+        if(!l.contractFiles&&prev.contractFiles){l.contractFiles=prev.contractFiles;l.contractName=prev.contractName;}
+        _dedup[_dedup.indexOf(prev)]=l;_dk[k]=l;
+      } else {
+        // 기존이 더 풍부 → 유지 (병합만)
+        if(!prev.rfStart&&l.rfStart){prev.rfStart=l.rfStart;prev.rfEnd=l.rfEnd;}
+        if(!prev.contractFiles&&l.contractFiles){prev.contractFiles=l.contractFiles;prev.contractName=l.contractName;}
+      }
+    } else {
+      _dk[k]=l;_dedup.push(l);
+    }
+  });
+  DB.leases=_dedup;
+  sv(); try{rdLease();}catch(e){} try{rdFixed();}catch(e){} upBadges();
 }
 function saveLease(){
   const eid=$('lease-eid').value;
@@ -11719,16 +11846,16 @@ function rdCal(){
   const bf=DB.ui.calBldgF;
   const calSb=$('cal-bldg-f');
   if(calSb){
+    var _calAllBldgs=(DB.buildings||[]).filter(b=>!b._deleted).sort((a,b)=>(a.team||2)-(b.team||2)||(a.id||0)-(b.id||0));
     calSb.innerHTML=`<div class="sb-list-item${bf==='all'?' on':''}" onclick="setCBF('all')">전체</div>`+
-      _teamBuildings().map(b=>`<div class="sb-list-item${bf==b.id?' on':''}" onclick="setCBF(${b.id})">${b.name}</div>`).join('');
+      _calAllBldgs.map(b=>`<div class="sb-list-item${bf==b.id?' on':''}" onclick="setCBF(${b.id})">${b.name}</div>`).join('');
   }
   const myOnly=$('cal-my')?.checked;
   const flt=DB.ui.calFlt;
-  const _calTBids=new Set(_teamBuildings().map(b=>b.id));
+  const _calAllBids=new Set((DB.buildings||[]).filter(b=>!b._deleted).map(b=>b.id));
   let evs=DB.calEvents.filter(e=>{
     if(e._deleted)return false;
-    // 팀 필터: 특정 건물 일정은 현재 팀 건물만, 건물전체/미지정은 통과
-    if(e.bId&&e.bId!=='all'&&!_calTBids.has(Number(e.bId)))return false;
+    // 공용 탭: 모든 건물 일정 표시 (팀 무관)
     if(bf!=='all'&&e.bId!=bf)return false;
     if(myOnly&&e.user!=='나')return false;
     if(flt==='todo'&&e.status==='done')return false;
@@ -15693,7 +15820,7 @@ function _floatSaveNow(){
   var pg=md.pages[_floatDirtyIdx]; if(!pg) return;
   pg.text=ta.value;
   md.updatedAt=_pmemoTs(); md.userName=CURRENT_USER_NAME||'나';
-  _floatDirty=false; _floatOrigText=null;
+  _floatDirty=false; _floatDirtyIdx=null; _floatOrigText=null;
   sv(); _syncPMemoIfOpen(); _showFloatSaved();
   var fb=document.getElementById('float-save-btn');if(fb)fb.style.background='#16a34a';
 }
@@ -19689,7 +19816,7 @@ function _odRenderList(items){
   _odSelected={};_odLastClickIdx=-1;
   if(!items||items.length===0){list$.innerHTML='<div style="text-align:center;padding:40px;color:#94a3b8;font-size:12px">파일이 없습니다</div>';return;}
   // 컬럼 헤더 (윈도우 탐색기 스타일)
-  var html='<div style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;color:#64748b;font-weight:600;user-select:none">';
+  var html='<div style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;color:#64748b;font-weight:600;user-select:none;max-width:560px">';
   html+='<span style="min-width:16px"></span>';
   html+='<span style="flex:1;min-width:0">이름</span>';
   html+='<span style="width:58px;text-align:right">수정한 날짜</span>';
@@ -19703,7 +19830,7 @@ function _odRenderList(items){
     var dt=f.modified?(f.modified||'').slice(2,10).replace(/-/g,'-'):'';
     // 상태 아이콘: 공유 클라우드 (OneDrive 공유 폴더이므로 모두 클라우드 상태)
     var statusIcon='<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3C6.5 3 5.2 3.8 4.5 5C3 5.2 1.8 6.5 1.5 8.1C.6 8.5 0 9.4 0 10.5C0 12 1.3 13 2.7 13H13C14.7 13 16 11.7 16 10C16 8.7 15 7.5 13.6 7.2C13.7 6.8 13.8 6.4 13.8 6C13.8 4.3 12.5 3 10.8 3C10.2 3 9.7 3.2 9.2 3.4C8.9 3.1 8.5 3 8 3Z" fill="#0078D4"/><path d="M5 8.5L7 10.5L11 6.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    html+='<div data-od-idx="'+idx+'" style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:var(--w);border-bottom:1px solid #f1f5f9;cursor:pointer;transition:.08s;user-select:none" '
+    html+='<div data-od-idx="'+idx+'" style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:var(--w);border-bottom:1px solid #f1f5f9;cursor:pointer;transition:.08s;user-select:none;max-width:560px" '
       +'onclick="_odToggleSel('+idx+',event)" '
       +'ondblclick="'+(f.isFolder?'_odOpenFolder(\''+f.id+'\',\''+(f.name||'').replace(/'/g,"\\'")+'\',\''+(f.driveId||'').replace(/'/g,"\\'")+'\')':'_odOpenFile(\''+(f.webUrl||'').replace(/'/g,"\\'")+'\',\''+f.name.replace(/'/g,"\\'")+'\')' )+'" '
       +'oncontextmenu="_odShowCtx(event,'+idx+')" '
@@ -19735,6 +19862,8 @@ function _odUpdateViewBtn(){
   var items=window._odItems||[];
   var hasMedia=items.some(function(f){return !f.isFolder&&(_odIsImage(f.name)||_odIsVideo(f.name));});
   btn.style.display=hasMedia?'':'none';
+  // 미디어 없는 폴더에서는 강제 리스트 모드
+  if(!hasMedia) _odViewMode='list';
   btn.textContent=_odViewMode==='list'?'🖼️':'📋';
 }
 
@@ -19831,14 +19960,26 @@ function _odLoadThumbnails(){
 
 // 드래그 기능: 선택 드래그 + 파일 이동 드래그
 var _odDragMoveHandler=null,_odDragUpHandler=null;
+// 잔여 드래그 박스 정리
+function _odCleanupDrag(){
+  document.querySelectorAll('div[style*="z-index:9998"]').forEach(function(el){el.remove();});
+  document.querySelectorAll('div[style*="z-index:9999"]').forEach(function(el){if(el.textContent.indexOf('항목 이동')>=0) el.remove();});
+}
 function _odInitDragSelect(listEl,items){
   if(_odDragMoveHandler){document.removeEventListener('mousemove',_odDragMoveHandler);}
   if(_odDragUpHandler){document.removeEventListener('mouseup',_odDragUpHandler);}
+  _odCleanupDrag(); // 이전 잔여 드래그 박스 정리
   var dragBox=null,startX=0,startY=0,pending=false,isDragging=false;
   var isMoveDrag=false,moveGhost=null;
+  function cleanup(){
+    if(dragBox){dragBox.remove();dragBox=null;}
+    if(moveGhost){moveGhost.remove();moveGhost=null;}
+    pending=false;isDragging=false;isMoveDrag=false;
+  }
   listEl.addEventListener('mousedown',function(ev){
     if(ev.button!==0||ev.target.tagName==='INPUT'||window._odRenaming) return;
     if($('od-ctx-menu')&&$('od-ctx-menu').contains(ev.target)) return;
+    cleanup(); // 이전 드래그 잔여물 정리
     var row=ev.target.closest('[data-od-idx]');
     isMoveDrag=false;
     if(row){var idx=parseInt(row.getAttribute('data-od-idx'));if(items[idx]&&_odSelected[items[idx].id]) isMoveDrag=true;}
@@ -19937,11 +20078,15 @@ function _odInitDragSelect(listEl,items){
     } else {
       if(dragBox){dragBox.remove();dragBox=null;}
     }
+    // 항상 정리
+    cleanup();
     window._odDragJustEnded=true;
-    setTimeout(function(){window._odDragJustEnded=false;},30);
+    setTimeout(function(){window._odDragJustEnded=false;},200);
   };
   document.addEventListener('mousemove',_odDragMoveHandler);
   document.addEventListener('mouseup',_odDragUpHandler);
+  // 창 밖 이탈 시 정리
+  window.addEventListener('blur',function(){cleanup();});
 }
 // 선택된 항목을 대상 폴더로 이동
 async function _odMoveToFolder(targetFolder){
@@ -20031,7 +20176,7 @@ function _odRenderSearchList(items,q){
   // 검색 결과를 _odItems에 반영 (클릭/우클릭 동작을 위해)
   window._odItems=items;
   var html='<div style="padding:4px 6px;font-size:9px;color:#3b82f6;font-weight:600;background:#eff6ff;border-bottom:1px solid #dbeafe">🔍 전체 검색 결과: '+items.length+'건</div>';
-  html+='<div style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;color:#64748b;font-weight:600;user-select:none">';
+  html+='<div style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;color:#64748b;font-weight:600;user-select:none;max-width:560px">';
   html+='<span style="min-width:16px"></span>';
   html+='<span style="flex:1;min-width:0">이름</span>';
   html+='<span style="width:100px">위치</span>';
@@ -20045,7 +20190,7 @@ function _odRenderSearchList(items,q){
     var sz=f.size>0?(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'';
     var dt=f.modified?(f.modified||'').slice(2,10):'';
     var pathStr=f.path||'';
-    html+='<div data-od-idx="'+idx+'" style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:var(--w);border-bottom:1px solid #f1f5f9;cursor:pointer;transition:.08s;user-select:none" '
+    html+='<div data-od-idx="'+idx+'" style="display:flex;align-items:center;gap:4px;padding:2px 6px;background:var(--w);border-bottom:1px solid #f1f5f9;cursor:pointer;transition:.08s;user-select:none;max-width:560px" '
       +'onclick="_odToggleSel('+idx+',event)" '
       +'ondblclick="'+(f.isFolder?'_odOpenFolder(\''+f.id+'\',\''+(f.name||'').replace(/'/g,"\\'")+'\',\''+(f.driveId||'').replace(/'/g,"\\'")+'\')':'_odOpenFile(\''+(f.webUrl||'').replace(/'/g,"\\'")+'\',\''+f.name.replace(/'/g,"\\'")+'\')' )+'" '
       +'oncontextmenu="_odShowCtx(event,'+idx+')" '
@@ -20097,7 +20242,7 @@ function _odOpenFile(webUrl,name){
     _odOpenImageViewer(found.idx);return;
   }
 
-  // ── 동영상: 내장 플레이어 ──
+  // ── 동영상: 내장 embed 플레이어 시도 → fallback webUrl ──
   if(_odIsVideo(name)&&found&&found.item){
     _odOpenVideoPlayer(found.item);return;
   }
@@ -20119,110 +20264,100 @@ var _odIvCache={};
 function _odIvGetUrl(f){
   if(f.downloadUrl) return Promise.resolve(f.downloadUrl);
   if(!_odToken||!f.driveId) return Promise.resolve(f.webUrl||'');
-  return _odGraphCall('/drives/'+f.driveId+'/items/'+f.id+'?$select=id,@microsoft.graph.downloadUrl')
-    .then(function(d){var u=d["@microsoft.graph.downloadUrl"];if(u) f.downloadUrl=u;return u||f.webUrl||'';})
-    .catch(function(){return f.webUrl||'';});
+  return _odGraphCall('/drives/'+f.driveId+'/items/'+f.id).then(function(d){
+    var u=d["@microsoft.graph.downloadUrl"];if(u) f.downloadUrl=u;return u||f.webUrl||'';
+  }).catch(function(){return f.webUrl||'';});
 }
 function _odIvPreload(f){
   if(!f||!f.id||_odIvCache[f.id]) return;
   if(f.downloadUrl){var im=new Image();im.src=f.downloadUrl;_odIvCache[f.id]=f.downloadUrl;return;}
   _odIvGetUrl(f).then(function(u){if(u){var im=new Image();im.src=u;_odIvCache[f.id]=u;}});
 }
-var _odIvUndoStack=[];
-var _odIvRedoStack=[];
+var _odIvUndoStack=[], _odIvRedoStack=[];
 function _odIvSaveState(){
-  var canvas=document.getElementById('od-iv-canvas');if(!canvas) return;
-  _odIvUndoStack.push(canvas.toDataURL());
-  _odIvRedoStack=[];
+  var c=document.getElementById('od-iv-canvas');if(!c) return;
+  _odIvUndoStack.push(c.toDataURL());_odIvRedoStack=[];
   if(_odIvUndoStack.length>30) _odIvUndoStack.shift();
-  var ub=document.getElementById('od-iv-undo');if(ub) ub.style.opacity='1';
-  var rb=document.getElementById('od-iv-redo');if(rb) rb.style.opacity='.3';
+  var u=document.getElementById('od-iv-undo');if(u) u.style.opacity='1';
+  var r=document.getElementById('od-iv-redo');if(r) r.style.opacity='.3';
 }
 function _odIvUndo(){
   if(!_odIvUndoStack.length) return;
-  var canvas=document.getElementById('od-iv-canvas');if(!canvas) return;
-  _odIvRedoStack.push(canvas.toDataURL());
-  var prev=_odIvUndoStack.pop();
-  var img=new Image();img.onload=function(){
-    var ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);
-  };img.src=prev;
-  var ub=document.getElementById('od-iv-undo');if(ub) ub.style.opacity=_odIvUndoStack.length?'1':'.3';
-  var rb=document.getElementById('od-iv-redo');if(rb) rb.style.opacity='1';
+  var c=document.getElementById('od-iv-canvas');if(!c) return;
+  _odIvRedoStack.push(c.toDataURL());var prev=_odIvUndoStack.pop();
+  var img=new Image();img.onload=function(){c.getContext('2d').clearRect(0,0,c.width,c.height);c.getContext('2d').drawImage(img,0,0);};img.src=prev;
+  document.getElementById('od-iv-undo').style.opacity=_odIvUndoStack.length?'1':'.3';
+  document.getElementById('od-iv-redo').style.opacity='1';
 }
 function _odIvRedo(){
   if(!_odIvRedoStack.length) return;
-  var canvas=document.getElementById('od-iv-canvas');if(!canvas) return;
-  _odIvUndoStack.push(canvas.toDataURL());
-  var next=_odIvRedoStack.pop();
-  var img=new Image();img.onload=function(){
-    var ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);
-  };img.src=next;
-  var ub=document.getElementById('od-iv-undo');if(ub) ub.style.opacity='1';
-  var rb=document.getElementById('od-iv-redo');if(rb) rb.style.opacity=_odIvRedoStack.length?'1':'.3';
+  var c=document.getElementById('od-iv-canvas');if(!c) return;
+  _odIvUndoStack.push(c.toDataURL());var next=_odIvRedoStack.pop();
+  var img=new Image();img.onload=function(){c.getContext('2d').clearRect(0,0,c.width,c.height);c.getContext('2d').drawImage(img,0,0);};img.src=next;
+  document.getElementById('od-iv-undo').style.opacity='1';
+  document.getElementById('od-iv-redo').style.opacity=_odIvRedoStack.length?'1':'.3';
 }
 function _odOpenImageViewer(startIdx){
-  var items=window._odItems||[];
-  var imageItems=[];var curPos=0;
+  var items=window._odItems||[];var imageItems=[];var curPos=0;
   items.forEach(function(f,i){if(_odIsImage(f.name)){if(i===startIdx) curPos=imageItems.length;imageItems.push(f);}});
   if(!imageItems.length) return;
   var ov=document.createElement('div');ov.id='od-img-viewer';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10000;display:flex;flex-direction:column;user-select:none';
-  var btnS='background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:4px;cursor:pointer;';
-  ov.innerHTML='<div id="od-iv-top" style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;color:#fff;font-size:10px;z-index:3;flex-shrink:0;background:rgba(0,0,0,.5)">'
-    +'<span id="od-iv-title" style="opacity:.8;max-width:30%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px"></span>'
-    +'<div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">'
-    // 모드 버튼
-    +'<button onclick="_odIvSetMode(\'view\')" id="od-iv-m-view" style="'+btnS+'padding:3px 7px;font-size:10px;background:rgba(255,255,255,.25)">👁 보기</button>'
-    +'<button onclick="_odIvSetMode(\'pen\')" id="od-iv-m-pen" style="'+btnS+'padding:3px 7px;font-size:10px">✏️ 펜</button>'
-    +'<button onclick="_odIvSetMode(\'crop\')" id="od-iv-m-crop" style="'+btnS+'padding:3px 7px;font-size:10px">✂️ 자르기</button>'
-    +'<span style="width:1px;height:14px;background:rgba(255,255,255,.15)"></span>'
-    // 펜 옵션
-    +'<input type="color" id="od-iv-color" value="#ff0000" style="width:20px;height:20px;border:none;cursor:pointer;background:none;padding:0" title="펜 색상">'
-    +'<select id="od-iv-size" style="background:#333;color:#fff;border:1px solid #555;border-radius:3px;font-size:10px;padding:1px 2px"><option value="2">얇게</option><option value="4" selected>보통</option><option value="8">굵게</option><option value="16">매우굵게</option></select>'
-    +'<span style="width:1px;height:14px;background:rgba(255,255,255,.15)"></span>'
-    // Undo/Redo (회전과 구분)
-    +'<button onclick="_odIvUndo()" id="od-iv-undo" style="'+btnS+'width:26px;height:26px;font-size:13px;opacity:.3" title="되돌리기 (Ctrl+Z)">↩</button>'
-    +'<button onclick="_odIvRedo()" id="od-iv-redo" style="'+btnS+'width:26px;height:26px;font-size:13px;opacity:.3" title="다시실행 (Ctrl+Y)">↪</button>'
-    +'<span style="width:1px;height:14px;background:rgba(255,255,255,.15)"></span>'
-    // 회전
-    +'<button onclick="_odIvRotate(-90)" style="'+btnS+'width:26px;height:26px;font-size:11px" title="왼쪽 회전">🔄↶</button>'
-    +'<button onclick="_odIvRotate(90)" style="'+btnS+'width:26px;height:26px;font-size:11px" title="오른쪽 회전">🔄↷</button>'
-    +'<span style="width:1px;height:14px;background:rgba(255,255,255,.15)"></span>'
-    +'<button onclick="_odIvSaveEdit()" id="od-iv-save" style="display:none;background:#3b82f6;border:none;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px">💾 저장</button>'
-    +'<button onclick="_odCloseImageViewer()" style="'+btnS+'width:26px;height:26px;font-size:14px;background:rgba(255,255,255,.15)">✕</button>'
-    +'</div></div>'
-    // 화살표
-    +'<button id="od-iv-prev" onclick="_odIvNav(-1)" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);'+btnS+'width:32px;height:32px;border-radius:50%;font-size:16px;z-index:3">‹</button>'
-    +'<button id="od-iv-next" onclick="_odIvNav(1)" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);'+btnS+'width:32px;height:32px;border-radius:50%;font-size:16px;z-index:3">›</button>'
-    // 이미지+캔버스
-    +'<div id="od-iv-area" style="flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:grab">'
-    +'<div id="od-iv-container" style="position:relative;display:inline-block">'
-    +'<img id="od-iv-img" style="display:block;max-width:90vw;max-height:calc(100vh - 60px);object-fit:contain" crossorigin="anonymous">'
-    +'<canvas id="od-iv-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>'
-    +'</div></div>'
-    +'<div id="od-iv-counter" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.4);font-size:10px;z-index:3"></div>';
+  var B='border:none;color:#fff;border-radius:6px;cursor:pointer;font-family:inherit;';
+  ov.innerHTML=
+    // 좌측 하단: 폴더로 돌아가기 버튼
+    '<button onclick="_odCloseImageViewerForce()" style="position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.15);'+B+'padding:6px 12px;font-size:11px;z-index:3" title="폴더로 돌아가기">📁 돌아가기</button>'
+    // 좌우 화살표
+   +'<button id="od-iv-prev" onclick="_odIvNav(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);'+B+'width:36px;height:36px;font-size:18px;z-index:3;border-radius:50%">‹</button>'
+   +'<button id="od-iv-next" onclick="_odIvNav(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);'+B+'width:36px;height:36px;font-size:18px;z-index:3;border-radius:50%">›</button>'
+   // 이미지 영역
+   +'<div id="od-iv-area" style="flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:grab;flex-direction:column">'
+     // 툴바 (사진 바로 위)
+     +'<div id="od-iv-toolbar" style="display:flex;gap:5px;align-items:center;padding:6px 10px;background:rgba(0,0,0,.65);border-radius:0 0 10px 10px;margin-bottom:6px;flex-wrap:wrap;z-index:2">'
+       +'<span id="od-iv-title" style="color:rgba(255,255,255,.7);font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:6px"></span>'
+       +'<button onclick="_odIvSetMode(\'view\')" id="od-iv-m-view" style="background:rgba(255,255,255,.3);'+B+'padding:5px 10px;font-size:12px">👁 보기</button>'
+       +'<button onclick="_odIvSetMode(\'pen\')" id="od-iv-m-pen" style="background:rgba(255,255,255,.12);'+B+'padding:5px 10px;font-size:12px">✏️ 펜</button>'
+       +'<button onclick="_odIvSetMode(\'crop\')" id="od-iv-m-crop" style="background:rgba(255,255,255,.12);'+B+'padding:5px 10px;font-size:12px">✂️ 자르기</button>'
+       +'<input type="color" id="od-iv-color" value="#ff0000" style="width:28px;height:28px;border:none;cursor:pointer;background:none;padding:0">'
+       +'<select id="od-iv-size" style="background:#333;color:#fff;border:1px solid #555;border-radius:4px;font-size:11px;padding:3px 4px;height:28px"><option value="2">얇게</option><option value="4" selected>보통</option><option value="8">굵게</option><option value="16">매우굵게</option></select>'
+       +'<span style="width:1px;height:20px;background:rgba(255,255,255,.2)"></span>'
+       +'<button onclick="_odIvUndo()" id="od-iv-undo" style="background:rgba(255,255,255,.12);'+B+'width:32px;height:32px;font-size:16px;opacity:.3" title="되돌리기 Ctrl+Z">↩</button>'
+       +'<button onclick="_odIvRedo()" id="od-iv-redo" style="background:rgba(255,255,255,.12);'+B+'width:32px;height:32px;font-size:16px;opacity:.3" title="다시실행 Ctrl+Y">↪</button>'
+       +'<span style="width:1px;height:20px;background:rgba(255,255,255,.2)"></span>'
+       +'<button onclick="_odIvRotate(-90)" style="background:rgba(255,255,255,.12);'+B+'width:32px;height:32px;font-size:14px" title="왼쪽 회전">⟲</button>'
+       +'<button onclick="_odIvRotate(90)" style="background:rgba(255,255,255,.12);'+B+'width:32px;height:32px;font-size:14px" title="오른쪽 회전">⟳</button>'
+       +'<button onclick="_odIvSaveEdit()" id="od-iv-save" style="display:none;background:#3b82f6;'+B+'padding:5px 12px;font-size:12px">💾 저장</button>'
+       +'<button onclick="_odCloseImageViewer()" style="background:rgba(255,255,255,.18);'+B+'width:32px;height:32px;font-size:16px">✕</button>'
+     +'</div>'
+     +'<div id="od-iv-container" style="position:relative;display:inline-block">'
+       +'<img id="od-iv-img" style="display:block;max-width:90vw;max-height:calc(100vh - 100px);object-fit:contain" crossorigin="anonymous">'
+       +'<canvas id="od-iv-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>'
+     +'</div>'
+   +'</div>'
+   +'<div id="od-iv-counter" style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.4);font-size:11px;z-index:3"></div>';
   document.body.appendChild(ov);
   window._odIvImages=imageItems;window._odIvPos=curPos;
   window._odIvRotation=0;window._odIvScale=1;window._odIvPanX=0;window._odIvPanY=0;
   window._odIvMode='view';window._odIvDrawing=false;window._odIvEdited=false;
   _odIvUndoStack=[];_odIvRedoStack=[];
-  // 휠 줌
   ov.addEventListener('wheel',function(ev){ev.preventDefault();_odIvZoom(ev.deltaY<0?1:-1);},{passive:false});
-  // 마우스 뒤로/앞으로 버튼 (button 3=뒤로, 4=앞으로)
+  // 마우스 옆버튼 — stopPropagation으로 드라이브 네비 차단
   ov.addEventListener('mousedown',function(ev){
-    if(ev.button===3){ev.preventDefault();_odIvNav(-1);}
-    if(ev.button===4){ev.preventDefault();_odIvNav(1);}
-  });
-  ov.addEventListener('mouseup',function(ev){if(ev.button===3||ev.button===4) ev.preventDefault();});
-  // 팬/펜 이벤트
+    if(ev.button===3){ev.preventDefault();ev.stopPropagation();_odIvNav(-1);}
+    if(ev.button===4){ev.preventDefault();ev.stopPropagation();_odIvNav(1);}
+  },true);
+  ov.addEventListener('mouseup',function(ev){if(ev.button===3||ev.button===4){ev.preventDefault();ev.stopPropagation();}},true);
+  ov.addEventListener('contextmenu',function(ev){ev.preventDefault();});
   var area=document.getElementById('od-iv-area');
   var panning=false,panSX=0,panSY=0;
   area.addEventListener('mousedown',function(ev){
     if(ev.button!==0) return;
+    if(ev.target.closest('#od-iv-toolbar')) return;
+    // 사진 옆 빈 공간(어두운 영역) 클릭 → 뒤로가기
+    if(ev.target===area&&window._odIvMode==='view'){_odCloseImageViewerForce();return;}
     if(window._odIvMode==='pen'){
       var canvas=document.getElementById('od-iv-canvas');if(!canvas) return;
-      _odIvSaveState(); // undo 스택에 저장
-      canvas.style.pointerEvents='auto';window._odIvDrawing=true;window._odIvEdited=true;
+      _odIvSaveState();canvas.style.pointerEvents='auto';window._odIvDrawing=true;window._odIvEdited=true;
       var ctx=canvas.getContext('2d');var rect=canvas.getBoundingClientRect();
       var sx=canvas.width/rect.width,sy=canvas.height/rect.height;
       ctx.strokeStyle=document.getElementById('od-iv-color').value;
@@ -20232,7 +20367,6 @@ function _odOpenImageViewer(startIdx){
       var sb=document.getElementById('od-iv-save');if(sb) sb.style.display='';
       ev.preventDefault();ev.stopPropagation();
     } else if(window._odIvMode==='crop'){
-      // 자르기: 드래그로 영역 그리기 시작
       _odIvCropStart(ev);
     } else {
       panning=true;panSX=ev.clientX-window._odIvPanX;panSY=ev.clientY-window._odIvPanY;
@@ -20243,20 +20377,21 @@ function _odOpenImageViewer(startIdx){
     if(window._odIvMode==='pen'&&window._odIvDrawing){
       var canvas=document.getElementById('od-iv-canvas');if(!canvas) return;
       var ctx=canvas.getContext('2d');var rect=canvas.getBoundingClientRect();
-      ctx.lineTo((ev.clientX-rect.left)*(canvas.width/rect.width),(ev.clientY-rect.top)*(canvas.height/rect.height));
-      ctx.stroke();ev.preventDefault();
+      ctx.lineTo((ev.clientX-rect.left)*(canvas.width/rect.width),(ev.clientY-rect.top)*(canvas.height/rect.height));ctx.stroke();
     } else if(panning){
-      window._odIvPanX=ev.clientX-panSX;window._odIvPanY=ev.clientY-panSY;
-      _odIvApplyTransform();ev.preventDefault();
+      window._odIvPanX=ev.clientX-panSX;window._odIvPanY=ev.clientY-panSY;_odIvApplyTransform();
     }
   });
   area.addEventListener('mouseup',function(){
     if(window._odIvDrawing){window._odIvDrawing=false;var c=document.getElementById('od-iv-canvas');if(c) c.style.pointerEvents='none';}
     if(panning){panning=false;area.style.cursor=window._odIvMode==='pen'?'crosshair':'grab';}
   });
-  // 키보드
   window._odIvKeyHandler=function(ev){
-    if(ev.key==='Escape') _odCloseImageViewer();
+    if(ev.key==='Escape'){
+      var co=document.getElementById('od-iv-crop-overlay');
+      if(co){co.remove();var cok=document.getElementById('od-iv-crop-ok');if(cok) cok.remove();var ccn=document.getElementById('od-iv-crop-cancel');if(ccn) ccn.remove();_odIvSetMode('view');return;}
+      _odCloseImageViewer();return;
+    }
     if(ev.ctrlKey&&ev.key==='z'){ev.preventDefault();_odIvUndo();}
     if(ev.ctrlKey&&(ev.key==='y'||ev.key==='Z')){ev.preventDefault();_odIvRedo();}
     if(window._odIvMode!=='view') return;
@@ -20268,78 +20403,105 @@ function _odOpenImageViewer(startIdx){
 }
 function _odIvSetMode(m){
   window._odIvMode=m;
-  ['view','pen','crop'].forEach(function(k){var b=document.getElementById('od-iv-m-'+k);if(b) b.style.background=k===m?'rgba(255,255,255,.25)':'rgba(255,255,255,.1)';});
+  ['view','pen','crop'].forEach(function(k){var b=document.getElementById('od-iv-m-'+k);if(b) b.style.background=k===m?'rgba(255,255,255,.3)':'rgba(255,255,255,.12)';});
   var area=document.getElementById('od-iv-area');
   if(area) area.style.cursor=m==='pen'?'crosshair':m==='crop'?'crosshair':'grab';
-  var canvas=document.getElementById('od-iv-canvas');
-  if(canvas) canvas.style.pointerEvents=m==='pen'?'auto':'none';
-  // 자르기 모드 해제 시 오버레이 제거
   var co=document.getElementById('od-iv-crop-overlay');if(co&&m!=='crop') co.remove();
   var cok=document.getElementById('od-iv-crop-ok');if(cok&&m!=='crop') cok.remove();
+  var ccn=document.getElementById('od-iv-crop-cancel');if(ccn&&m!=='crop') ccn.remove();
 }
-// ── 자르기 (윈도우 방식: 드래그로 영역 그리기 + 어두운 외곽) ──
 var _odIvCropRect=null;
 function _odIvCropStart(ev){
-  var area=document.getElementById('od-iv-area');
-  var imgEl=document.getElementById('od-iv-img');if(!area||!imgEl) return;
+  var imgEl=document.getElementById('od-iv-img');if(!imgEl) return;
+  var ir=imgEl.getBoundingClientRect();
+  if(ev.clientX<ir.left||ev.clientX>ir.right||ev.clientY<ir.top||ev.clientY>ir.bottom) return;
   var old=document.getElementById('od-iv-crop-overlay');if(old) old.remove();
   var oldOk=document.getElementById('od-iv-crop-ok');if(oldOk) oldOk.remove();
-  var startX=ev.clientX,startY=ev.clientY;
-  // 오버레이 SVG로 어두운 마스크 + 투명 영역
+  var oldCn=document.getElementById('od-iv-crop-cancel');if(oldCn) oldCn.remove();
+  var sx=ev.clientX,sy=ev.clientY;
   var overlay=document.createElement('div');overlay.id='od-iv-crop-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:4;cursor:crosshair';
+  overlay.style.cssText='position:fixed;inset:0;z-index:10001;cursor:crosshair';
   document.body.appendChild(overlay);
-  var box=document.createElement('div');box.style.cssText='position:fixed;border:2px solid #fff;z-index:5;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.5)';
+  var box=document.createElement('div');
+  box.style.cssText='position:fixed;border:2px solid #fff;z-index:10002;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.55)';
   overlay.appendChild(box);
-  function updateBox(x1,y1,x2,y2){
+  function upd(x1,y1,x2,y2){
+    x1=Math.max(ir.left,Math.min(ir.right,x1));y1=Math.max(ir.top,Math.min(ir.bottom,y1));
+    x2=Math.max(ir.left,Math.min(ir.right,x2));y2=Math.max(ir.top,Math.min(ir.bottom,y2));
     var l=Math.min(x1,x2),t=Math.min(y1,y2),w=Math.abs(x2-x1),h=Math.abs(y2-y1);
     box.style.left=l+'px';box.style.top=t+'px';box.style.width=w+'px';box.style.height=h+'px';
     _odIvCropRect={left:l,top:t,width:w,height:h};
   }
-  updateBox(startX,startY,startX,startY);
-  var mmh=function(ev2){updateBox(startX,startY,ev2.clientX,ev2.clientY);};
-  var muh=function(ev2){
-    document.removeEventListener('mousemove',mmh);document.removeEventListener('mouseup',muh);
-    updateBox(startX,startY,ev2.clientX,ev2.clientY);
-    if(_odIvCropRect.width>10&&_odIvCropRect.height>10){
-      // 확인 버튼
-      var okBtn=document.createElement('button');okBtn.id='od-iv-crop-ok';
-      okBtn.textContent='✂️ 자르기 적용';
-      okBtn.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:6;background:#3b82f6;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:11px';
-      okBtn.onclick=function(){_odIvDoCrop();};
-      document.body.appendChild(okBtn);
-      // 영역 드래그로 이동 가능
+  upd(sx,sy,sx,sy);
+  var mm=function(e2){upd(sx,sy,e2.clientX,e2.clientY);};
+  var mu=function(e2){
+    document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);
+    upd(sx,sy,e2.clientX,e2.clientY);
+    if(_odIvCropRect.width>5&&_odIvCropRect.height>5){
+      // 적용 + 취소 버튼
+      var btnWrap=document.createElement('div');btnWrap.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:10003;display:flex;gap:8px';
+      var ok=document.createElement('button');ok.id='od-iv-crop-ok';
+      ok.textContent='✂️ 자르기 적용';ok.style.cssText='background:#3b82f6;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit';
+      ok.onclick=_odIvDoCrop;
+      var cn=document.createElement('button');cn.id='od-iv-crop-cancel';
+      cn.textContent='취소';cn.style.cssText='background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit';
+      cn.onclick=function(){overlay.remove();btnWrap.remove();_odIvCropRect=null;_odIvSetMode('view');};
+      btnWrap.appendChild(ok);btnWrap.appendChild(cn);
+      document.body.appendChild(btnWrap);
+      // 리사이즈 핸들
       box.style.pointerEvents='auto';box.style.cursor='move';
-      var dragging=false,ddx=0,ddy=0;
-      box.onmousedown=function(e3){dragging=true;ddx=e3.clientX-parseInt(box.style.left);ddy=e3.clientY-parseInt(box.style.top);e3.stopPropagation();};
-      overlay.onmousemove=function(e3){if(!dragging) return;box.style.left=(e3.clientX-ddx)+'px';box.style.top=(e3.clientY-ddy)+'px';_odIvCropRect.left=e3.clientX-ddx;_odIvCropRect.top=e3.clientY-ddy;};
-      overlay.onmouseup=function(){dragging=false;};
-    } else {
-      overlay.remove();
-    }
+      ['nw','ne','sw','se','n','s','w','e'].forEach(function(h){
+        var hd=document.createElement('div');var isC=h.length===2;var sz=isC?10:6;
+        hd.style.cssText='position:absolute;width:'+sz+'px;height:'+sz+'px;background:#fff;z-index:10003;cursor:'+({nw:'nwse-resize',ne:'nesw-resize',sw:'nesw-resize',se:'nwse-resize',n:'ns-resize',s:'ns-resize',w:'ew-resize',e:'ew-resize'}[h]);
+        if(h.indexOf('n')>=0) hd.style.top='-'+(sz/2)+'px';if(h.indexOf('s')>=0) hd.style.bottom='-'+(sz/2)+'px';
+        if(h.indexOf('w')>=0) hd.style.left='-'+(sz/2)+'px';if(h.indexOf('e')>=0) hd.style.right='-'+(sz/2)+'px';
+        if(h==='n'||h==='s'){hd.style.left='50%';hd.style.transform='translateX(-50%)';}
+        if(h==='w'||h==='e'){hd.style.top='50%';hd.style.transform='translateY(-50%)';}
+        hd.addEventListener('mousedown',function(e4){
+          e4.stopPropagation();e4.preventDefault();
+          var sc={left:parseInt(box.style.left),top:parseInt(box.style.top),width:parseInt(box.style.width),height:parseInt(box.style.height)};
+          var smx=e4.clientX,smy=e4.clientY;
+          var rmm=function(e5){
+            var dx=e5.clientX-smx,dy=e5.clientY-smy,nl=sc.left,nt=sc.top,nw=sc.width,nh=sc.height;
+            if(h.indexOf('w')>=0){nl+=dx;nw-=dx;}if(h.indexOf('e')>=0){nw+=dx;}
+            if(h.indexOf('n')>=0){nt+=dy;nh-=dy;}if(h.indexOf('s')>=0){nh+=dy;}
+            if(nw<20) nw=20;if(nh<20) nh=20;
+            box.style.left=nl+'px';box.style.top=nt+'px';box.style.width=nw+'px';box.style.height=nh+'px';
+            _odIvCropRect={left:nl,top:nt,width:nw,height:nh};
+          };
+          var rmu=function(){document.removeEventListener('mousemove',rmm);document.removeEventListener('mouseup',rmu);};
+          document.addEventListener('mousemove',rmm);document.addEventListener('mouseup',rmu);
+        });
+        box.appendChild(hd);
+      });
+      // 박스 드래그 이동
+      var dd=false,ddx=0,ddy=0;
+      box.onmousedown=function(e3){if(e3.target!==box) return;dd=true;ddx=e3.clientX-parseInt(box.style.left);ddy=e3.clientY-parseInt(box.style.top);e3.stopPropagation();e3.preventDefault();};
+      overlay.addEventListener('mousemove',function(e3){if(!dd) return;box.style.left=(e3.clientX-ddx)+'px';box.style.top=(e3.clientY-ddy)+'px';_odIvCropRect.left=e3.clientX-ddx;_odIvCropRect.top=e3.clientY-ddy;});
+      overlay.addEventListener('mouseup',function(){dd=false;});
+    } else {overlay.remove();}
   };
-  document.addEventListener('mousemove',mmh);document.addEventListener('mouseup',muh);
-  ev.preventDefault();
+  document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);
+  ev.preventDefault();ev.stopPropagation();
 }
 function _odIvDoCrop(){
-  var imgEl=document.getElementById('od-iv-img');
-  if(!imgEl||!_odIvCropRect) return;
-  var ir=imgEl.getBoundingClientRect();
-  var cr=_odIvCropRect;
-  var sx=Math.max(0,(cr.left-ir.left)*(imgEl.naturalWidth/ir.width));
-  var sy=Math.max(0,(cr.top-ir.top)*(imgEl.naturalHeight/ir.height));
-  var sw=Math.min(imgEl.naturalWidth-sx,cr.width*(imgEl.naturalWidth/ir.width));
-  var sh=Math.min(imgEl.naturalHeight-sy,cr.height*(imgEl.naturalHeight/ir.height));
-  if(sw<10||sh<10) return;
+  var imgEl=document.getElementById('od-iv-img');if(!imgEl||!_odIvCropRect) return;
+  var ir=imgEl.getBoundingClientRect();var cr=_odIvCropRect;
+  var scX=imgEl.naturalWidth/ir.width,scY=imgEl.naturalHeight/ir.height;
+  var sx2=Math.max(0,(cr.left-ir.left)*scX),sy2=Math.max(0,(cr.top-ir.top)*scY);
+  var sw=Math.min(imgEl.naturalWidth-sx2,cr.width*scX),sh=Math.min(imgEl.naturalHeight-sy2,cr.height*scY);
+  if(sw<5||sh<5) return;
   _odIvSaveState();
-  var tc=document.createElement('canvas');tc.width=sw;tc.height=sh;
-  var tctx=tc.getContext('2d');tctx.drawImage(imgEl,sx,sy,sw,sh,0,0,sw,sh);
+  var tc=document.createElement('canvas');tc.width=Math.round(sw);tc.height=Math.round(sh);
+  var tctx=tc.getContext('2d');tctx.drawImage(imgEl,sx2,sy2,sw,sh,0,0,tc.width,tc.height);
   var dc=document.getElementById('od-iv-canvas');
-  if(dc&&dc.width>0){var dsx=sx*(dc.width/imgEl.naturalWidth),dsy=sy*(dc.height/imgEl.naturalHeight);tctx.drawImage(dc,dsx,dsy,sw*(dc.width/imgEl.naturalWidth),sh*(dc.height/imgEl.naturalHeight),0,0,sw,sh);}
+  if(dc&&dc.width>0){var dsx=sx2*(dc.width/imgEl.naturalWidth),dsy=sy2*(dc.height/imgEl.naturalHeight);tctx.drawImage(dc,dsx,dsy,sw*(dc.width/imgEl.naturalWidth),sh*(dc.height/imgEl.naturalHeight),0,0,tc.width,tc.height);}
   imgEl.src=tc.toDataURL('image/png');
-  if(dc){dc.width=sw;dc.height=sh;dc.getContext('2d').clearRect(0,0,sw,sh);}
+  if(dc){dc.width=tc.width;dc.height=tc.height;dc.getContext('2d').clearRect(0,0,tc.width,tc.height);}
+  // 정리
   var co=document.getElementById('od-iv-crop-overlay');if(co) co.remove();
-  var cok=document.getElementById('od-iv-crop-ok');if(cok) cok.remove();
+  // 버튼 래퍼 제거
+  document.querySelectorAll('#od-iv-crop-ok,#od-iv-crop-cancel').forEach(function(el){if(el.parentNode) el.parentNode.remove();});
   window._odIvEdited=true;_odIvSetMode('view');
   var sb=document.getElementById('od-iv-save');if(sb) sb.style.display='';
   _odIvCropRect=null;
@@ -20356,7 +20518,7 @@ async function _odIvSaveEdit(){
     var tk=await _odGetToken();
     var r=await fetch("https://graph.microsoft.com/v1.0"+base+"/items/"+f.id+"/content",{method:'PUT',headers:{Authorization:'Bearer '+tk,'Content-Type':'image/png'},body:blob});
     if(r.ok){alert('저장 완료');window._odIvEdited=false;var sb=document.getElementById('od-iv-save');if(sb) sb.style.display='none';_odIvUndoStack=[];_odIvRedoStack=[];}
-    else{alert('저장 실패');}
+    else alert('저장 실패');
   }catch(e){alert('저장 실패: '+e.message);}
 }
 function _odIvShow(pos){
@@ -20366,31 +20528,26 @@ function _odIvShow(pos){
   document.getElementById('od-iv-title').textContent=f.name;
   document.getElementById('od-iv-counter').textContent=(pos+1)+' / '+imgs.length;
   var canvas=document.getElementById('od-iv-canvas');
-  if(canvas){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);}
+  if(canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
   _odIvUndoStack=[];_odIvRedoStack=[];
-  var ub=document.getElementById('od-iv-undo');if(ub) ub.style.opacity='.3';
-  var rb=document.getElementById('od-iv-redo');if(rb) rb.style.opacity='.3';
+  var u=document.getElementById('od-iv-undo');if(u) u.style.opacity='.3';
+  var r=document.getElementById('od-iv-redo');if(r) r.style.opacity='.3';
   window._odIvEdited=false;var sb=document.getElementById('od-iv-save');if(sb) sb.style.display='none';
   var imgEl=document.getElementById('od-iv-img');
   if(imgEl){
     var cont=document.getElementById('od-iv-container');if(cont) cont.style.transform='';
     imgEl.onload=function(){if(canvas){canvas.width=imgEl.naturalWidth;canvas.height=imgEl.naturalHeight;}};
-    if(_odIvCache[f.id]){imgEl.src=_odIvCache[f.id];}
+    if(_odIvCache[f.id]) imgEl.src=_odIvCache[f.id];
     else if(f.downloadUrl){imgEl.src=f.downloadUrl;_odIvCache[f.id]=f.downloadUrl;}
-    else{imgEl.src='';_odIvGetUrl(f).then(function(u){if(u&&window._odIvPos===pos){imgEl.src=u;_odIvCache[f.id]=u;}});}
+    else{imgEl.src='';_odIvGetUrl(f).then(function(u2){if(u2&&window._odIvPos===pos){imgEl.src=u2;_odIvCache[f.id]=u2;}});}
   }
-  if(imgs[pos-1]) _odIvPreload(imgs[pos-1]);
-  if(imgs[pos+1]) _odIvPreload(imgs[pos+1]);
-  if(imgs[pos+2]) _odIvPreload(imgs[pos+2]);
+  if(imgs[pos-1]) _odIvPreload(imgs[pos-1]);if(imgs[pos+1]) _odIvPreload(imgs[pos+1]);if(imgs[pos+2]) _odIvPreload(imgs[pos+2]);
   document.getElementById('od-iv-prev').style.display=pos>0?'':'none';
   document.getElementById('od-iv-next').style.display=pos<imgs.length-1?'':'none';
-  // 자르기 오버레이 정리
-  var co=document.getElementById('od-iv-crop-overlay');if(co) co.remove();
-  var cok=document.getElementById('od-iv-crop-ok');if(cok) cok.remove();
   _odIvSetMode('view');
 }
 function _odIvNav(dir){
-  if(window._odIvEdited){if(!confirm('편집 내용이 저장되지 않았습니다. 이동하시겠습니까?')) return;}
+  if(window._odIvEdited&&!confirm('편집 내용이 저장되지 않았습니다. 이동하시겠습니까?')) return;
   var p=window._odIvPos+dir;if(p<0||p>=window._odIvImages.length) return;_odIvShow(p);
 }
 function _odIvRotate(deg){window._odIvRotation=(window._odIvRotation+deg)%360;_odIvApplyTransform();}
@@ -20403,10 +20560,16 @@ function _odIvApplyTransform(){
   var c=document.getElementById('od-iv-container');
   if(c) c.style.transform='translate('+window._odIvPanX+'px,'+window._odIvPanY+'px) rotate('+window._odIvRotation+'deg) scale('+window._odIvScale+')';
 }
+// 저장 확인 후 닫기
 function _odCloseImageViewer(){
-  if(window._odIvEdited){if(!confirm('편집 내용이 저장되지 않았습니다.\n저장하지 않고 나가시겠습니까?')) return;}
+  if(window._odIvEdited&&!confirm('편집 내용이 저장되지 않았습니다.\n저장하지 않고 나가시겠습니까?')) return;
+  _odCloseImageViewerForce();
+}
+// 강제 닫기 (확인 없이)
+function _odCloseImageViewerForce(){
+  window._odIvEdited=false;
   var co=document.getElementById('od-iv-crop-overlay');if(co) co.remove();
-  var cok=document.getElementById('od-iv-crop-ok');if(cok) cok.remove();
+  document.querySelectorAll('#od-iv-crop-ok,#od-iv-crop-cancel').forEach(function(el){if(el.parentNode) el.parentNode.remove();});
   var ov=document.getElementById('od-img-viewer');if(ov) ov.remove();
   if(window._odIvKeyHandler){document.removeEventListener('keydown',window._odIvKeyHandler);window._odIvKeyHandler=null;}
 }
@@ -20416,59 +20579,59 @@ async function _odOpenPdfPreview(fileItem){
   try{
     var base=(fileItem.driveId)?"/drives/"+fileItem.driveId:(_odDriveId?"/drives/"+_odDriveId:"/me/drive");
     var data=await _odGraphCall(base+"/items/"+fileItem.id+"/preview","POST",{});
-    if(data.getUrl){
-      window.open(data.getUrl,'_blank');return;
-    }
+    if(data.getUrl){window.open(data.getUrl,'_blank');return;}
   }catch(e){console.warn('[OD] preview API failed:',e.message);}
   if(fileItem.webUrl) window.open(fileItem.webUrl,'_blank');
 }
+
+// ── 동영상 플레이어 (downloadUrl → preview embed → webUrl fallback) ──
 async function _odOpenVideoPlayer(fileItem){
   var ov=document.createElement('div');ov.id='od-video-player';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none';
   ov.innerHTML='<div style="color:#fff;font-size:12px">동영상 로딩 중...</div>';
   ov.addEventListener('click',function(ev){if(ev.target===ov) _odCloseVideoPlayer();});
   document.body.appendChild(ov);
-  var keyH=function(ev){if(ev.key==='Escape') _odCloseVideoPlayer();if(ev.key==='f'||ev.key==='F') _odVideoFullscreen();};
+  var keyH=function(ev){if(ev.key==='Escape') _odCloseVideoPlayer();if(ev.key==='f'||ev.key==='F'){var v=document.getElementById('od-video-el');if(v&&v.requestFullscreen) v.requestFullscreen();}};
   document.addEventListener('keydown',keyH);window._odVideoKeyHandler=keyH;
-  try{
-    var vidUrl=fileItem.downloadUrl;
-    if(!vidUrl){
-      var base=(fileItem.driveId)?"/drives/"+fileItem.driveId:(_odDriveId?"/drives/"+_odDriveId:"/me/drive");
-      try{var data=await _odGraphCall(base+"/items/"+fileItem.id);vidUrl=data["@microsoft.graph.downloadUrl"];}catch(e2){}
-      if(!vidUrl){
-        // content 엔드포인트로 리다이렉트 URL 가져오기
-        var tk=await _odGetToken();
-        var r=await fetch("https://graph.microsoft.com/v1.0"+base+"/items/"+fileItem.id+"/content",{method:'GET',headers:{Authorization:'Bearer '+tk},redirect:'manual'});
-        if(r.status===302) vidUrl=r.headers.get('Location');
-        else if(r.ok) vidUrl=r.url;
-      }
-      if(vidUrl) fileItem.downloadUrl=vidUrl;
-    }
-    if(!vidUrl){
-      // 최후수단: webUrl로 열기
-      if(fileItem.webUrl){window.open(fileItem.webUrl,'_blank');ov.remove();document.removeEventListener('keydown',keyH);return;}
-      throw new Error('동영상 URL을 가져올 수 없습니다');
-    }
-    ov.innerHTML='<div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:6px 12px;color:#fff;font-size:11px;z-index:2;background:rgba(0,0,0,.5)">'
-      +'<span style="opacity:.8;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+fileItem.name+'</span>'
-      +'<div style="display:flex;gap:6px">'
-      +'<button onclick="_odVideoFullscreen()" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px">⛶ 전체화면</button>'
-      +'<button onclick="_odCloseVideoPlayer()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:14px">✕</button>'
-      +'</div></div>'
-      +'<video id="od-video-el" controls autoplay style="max-width:95vw;max-height:90vh;outline:none" onclick="event.stopPropagation()">'
-      +'<source src="'+vidUrl+'">동영상을 재생할 수 없습니다.</video>';
-  }catch(e){
-    ov.innerHTML='<div style="color:#ef4444;font-size:12px;text-align:center">동영상 로드 실패: '+e.message
-      +'<br><button onclick="_odCloseVideoPlayer()" style="margin-top:8px;padding:4px 12px;border:1px solid #555;background:transparent;color:#fff;border-radius:4px;cursor:pointer;font-size:10px">닫기</button></div>';
+  var base=(fileItem.driveId)?"/drives/"+fileItem.driveId:(_odDriveId?"/drives/"+_odDriveId:"/me/drive");
+  var topH='<div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 14px;color:#fff;font-size:12px;z-index:2;background:rgba(0,0,0,.5)">'
+    +'<span style="opacity:.8;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+fileItem.name+'</span>'
+    +'<div style="display:flex;gap:6px">'
+    +'<button onclick="var v=document.getElementById(\'od-video-el\');if(v&&v.requestFullscreen)v.requestFullscreen();" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px">전체화면</button>'
+    +'<button onclick="_odCloseVideoPlayer()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:15px">✕</button>'
+    +'</div></div>';
+  // 1차: downloadUrl → video 태그 직접 재생
+  var vidUrl=fileItem.downloadUrl;
+  if(!vidUrl){try{var d=await _odGraphCall(base+"/items/"+fileItem.id);vidUrl=d["@microsoft.graph.downloadUrl"];if(vidUrl) fileItem.downloadUrl=vidUrl;}catch(e){}}
+  if(vidUrl){
+    ov.innerHTML=topH+'<video id="od-video-el" controls autoplay style="max-width:95vw;max-height:90vh;outline:none" onclick="event.stopPropagation()"><source src="'+vidUrl+'"></video>';
+    var vel=document.getElementById('od-video-el');
+    if(vel) vel.onerror=function(){_odVideoFallback(ov,base,fileItem,topH,keyH);};
+    return;
   }
+  // downloadUrl 없으면 바로 fallback
+  await _odVideoFallback(ov,base,fileItem,topH,keyH);
 }
-function _odVideoFullscreen(){var v=document.getElementById('od-video-el');if(!v)return;if(v.requestFullscreen)v.requestFullscreen();else if(v.webkitRequestFullscreen)v.webkitRequestFullscreen();}
+async function _odVideoFallback(ov,base,fileItem,topH,keyH){
+  // 2차: preview API embed
+  try{
+    var data=await _odGraphCall(base+"/items/"+fileItem.id+"/preview","POST",{});
+    if(data.getUrl){
+      ov.innerHTML=topH+'<iframe src="'+data.getUrl+'" style="width:92vw;height:88vh;border:none;border-radius:6px" allowfullscreen></iframe>';
+      return;
+    }
+  }catch(e){console.warn('[OD Video] preview failed:',e);}
+  // 3차: webUrl로 새 탭
+  if(fileItem.webUrl){
+    ov.remove();document.removeEventListener('keydown',keyH);window._odVideoKeyHandler=null;
+    window.open(fileItem.webUrl,'_blank');return;
+  }
+  ov.innerHTML='<div style="color:#ef4444;font-size:12px;text-align:center">동영상을 열 수 없습니다<br><button onclick="_odCloseVideoPlayer()" style="margin-top:8px;padding:5px 14px;border:1px solid #555;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:11px">닫기</button></div>';
+}
 function _odCloseVideoPlayer(){
-  var ov=document.getElementById('od-video-player');
-  if(ov) ov.remove();
+  var ov=document.getElementById('od-video-player');if(ov) ov.remove();
   if(window._odVideoKeyHandler){document.removeEventListener('keydown',window._odVideoKeyHandler);window._odVideoKeyHandler=null;}
 }
-
 
 // ── 한글(HWP) 데스크톱 앱 열기 ──
 async function _odOpenHwpDesktop(fileItem){
@@ -20595,10 +20758,9 @@ function _odRemoveFav(idx){
 function _odNavToFav(idx){
   if(window._odCtxJustClosed) return;
   var favs=_odGetFavs();if(idx<0||idx>=favs.length) return;
-  // 뷰어 열려있으면 닫기
-  var iv=document.getElementById('od-img-viewer');if(iv){window._odIvEdited=false;iv.remove();if(window._odIvKeyHandler){document.removeEventListener('keydown',window._odIvKeyHandler);window._odIvKeyHandler=null;}}
+  // 뷰어 강제 닫기
+  if(typeof _odCloseImageViewerForce==='function') _odCloseImageViewerForce();
   var vp=document.getElementById('od-video-player');if(vp){vp.remove();if(window._odVideoKeyHandler){document.removeEventListener('keydown',window._odVideoKeyHandler);window._odVideoKeyHandler=null;}}
-  var co=document.getElementById('od-iv-crop-overlay');if(co) co.remove();
   var fav=favs[idx];
   _odDriveId=fav.driveId||null;_odFolderId=fav.id;
   _odNavStack=[{id:fav.id,name:fav.name}];_odFwdStack=[];_odViewMode='list';
