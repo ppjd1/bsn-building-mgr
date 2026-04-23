@@ -195,22 +195,24 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .cal-dow{text-align:center;padding:6px 2px;font-size:12px;font-weight:600;color:var(--t3);background:var(--w2);border-bottom:1px solid var(--ln)}
 .cal-dow:first-child{color:#a02020}.cal-dow:last-child{color:#2040a0}
 .cal-body{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding-bottom:2px}
-.cday{min-height:80px;border-right:1px solid var(--ln);border-bottom:1px solid var(--ln);padding:4px 5px;cursor:pointer;transition:.08s;overflow:hidden;min-width:0;position:relative}
+.cday{height:95px;border-right:1px solid var(--ln);border-bottom:1px solid var(--ln);padding:4px 5px;cursor:pointer;transition:.08s;overflow:hidden;min-width:0;position:relative}
 .cday:nth-child(7n){border-right:none}
 .cday.oth{opacity:.3}.cday.today{background:#e8f4fd}.cday.sel{background:var(--bl2);outline:2px solid var(--bl);outline-offset:-2px}
 .cday:hover{background:#f0f6ff}
 .cdn{font-size:13px;font-weight:700;margin-bottom:3px;font-family:'Pretendard',sans-serif;display:flex;align-items:center;gap:4px}
 .cdn-num{}.cdn-badge{font-size:10px;font-weight:600;color:var(--t3);background:var(--w2);border:1px solid var(--ln);border-radius:8px;padding:0 5px;line-height:1.6}
 .cday:nth-child(7n+1) .cdn-num{color:#a02020}.cday:nth-child(7n) .cdn-num{color:#2040a0}
-.cev{font-size:12px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:3px;line-height:1.45}
-.cev:hover{opacity:.8}.cev-bl{background:#fff;border:1px solid #d0d7de;color:var(--t1)}.cev-rd{background:#f0f0f0;color:var(--t3);text-decoration:line-through;border:1px solid #e0e0e0}
+.cev{font-size:12px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;white-space:nowrap;display:flex;align-items:center;gap:3px;line-height:1.45;width:100%;box-sizing:border-box}
+.cev-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.cev:hover{opacity:.8}.cev-bl{background:transparent;border:none;color:var(--t1)}.cev-rd{background:transparent;border:none;color:var(--t3);text-decoration:line-through}
 .cev-tag{padding:0 4px;border-radius:3px;font-size:9.5px;font-weight:700;flex-shrink:0}
 .cev-tag.all{background:#4a90d9;color:#fff}
 .cev-tag.bldg{background:#fff;color:var(--t2);border:1px solid var(--ln);font-weight:600}
 .cev-cnt{font-size:10px;color:var(--t3);font-weight:600;padding:1px 4px;text-align:center;margin-top:1px}
 .overdue-shortcut:hover{opacity:1!important;background:#fee2e2!important}
-.cal-expand-bar{padding:10px 6px;text-align:center;font-size:12px;color:var(--t3);cursor:pointer;background:var(--w);border-top:1px solid var(--ln);margin-top:2px}
+.cal-expand-bar{padding:3px 6px;text-align:center;font-size:11px;color:var(--t3);cursor:pointer;background:var(--w);border-top:none;margin-top:0}
 .cal-expand-bar:hover{background:var(--w2);color:var(--bl)}
+.cal-qrow .ndate{display:none!important}
 .lv-block{margin-bottom:7px;background:var(--w);border:1px solid var(--ln);border-radius:var(--r)}
 .lv-date-hd{font-size:13px;font-weight:700;padding:7px 11px;background:var(--w2);border-radius:var(--r) var(--r) 0 0;border-bottom:1px solid var(--ln);display:flex;align-items:center;justify-content:space-between;gap:10px}
 .lv-bldg-inline{font-size:12px;font-weight:700;color:var(--bl);padding:2px 8px;background:var(--bl2);border-radius:4px;flex-shrink:0}
@@ -1041,40 +1043,38 @@ body.view-only .vo-tag{display:inline-block !important}
     <!-- 우측: 대시보드 본문 -->
     <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px">
       <div style="width:100%;max-width:900px">
-        <!-- 날씨 -->
-        <div id="dash-weather" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);border:1px solid #7dd3fc;border-radius:var(--r2);padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:0;min-height:56px">
+        <!-- 날씨 (컴팩트) -->
+        <div id="dash-weather" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);border:1px solid #7dd3fc;border-radius:var(--r2);padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:0;min-height:40px">
           <div style="font-size:11px;color:#0369a1">날씨 로딩 중...</div>
         </div>
-        <!-- 만료 임박 -->
-        <div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:14px 16px;margin-bottom:12px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:10px">⏰ 만료 임박 (30일 이내)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <!-- 오늘일정(좌) + 만료임박(우) -->
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <!-- 좌: 오늘·내일 일정 -->
+          <div style="flex:1;min-width:0;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px 14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">📅 오늘·내일 일정</div>
+            <div id="dash-today" style="font-size:12px;color:var(--t2)"></div>
+          </div>
+          <!-- 우: 만료 임박 -->
+          <div style="flex:1;min-width:0;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:12px 14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">⏰ 만료 임박 (30일)</div>
             <div>
-              <div style="font-size:11px;font-weight:600;color:#dc2626;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid #fecaca">📋 임대 계약</div>
-              <div id="dash-exp-lease" style="font-size:12px;color:var(--t2)"></div>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:#d97706;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid #fde68a">🛡 보험·청소</div>
-              <div id="dash-exp-insure" style="font-size:12px;color:var(--t2)"></div>
+              <div style="font-size:11px;font-weight:600;color:#dc2626;margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid #fecaca">📋 임대 계약</div>
+              <div id="dash-exp-lease" style="font-size:11px;color:var(--t2);margin-bottom:8px"></div>
+              <div style="font-size:11px;font-weight:600;color:#d97706;margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid #fde68a">🛡 보험·청소</div>
+              <div id="dash-exp-insure" style="font-size:11px;color:var(--t2)"></div>
             </div>
           </div>
         </div>
-        <!-- 오늘 일정 -->
-        <div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:14px 16px;margin-bottom:12px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px">📅 오늘·내일 일정</div>
-          <div id="dash-today" style="font-size:12px;color:var(--t2)"></div>
-        </div>
-        <!-- 최근 점검 -->
-        <div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:14px 16px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px">🔧 최근 점검</div>
-          <div id="dash-inspect" style="font-size:12px;color:var(--t2)">건물점검 탭에서 점검을 시작하세요.</div>
-        </div>
-        <!-- 미완료 업무 -->
-        <div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:14px 16px;margin-top:12px">
-          <div style="display:flex;align-items:center;margin-bottom:8px">
-            <div style="font-size:13px;font-weight:600;flex:1">🚨 미완료 업무 <span id="dash-overdue-badge" style="display:none;background:#ef4444;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:4px"></span></div>
+        <!-- 최근점검(좌) + 미완료업무(우) -->
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <div style="flex:1;min-width:0;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:10px 12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px">🔧 최근 점검</div>
+            <div id="dash-inspect" style="font-size:11px;color:var(--t2);max-height:150px;overflow-y:auto">건물점검 탭에서 점검을 시작하세요.</div>
           </div>
-          <div id="dash-overdue" style="font-size:12px;color:var(--t2)"></div>
+          <div style="flex:1;min-width:0;background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:10px 12px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px">🚨 미완료 업무 <span id="dash-overdue-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;margin-left:3px"></span></div>
+            <div id="dash-overdue" style="font-size:11px;color:var(--t2);max-height:150px;overflow-y:auto"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1106,7 +1106,7 @@ body.view-only .vo-tag{display:inline-block !important}
         <table style="width:auto">
           <thead><tr>
             <th style="text-align:center;width:48px">층</th>
-            <th style="padding-left:2px;padding-right:2px;width:90px;min-width:70px;max-width:100px;text-align:center">임차인(상호)</th>
+            <th style="padding-left:2px;padding-right:2px;width:120px;min-width:70px;max-width:180px;text-align:center">임차인(상호)</th>
             <th style="width:80px;padding-left:4px;padding-right:4px;text-align:center">계약시작</th><th style="width:80px;padding-left:4px;padding-right:4px;text-align:center">계약만료</th><th class="narrow-col" style="width:52px;text-align:center">D-day</th>
             <th class="money-col wide" style="text-align:center">보증금</th><th class="money-col" style="text-align:center">임대료</th><th class="money-col" style="text-align:center">관리비</th><th class="money-col wide" style="text-align:center">합계(VAT포함)</th>
             <th class="narrow-col" style="width:56px;text-align:center">납부방식</th><th class="narrow-col" style="width:48px;text-align:center">납부일</th>
@@ -1158,8 +1158,8 @@ body.view-only .vo-tag{display:inline-block !important}
 
 <!-- 일정 캘린더 -->
 <div class="page" id="pg-cal">
-  <div class="ph" style="padding:4px 10px 0"><h2>일정 캘린더</h2></div>
-  <div class="split-layout" style="grid-template-columns:130px 1fr;height:calc(100vh - 56px);zoom:1.15">
+  <div class="ph" style="padding:0px 10px 0"><h2 style="margin:0;font-size:14px">일정 캘린더</h2></div>
+  <div class="split-layout" style="grid-template-columns:130px 1fr;height:calc(100vh - 40px);zoom:1.15">
     <!-- 건물 사이드바 -->
     <div class="split-left" style="min-width:0">
       <div style="padding:4px 5px;border-bottom:1px solid var(--ln);display:flex;gap:2px;flex-shrink:0">
@@ -1172,7 +1172,7 @@ body.view-only .vo-tag{display:inline-block !important}
     <!-- 오른쪽 캘린더 영역 -->
     <div class="split-right" style="display:flex;flex-direction:column;min-height:0">
       <!-- top bar -->
-      <div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-bottom:1px solid var(--ln);flex-shrink:0;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;padding:2px 8px;border-bottom:1px solid var(--ln);flex-shrink:0;flex-wrap:wrap">
         <div class="cal-nav">
           <button onclick="calPrev()">‹</button>
           <span id="cal-lbl"></span>
@@ -1197,25 +1197,20 @@ body.view-only .vo-tag{display:inline-block !important}
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto;max-width:1200px">
           <!-- month view (calendar grid) -->
           <div id="cal-month-grid" style="width:100%">
-            <div class="cal-outer" id="cal-outer-wrap" style="border-left:none;border-right:none;border-radius:0">
+            <div class="cal-outer" id="cal-outer-wrap" style="border-left:none;border-right:none;border-bottom:none;border-radius:0">
               <div class="cal-dows" id="cal-dow"></div>
               <div class="cal-body" id="cal-cells"></div>
             </div>
             <div class="cal-expand-bar" id="cal-collapse-btn" onclick="toggleCalCollapse()">달력 펼치기 ∨</div>
             <!-- input row right below calendar : [건물필터][내용][등록][자세히] -->
-            <div class="cal-qrow" style="padding:3px 10px;display:flex;align-items:center;gap:6px;background:var(--w2);flex-wrap:nowrap">
-              <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
-                <div style="display:flex;gap:2px">
-                  <button id="ca-tb-t1" onclick="_caTeamSel(1)" style="flex:1;font-size:9px;padding:1px 0;border:1px solid #2563eb;background:#dbeafe;color:#2563eb;border-radius:3px;cursor:pointer;font-weight:700;font-family:inherit">1팀</button>
-                  <button id="ca-tb-t2" onclick="_caTeamSel(2)" style="flex:1;font-size:9px;padding:1px 0;border:1px solid var(--ln);background:#fff;color:#059669;border-radius:3px;cursor:pointer;font-weight:700;font-family:inherit">2팀</button>
-                </div>
-                <select id="ca-bldg" style="width:100px;padding:4px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;background:#fff"></select>
-              </div>
+            <div class="cal-qrow" style="padding:2px 2px;margin-top:6px;display:flex;align-items:center;gap:3px;background:var(--w2);flex-wrap:nowrap">
+              <button id="ca-tb-t1" onclick="_caTeamSel(1)" style="font-size:11px;padding:3px 10px;border:1px solid #2563eb;background:#dbeafe;color:#2563eb;border-radius:4px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">1팀</button>
+              <button id="ca-tb-t2" onclick="_caTeamSel(2)" style="font-size:11px;padding:3px 10px;border:1px solid var(--ln);background:#fff;color:#059669;border-radius:4px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">2팀</button>
+              <select id="ca-bldg" style="width:80px;padding:2px 4px;border:1px solid var(--ln);border-radius:var(--r);font-size:11px;font-family:inherit;outline:none;background:#fff;flex-shrink:0"></select>
               <input type="date" id="ca-date" lang="en" data-native="1" style="display:none">
-              <span id="ca-date-label" style="font-size:12px;font-weight:700;color:var(--bl);flex-shrink:0;min-width:40px;cursor:default" title="캘린더에서 날짜를 클릭하세요"></span>
-              <textarea id="ca-title" placeholder="내용을 입력해 주세요 (Shift+Enter로 줄바꿈)" rows="1" style="flex:1;min-width:140px;padding:5px 7px;border:1px solid var(--ln);border-radius:var(--r);font-size:12px;font-family:inherit;outline:none;background:#fff;resize:none;overflow:hidden;line-height:1.4" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();quickAdd();}"></textarea>
-              <button class="btn sm" onclick="quickAdd()" title="등록" style="font-size:12px;padding:5px 14px;background:var(--bl);color:#fff;border-color:var(--bl);font-weight:600">✓ 등록</button>
-
+              <span id="ca-date-label" style="font-size:12px;font-weight:700;color:var(--bl);flex-shrink:0;cursor:default" title="캘린더에서 날짜를 클릭하세요"></span>
+              <textarea id="ca-title" placeholder="내용을 입력해 주세요 (Shift+Enter로 줄바꿈)" rows="1" style="flex:1;min-width:100px;padding:3px 6px;border:1px solid var(--ln);border-radius:var(--r);font-size:12px;font-family:inherit;outline:none;background:#fff;resize:none;overflow:hidden;line-height:1.4" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();quickAdd();}"></textarea>
+              <button class="btn sm" onclick="quickAdd()" title="등록" style="font-size:12px;padding:4px 12px;background:var(--bl);color:#fff;border-color:var(--bl);font-weight:600">✓ 등록</button>
             </div>
           </div>
           <!-- day detail panel -->
@@ -3320,18 +3315,113 @@ let _idbLoaded=false;
             localStorage.setItem('_leasePatch_v27_bridge','1');
           }catch(e){}
         }
-        // 트러스트힐 DLG + 1팀 건물 통임대 잔존 삭제 & 재추가 방지
-        try{
-          if(!DB._deletedLeases) DB._deletedLeases=[];
-          // 삭제 대상: bId_통임대 키 등록 (import 시 재추가 방지)
-          var _tongKeys=['1_통임대','22_통임대','24_통임대','25_통임대','27_통임대'];
-          _tongKeys.forEach(function(k){ if(DB._deletedLeases.indexOf(k)<0) DB._deletedLeases.push(k); });
-          var _tBefore=DB.leases.length;
-          DB.leases=DB.leases.filter(function(l){
-            return !(l.floor==='통임대' && _tongKeys.indexOf(l.bId+'_통임대')>=0);
-          });
-          if(DB.leases.length<_tBefore){ sv(); console.log('[patch] 통임대 '+(_tBefore-DB.leases.length)+'건 삭제'); }
-        }catch(e){}
+        // 통임대 잘못 입력된 건물: _deletedLeases에 키 등록 (import 재추가 방지)
+        if(!localStorage.getItem('_leasePatch_v28_tongim')){
+          try{
+            if(!DB._deletedLeases) DB._deletedLeases=[];
+            var _tKeys=['1_통임대','22_통임대','24_통임대','25_통임대','27_통임대'];
+            var _tDirty=false;
+            _tKeys.forEach(function(k){ if(DB._deletedLeases.indexOf(k)<0){ DB._deletedLeases.push(k); _tDirty=true; }});
+            // 기존 잘못된 통임대 항목 삭제
+            var _tBefore=DB.leases.length;
+            DB.leases=DB.leases.filter(function(l){
+              return !(l.floor==='통임대' && _tKeys.indexOf(l.bId+'_통임대')>=0);
+            });
+            if(DB.leases.length<_tBefore || _tDirty) sv();
+            localStorage.setItem('_leasePatch_v28_tongim','1');
+            if(_tBefore-DB.leases.length>0) console.log('[patch] 통임대 '+(_tBefore-DB.leases.length)+'건 삭제');
+          }catch(e){}
+        }
+        // ===== v30 종합 수정 패치: sync 데이터와 DB 동기화 =====
+        if(!localStorage.getItem('_leasePatch_v30_sync')){
+          try{
+            var _v30=0;
+            // 건물 bId 찾기 헬퍼
+            function _fb(kw){var b=DB.buildings.find(function(x){return x.name&&x.name.indexOf(kw)>=0;});return b?b.id:null;}
+            // lease 찾기
+            function _fl(bid,fl,tn){return DB.leases.find(function(l){return l.bId===bid&&(fl?l.floor===fl:true)&&(tn?l.tenant&&l.tenant.indexOf(tn)>=0:true);});}
+            // lease 삭제
+            function _dl(bid,fl,tn){var before=DB.leases.length;DB.leases=DB.leases.filter(function(l){return !(l.bId===bid&&(fl?l.floor===fl:true)&&(tn?l.tenant&&l.tenant.indexOf(tn)>=0:true));});if(DB.leases.length<before)_v30++;}
+            // 층수 변경
+            function _cf(bid,oldF,newF,tn){var l=_fl(bid,oldF,tn);if(l){l.floor=newF;_v30++;}}
+            
+            // 1) 브릿지빌딩: "지하" 삭제, "1층"→"B1~1층"
+            var _b19=_fb('브릿지');
+            if(_b19){_dl(_b19,'지하','김영욱');_cf(_b19,'1층','B1~1층','김영욱');}
+            
+            // 2) 청담포레: "통임대" 삭제, 나머지→"B1~5층"
+            var _b12=_fb('청담포레');
+            if(_b12){_dl(_b12,'통임대',null);var _b12l=DB.leases.find(function(l){return l.bId===_b12&&l.tenant==='그랑파리';});if(_b12l)_b12l.floor='B1~5층';}
+            
+            // 3) 대치914: "지하1층" 작심 삭제, "지하2층"→"B1~B2층"
+            var _b11=_fb('대치');
+            if(_b11){_dl(_b11,'지하1층','작심');_cf(_b11,'지하2층','B1~B2층','작심');}
+            
+            // 4) 아델로: "통임대"→"B1~4층"
+            var _b10=_fb('아델로');
+            if(_b10){_cf(_b10,'통임대','B1~4층',null);}
+            
+            // 5) 디와이: "통임대" 조이엠에이치→"3~4층"
+            var _b22=_fb('디와이');
+            if(_b22){_cf(_b22,'통임대','3~4층','조이엠에이치');}
+            
+            // 6) 청담SS: "통임대" 밴타→"지하1층,1층"
+            var _b24=_fb('청담SS');
+            if(_b24){
+              _cf(_b24,'통임대','지하1층,1층','밴타');
+              // 스튜디오363 추가
+              if(!_fl(_b24,null,'스튜디오363')){
+                DB.leases.push({bId:_b24,floor:'2~5층',tenant:'스튜디오363',start:'2025-01-15',end:'2027-01-14',deposit:200000000,rent:20000000,mgmt:0,paytype:'선불',payday:'15일',phone:'',email:'admin@studio363.co.kr',note:'',vacant:false,directRun:false});_v30++;
+              }
+              // 유노하나 추가
+              if(!_fl(_b24,null,'유노하나')){
+                DB.leases.push({bId:_b24,floor:'지하2층',tenant:'유노하나코리아',start:'2025-10-28',end:'2027-10-27',deposit:30000000,rent:4000000,mgmt:0,paytype:'선불',payday:'28일',phone:'',email:'',note:'~25.12.27 렌트프리 기간',vacant:false,directRun:false,rfStart:'2025-10-28',rfEnd:'2025-12-27'});_v30++;
+              }
+            }
+            
+            // 7) 청담119: "통임대"→"1,2,4,5층"
+            var _b25=_fb('청담119');
+            if(_b25){_cf(_b25,'통임대','1,2,4,5층','프라다');}
+            
+            // 8) 디에이치: "통임대"→"1~4층"
+            var _b27=_fb('디에이치');
+            if(_b27){_cf(_b27,'통임대','1~4층',null);}
+            
+            // 9) 트러스트힐: "통임대" 삭제
+            var _b1=_fb('트러스트');
+            if(_b1){_dl(_b1,'통임대',null);}
+            
+            // 10) 바로스: 누락분 추가
+            var _b30=_fb('바로스');
+            if(_b30){
+              if(!_fl(_b30,'B1층(B)',null)){DB.leases.push({bId:_b30,floor:'B1층(B)',tenant:'(미정)',start:'',end:'',deposit:0,rent:1000000,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'',vacant:false,directRun:false});_v30++;}
+              if(!_fl(_b30,'1층(A)',null)){DB.leases.push({bId:_b30,floor:'1층(A)',tenant:'(미정)',start:'2025-08-04',end:'2027-08-03',deposit:0,rent:2500000,mgmt:0,paytype:'',payday:'',phone:'',email:'',note:'',vacant:false,directRun:false});_v30++;}
+            }
+            
+            // 11) 옥남빌딩: 2층,3층 추가
+            var _b17=_fb('옥남');
+            if(_b17){
+              if(!_fl(_b17,'2층',null)){DB.leases.push({bId:_b17,floor:'2층',tenant:'㈜지엘리코퍼레이션',start:'2025-07-02',end:'2027-02-13',deposit:70000000,rent:5600000,mgmt:800000,paytype:'선불',payday:'14일',phone:'홍동환 010-8706-8813',email:'',note:'~25.10.01 렌트프리 기간',vacant:false,directRun:false,rfStart:'2025-07-02',rfEnd:'2025-10-01'});_v30++;}
+              if(!_fl(_b17,'3층',null)){DB.leases.push({bId:_b17,floor:'3층',tenant:'이화정',start:'2025-01-13',end:'2027-01-12',deposit:50000000,rent:5600000,mgmt:400000,paytype:'선불',payday:'13일',phone:'010-5449-1113',email:'account@hyeins.com',note:'~25.03.12 렌트프리 기간',vacant:false,directRun:false,rfStart:'2025-01-13',rfEnd:'2025-03-12'});_v30++;}
+            }
+            
+            // 12) 이현빌딩: 103호 추가
+            var _b28=_fb('이현');
+            if(_b28&&!_fl(_b28,'103호',null)){DB.leases.push({bId:_b28,floor:'103호',tenant:'김일섭',start:'2024-09-02',end:'2026-09-01',deposit:20000000,rent:1500000,mgmt:100000,paytype:'후불',payday:'말일',phone:'010-3894-7044',email:'',note:'',vacant:false,directRun:false,rfStart:'2024-09-02',rfEnd:'2024-10-01'});_v30++;}
+            
+            // 13) 동교동147-46: 3층 추가
+            var _b29=_fb('동교동147');
+            if(_b29&&!_fl(_b29,'3층',null)){DB.leases.push({bId:_b29,floor:'3층',tenant:'김도형(점장)',start:'2024-09-30',end:'2026-09-29',deposit:30000000,rent:2400000,mgmt:100000,paytype:'선불',payday:'30일',phone:'010-2655-1141',email:'changjo1989@naver.com',note:'~10.29 렌트프리 기간',vacant:false,directRun:false,rfStart:'2024-09-30',rfEnd:'2024-10-29'});_v30++;}
+            
+            // 14) 이지빌딩: 지하1층 추가
+            var _b31=_fb('이지');
+            if(_b31&&!_fl(_b31,'지하1층',null)){DB.leases.push({bId:_b31,floor:'지하1층',tenant:'(미정)',start:'2026-04-15',end:'2028-04-14',deposit:40000000,rent:3000000,mgmt:500000,paytype:'선불',payday:'25일',phone:'길현준 010-2925-8533',email:'',note:'',vacant:false,directRun:false});_v30++;}
+            
+            if(_v30>0) sv();
+            localStorage.setItem('_leasePatch_v30_sync','1');
+            if(_v30>0) console.log('[patch v30] '+_v30+'건 수정');
+          }catch(e){console.error('[patch v30]',e);}
+        }
         // 하이원빌딩 엑셀 호실 재추가 방지 patch (건물 유지, 기존 lease 유지, 엑셀 키만 등록)
         if(!localStorage.getItem('_leasePatch_v27_hiwan3')){
           try{
@@ -3459,12 +3549,12 @@ leases:[
   {id:21,bId:6,floor:'4층',tenant:'슈퍼진스',start:'2024-06-03',end:'2026-06-02',deposit:56000000,rent:4500000,mgmt:0,paytype:'선불',payday:'1일',phone:'',email:'',note:''},
   {id:22,bId:8,floor:'전체',tenant:'라이드주식회사',start:'2024-03-29',end:'2026-03-28',deposit:350000000,rent:31000000,mgmt:0,paytype:'후불',payday:'말일',phone:'박채린 010-8285-8546',email:'chaerin.pak@rideoffice.kr',note:'통임대'},
   {id:23,bId:9,floor:'전체',tenant:'주식회사 포도클럽',start:'2025-05-23',end:'2030-05-22',deposit:560000000,rent:44000000,mgmt:0,paytype:'선불',payday:'23일',phone:'염환아 010-8620-7489',email:'podo.pay@gmail.com',note:'렌트프리 25.05.23~25.08.22'},
-  {id:24,bId:10,floor:'전체',tenant:'압구정파인만교육',start:'2025-10-31',end:'2028-10-30',deposit:330000000,rent:25000000,mgmt:0,paytype:'선불',payday:'말일',phone:'송요나 010-6368-3544',email:'',note:'렌트프리 25.10.31~26.01.30'},
-  {id:25,bId:11,floor:'지하2층',tenant:'작심스터디카페',start:'2024-09-25',end:'2026-09-24',deposit:0,rent:10000000,mgmt:0,paytype:'',payday:'',phone:'기진영 010-6412-0715',email:'',note:''},
+  {id:24,bId:10,floor:'B1~4층',tenant:'압구정파인만교육',start:'2025-10-31',end:'2028-10-30',deposit:330000000,rent:25000000,mgmt:0,paytype:'선불',payday:'말일',phone:'송요나 010-6368-3544',email:'',note:'렌트프리 25.10.31~26.01.30'},
+  {id:25,bId:11,floor:'B1~B2층',tenant:'작심스터디카페',start:'2024-09-25',end:'2026-09-24',deposit:0,rent:10000000,mgmt:0,paytype:'',payday:'',phone:'기진영 010-6412-0715',email:'',note:''},
   {id:26,bId:11,floor:'1층',tenant:'오수진(GLP아카데미)',start:'2026-04-01',end:'2028-03-31',deposit:30000000,rent:3165000,mgmt:200000,paytype:'선불',payday:'1일',phone:'010-5269-8687',email:'ktym727@naver.com',note:''},
   {id:27,bId:11,floor:'2층',tenant:'나선영(에이탑학원)',start:'2024-11-10',end:'2026-11-09',deposit:30000000,rent:2850000,mgmt:300000,paytype:'선불',payday:'10일',phone:'010-5703-7164',email:'pdhnsy@gmail.com',note:''},
   {id:28,bId:11,floor:'3층',tenant:'오수진(GLP아카데미)',start:'2026-04-01',end:'2028-03-31',deposit:20000000,rent:3165000,mgmt:200000,paytype:'선불',payday:'30일',phone:'010-5269-8687',email:'',note:''},
-  {id:29,bId:12,floor:'지하1층~5층',tenant:'그랑파리',start:'2026-01-07',end:'2029-01-06',deposit:400000000,rent:28000000,mgmt:0,paytype:'선불',payday:'7일',phone:'최윤영 010-9002-8863',email:'hichois@naver.com',note:'렌트프리 26.01.07~26.04.06'},
+  {id:29,bId:12,floor:'B1~5층',tenant:'그랑파리',start:'2026-01-07',end:'2029-01-06',deposit:400000000,rent:28000000,mgmt:0,paytype:'선불',payday:'7일',phone:'최윤영 010-9002-8863',email:'hichois@naver.com',note:'렌트프리 26.01.07~26.04.06'},
   {id:30,bId:13,floor:'2층',tenant:'이작디자인',start:'2025-03-27',end:'2026-03-26',deposit:1000000,rent:600000,mgmt:0,paytype:'후불',payday:'말일',phone:'양은주 010-6209-6657',email:'',note:''},
   {id:31,bId:2,floor:'5층',tenant:'바오밥픽처스',start:'2024-09-23',end:'2026-09-22',deposit:60000000,rent:4200000,mgmt:400000,paytype:'',payday:'',phone:'',email:'',note:''},
 ],
@@ -3477,8 +3567,8 @@ expires:[
   {id:18,bId:6,type:'승강기 보험',date:'2027-01-08',note:'임차사측 가입'},{id:19,bId:6,type:'화재 보험',date:'2034-01-08',note:''},{id:20,bId:6,type:'정화조 청소',date:'2026-12-01',note:''},
   {id:21,bId:7,type:'승강기 보험',date:'2026-12-05',note:''},{id:22,bId:7,type:'화재 보험',date:'2027-01-22',note:''},{id:23,bId:7,type:'주차기 보험',date:'2027-01-22',note:''},{id:24,bId:7,type:'저수조 청소',date:'2026-07-19',note:''},{id:25,bId:7,type:'정화조 청소',date:'2027-01-19',note:''},
   {id:26,bId:8,type:'승강기 보험',date:'2026-05-23',note:''},{id:27,bId:8,type:'화재 보험',date:'2039-03-26',note:''},{id:28,bId:8,type:'정화조 청소',date:'2026-11-05',note:''},
-  {id:29,bId:9,type:'승강기 보험',date:'2026-05-22',note:''},{id:30,bId:9,type:'화재 보험',date:'2040-11-10',note:''},{id:31,bId:9,type:'정화조 청소',date:'2026-12-30',note:'1년 연장'},
-  {id:32,bId:10,type:'승강기 보험',date:'2026-06-07',note:''},{id:33,bId:10,type:'화재 보험',date:'2040-06-13',note:''},{id:34,bId:10,type:'정화조 청소',date:'2027-03-03',note:''},
+  {id:29,bId:9,type:'승강기 보험',date:'2026-06-07',note:''},{id:30,bId:9,type:'화재 보험',date:'2040-06-13',note:''},{id:31,bId:9,type:'정화조 청소',date:'2027-03-03',note:''},
+  {id:32,bId:10,type:'승강기 보험',date:'2026-05-22',note:''},{id:33,bId:10,type:'화재 보험',date:'2040-11-10',note:''},{id:34,bId:10,type:'정화조 청소',date:'2026-12-30',note:'1년 연장'},
   {id:35,bId:11,type:'승강기 보험',date:'2026-10-11',note:''},{id:36,bId:11,type:'화재 보험',date:'2039-10-16',note:''},{id:37,bId:11,type:'주차기 보험',date:'2026-06-24',note:''},{id:38,bId:11,type:'정화조 청소',date:'2026-07-26',note:''},
   {id:39,bId:12,type:'승강기 보험',date:'2027-02-19',note:''},{id:40,bId:12,type:'화재 보험',date:'2041-02-24',note:''},{id:41,bId:12,type:'정화조 청소',date:'2027-02-28',note:''},
   {id:42,bId:13,type:'화재 보험',date:'2040-03-04',note:''},{id:43,bId:13,type:'정화조 청소',date:'2027-02-22',note:''},
@@ -4020,12 +4110,12 @@ function inlineEdit(el,saveFn){
   ta.addEventListener('blur',()=>{const v=ta.value.trim();saveFn(v);});
 }
 function ddBg(d,type){
-  if(d<0)return`<span class="bg bg-gr">만료</span>`;
+  if(d<0)return`<span class="bg bg-rd" style="background:#dc2626;color:#fff" title="만료 ${Math.abs(d)}일 경과">D+${Math.abs(d)}</span>`;
   if(type==='lease'){if(d<=30)return`<span class="bg bg-rd" title="만료 임박 (30일 이내)">D-${d}</span>`;if(d<=90)return`<span class="bg bg-am" title="만료 예정 (90일 이내)">D-${d}</span>`;return`<span class="bg bg-gn">D-${d}</span>`;}
   if(d<=30)return`<span style="display:inline-block;font-family:'Pretendard',sans-serif;font-size:11px">—</span>`;
   return``;
 }
-function expCls(d){return d<=30?'ec-rd':'';} // only red for <=30
+function expCls(d){return d<0?'ec-rd':d<=30?'ec-rd':'';} // red for expired or <=30 days
 // ── 팀 전환 ─────────────────────────────────────────────────────────────
 function _getCurrentTeam(){ return DB.ui.currentTeam||2; }
 function _teamBuildings(){ return DB.buildings.filter(function(b){ return (b.team||2)===_getCurrentTeam(); }).sort(function(a,b){ return (a.id||0)-(b.id||0); }); }
@@ -4460,7 +4550,7 @@ function _gpDo(id,el){
 }
 function upBadges(){
   const y=$('nb-ex');
-  if(y)y.textContent=DB.expires.filter(e=>dday(e.date)>=0&&dday(e.date)<=30).length;
+  if(y){var _exCnt=DB.expires.filter(e=>!e.na&&dday(e.date)>=-30&&dday(e.date)<=30).length;var _leCnt=DB.leases.filter(l=>l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실'&&l.end&&dday(l.end)>=-30&&dday(l.end)<=30).length;y.textContent=_exCnt+_leCnt;}
   try{_updateEditBadges();}catch(_){}
 }
 
@@ -4531,10 +4621,11 @@ var _EXCEL_LEASE_DATA=[
 {"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false,"rfS":"2025.07.02","rfE":"2025-10-01"},
 {"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"","v":false,"dr":false,"rfS":"2025.01.13","rfE":"2025-03-12"},
 {"bn":4,"f":"5층","t":"하우스맨 박종호","s":"2025.03.15","e":"2027.03.14","d":80000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"업무폰 010-4456-4150","em":"","n":"","v":false,"dr":false},
+{"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"~25.10.01 렌트프리 기간","v":false,"dr":false},
+{"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"~25.03.12 렌트프리 기간","v":false,"dr":false},
 {"bn":5,"f":"2층","t":"더와이디자인스튜디오(양준석)","s":"2025.07.28","e":"2026.07.31","d":20000000,"r":2150000,"mg":0,"pt":"선불","pd":"01일","ph":"010-9904-8121","em":"theydesign02@gmail.com","n":"","v":false,"dr":false},
 {"bn":5,"f":"3층","t":"블링에스(김솔아)","s":"2025.07.16","e":"2026.07.15","d":20000000,"r":2300000,"mg":0,"pt":"후불","pd":"16일","ph":"010-3441-3710","em":"","n":"","v":false,"dr":false},
-{"bn":6,"f":"1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
-{"bn":6,"f":"지하","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
+{"bn":6,"f":"B1~1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
 {"bn":6,"f":"2층","t":"한재민(태국수)","s":"2026-03-16","e":"2028-03-15","d":30000000,"r":3100000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-3380-4486","em":"","n":"임대료 310만원 인상 완","v":false,"dr":false},
 {"bn":6,"f":"3층","t":"곽병수(청23)","s":"2026-01-27","e":"2027-01-26","d":20000000,"r":1700000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-8230-0528","em":"","n":"","v":false,"dr":false},
 {"bn":8,"f":"B2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"기계실","v":true,"dr":false},
@@ -4546,7 +4637,7 @@ var _EXCEL_LEASE_DATA=[
 {"bn":9,"f":"지하2층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
 {"bn":9,"f":"지하1층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
 {"bn":9,"f":"2층","t":"주식회사 제니트레이드","s":"2025-08-01","e":"2026-07-31","d":50000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"010-4147-1777","em":"","n":"","v":false,"dr":false},
-{"bn":9,"f":"1,3~5층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
+{"bn":9,"f":"3~4층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
 {"bn":10,"f":"B01호","t":"권형준","s":"2023-07-29","e":"2026-07-28","d":10000000,"r":860000,"mg":70000,"pt":"선불","pd":"29일","ph":"010-7402-5683\n010-7633-0589 여재민 (실 임차인)\n010-8335-6709(실 임차인 지인)","em":"","n":"애완견 두 마리 / 주차불가/ 보증금 반환시 확인필요!","v":false,"dr":false},
 {"bn":10,"f":"B02호","t":"김지현","s":"2022-09-19","e":"2026-09-18","d":5000000,"r":735000,"mg":0,"pt":"선불","pd":"19일","ph":"010-7188-8104","em":"","n":"월세에 관리비 수도요금/ 차량번호: 396구 2913","v":false,"dr":false},
 {"bn":10,"f":"101호","t":"최우진","s":"2025-06-20","e":"2026-06-19","d":10000000,"r":930000,"mg":150000,"pt":"선불","pd":"20일","ph":"010-2763-9996","em":"","n":"","v":false,"dr":false},
@@ -4556,8 +4647,9 @@ var _EXCEL_LEASE_DATA=[
 {"bn":10,"f":"3층","t":"이   훈","s":"2026-02-27","e":"2027-08-31","d":30000000,"r":1540000,"mg":100000,"pt":"선불","pd":"27일","ph":"010-2679-8696","em":"","n":"관리비 수도요금 포함 / 주차 사용 중(계약서 명시X)","v":false,"dr":false},
 {"bn":10,"f":"옥탑","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"주기적으로 확인요망","v":true,"dr":false},
 {"bn":11,"f":"지하2층","t":"유노하나코리아","s":"2025-10-28","e":"2027-10-27","d":30000000,"r":4000000,"mg":0,"pt":"선불","pd":"28일","ph":"","em":"","n":"","v":false,"dr":false,"rfS":"2025-10-28","rfE":"2025-12-27"},
-{"bn":11,"f":"1~5층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
-{"bn":12,"f":"B1~2,4~5층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
+{"bn":11,"f":"지하1층,1층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
+{"bn":11,"f":"2~5층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15일","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},
+{"bn":12,"f":"1,2,4,5층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
 {"bn":12,"f":"지상3층","t":"셀나인","s":"2024-03-05","e":"2027-03-04","d":300000000,"r":9270000,"mg":871000,"pt":"선불","pd":"20일","ph":"김은지 원장 : 010-4199-8386\n총괄실장:010-9164-5227","em":"","n":"26년 3월부터 매년 3% 인상","v":false,"dr":false},
 {"bn":13,"f":"1층","t":"더블유더블유씨디","s":"2024-06-28","e":"2027-06-27","d":120000000,"r":9075000,"mg":300000,"pt":"선불","pd":"28일","ph":"대표 010-5101-8666(연락은 매니저한테)\n매니저 010-4976-4250(최신)","em":"","n":"2년 계약갱신완료(임대료 907,5만원 / 관리비 30만원 으로 인상)","v":false,"dr":false},
 {"bn":13,"f":"2층","t":"주식회사 하연옥","s":"2024-06-28","e":"2026-06-27","d":100000000,"r":8000000,"mg":300000,"pt":"선불","pd":"08일","ph":"사장님 010-7208-0327","em":"","n":"2년 계약갱신완료(관리비 30만원 으로 인상)","v":false,"dr":false},
@@ -4566,10 +4658,11 @@ var _EXCEL_LEASE_DATA=[
 {"bn":13,"f":"4층","t":"㈜하늘을담다","s":"2024-06-20","e":"2026-06-19","d":80000000,"r":4200000,"mg":300000,"pt":"선불","pd":"20일","ph":"대표 010-8586-3549\n직원 010-4817-0259(담당)","em":"","n":"주차비 15만원 추가 납입. 2대 사용 중","v":false,"dr":false},
 {"bn":14,"f":"B1호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":1000000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
 {"bn":14,"f":"B2호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":700000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
-{"bn":14,"f":"1~5층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":14,"f":"1~4층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"B01호","t":"김수연","s":"2025-10-24","e":"2027-10-23","d":15000000,"r":1100000,"mg":100000,"pt":"선불","pd":"24일","ph":"010-2115-5611","em":"","n":"mabuceo34@gmail.com","v":false,"dr":false},
 {"bn":15,"f":"101호","t":"살롱드유헤어","s":"2025-04-15","e":"2027-04-14","d":20000000,"r":1530000,"mg":50000,"pt":"후불","pd":"말일","ph":"010-9542-0336","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"102호","t":"신동민","s":"2024-09-19","e":"2026-09-18","d":15000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-7738-8083","em":"","n":"10월분 납입함,11월부터 말일로 변경","v":false,"dr":false},
+{"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"렌트프리기간(1개월) 24.09.02~24.10.01","v":false,"dr":false},
 {"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"","v":false,"dr":false,"rfS":"2024-09-02","rfE":"2024-10-01"},
 {"bn":15,"f":"201호","t":"아이디얼핏","s":"2026-01-02","e":"2028-01-01","d":20000000,"r":2020000,"mg":130000,"pt":"후불","pd":"말일","ph":"010-3124-0120","em":"","n":"관리비=주차비 3만원 포함(vat별도),","v":false,"dr":false},
 {"bn":15,"f":"301호","t":"한울이앤씨(직영)","s":"2025-09-01","e":"2027-08-31","d":20000000,"r":2300000,"mg":100000,"pt":"후불","pd":"20일","ph":"","em":"","n":"","v":false,"dr":true},
@@ -4577,9 +4670,13 @@ var _EXCEL_LEASE_DATA=[
 {"bn":15,"f":"402호","t":"하사도(주택)","s":"2025-09-20","e":"2026-09-19","d":10000000,"r":650000,"mg":50000,"pt":"후불","pd":"20일","ph":"010-8563-4142","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"501호","t":"김시현(주택)","s":"2026-02-14","e":"2027-02-13","d":30000000,"r":1100000,"mg":100000,"pt":"후불","pd":"14일","ph":"010-9931-8193","em":"","n":"","v":false,"dr":false},
 {"bn":17,"f":"1층","t":"연남 허니 밀크","s":"2024-04-29","e":"2028-04-28","d":30000000,"r":2600000,"mg":250000,"pt":"선불","pd":"29일","ph":"010-6330-8758(남편)","em":"","n":"","v":false,"dr":false},
+{"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"~10.29 렌트프리 기간","v":false,"dr":false},
 {"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"","v":false,"dr":false,"rfS":"2024-09-30","rfE":"2024-10-29"},
+{"bn":18,"f":"B1층(B)","t":"(미정)","s":"","e":"","d":0,"r":1000000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":18,"f":"1층(A)","t":"(미정)","s":"2025-08-04","e":"2027-08-03","d":0,"r":2500000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":18,"f":"1층(B)","t":"퍼스널랭귀지","s":"2025-08-04","e":"2027-08-03","d":30000000,"r":2200000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":18,"f":"2층","t":"(주)십사일동안","s":"2025-07-31","e":"2027-06.30","d":40000000,"r":4000000,"mg":300000,"pt":"","pd":"말일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":23,"f":"지하1층","t":"(미정)","s":"2026-04-15","e":"2028-04-14","d":40000000,"r":3000000,"mg":500000,"pt":"선불","pd":"25일","ph":"길현준 010-2925-8533","em":"","n":"","v":false,"dr":false},
 {"bn":23,"f":"1층","t":"안짱","s":"2024-09-23","e":"2026-09-22","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25일","ph":"안태희대표 010-4600-2522\n정혜진팀장 010-7139-4600","em":"hyejin@richnmedia.co.kr","n":"","v":false,"dr":false},
 {"bn":23,"f":"2층","t":"스튜디오에이콘","s":"2025-01-10","e":"2027-01-09","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25일","ph":"김선구 010-9078-3538","em":"dotori@studioacorn.com","n":"주차 1대","v":false,"dr":false},
 {"bn":23,"f":"3층","t":"요쿠스","s":"2023-11-16","e":"2028-05-15","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25일","ph":"최창훈대표 010-2537-4435\n오종근이사 010-4966-4110","em":"changhoon.choi@jocoos.com","n":"주차 1대","v":false,"dr":false},
@@ -4613,14 +4710,12 @@ var _EXCEL_LEASE_DATA=[
 {"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","v":false,"dr":false,"rfS":"2024-09-20","rfE":"2024-12-19"},
 {"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":29,"f":"통임대","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":30,"f":"통임대","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
-{"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
-{"bn":31,"f":"지하1층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
+{"bn":30,"f":"B1~4층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
+{"bn":31,"f":"B1~B2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"1층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":30000000,"r":3165000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"3층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":20000000,"r":3165000,"mg":200000,"pt":"선불","pd":"30일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"4층","t":"오수진 (GLP) 아카데미","s":"2026-02-01","e":"2028-03-31","d":30000000,"r":3500000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"2층","t":"나선영 (에이탑Atop)학원","s":"2024-11-10","e":"2026-11-09","d":30000000,"r":2850000,"mg":300000,"pt":"선불","pd":"10일","ph":"010-5703-7164","em":"pdhnsy@gmail.com","n":"","v":false,"dr":false},
-{"bn":32,"f":"통임대","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07일","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"","v":false,"dr":false},
 {"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},
 {"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"퇴거완료","v":true,"dr":false},
 {"bn":33,"f":"4층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"명도 완료","v":true,"dr":false},
@@ -4631,10 +4726,11 @@ var _EXCEL_LEASE_DATA=[
 {"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"","v":false,"dr":false,"rfS":"2025.07.02","rfE":"2025-10-01"},
 {"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"","v":false,"dr":false,"rfS":"2025.01.13","rfE":"2025-03-12"},
 {"bn":4,"f":"5층","t":"하우스맨 박종호","s":"2025.03.15","e":"2027.03.14","d":80000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"업무폰 010-4456-4150","em":"","n":"","v":false,"dr":false},
+{"bn":4,"f":"2층","t":"㈜지엘리코퍼레이션","s":"2025.07.02","e":"2027.02.13","d":70000000,"r":5600000,"mg":800000,"pt":"선불","pd":"14일","ph":"홍동환 010-8706-8813\n장재권대표 010-4051-2245","em":"","n":"~25.10.01 렌트프리 기간","v":false,"dr":false},
+{"bn":4,"f":"3층","t":"이화정","s":"2025.01.13","e":"2027.01.12","d":50000000,"r":5600000,"mg":400000,"pt":"선불","pd":"13일","ph":"010-5449-1113","em":"account@hyeins.com","n":"~25.03.12 렌트프리 기간","v":false,"dr":false},
 {"bn":5,"f":"2층","t":"더와이디자인스튜디오(양준석)","s":"2025.07.28","e":"2026.07.31","d":20000000,"r":2150000,"mg":0,"pt":"선불","pd":"01일","ph":"010-9904-8121","em":"theydesign02@gmail.com","n":"","v":false,"dr":false},
 {"bn":5,"f":"3층","t":"블링에스(김솔아)","s":"2025.07.16","e":"2026.07.15","d":20000000,"r":2300000,"mg":0,"pt":"후불","pd":"16일","ph":"010-3441-3710","em":"","n":"","v":false,"dr":false},
-{"bn":6,"f":"1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
-{"bn":6,"f":"지하","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
+{"bn":6,"f":"B1~1층","t":"김영욱(더목)","s":"2025-03-20","e":"2026-08-15","d":20000000,"r":2300000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-2447-7852","em":"","n":"최초 2024.08.16","v":false,"dr":false},
 {"bn":6,"f":"2층","t":"한재민(태국수)","s":"2026-03-16","e":"2028-03-15","d":30000000,"r":3100000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-3380-4486","em":"","n":"임대료 310만원 인상 완","v":false,"dr":false},
 {"bn":6,"f":"3층","t":"곽병수(청23)","s":"2026-01-27","e":"2027-01-26","d":20000000,"r":1700000,"mg":100000,"pt":"선불","pd":"20일","ph":"010-8230-0528","em":"","n":"","v":false,"dr":false},
 {"bn":8,"f":"B2층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"기계실","v":true,"dr":false},
@@ -4646,7 +4742,7 @@ var _EXCEL_LEASE_DATA=[
 {"bn":9,"f":"지하2층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
 {"bn":9,"f":"지하1층","t":"오르빗 홀딩스","s":"2025-08-01","e":"2026-07-31","d":0,"r":6900000,"mg":800000,"pt":"선불","pd":"15일","ph":"김홍갑 대표 : 010-2821-2868\n김창식 대표 : 010-8685-5055","em":"","n":"","v":false,"dr":false},
 {"bn":9,"f":"2층","t":"주식회사 제니트레이드","s":"2025-08-01","e":"2026-07-31","d":50000000,"r":4600000,"mg":400000,"pt":"선불","pd":"15일","ph":"010-4147-1777","em":"","n":"","v":false,"dr":false},
-{"bn":9,"f":"1,3~5층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
+{"bn":9,"f":"3~4층","t":"주식회사 조이엠에이치","s":"2025-10-01","e":"2026-05-06","d":90000000,"r":8200000,"mg":700000,"pt":"선불","pd":"01일","ph":"담당자 010-6226-5042\n여직원 010-5364-8708","em":"","n":"","v":false,"dr":false},
 {"bn":10,"f":"B01호","t":"권형준","s":"2023-07-29","e":"2026-07-28","d":10000000,"r":860000,"mg":70000,"pt":"선불","pd":"29일","ph":"010-7402-5683\n010-7633-0589 여재민 (실 임차인)\n010-8335-6709(실 임차인 지인)","em":"","n":"애완견 두 마리 / 주차불가/ 보증금 반환시 확인필요!","v":false,"dr":false},
 {"bn":10,"f":"B02호","t":"김지현","s":"2022-09-19","e":"2026-09-18","d":5000000,"r":735000,"mg":0,"pt":"선불","pd":"19일","ph":"010-7188-8104","em":"","n":"월세에 관리비 수도요금/ 차량번호: 396구 2913","v":false,"dr":false},
 {"bn":10,"f":"101호","t":"최우진","s":"2025-06-20","e":"2026-06-19","d":10000000,"r":930000,"mg":150000,"pt":"선불","pd":"20일","ph":"010-2763-9996","em":"","n":"","v":false,"dr":false},
@@ -4656,8 +4752,9 @@ var _EXCEL_LEASE_DATA=[
 {"bn":10,"f":"3층","t":"이   훈","s":"2026-02-27","e":"2027-08-31","d":30000000,"r":1540000,"mg":100000,"pt":"선불","pd":"27일","ph":"010-2679-8696","em":"","n":"관리비 수도요금 포함 / 주차 사용 중(계약서 명시X)","v":false,"dr":false},
 {"bn":10,"f":"옥탑","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"주기적으로 확인요망","v":true,"dr":false},
 {"bn":11,"f":"지하2층","t":"유노하나코리아","s":"2025-10-28","e":"2027-10-27","d":30000000,"r":4000000,"mg":0,"pt":"선불","pd":"28일","ph":"","em":"","n":"","v":false,"dr":false,"rfS":"2025-10-28","rfE":"2025-12-27"},
-{"bn":11,"f":"1~5층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
-{"bn":12,"f":"B1~2,4~5층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
+{"bn":11,"f":"지하1층,1층","t":"주식회사 밴타","s":"2024-12-23","e":"2026-12-22","d":130000000,"r":12000000,"mg":0,"pt":"선불","pd":"23일","ph":"여자 대표님\n010-4326-0853","em":"","n":"","v":false,"dr":false},
+{"bn":11,"f":"2~5층","t":"스튜디오363","s":"2025-01-15","e":"2027-01-14","d":200000000,"r":20000000,"mg":0,"pt":"선불","pd":"15일","ph":"","em":"admin@studio363.co.kr","n":"","v":false,"dr":false},
+{"bn":12,"f":"1,2,4,5층","t":"프라다","s":"2023-03-31","e":"2027-03-30","d":2400000000,"r":79567500,"mg":7638480,"pt":"선불","pd":"25일","ph":"변호사:010-7150-9684\n배순미점장 : 010-2851-0174","em":"","n":"매년 3%인상","v":false,"dr":false},
 {"bn":12,"f":"지상3층","t":"셀나인","s":"2024-03-05","e":"2027-03-04","d":300000000,"r":9270000,"mg":871000,"pt":"선불","pd":"20일","ph":"김은지 원장 : 010-4199-8386\n총괄실장:010-9164-5227","em":"","n":"26년 3월부터 매년 3% 인상","v":false,"dr":false},
 {"bn":13,"f":"1층","t":"더블유더블유씨디","s":"2024-06-28","e":"2027-06-27","d":120000000,"r":9075000,"mg":300000,"pt":"선불","pd":"28일","ph":"대표 010-5101-8666(연락은 매니저한테)\n매니저 010-4976-4250(최신)","em":"","n":"2년 계약갱신완료(임대료 907,5만원 / 관리비 30만원 으로 인상)","v":false,"dr":false},
 {"bn":13,"f":"2층","t":"주식회사 하연옥","s":"2024-06-28","e":"2026-06-27","d":100000000,"r":8000000,"mg":300000,"pt":"선불","pd":"08일","ph":"사장님 010-7208-0327","em":"","n":"2년 계약갱신완료(관리비 30만원 으로 인상)","v":false,"dr":false},
@@ -4666,10 +4763,11 @@ var _EXCEL_LEASE_DATA=[
 {"bn":13,"f":"4층","t":"㈜하늘을담다","s":"2024-06-20","e":"2026-06-19","d":80000000,"r":4200000,"mg":300000,"pt":"선불","pd":"20일","ph":"대표 010-8586-3549\n직원 010-4817-0259(담당)","em":"","n":"주차비 15만원 추가 납입. 2대 사용 중","v":false,"dr":false},
 {"bn":14,"f":"B1호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":1000000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
 {"bn":14,"f":"B2호","t":"(주)난달라푸드테크놀리지","s":"2024-06-21","e":"2027-06-20","d":10000000,"r":700000,"mg":50000,"pt":"선불","pd":"21일","ph":"대표 010-4515-7147","em":"","n":"묵시적갱신","v":false,"dr":false},
-{"bn":14,"f":"1~5층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":14,"f":"1~4층","t":"010-2216-3805 김창수","s":"2025-11-11","e":"2027-11-10","d":40000000,"r":4500000,"mg":0,"pt":"선불","pd":"11일","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"B01호","t":"김수연","s":"2025-10-24","e":"2027-10-23","d":15000000,"r":1100000,"mg":100000,"pt":"선불","pd":"24일","ph":"010-2115-5611","em":"","n":"mabuceo34@gmail.com","v":false,"dr":false},
 {"bn":15,"f":"101호","t":"살롱드유헤어","s":"2025-04-15","e":"2027-04-14","d":20000000,"r":1530000,"mg":50000,"pt":"후불","pd":"말일","ph":"010-9542-0336","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"102호","t":"신동민","s":"2024-09-19","e":"2026-09-18","d":15000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-7738-8083","em":"","n":"10월분 납입함,11월부터 말일로 변경","v":false,"dr":false},
+{"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"렌트프리기간(1개월) 24.09.02~24.10.01","v":false,"dr":false},
 {"bn":15,"f":"103호","t":"김일섭","s":"2024-09-02","e":"2026-09-01","d":20000000,"r":1500000,"mg":100000,"pt":"후불","pd":"말일","ph":"010-3894-7044","em":"","n":"","v":false,"dr":false,"rfS":"2024-09-02","rfE":"2024-10-01"},
 {"bn":15,"f":"201호","t":"아이디얼핏","s":"2026-01-02","e":"2028-01-01","d":20000000,"r":2020000,"mg":130000,"pt":"후불","pd":"말일","ph":"010-3124-0120","em":"","n":"관리비=주차비 3만원 포함(vat별도),","v":false,"dr":false},
 {"bn":15,"f":"301호","t":"한울이앤씨(직영)","s":"2025-09-01","e":"2027-08-31","d":20000000,"r":2300000,"mg":100000,"pt":"후불","pd":"20일","ph":"","em":"","n":"","v":false,"dr":true},
@@ -4677,9 +4775,13 @@ var _EXCEL_LEASE_DATA=[
 {"bn":15,"f":"402호","t":"하사도(주택)","s":"2025-09-20","e":"2026-09-19","d":10000000,"r":650000,"mg":50000,"pt":"후불","pd":"20일","ph":"010-8563-4142","em":"","n":"","v":false,"dr":false},
 {"bn":15,"f":"501호","t":"김시현(주택)","s":"2026-02-14","e":"2027-02-13","d":30000000,"r":1100000,"mg":100000,"pt":"후불","pd":"14일","ph":"010-9931-8193","em":"","n":"","v":false,"dr":false},
 {"bn":17,"f":"1층","t":"연남 허니 밀크","s":"2024-04-29","e":"2028-04-28","d":30000000,"r":2600000,"mg":250000,"pt":"선불","pd":"29일","ph":"010-6330-8758(남편)","em":"","n":"","v":false,"dr":false},
+{"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"~10.29 렌트프리 기간","v":false,"dr":false},
 {"bn":17,"f":"3층","t":"김도형(점장)","s":"2024-09-30","e":"2026-09-29","d":30000000,"r":2400000,"mg":100000,"pt":"선불","pd":"30일","ph":"010-2655-1141","em":"changjo1989@naver.com","n":"","v":false,"dr":false,"rfS":"2024-09-30","rfE":"2024-10-29"},
+{"bn":18,"f":"B1층(B)","t":"(미정)","s":"","e":"","d":0,"r":1000000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":18,"f":"1층(A)","t":"(미정)","s":"2025-08-04","e":"2027-08-03","d":0,"r":2500000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":18,"f":"1층(B)","t":"퍼스널랭귀지","s":"2025-08-04","e":"2027-08-03","d":30000000,"r":2200000,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"","v":false,"dr":false},
 {"bn":18,"f":"2층","t":"(주)십사일동안","s":"2025-07-31","e":"2027-06.30","d":40000000,"r":4000000,"mg":300000,"pt":"","pd":"말일","ph":"","em":"","n":"","v":false,"dr":false},
+{"bn":23,"f":"지하1층","t":"(미정)","s":"2026-04-15","e":"2028-04-14","d":40000000,"r":3000000,"mg":500000,"pt":"선불","pd":"25일","ph":"길현준 010-2925-8533","em":"","n":"","v":false,"dr":false},
 {"bn":23,"f":"1층","t":"안짱","s":"2024-09-23","e":"2026-09-22","d":50000000,"r":3350000,"mg":0,"pt":"선불","pd":"25일","ph":"안태희대표 010-4600-2522\n정혜진팀장 010-7139-4600","em":"hyejin@richnmedia.co.kr","n":"","v":false,"dr":false},
 {"bn":23,"f":"2층","t":"스튜디오에이콘","s":"2025-01-10","e":"2027-01-09","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25일","ph":"김선구 010-9078-3538","em":"dotori@studioacorn.com","n":"주차 1대","v":false,"dr":false},
 {"bn":23,"f":"3층","t":"요쿠스","s":"2023-11-16","e":"2028-05-15","d":50000000,"r":4950000,"mg":0,"pt":"선불","pd":"25일","ph":"최창훈대표 010-2537-4435\n오종근이사 010-4966-4110","em":"changhoon.choi@jocoos.com","n":"주차 1대","v":false,"dr":false},
@@ -4714,14 +4816,13 @@ var _EXCEL_LEASE_DATA=[
 {"bn":24,"f":"1층","t":"백은경(미용실)","s":"2024-09-20","e":"2026-09-19","d":70000000,"r":5500000,"mg":0,"pt":"선불","pd":"20일","ph":"010-4531-8498","em":"","n":"개인 미용실","v":false,"dr":false,"rfS":"2024-09-20","rfE":"2024-12-19"},
 {"bn":24,"f":"4층","t":"슈퍼진스","s":"2024-06-03","e":"2026-06-02","d":56000000,"r":4500000,"mg":0,"pt":"선불","pd":"1일","ph":"최수만 팀장 010-3774-2328","em":"","n":"1층 제외 전층 사용\n) 8/1부터 임대료 부과","v":false,"dr":false,"rfS":"2024-06-03","rfE":"2024-07-31"},
 {"bn":29,"f":"통임대","t":"주식회사 포도클럽","s":"2025-05-23","e":"2030-05-22","d":560000000,"r":44000000,"mg":0,"pt":"선불","pd":"23일","ph":"010-8620-7489 (염환아 원장님)","em":"podo.pay@gmail.com","n":"* 특약사항 (차임 조건)\n2025-05-23 ~ 2028-05-22 차임 : 44,000,000원(부가세별도)\n2028-05-23 ~ 2030-05-22 차임 : 46,480,000원(부가세별도)","v":false,"dr":false},
-{"bn":30,"f":"통임대","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
-{"bn":31,"f":"지하2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
-{"bn":31,"f":"지하1층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
+{"bn":30,"f":"B1~4층","t":"주식회사 압구정파인만교육","s":"2025-10-31","e":"2028-10-30","d":330000000,"r":25000000,"mg":0,"pt":"선불","pd":"말일","ph":"파인만 송요나 팀장 010 6368 3544","em":"","n":"","v":false,"dr":false},
+{"bn":31,"f":"B1~B2층","t":"작심스터디카페","s":"2024-09-25","e":"2026-09-24","d":0,"r":10000000,"mg":0,"pt":"","pd":"","ph":"기진영 매니저, 010-6412-0715","em":"","n":"","v":false,"dr":false},
 {"bn":31,"f":"1층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":30000000,"r":3165000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"3층","t":"오수진 (GLP) 아카데미","s":"2026-04-01","e":"2028-03-31","d":20000000,"r":3165000,"mg":200000,"pt":"선불","pd":"30일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"4층","t":"오수진 (GLP) 아카데미","s":"2026-02-01","e":"2028-03-31","d":30000000,"r":3500000,"mg":200000,"pt":"선불","pd":"1일","ph":"010-5269-8687","em":"ktym727@naver.com","n":"","v":false,"dr":false},
 {"bn":31,"f":"2층","t":"나선영 (에이탑Atop)학원","s":"2024-11-10","e":"2026-11-09","d":30000000,"r":2850000,"mg":300000,"pt":"선불","pd":"10일","ph":"010-5703-7164","em":"pdhnsy@gmail.com","n":"","v":false,"dr":false},
-{"bn":32,"f":"지하1층\n~\n5층","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07일","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"","v":false,"dr":false},
+{"bn":32,"f":"B1~5층","t":"그랑파리","s":"2026-01-07","e":"2029-01-06","d":400000000,"r":28000000,"mg":0,"pt":"선불","pd":"07일","ph":"최윤영 대표님 010-9002-8863","em":"hichois@naver.com","n":"","v":false,"dr":false},
 {"bn":33,"f":"지하1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},
 {"bn":33,"f":"1층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"25.12.31 퇴거예정","v":true,"dr":false},
 {"bn":33,"f":"3층","t":"","s":"","e":"","d":0,"r":0,"mg":0,"pt":"","pd":"","ph":"","em":"","n":"퇴거완료","v":true,"dr":false},
@@ -4845,7 +4946,7 @@ function rdLease(){
       const ptBg=l.paytype==='선불'?'background:#fff8d0;':l.paytype==='후불'?'background:#e4f3ea;':'';
       html+=`<tr ondblclick="editLease(${l.id})" style="cursor:pointer;${isV?'background:var(--w2);opacity:.75':''}" title="더블클릭 수정" data-presence-type="lease" data-presence-id="${l.id}">
         <td style="text-align:center;white-space:normal;word-break:keep-all;line-height:1.25">${fmtFloor(l.floor)}</td>
-        <td style="padding:2px 3px;min-width:70px;max-width:120px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':(l.tenant+(l.renewCount?` <span onclick="event.stopPropagation();openRenewLease(${l.id})" style="cursor:pointer;font-size:9px;color:#3C3489;background:#EEEDFE;border-radius:3px;padding:1px 4px;font-weight:500" title="계약 이력 보기">${l.renewCount}회</span>`:''))}</td>
+        <td style="padding:2px 3px;min-width:70px;max-width:180px;word-break:keep-all;white-space:normal;line-height:1.3;font-weight:${isV||isDr?400:500}">${isV?'<span class="bg bg-vacant">공실</span>':isDr?'<span class="bg bg-gr">직영</span>':(l.tenant+(l.renewCount?` <span onclick="event.stopPropagation();openRenewLease(${l.id})" style="cursor:pointer;font-size:9px;color:#3C3489;background:#EEEDFE;border-radius:3px;padding:1px 4px;font-weight:500" title="계약 이력 보기">${l.renewCount}회</span>`:''))}</td>
         <td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.start)}</td><td class="mono" style="width:80px;padding-left:4px;padding-right:4px">${fdS(l.end)}</td>
         <td class="narrow-col">${l.end&&!isV&&!isDr?(ddBg(d,'lease')+(d<=90?`<div style="margin-top:2px"><span onclick="event.stopPropagation();openRenewLease(${l.id})" style="cursor:pointer;font-size:9px;color:#185FA5;background:#e6f1fb;border:1px solid #85b7eb;border-radius:3px;padding:1px 5px;font-weight:600;white-space:nowrap">연장</span></div>`:'')):'—'}</td>
         <td class="mono right money-col wide">${fm(l.deposit)}</td><td class="mono right money-col" style="${_isRF?'color:#b45309;font-weight:600':_isBumped?'color:#075985;font-weight:600':''}" title="${_isRF?'렌트프리 기간':_isBumped?'인상구간 반영 (기본: '+fm(l.rent)+')':''}">${_isRF?'<span style="font-size:10px">렌트프리</span>':fm(_dispRent)}${_isBumped&&!_isRF?'<span style="font-size:8px;color:#075985;vertical-align:super"> ↑</span>':''}</td><td class="mono right money-col" style="${_isRF?'color:#b45309':_isBumped?'color:#075985;font-weight:600':''}" title="${_isBumped&&!_isRF?'인상구간 반영 (기본: '+fm(l.mgmt)+')':''}">${_isRF?'—':fm(_dispMgmt)}${_isBumped&&!_isRF&&_curRate.mgmt!==l.mgmt?'<span style="font-size:8px;color:#075985;vertical-align:super"> ↑</span>':''}</td>
@@ -5263,7 +5364,19 @@ function _syncLeaseFromExcel(){
     // 머지: 이미 있는 층은 건너뛰고, 없는 층만 추가
     items.forEach(function(d){
       var key=bId+'_'+d.f;
-      if(_existLease[key]){ updated++; return; } // 이미 존재 → 유저 데이터 보존
+      if(_existLease[key]){
+        // sync 데이터로 기존 항목 덮어쓰기 (sync = source of truth)
+        var el=_existLease[key];
+        el.floor=d.f;
+        el.tenant=d.dr?'직영':(d.t||el.tenant);
+        if(d.s)el.start=d.s;if(d.e)el.end=d.e;
+        if(d.d!=null)el.deposit=d.d;if(d.r!=null)el.rent=d.r;if(d.mg!=null)el.mgmt=d.mg;
+        el.paytype=d.dr?'직영':(d.pt||el.paytype);
+        if(d.pd)el.payday=d.pd;if(d.ph)el.phone=d.ph;if(d.em)el.email=d.em;
+        if(d.n)el.note=d.n;
+        if(d.rfS)el.rfStart=d.rfS;if(d.rfE)el.rfEnd=d.rfE;
+        updated++; return;
+      }
       if(_delSet[key]){ skipped++; return; } // 유저가 삭제한 항목 → 다시 추가 안함
       var lease={
         id:nid(), bId:bId, floor:d.f,
@@ -5342,6 +5455,11 @@ function _syncLeaseFromExcel(){
     }
   });
   DB.leases=_dedup;
+  // ★ _deletedLeases에 등록된 항목은 DB에서 강제 제거 (sync 덮어쓰기 후에도 보호)
+  if(DB._deletedLeases && DB._deletedLeases.length){
+    var _dlClean={};DB._deletedLeases.forEach(function(k){_dlClean[k]=1;});
+    DB.leases=DB.leases.filter(function(l){return !_dlClean[l.bId+'_'+l.floor];});
+  }
   sv(); try{rdLease();}catch(e){} try{rdFixed();}catch(e){} upBadges();
 }
 function saveLease(){
@@ -12201,7 +12319,7 @@ function rdExpire(){
   // ★ 팀 필터
   const _tBids=new Set(_teamBuildings().map(b=>b.id));
   // Left panel: lease expiry
-  const leRows=DB.leases.filter(l=>_tBids.has(l.bId)&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실'&&l.end&&dday(l.end)>=0&&dday(l.end)<=90).sort((a,b)=>dday(a.end)-dday(b.end));
+  const leRows=DB.leases.filter(l=>_tBids.has(l.bId)&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실'&&l.end&&dday(l.end)>=-30&&dday(l.end)<=90).sort((a,b)=>dday(a.end)-dday(b.end));
   const lp=$('expire-lease-list');
   if(lp){lp.innerHTML=leRows.length?leRows.map(l=>{const d=dday(l.end);return`<div style="padding:4px 5px;border-bottom:1px solid var(--ln);font-size:11px">
     <div style="display:flex;justify-content:space-between"><strong>${bs(l.bId)}</strong>${ddBg(d,'lease')}</div>
@@ -12225,7 +12343,7 @@ function rdExpire(){
       if(!e)return`<td class="exp-cell ec-add" onclick="expAddInline(${b.id},'${t}')">+</td>`;
       const d=dday(e.date),cls=e.na?'ec-na':expCls(d);
       const txt=e.na?'':fdS(e.date);
-      const dBadge=(!e.na&&d<=30)?`<br><span style="display:inline-block;background:#f87171;color:#fff;font-size:9px;font-weight:600;padding:1px 4px;border-radius:6px;margin-top:2px">D-${d}</span>`:'';
+      const dBadge=(!e.na&&d<=30)?`<br><span style="display:inline-block;background:${d<0?'#dc2626':'#f87171'};color:#fff;font-size:9px;font-weight:600;padding:1px 4px;border-radius:6px;margin-top:2px">${d>=0?'D-'+d:'D+'+Math.abs(d)}</span>`:'';
       return`<td class="exp-cell ${cls}" ondblclick="expEditDate(event,${e.id})" oncontextmenu="event.preventDefault();expDelItem(${e.id})" title="더블클릭: 수정 / 우클릭: 삭제" data-presence-type="exp" data-presence-id="${e.id}">${txt}${dBadge}</td>`;
     }
     function noteCell(t){
@@ -12502,7 +12620,7 @@ function rdCal(){
     } else {
       _blds=(DB.buildings||[]).filter(function(b){return !b._deleted&&(b.team||2)===_calCurTeam;});
     }
-    _blds.sort(function(a,b){var ta=(a.team||2),tb=(b.team||2);if(ta!==tb)return ta-tb;return (a.id||0)-(b.id||0);});
+    _blds.sort(function(a,b){return (a.id||0)-(b.id||0);});
     var _sbH='';
     _blds.forEach(function(b){
       var sel=(bf===b.id);
@@ -12648,7 +12766,7 @@ function rdCalM(y,m,evs){
       var evHtml=c.de.slice(0,3).map(function(e){
         var tagCls=e.bId?'cev-tag bldg':'cev-tag all';
         var tagTxt=e.bId?bs(e.bId).substring(0,4):'전체';
-        return'<div class="cev '+(e.status==='done'?'cev-rd':'cev-bl')+'" data-presence-type="cal" data-presence-id="'+e.id+'"><span class="'+tagCls+'">'+tagTxt+'</span>'+esc(e.title||'')+'</div>';
+        return'<div class="cev '+(e.status==='done'?'cev-rd':'cev-bl')+'" data-presence-type="cal" data-presence-id="'+e.id+'"><span class="'+tagCls+'">'+tagTxt+'</span><span class="cev-txt">'+esc(e.title||'')+'</span></div>';
       }).join('');
       var more=totalC>3?'<div class="cev-cnt">+'+(totalC-3)+'</div>':'';
       cells+=`<div class="cday${c.isT?' today':''}${c.isSel?' sel':''}" onclick="calDayClick('${c.ds}')" ${hidden?'style="display:none"':''}>
@@ -17998,16 +18116,7 @@ function buildDemoDB(){
     ],
     fixedDone:{},
     fixedHistory:[],
-    calEvents:[
-      {id:1,date:fd(today),bId:16,title:'엘리베이터 정기점검',status:'todo',user:'방문자',_created:'4/10 10:00'},
-      {id:2,date:fd(today),bId:19,title:'소방 안전점검',status:'done',user:'방문자',_created:'4/8 14:20'},
-      {id:3,date:addDays(1),bId:0,title:'건물전체 공지사항 전달',status:'todo',user:'방문자'},
-      {id:4,date:addDays(-1),bId:16,title:'3층 누수점검',status:'todo',user:'방문자'},
-      {id:5,date:addDays(-3),bId:21,title:'임차인 미팅 - 계약갱신 협의',status:'done',user:'방문자'},
-      {id:6,date:addDays(-7),bId:20,title:'저수조 청소 업체 견적 요청',status:'todo',user:'방문자'},
-      {id:7,date:addDays(3),bId:22,title:'정화조 청소 일정 조율',status:'todo',user:'방문자'},
-      {id:8,date:addDays(7),bId:16,title:'월간보고서 송부',status:'todo',user:'방문자'},
-    ],
+    calEvents:[],
     memos:{},
     memoCats:{
       16:{password:'',cctv:'',fire:'소방: 하이119, 02-6471-3119',elevator:'승강기: 현대el, 최재운 기사',water:'수도요금 청구서: 짝수월\n검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',etc:'전기안전관리자: 한빛티이씨\n주차기: 엡스\n저수조: 명성종합환경\n정화조: 성덕실업'},
@@ -18156,10 +18265,16 @@ async function enterApp(){
   const _renderers={dash:rdDash,lease:rdLease,expire:rdExpire,cal:rdCal,fixed:rdFixed,memo:rdMemo,report:rdReport,invoice:initInvoice,water:rdWater,electric:rdElectric,utility:function(){rdWater();rdElectric();},pmemo:rdPMemo,inspect:rdInspect,tax:rdTax,drive:rdDrive,admin:loadAdminUsers};
   window._renderCurrentTab=function(tab){
     try{ _renderers[tab]?.(); }
-    catch(e){ console.error('탭 렌더 실패',tab,e); try{ rdLease(); }catch(_){} }
+    catch(e){ console.error('탭 렌더 실패',tab,e); }
     // ★ 렌더 후 presence 인디케이터 복원 (DOM 재생성으로 사라진 배지 복구)
     try{ if(typeof _renderEditIndicators==='function') _renderEditIndicators(); }catch(_){}
   };
+  // ★ 테스트 일정 정리 (user='방문자'인 초기 데이터 삭제)
+  if(DB.calEvents&&DB.calEvents.length){
+    var _beforeCal=DB.calEvents.length;
+    DB.calEvents=DB.calEvents.filter(function(e){return e.user!=='방문자';});
+    if(DB.calEvents.length<_beforeCal) console.log('[마이그레이션] 테스트 일정 '+(_beforeCal-DB.calEvents.length)+'건 삭제');
+  }
   // ★ 팀 초기화: 기존 건물에 team 필드 배정 + 토글 상태 복원
   _ensureBuildingTeams();
   _initTeam();
@@ -18849,7 +18964,7 @@ function rdDash(){
     var leaseSoon=[],insureSoon=[];
     // 1) 임대 만료
     if(DB.leases) DB.leases.forEach(function(l){
-      var d=dday(l.end); if(_tBids.has(l.bId)&&d>=0&&d<=30){
+      var d=dday(l.end); if(_tBids.has(l.bId)&&d>=-30&&d<=30){
         var bldg=DB.buildings.find(function(b){return b.id===l.bId;});
         leaseSoon.push({d:d, label:(bldg?bldg.name.replace(/^\d+\./,''):'')+' '+l.floor+' '+(l.tenant||'')});
       }
@@ -18858,14 +18973,14 @@ function rdDash(){
     if(DB.expires) DB.expires.forEach(function(e){
       if(!_tBids.has(e.bId)) return;
       var ed=e.date; if(!ed) return;
-      var d=dday(ed); if(d>=0&&d<=30){
+      var d=dday(ed); if(d>=-30&&d<=30){
         var bldg=DB.buildings.find(function(b){return b.id===e.bId;});
         insureSoon.push({d:d, label:(bldg?bldg.name.replace(/^\d+\./,''):'')+' '+(e.type||'')});
       }
     });
     leaseSoon.sort(function(a,b){return a.d-b.d;});
     insureSoon.sort(function(a,b){return a.d-b.d;});
-    var mkRow=function(it,cls){return '<div style="padding:3px 0;display:flex;gap:6px;align-items:center"><span class="'+cls+'" style="font-size:10px;min-width:32px;text-align:center">D-'+it.d+'</span><span style="font-size:12px">'+esc(it.label)+'</span></div>';};
+    var mkRow=function(it,cls){var dLabel=it.d>=0?'D-'+it.d:'D+'+Math.abs(it.d);var bgCls=it.d<0?'bg bg-rd':cls;return '<div style="padding:3px 0;display:flex;gap:6px;align-items:center"><span class="'+bgCls+'" style="font-size:10px;min-width:32px;text-align:center'+(it.d<0?';background:#dc2626;color:#fff':'')+'">'+dLabel+'</span><span style="font-size:12px">'+esc(it.label)+'</span></div>';};
     expLease.innerHTML=leaseSoon.length?leaseSoon.map(function(it){return mkRow(it,'bg bg-rd');}).join(''):'<span style="color:var(--gn);font-size:11px">✓ 없음</span>';
     expInsure.innerHTML=insureSoon.length?insureSoon.map(function(it){return mkRow(it,'bg bg-yl');}).join(''):'<span style="color:var(--gn);font-size:11px">✓ 없음</span>';
   }
@@ -18929,43 +19044,16 @@ function _renderWeatherOM(el,d){
     var wind=d.current.wind_speed_10m;
     var wInfo=_weatherInfo(wc);
     var daily=d.daily;
-    var html='<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">';
-    html+='<span style="font-size:36px;line-height:1">'+wInfo.ico+'</span>';
-    html+='<div><div style="font-size:20px;font-weight:800;color:#0c4a6e">'+temp+'°</div>';
-    html+='<div style="font-size:11px;color:#0369a1">'+wInfo.txt+'</div></div>';
-    html+='<div style="font-size:11px;color:#0369a1;margin-left:8px;line-height:1.6">습도 '+humidity+'%<br>바람 '+wind+'km/h</div>';
-    html+='</div>';
-    // 시간별 날씨 (오늘)
-    if(d.hourly&&d.hourly.time){
-      var nowH=new Date().getHours();
-      var todayStr=daily.time[0];
-      html+='<div style="display:flex;gap:3px;overflow-x:auto;padding:6px 0 2px;margin-top:4px;border-top:1px solid rgba(14,116,144,.15)">';
-      for(var h=0;h<24;h++){
-        var hIdx=h;
-        if(hIdx>=d.hourly.time.length) break;
-        var hTime=d.hourly.time[hIdx];
-        if(!hTime||!hTime.startsWith(todayStr)) continue;
-        var isPast=h<nowH;
-        var isNow=h===nowH;
-        var hTemp=Math.round(d.hourly.temperature_2m[hIdx]);
-        var hWc=d.hourly.weather_code[hIdx];
-        var hInfo=_weatherInfo(hWc);
-        var hRain=d.hourly.precipitation_probability?d.hourly.precipitation_probability[hIdx]:0;
-        var opacity=isPast?'opacity:.4':'';
-        var border=isNow?'border:1.5px solid #0ea5e9':'';
-        html+='<div style="text-align:center;min-width:36px;padding:3px 2px;background:rgba(255,255,255,.45);border-radius:6px;flex-shrink:0;'+opacity+';'+border+'">';
-        html+='<div style="font-size:9px;color:#0369a1;font-weight:'+(isNow?'700':'500')+'">'+h+'시</div>';
-        html+='<div style="font-size:14px;line-height:1.1">'+hInfo.ico+'</div>';
-        html+='<div style="font-size:9px;font-weight:700;color:#0c4a6e">'+hTemp+'°</div>';
-        if(hRain>0) html+='<div style="font-size:8px;color:#0369a1">'+hRain+'%</div>';
-        html+='</div>';
-      }
-      html+='</div>';
-    }
-    // 주간 예보
-    html+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">';
+    // 컴팩트: 현재날씨 + 주간예보 한 줄
+    var html='<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">';
+    html+='<span style="font-size:28px;line-height:1">'+wInfo.ico+'</span>';
+    html+='<div><span style="font-size:18px;font-weight:800;color:#0c4a6e">'+temp+'°</span>';
+    html+=' <span style="font-size:10px;color:#0369a1">'+wInfo.txt+' · 습도'+humidity+'% · 바람'+wind+'km/h</span></div>';
+    html+='<div style="flex:1"></div>';
+    // 주간 예보 (가로 한 줄)
+    html+='<div style="display:flex;gap:2px">';
     var _dayN=['일','월','화','수','목','금','토'];
-    for(var i=0;i<daily.time.length;i++){
+    for(var i=0;i<Math.min(daily.time.length,7);i++){
       var dWc=daily.weather_code[i];
       var dInfo=_weatherInfo(dWc);
       var hi=Math.round(daily.temperature_2m_max[i]);
@@ -18973,15 +19061,14 @@ function _renderWeatherOM(el,d){
       var rain=daily.precipitation_probability_max?daily.precipitation_probability_max[i]:0;
       var ddt=new Date(daily.time[i]+'T00:00:00');
       var dlbl=i===0?'오늘':i===1?'내일':_dayN[ddt.getDay()];
-      var ddate=(ddt.getMonth()+1)+'/'+ddt.getDate();
-      html+='<div style="text-align:center;padding:5px 6px;background:rgba(255,255,255,.5);border-radius:8px;min-width:48px;flex:1">';
-      html+='<div style="font-size:10px;color:#0369a1;font-weight:600">'+dlbl+'</div>';
-      html+='<div style="font-size:8px;color:#64748b">'+ddate+'</div>';
-      html+='<div style="font-size:18px;line-height:1.2">'+dInfo.ico+'</div>';
-      html+='<div style="font-size:10px;font-weight:700;color:#0c4a6e">'+hi+'°<span style="color:#64748b;font-weight:400"> '+lo+'°</span></div>';
-      if(rain>0) html+='<div style="font-size:9px;color:#0369a1">💧'+rain+'%</div>';
+      html+='<div style="text-align:center;padding:3px 5px;background:rgba(255,255,255,.5);border-radius:6px;min-width:38px">';
+      html+='<div style="font-size:9px;color:#0369a1;font-weight:600">'+dlbl+'</div>';
+      html+='<div style="font-size:14px;line-height:1.1">'+dInfo.ico+'</div>';
+      html+='<div style="font-size:9px;font-weight:700;color:#0c4a6e">'+hi+'°<span style="color:#94a3b8"> '+lo+'°</span></div>';
+      if(rain>0) html+='<div style="font-size:8px;color:#0369a1">💧'+rain+'%</div>';
       html+='</div>';
     }
+    html+='</div>';
     html+='</div>';
     el.innerHTML=html;
   }catch(e){console.warn('[날씨] 파싱 오류:',e);_loadWeatherWttr(el);}
