@@ -168,7 +168,7 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .exp-cell.ec-add{color:#b0b8c4;cursor:pointer;font-size:14px;background:#fafbfc}
 .exp-cell.ec-add:hover{background:#eef2f7;color:#4a6fa5}
 .exp-cell.ec-na,.exp-note-cell.ec-na{background:#d0d5dd !important;color:#8893a0 !important}
-.exp-tbl td.exp-note-cell{font-size:11px;color:#64748b;cursor:pointer;background:#fff;transition:background .15s;overflow:hidden;white-space:normal;word-break:break-all;line-height:1.3}
+.exp-tbl td.exp-note-cell{font-size:11px;color:#64748b;cursor:pointer;background:#fff;transition:background .15s;overflow:hidden;white-space:pre-line;word-break:break-all;line-height:1.3}
 .exp-tbl td.exp-note-cell:hover{background:#f5f7fa}
 .exp-tbl tbody tr:hover td{background:#eff6ff !important}
 .exp-tbl tbody tr:hover .col-b{background:#e0ecff !important}
@@ -1026,6 +1026,7 @@ body.view-only .vo-tag{display:inline-block !important}
     <h2>📋 대시보드</h2>
     <div style="flex:1"></div>
     <span style="font-size:11px;color:var(--t3)" id="dash-date"></span>
+    <button onclick="importBuildingCareEvents()" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid #d97706;background:#fef3c7;color:#92400e;cursor:pointer;font-weight:600" title="빌딩케어 4월 일정 가져오기">📥 빌딩케어 가져오기</button>
   </div>
   <div class="pb" style="display:flex;gap:0;padding:0;overflow:hidden;flex:1">
     <!-- 좌측: 인수인계 사이드 -->
@@ -1100,6 +1101,20 @@ body.view-only .vo-tag{display:inline-block !important}
               <button onclick="loadDashNews()" style="font-size:9px;padding:2px 8px;border-radius:4px;border:1px solid var(--ln);cursor:pointer;background:transparent;color:var(--t3)">새로고침</button>
             </div>
             <div id="dash-news" style="font-size:12px;color:var(--t2);max-height:150px;overflow-y:auto">뉴스 로딩 중...</div>
+          </div>
+        </div>
+        <!-- 4행: 빠른 계좌 -->
+        <div style="margin-top:10px">
+          <div style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:10px 12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer" onclick="var c=document.getElementById('dash-acct-wrap');var a=this.querySelector('.acct-arrow');if(c.style.display==='none'){c.style.display='';a.textContent='▼';}else{c.style.display='none';a.textContent='▶';}">
+              <span class="acct-arrow" style="font-size:10px;color:var(--t3)">▼</span><span style="font-size:14px;font-weight:600">🏦 빠른 계좌</span>
+              <button onclick="event.stopPropagation();acctAddPopup()" style="font-size:9px;padding:2px 8px;border-radius:4px;border:1px solid var(--ln);cursor:pointer;background:transparent;color:var(--t3)" title="계좌 추가">+ 추가</button>
+              <div style="display:flex;gap:2px;margin-left:auto" id="dash-acct-mode-btns"></div>
+              <div style="display:flex;gap:2px" id="dash-acct-btns"></div>
+            </div>
+            <div id="dash-acct-wrap">
+              <div id="dash-acct-content" style="font-size:12px;color:var(--t2);max-height:280px;overflow-y:auto"></div>
+            </div>
           </div>
         </div>
       </div><!-- 우측 끝 -->
@@ -2740,6 +2755,10 @@ function _normFloor(f){
   if(s==='통임대') s='전체';
   // 공백 제거
   s=s.replace(/\s+/g,'');
+  // 중간 '층' 제거: 4층,5층 → 4,5층 / 6층~7층 → 6~7층
+  s=s.replace(/층([,~])/g,'$1');
+  // 콤마로 연결된 숫자를 ~ 로 통일: 4,5층 → 4~5층 / 6,7층 → 6~7층
+  s=s.replace(/(\d),(?=\d)/g,'$1~');
   return s;
 }
 function _mergeArrayById(cloudArr, localArr){
@@ -3033,6 +3052,8 @@ function _rtApplyRow(row){
       if(l.floor&&l.floor.indexOf('\n')>=0)l.floor=l.floor.replace(/\n/g,',');
       if(l.floor)l.floor=l.floor.replace(/^b(\d)/,'B$1').replace(/([,~])b(\d)/g,'$1B$2');
       if(l.floor==='통임대')l.floor='전체';
+      // 중간 '층' 제거 + 콤마→틸드 통일 (4층,5층→4~5층, 6,7층→6~7층)
+      if(l.floor)l.floor=l.floor.replace(/\s+/g,'').replace(/층([,~])/g,'$1').replace(/(\d),(?=\d)/g,'$1~');
       var k=l.bId+'_'+_normFloor(l.floor);
       if(_dk[k]){
         var prev=_dk[k];
@@ -3332,6 +3353,8 @@ function _renderEditIndicators(){
   // 기존 스타일 복원
   document.querySelectorAll('[data-presence-editing]').forEach(function(el){
     el.style.outline='';el.style.outlineOffset='';el.style.boxShadow='';
+    // TR인 경우 각 TD도 복원
+    if(el.tagName==='TR') Array.from(el.cells||[]).forEach(function(td){td.style.outline='';td.style.outlineOffset='';td.style.boxShadow='';});
     el.removeAttribute('data-presence-editing');
   });
   // 편집 항목 수집: _presenceState + 자기 편집(_myEditingCtx 직접 사용)
@@ -3353,9 +3376,19 @@ function _renderEditIndicators(){
     targets.forEach(function(target){
       var color=item.isSelf?'rgba(147,197,253,.55)':'#ef4444';
       var outlineColor=item.isSelf?'rgba(147,197,253,.5)':'#ef4444';
-      target.style.outline='2px solid '+outlineColor;
-      target.style.outlineOffset='-1px';
-      target.style.boxShadow=item.isSelf?'inset 0 0 0 1px rgba(147,197,253,.18)':'inset 0 0 0 2px rgba(239,68,68,.25)';
+      var shadow=item.isSelf?'inset 0 0 0 1px rgba(147,197,253,.18)':'inset 0 0 0 2px rgba(239,68,68,.25)';
+      // TR은 border-collapse:collapse에서 outline이 안 보이므로 각 TD에 적용
+      if(target.tagName==='TR'){
+        Array.from(target.cells||[]).forEach(function(td){
+          td.style.outline='2px solid '+outlineColor;
+          td.style.outlineOffset='-1px';
+          td.style.boxShadow=shadow;
+        });
+      } else {
+        target.style.outline='2px solid '+outlineColor;
+        target.style.outlineOffset='-1px';
+        target.style.boxShadow=shadow;
+      }
       target.setAttribute('data-presence-editing','1');
       var badgeParent=target.tagName==='TR'?(target.cells[0]||target):target;
       if(badgeParent.style.position!=='relative'&&badgeParent.style.position!=='absolute') badgeParent.style.position='relative';
@@ -3670,14 +3703,14 @@ let _idbLoaded=false;
           try{
             var _v32=0;
             // 1) _deletedLeases에서 잘못된 키 제거 (정상 데이터가 필터링되는 문제)
-            var _badDL=['1_6~7층','1_4,5층'];
+            var _badDL=['1_6~7층','1_4,5층','1_6,7층','1_4층,5층','1_4~5층'];
             if(DB._deletedLeases){
               var _dlBefore=DB._deletedLeases.length;
               DB._deletedLeases=DB._deletedLeases.filter(function(k){return _badDL.indexOf(k)<0;});
               _v32+=(_dlBefore-DB._deletedLeases.length);
             }
             // 2) 트러스트 4,5층 + 6~7층 누락 시 mkDef에서 복원
-            var _hasTrust45=DB.leases.some(function(l){return l.bId===1&&_normFloor(l.floor)==='4,5층';});
+            var _hasTrust45=DB.leases.some(function(l){return l.bId===1&&_normFloor(l.floor)==='4~5층';});
             if(!_hasTrust45){
               var _nid=Math.max.apply(null,DB.leases.map(function(l){return l.id;}))+1;
               DB.leases.push({id:_nid,bId:1,floor:'4,5층',tenant:'세무법인 디엘지(DLG)',start:'2024-11-19',end:'2026-11-18',deposit:200000000,rent:12000000,mgmt:1000000,paytype:'선불',payday:'19일',phone:'대표님 010-9344-1543',email:'',note:'렌트프리(2개월) 24.11.19~25.01.18',_edit:new Date().toLocaleString()});
@@ -3728,6 +3761,50 @@ let _idbLoaded=false;
           if(_v33>0){sv();console.log('[patch v33] contact 갱신 '+_v33+'건');}
           localStorage.setItem('_patch_v33','1');
         }catch(e){console.error('[patch v33]',e);}
+      }
+      /* ── patch v34: 1팀 만료일 비고/특이사항 누락 보완 ── */
+      if(!localStorage.getItem('_patch_v34')){
+        try{
+          var _v34=0;
+          // 정화조/저수조 비고 업데이트 (빈 note만 채움)
+          var _noteMap={
+            105:'24.09.12 준공',108:'한성성업 02-546-7164~6',111:'한성성업 02-546-7164~6',
+            115:'정익산업 02-518-8590',120:'성덕실업㈜ 02-3473-0400\n저수조: 010-2014-2250\n정화조청소 원장님 오프날 진행',
+            123:'정익산업 02-518-8590',125:'정익산업 02-518-8590',128:'정익산업 02-518-8590',
+            131:'정익산업 02-518-8590',137:'정익산업 02-518-8590',141:'선흥환경 02-408-8051',
+            143:'마포환경산업 02-376-4074',146:'승보환경 02-716-5411',149:'마포환경산업 02-376-4074'
+          };
+          // note 보강 (기존 note에 추가)
+          var _noteAppend={
+            102:'\n6개월 연장 신청',113:'마포환경산업 02-376-4074\n',
+            118:'\n2025-12-16 청소 완료',134:'승보환경 02-716-5411\n'
+          };
+          (DB.expires||[]).forEach(function(e){
+            if(_noteMap[e.id]&&(!e.note||e.note.length===0)){e.note=_noteMap[e.id];_v34++;}
+            if(_noteAppend[e.id]){
+              var ap=_noteAppend[e.id];
+              if(ap.endsWith('\n')){if(e.note.indexOf(ap.trim())<0){e.note=ap+e.note;_v34++;}}
+              else{if(e.note.indexOf(ap.trim())<0){e.note=e.note+ap;_v34++;}}
+            }
+          });
+          // 특이사항 항목 추가 (해당 bId에 custom type이 없으면)
+          var _spList=[
+            {id:200,bId:19,type:'26.03.30 새벽 청소 완료 / 6개월 1회',date:'',note:''},
+            {id:201,bId:20,type:'25년 9월 10일 준공',date:'',note:''},
+            {id:202,bId:21,type:'26년도 정화조청소 신청완 > 일정 확인 후 연락',date:'',note:''},
+            {id:203,bId:22,type:'25.09.19 새벽',date:'',note:''},
+            {id:204,bId:26,type:'사용량이 많아 6개월에 한번씩 청소 진행',date:'',note:''},
+            {id:205,bId:29,type:'10.21 청소예정',date:'',note:''},
+            {id:206,bId:32,type:'정화조청소 연장신청 완',date:'',note:''}
+          ];
+          var _stdT=['승강기 보험','화재 보험','주차기 보험','저수조 청소','정화조 청소'];
+          _spList.forEach(function(sp){
+            var exists=DB.expires.some(function(e){return e.bId===sp.bId&&!_stdT.includes(e.type);});
+            if(!exists){DB.expires.push(sp);_v34++;}
+          });
+          if(_v34>0){sv();console.log('[patch v34] 1팀 비고/특이사항 '+_v34+'건 보완');}
+          localStorage.setItem('_patch_v34','1');
+        }catch(e){console.error('[patch v34]',e);}
       }
       try{ if(typeof _renderCurrentTab==='function' && typeof _tab!=='undefined') _renderCurrentTab(_tab); }catch(e){}
     }).catch(function(e){ console.warn('[IDB]',e); });
@@ -3861,24 +3938,26 @@ expires:[
   {id:39,bId:12,type:'승강기 보험',date:'2027-02-19',note:''},{id:40,bId:12,type:'화재 보험',date:'2041-02-24',note:''},{id:41,bId:12,type:'정화조 청소',date:'2027-02-28',note:''},
   {id:42,bId:13,type:'화재 보험',date:'2040-03-04',note:''},{id:43,bId:13,type:'정화조 청소',date:'2027-02-22',note:''},
   {id:44,bId:14,type:'승강기 보험',date:'2027-04-22',note:''},{id:45,bId:14,type:'화재 보험',date:'2041-01-14',note:''},{id:46,bId:14,type:'정화조 청소',date:'2027-04-16',note:''},
-  {id:100,bId:15,type:'승강기 보험',date:'2027-01-22',note:''},{id:101,bId:15,type:'화재 보험',date:'2027-02-02',note:''},{id:102,bId:15,type:'정화조 청소',date:'2026-05-31',note:'용도변경으로 6개월마다 청소필요'},
-  {id:103,bId:16,type:'승강기 보험',date:'2027-04-21',note:''},{id:104,bId:16,type:'화재 보험',date:'2031-01-23',note:''},{id:105,bId:16,type:'정화조 청소',date:'2026-09-12',note:''},
-  {id:106,bId:17,type:'승강기 보험',date:'2027-01-19',note:''},{id:107,bId:17,type:'화재 보험',date:'2041-01-19',note:''},{id:108,bId:17,type:'정화조 청소',date:'2026-08-10',note:''},
-  {id:109,bId:18,type:'승강기 보험',date:'2026-08-11',note:''},{id:110,bId:18,type:'화재 보험',date:'2028-09-27',note:''},{id:111,bId:18,type:'정화조 청소',date:'2026-06-29',note:''},
-  {id:112,bId:19,type:'화재 보험',date:'2040-11-14',note:''},{id:113,bId:19,type:'정화조 청소',date:'2026-09-30',note:'6개월 1회'},
-  {id:114,bId:20,type:'승강기 보험',date:'2026-08-14',note:''},{id:115,bId:20,type:'정화조 청소',date:'2026-09-10',note:''},
-  {id:116,bId:21,type:'승강기 보험',date:'2026-11-14',note:''},{id:117,bId:21,type:'화재 보험',date:'2038-05-12',note:''},{id:118,bId:21,type:'저수조 청소',date:'2026-06-16',note:'6개월 주기'},{id:119,bId:21,type:'주차기 보험',date:'2027-10-27',note:''},{id:120,bId:21,type:'정화조 청소',date:'2027-03-27',note:''},
-  {id:121,bId:22,type:'승강기 보험',date:'2026-05-18',note:''},{id:122,bId:22,type:'화재 보험',date:'2026-05-20',note:''},{id:123,bId:22,type:'정화조 청소',date:'2026-09-19',note:''},
-  {id:124,bId:23,type:'화재 보험',date:'2027-01-19',note:''},{id:125,bId:23,type:'정화조 청소',date:'2026-11-05',note:''},
-  {id:126,bId:24,type:'승강기 보험',date:'2026-06-18',note:''},{id:127,bId:24,type:'화재 보험',date:'2040-03-04',note:''},{id:128,bId:24,type:'정화조 청소',date:'2027-03-11',note:''},
-  {id:129,bId:25,type:'승강기 보험',date:'2026-07-30',note:''},{id:130,bId:25,type:'화재 보험',date:'2026-07-30',note:''},{id:131,bId:25,type:'정화조 청소',date:'2026-08-01',note:''},
-  {id:132,bId:26,type:'승강기 보험',date:'2026-06-02',note:''},{id:133,bId:26,type:'화재 보험',date:'2026-08-12',note:''},{id:134,bId:26,type:'정화조 청소',date:'2026-10-23',note:'6개월에 한번'},
-  {id:135,bId:27,type:'승강기 보험',date:'2026-08-11',note:''},{id:136,bId:27,type:'화재 보험',date:'2041-01-22',note:''},{id:137,bId:27,type:'정화조 청소',date:'2027-02-27',note:''},
-  {id:138,bId:28,type:'승강기 보험',date:'2026-10-23',note:''},{id:139,bId:28,type:'화재 보험',date:'2034-10-21',note:''},{id:140,bId:28,type:'저수조 청소',date:'2026-06-21',note:''},{id:141,bId:28,type:'정화조 청소',date:'2026-06-04',note:''},
-  {id:142,bId:29,type:'화재 보험',date:'2041-01-20',note:''},{id:143,bId:29,type:'정화조 청소',date:'2026-10-20',note:''},
-  {id:144,bId:30,type:'승강기 보험',date:'2027-02-28',note:''},{id:145,bId:30,type:'화재 보험',date:'2026-12-28',note:''},{id:146,bId:30,type:'정화조 청소',date:'2026-07-29',note:''},
-  {id:147,bId:31,type:'승강기 보험',date:'2026-12-19',note:''},{id:148,bId:31,type:'화재 보험',date:'2029-12-29',note:''},{id:149,bId:31,type:'정화조 청소',date:'2027-02-28',note:''},
+  {id:100,bId:15,type:'승강기 보험',date:'2027-01-22',note:''},{id:101,bId:15,type:'화재 보험',date:'2027-02-02',note:''},{id:102,bId:15,type:'정화조 청소',date:'2026-05-31',note:'용도변경으로 6개월마다 청소필요\n6개월 연장 신청'},
+  {id:103,bId:16,type:'승강기 보험',date:'2027-04-21',note:''},{id:104,bId:16,type:'화재 보험',date:'2031-01-23',note:''},{id:105,bId:16,type:'정화조 청소',date:'2026-09-12',note:'24.09.12 준공'},
+  {id:106,bId:17,type:'승강기 보험',date:'2027-01-19',note:''},{id:107,bId:17,type:'화재 보험',date:'2041-01-19',note:''},{id:108,bId:17,type:'정화조 청소',date:'2026-08-10',note:'한성성업 02-546-7164~6'},
+  {id:109,bId:18,type:'승강기 보험',date:'2026-08-11',note:''},{id:110,bId:18,type:'화재 보험',date:'2028-09-27',note:''},{id:111,bId:18,type:'정화조 청소',date:'2026-06-29',note:'한성성업 02-546-7164~6'},
+  {id:112,bId:19,type:'화재 보험',date:'2040-11-14',note:''},{id:113,bId:19,type:'정화조 청소',date:'2026-09-30',note:'마포환경산업 02-376-4074\n6개월 1회'},
+  {id:114,bId:20,type:'승강기 보험',date:'2026-08-14',note:''},{id:115,bId:20,type:'정화조 청소',date:'2026-09-10',note:'정익산업 02-518-8590'},
+  {id:116,bId:21,type:'승강기 보험',date:'2026-11-14',note:''},{id:117,bId:21,type:'화재 보험',date:'2038-05-12',note:''},{id:118,bId:21,type:'저수조 청소',date:'2026-06-16',note:'6개월 주기\n2025-12-16 청소 완료'},{id:119,bId:21,type:'주차기 보험',date:'2027-10-27',note:''},{id:120,bId:21,type:'정화조 청소',date:'2027-03-27',note:'성덕실업㈜ 02-3473-0400\n저수조: 010-2014-2250\n정화조청소 원장님 오프날 진행'},
+  {id:121,bId:22,type:'승강기 보험',date:'2026-05-18',note:''},{id:122,bId:22,type:'화재 보험',date:'2026-05-20',note:''},{id:123,bId:22,type:'정화조 청소',date:'2026-09-19',note:'정익산업 02-518-8590'},
+  {id:124,bId:23,type:'화재 보험',date:'2027-01-19',note:''},{id:125,bId:23,type:'정화조 청소',date:'2026-11-05',note:'정익산업 02-518-8590'},
+  {id:126,bId:24,type:'승강기 보험',date:'2026-06-18',note:''},{id:127,bId:24,type:'화재 보험',date:'2040-03-04',note:''},{id:128,bId:24,type:'정화조 청소',date:'2027-03-11',note:'정익산업 02-518-8590'},
+  {id:129,bId:25,type:'승강기 보험',date:'2026-07-30',note:''},{id:130,bId:25,type:'화재 보험',date:'2026-07-30',note:''},{id:131,bId:25,type:'정화조 청소',date:'2026-08-01',note:'정익산업 02-518-8590'},
+  {id:132,bId:26,type:'승강기 보험',date:'2026-06-02',note:''},{id:133,bId:26,type:'화재 보험',date:'2026-08-12',note:''},{id:134,bId:26,type:'정화조 청소',date:'2026-10-23',note:'승보환경 02-716-5411\n6개월에 한번'},
+  {id:135,bId:27,type:'승강기 보험',date:'2026-08-11',note:''},{id:136,bId:27,type:'화재 보험',date:'2041-01-22',note:''},{id:137,bId:27,type:'정화조 청소',date:'2027-02-27',note:'정익산업 02-518-8590'},
+  {id:138,bId:28,type:'승강기 보험',date:'2026-10-23',note:''},{id:139,bId:28,type:'화재 보험',date:'2034-10-21',note:''},{id:140,bId:28,type:'저수조 청소',date:'2026-06-21',note:''},{id:141,bId:28,type:'정화조 청소',date:'2026-06-04',note:'선흥환경 02-408-8051'},
+  {id:142,bId:29,type:'화재 보험',date:'2041-01-20',note:''},{id:143,bId:29,type:'정화조 청소',date:'2026-10-20',note:'마포환경산업 02-376-4074'},
+  {id:144,bId:30,type:'승강기 보험',date:'2027-02-28',note:''},{id:145,bId:30,type:'화재 보험',date:'2026-12-28',note:''},{id:146,bId:30,type:'정화조 청소',date:'2026-07-29',note:'승보환경 02-716-5411'},
+  {id:147,bId:31,type:'승강기 보험',date:'2026-12-19',note:''},{id:148,bId:31,type:'화재 보험',date:'2029-12-29',note:''},{id:149,bId:31,type:'정화조 청소',date:'2027-02-28',note:'마포환경산업 02-376-4074'},
   {id:150,bId:32,type:'승강기 보험',date:'2027-02-01',note:''},{id:151,bId:32,type:'화재 보험',date:'2026-07-10',note:''},{id:152,bId:32,type:'정화조 청소',date:'2027-01-03',note:''},
+  {id:200,bId:19,type:'26.03.30 새벽 청소 완료 / 6개월 1회',date:'',note:''},{id:201,bId:20,type:'25년 9월 10일 준공',date:'',note:''},{id:202,bId:21,type:'26년도 정화조청소 신청완 > 일정 확인 후 연락',date:'',note:''},{id:203,bId:22,type:'25.09.19 새벽',date:'',note:''},{id:204,bId:26,type:'사용량이 많아 6개월에 한번씩 청소 진행',date:'',note:''},{id:205,bId:29,type:'10.21 청소예정',date:'',note:''},{id:206,bId:32,type:'정화조청소 연장신청 완',date:'',note:''}
+,
 ],
 fixedSchedules:[
   {id:1,day:1,dayLabel:'1일',bldg:['4613','H473','르헤브','청담4613','트러'],tasks:['1.월간보고서 송부','2.르헤브 b1층, 1~5층(딥러닝) 임대료 세금계산서(공과금은 말일)','3.H473(슈퍼진스&보이드)임대료 세금계산서(홀수월에 수도 계산서), 건물주 전달','4.트러, 공과금 청구서 / 수도 홀수월에 청구(작성월 기준, 청구서 날짜 기준 아님)\n>양부장님, 임차인 전달\n>주차소장한테 차량 방문일지 사진 요청 후 양부장님 전달','5.청담4613, 7층 임대료 청구서 / 수도(홀수월) 건물주, 임차인 전달','6.청담4613, 7층 임대료 세금계산서 / 수도 계산서(홀수월)\n>5월 수도 계산서 발행 시 전층(4,7층) 메일 수정필요 cheongdam4613@gmail.com'],special:'2) 르헤브: @duckling11 \n3) H473 : *h4735530* \n4) 공과금 청구서 양부장님 전달\n>세금계산서는 양부장님이 처리\n>방문주차비용 있을 시 해당 층 임차인에게 정산내역 공유 필요\n6) 4613: ch4613!!bsn \n{세금계산서 발행 시 임대료,주차비 사업자 다름}\n1.임대료,관리비(주식회사 미드미디앤씨)\n2.주차비((주)미드미디앤디)\n>기본 주차1대\n>추가 1대, 다른 층 임차전까지 15만원 지불 후 사용'},
@@ -3937,6 +4016,7 @@ memoCats:defMemoCats,
 reports:[],
 repPhotos:{},repPhotoCaptions:{},
 editHistory:[],
+accounts:[],
 ui:{calY:new Date().getFullYear(),calM:new Date().getMonth(),selBldg:null,selMemoCat:null,memoView:'byCategory',memoColW:150,memoRowH:{},leaseF:'all',calBldgF:'all',calView:'month',calFlt:'all',repBldgId:null,repY:new Date().getFullYear(),repM:new Date().getMonth()+1},
 };}
 
@@ -12737,7 +12817,7 @@ function expEditNote(evt,id){
   td.contentEditable='true';td.style.outline='2px solid #93c5fd';td.style.background='#fff';td.style.whiteSpace='pre-wrap';
   td.focus();try{var r=document.createRange();r.selectNodeContents(td);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(_){}
   var saved=false;function doSave(){if(saved)return;saved=true;td.contentEditable='false';td.style.outline='';td.style.background='';td.style.whiteSpace='';
-    var v=td.textContent.trim();if(v!==oldN){e.note=v;e._edit=editStamp();_logEdit('exp',bs(e.bId)+' '+e.type+' 비고: '+(oldN||'없음')+' → '+(v||'삭제'),id);}
+    var v=(td.innerText||td.textContent).trim();if(v!==oldN){e.note=v;e._edit=editStamp();_logEdit('exp',bs(e.bId)+' '+e.type+' 비고: '+(oldN||'없음')+' → '+(v||'삭제'),id);}
     if(typeof stopEditing==='function')stopEditing();sv();rdExpire();}
   td.onblur=doSave;td.onkeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();doSave();}if(ev.key==='Escape'){td.textContent=oldN;doSave();}};
 }
@@ -12796,7 +12876,7 @@ function expEditSp1(evt,bId){
   td.focus();try{var r=document.createRange();r.selectNodeContents(td);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(_){}
   var saved=false;function doSave(){if(saved)return;saved=true;td.contentEditable='false';td.style.outline='';td.style.background='';td.style.whiteSpace='';
     if(typeof stopEditing==='function')stopEditing();
-    var txt=td.textContent.trim();
+    var txt=(td.innerText||td.textContent).trim();
     if(!txt){
       // 텍스트 비우면 삭제
       if(e){var _oldInfo=e.type+(e.date?' '+_expShortD(e.date):'');DB.expires=DB.expires.filter(function(x){return x.id!==e.id;});_logEdit('exp',bs(bId)+' 특이사항 삭제: '+_oldInfo);}
@@ -12869,6 +12949,36 @@ function saveExpireNA(){
   if(eid){const i=DB.expires.findIndex(e=>e.id==eid);if(i>=0){DB.expires[i]={...DB.expires[i],...o,_edit:editStamp()};}}
   else DB.expires.push({id:nid(),...o,_created:editStamp()});
   sv();closeMo('mo-expire');rdExpire();upBadges();
+}
+
+// ── 빌딩케어 일정 가져오기 ──────────────────────────────────────────
+function importBuildingCareEvents(){
+  if(!confirm('빌딩케어 4월 일정 154건을 가져올까요?\n(이미 가져온 적 있으면 중복될 수 있습니다)')) return;
+  var bcData=[{"date":"2026-04-01","bId":null,"title":"16시 케어팀 회의","note":"","user":"손성재"},{"date":"2026-04-01","bId":null,"title":"블로그 작성 기한","note":"","user":"구정식"},{"date":"2026-04-01","bId":15,"title":"데이지 미팅(캡틴,송대표,승원)","note":">오후1시30분\n>담장관련","user":"장승원"},{"date":"2026-04-01","bId":5,"title":"4월부터 청소의 민족으로 변경","note":">월50만원, 주3회\n>공용부,전용부 계약서 2건으로 사업자 다름","user":"박정도"},{"date":"2026-04-01","bId":7,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-01","bId":7,"title":"현장확인 (박정도, 전원성)","note":"","user":"전원성"},{"date":"2026-04-01","bId":32,"title":"14:00 임대동행답사(밀리빌리부동산)","note":">업종 : 인테리어 관련업","user":"구정식"},{"date":"2026-04-01","bId":11,"title":"[계약] 3층 오수진 시작일","note":"","user":"빌딩케어"},{"date":"2026-04-01","bId":null,"title":"09시30분 승강기검사","note":"","user":"박정도"},{"date":"2026-04-02","bId":7,"title":"오후2시) 고문님 동행 / 스타벅스 전세권설정","note":"","user":"전원성"},{"date":"2026-04-02","bId":7,"title":"스타벅스)전세권설정 접수 완료","note":"","user":"전원성"},{"date":"2026-04-02","bId":7,"title":"스타벅스)잔금 5,400만원 입금 완료","note":"","user":"전원성"},{"date":"2026-04-02","bId":32,"title":"15:30 임대동행답사(미르부동산)","note":">업종 : 마케팅","user":"구정식"},{"date":"2026-04-02","bId":8,"title":"하이원 연장 후 퇴거일","note":"","user":"박정도"},{"date":"2026-04-02","bId":8,"title":"4월2일(목) 퇴거 입회(오후)","note":"","user":"박정도"},{"date":"2026-04-02","bId":14,"title":"15시 승강기검사","note":"","user":"박정도"},{"date":"2026-04-03","bId":null,"title":"계약 만료 3달전 체크","note":"","user":"박정도"},{"date":"2026-04-03","bId":null,"title":"입주,퇴거 시 고정일정 재셋팅 체크","note":"","user":"박정도"},{"date":"2026-04-03","bId":15,"title":"4층 유리 금감","note":">따로 설치한것 없는데, 갑자기 쫙 소리나면서 금이 났다고함\n오후 2시 방문예정","user":"장승원"},{"date":"2026-04-03","bId":16,"title":"이재호대표님 미팅","note":">오전 11시\n>반포역 스타벅스","user":"장승원"},{"date":"2026-04-03","bId":8,"title":"[계약] 전층 퇴거 완료","note":"","user":"빌딩케어"},{"date":"2026-04-04","bId":3,"title":"정화조청소(@진구)","note":"","user":"이진구"},{"date":"2026-04-05","bId":15,"title":"외벽 조경 보수","note":"","user":"장승원"},{"date":"2026-04-06","bId":null,"title":"BSN 단합 대회","note":"일시 : 04월 06일(월) 오전 9시 40분~13시\n장소 : 하남국민체육센터 다목적체육관","user":"박정도"},{"date":"2026-04-06","bId":null,"title":"센타/청담포레 (대출 대환) 임대료 꼭 납부 요청!!","note":"","user":"전원성"},{"date":"2026-04-06","bId":16,"title":"임대문의(칸 중개법인)","note":">업종 : 앤터\n>주차장에 벤 주차가능한지 문의","user":"장승원"},{"date":"2026-04-06","bId":3,"title":"임대 문의(1~2층,위더스)","note":">오후2시\n>일본기업","user":"장승원"},{"date":"2026-04-06","bId":7,"title":"스타벅스) 인테리어 공사 시작","note":"","user":"전원성"},{"date":"2026-04-06","bId":8,"title":"{케어팀 참고}","note":"","user":"박정도"},{"date":"2026-04-07","bId":20,"title":"11:00 임대동행답사(케이마스터)","note":">업종 : 엔터","user":"구정식"},{"date":"2026-04-07","bId":3,"title":"우편함 도착 우편물 회수","note":"","user":"장승원"},{"date":"2026-04-07","bId":13,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-07","bId":14,"title":"b1층 수전 교체","note":">교체 완료","user":"박정도"},{"date":"2026-04-08","bId":null,"title":"16시 케어팀 회의","note":"","user":"손성재"},{"date":"2026-04-08","bId":15,"title":"외벽 보수 견적 받아보기","note":"","user":"장승원"},{"date":"2026-04-08","bId":25,"title":"건물점검","note":"","user":"손성재"},{"date":"2026-04-08","bId":22,"title":"지하1층 퇴거 정산 관련","note":"","user":"장승원"},{"date":"2026-04-08","bId":26,"title":"1층 건물 외벽 보수","note":">공사비 160만원\n>사다리차 비용 30만원","user":"장승원"},{"date":"2026-04-08","bId":3,"title":"임대문의(캡스톤)","note":">업종 : 연예기획사","user":"장승원"},{"date":"2026-04-08","bId":4,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-08","bId":6,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-08","bId":7,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-08","bId":14,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-08","bId":14,"title":"분양홍보관 업체 회신 일정 체크","note":"","user":"구정식"},{"date":"2026-04-09","bId":null,"title":"월차: 이진구","note":"","user":"이진구"},{"date":"2026-04-09","bId":16,"title":"건물점검","note":"","user":"손성재"},{"date":"2026-04-09","bId":18,"title":"17:00 1층 임대동행답사(디에이치래미안부동산)","note":"","user":"구정식"},{"date":"2026-04-09","bId":21,"title":"건물점검","note":"","user":"손성재"},{"date":"2026-04-09","bId":23,"title":"3층 변기 물안나옴","note":">내일 오후5시 방문예정","user":"장승원"},{"date":"2026-04-09","bId":26,"title":"외벽 보수완료","note":">마르면 메지색이 백색으로 돌아온다고함","user":"장승원"},{"date":"2026-04-09","bId":8,"title":"잔여 보증금 5000만원중 3500만원 입금함","note":"","user":"박정도"},{"date":"2026-04-09","bId":9,"title":"내용증명 발송 완료","note":"","user":"전원성"},{"date":"2026-04-09","bId":9,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-09","bId":10,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-09","bId":12,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-10","bId":null,"title":"마포 점검","note":"","user":"장승원"},{"date":"2026-04-10","bId":15,"title":"건물 외벽보수 견적","note":">1차: 보수부분만 160만원\n>2차: 전체 칠까지 1200만원","user":"장승원"},{"date":"2026-04-10","bId":23,"title":"3층 변기 점검","note":">수압 약해서 물안나온건데 갑자기 나옴","user":"장승원"},{"date":"2026-04-10","bId":9,"title":"3월분 임대료중 일부 440만원 입금완료","note":"","user":"박정도"},{"date":"2026-04-10","bId":11,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-10","bId":14,"title":"분양홍보관 업체 회신 일정 체크","note":"","user":"구정식"},{"date":"2026-04-10","bId":14,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-11","bId":15,"title":"4층 유리 교체 작업","note":">금액 : 920,000원(vat 별도)","user":"구정식"},{"date":"2026-04-12","bId":26,"title":"1층 배관 막힘","note":"","user":"장승원"},{"date":"2026-04-13","bId":null,"title":"손성재 연차","note":"","user":"손성재"},{"date":"2026-04-13","bId":null,"title":"이진구 재택근무","note":"","user":"이진구"},{"date":"2026-04-13","bId":7,"title":"스타벅스) 인테리어 공사중","note":"","user":"전원성"},{"date":"2026-04-14","bId":15,"title":"외벽보수 현장 확인","note":"","user":"장승원"},{"date":"2026-04-14","bId":3,"title":"[계약] 402호 조연성 시작일","note":"","user":"빌딩케어"},{"date":"2026-04-14","bId":7,"title":"이진구 재택근무(~4/16)","note":"","user":"이진구"},{"date":"2026-04-15","bId":null,"title":"16시 케어팀 회의","note":"","user":"손성재"},{"date":"2026-04-15","bId":null,"title":"블로그 작성 기한","note":"","user":"구정식"},{"date":"2026-04-15","bId":null,"title":"수도요금 청구서 도착","note":"","user":"박정도"},{"date":"2026-04-15","bId":15,"title":"4층 유리 교체 완료","note":"","user":"장승원"},{"date":"2026-04-15","bId":3,"title":"임대미팅(유스페이스 부동산)","note":"","user":"구정식"},{"date":"2026-04-15","bId":7,"title":"에스원 출입리더기 설치 완료","note":"","user":"박정도"},{"date":"2026-04-15","bId":14,"title":"승강기 고장","note":"","user":"박정도"},{"date":"2026-04-16","bId":null,"title":"개발","note":"","user":"박정도"},{"date":"2026-04-16","bId":2,"title":"누땡)신규 임차대표님","note":"보증금 8,000만원\n임대료 600만원\n관리비 40만원\n렌트프리 2.5개월","user":"전원성"},{"date":"2026-04-16","bId":6,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-16","bId":11,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-16","bId":14,"title":"분양홍보관 업체 회신 일정 체크","note":"","user":"구정식"},{"date":"2026-04-16","bId":14,"title":"b1층 썬큰 청소","note":"","user":"박정도"},{"date":"2026-04-17","bId":null,"title":"구정식 연차","note":"","user":"구정식"},{"date":"2026-04-17","bId":26,"title":"1. 1층 건물 외벽 보수 완료","note":"총공사비 165만원","user":"장승원"},{"date":"2026-04-17","bId":1,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-17","bId":30,"title":"지하층 유분제거제 주문 완","note":">56,000원","user":"장승원"},{"date":"2026-04-17","bId":2,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-17","bId":31,"title":"지하 잔금 3600만원","note":">렌트프리 2개월 시작","user":"장승원"},{"date":"2026-04-17","bId":31,"title":"[계약] 지하1층 길현준 시작일","note":"","user":"빌딩케어"},{"date":"2026-04-17","bId":7,"title":"9시30분 승강기 정기검사","note":"","user":"박정도"},{"date":"2026-04-17","bId":15,"title":"임대문의(신사 현대부동산)","note":"","user":"장승원"},{"date":"2026-04-17","bId":9,"title":"오후1시~) 성태남 이사 미팅","note":"","user":"전원성"},{"date":"2026-04-17","bId":9,"title":"1월 임대료 미납분 4,840만원 입금완료","note":"","user":"박정도"},{"date":"2026-04-17","bId":14,"title":"임대 현황 보고","note":"","user":"구정식"},{"date":"2026-04-18","bId":17,"title":"옥상 방수공사 완료","note":"총 공사비 3,168,000원(부가세포함)","user":"장승원"},{"date":"2026-04-20","bId":null,"title":"마포 방문","note":"","user":"장승원"},{"date":"2026-04-20","bId":null,"title":"건물점검(오후)","note":"","user":"손성재"},{"date":"2026-04-20","bId":null,"title":"이진구 재택근무(4/20~4/22)","note":"","user":"이진구"},{"date":"2026-04-20","bId":16,"title":"임대미팅(유앤아이 부동산)","note":">오후 5시 방문 예정","user":"장승원"},{"date":"2026-04-20","bId":20,"title":"임대 미팅(힌트공인중개사)","note":">게임 개발 업체","user":"장승원"},{"date":"2026-04-20","bId":22,"title":"지하층 임대료 입금 확인","note":"","user":"장승원"},{"date":"2026-04-20","bId":7,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-21","bId":null,"title":"11시, 킴 전 검수","note":"","user":"전원성"},{"date":"2026-04-21","bId":1,"title":"세무법인 DLG) 주차 추가/변경","note":"","user":"전원성"},{"date":"2026-04-21","bId":3,"title":"임차미팅","note":">업종 : 정신과의원\n>3층 그나마 마음에 들어함","user":"구정식"},{"date":"2026-04-21","bId":3,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-21","bId":4,"title":"승강기에 딥러닝 직원 갇힘","note":">카도어스위치 노후로 임시 조정 후 운행중","user":"박정도"},{"date":"2026-04-22","bId":null,"title":"월차 : 장승원","note":"","user":"장승원"},{"date":"2026-04-22","bId":18,"title":"4층 임차인 퇴실 완료","note":"","user":"구정식"},{"date":"2026-04-22","bId":26,"title":"정화조청소 예정","note":">금액 : 207,570원","user":"장승원"},{"date":"2026-04-22","bId":1,"title":"세무법인 DLG) 주차 추가/변경","note":"","user":"전원성"},{"date":"2026-04-22","bId":3,"title":"임차미팅","note":">업종 : 정신과의원","user":"구정식"},{"date":"2026-04-22","bId":3,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-23","bId":null,"title":"15시 30분 케어팀 회의","note":"","user":"손성재"},{"date":"2026-04-23","bId":null,"title":"오후3시~) 르포렘 임차계약 날인","note":"","user":"전원성"},{"date":"2026-04-23","bId":5,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-23","bId":6,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-23","bId":7,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-24","bId":null,"title":"15시 30분 케어팀 회의","note":"","user":"손성재"},{"date":"2026-04-24","bId":null,"title":"오후3시~) 르포렘 계약","note":"","user":"전원성"},{"date":"2026-04-24","bId":14,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-27","bId":3,"title":"1층 임차인 임대료 미납으로 계약 해지 및 퇴실 통보","note":">4월 30일까지 퇴실 요청","user":"구정식"},{"date":"2026-04-27","bId":28,"title":"전기계량기 교체 예정(한전)","note":"","user":"손성재"},{"date":"2026-04-27","bId":32,"title":"매각 금액 산정 자료 작성 요청","note":"","user":"구정식"},{"date":"2026-04-28","bId":1,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-28","bId":2,"title":"건물점검","note":"","user":"박정도"},{"date":"2026-04-29","bId":32,"title":"15:00 잔금","note":"","user":"구정식"},{"date":"2026-04-29","bId":9,"title":"3월분 전기요금 납부 확인","note":"","user":"박정도"},{"date":"2026-04-30","bId":null,"title":"르포렘 누땡 4월30일 임대료 입금 확인","note":"","user":"전원성"},{"date":"2026-04-30","bId":3,"title":"1층 퇴실일","note":"","user":"구정식"}];
+  var added=0, skipped=0;
+  bcData.forEach(function(ev){
+    // 중복 체크 (같은 날짜+같은 제목+같은 건물)
+    var dup=DB.calEvents.some(function(e){
+      return e.date===ev.date && e.title===ev.title && e.bId===ev.bId && !e._deleted;
+    });
+    if(dup){ skipped++; return; }
+    DB.calEvents.push({
+      id: nid(),
+      date: ev.date,
+      bId: ev.bId,
+      title: ev.title,
+      note: ev.note||'',
+      user: ev.user||'박정도',
+      status: 'done',
+      _created: editStamp(),
+      _src: 'buildingcare'
+    });
+    added++;
+  });
+  sv();
+  if(typeof rdCal==='function') rdCal();
+  if(typeof rdDash==='function') rdDash();
+  alert('빌딩케어 일정 가져오기 완료!\n추가: '+added+'건\n중복 스킵: '+skipped+'건');
 }
 
 // ── CALENDAR ──────────────────────────────────────────────────────────
@@ -13738,7 +13848,7 @@ function rdFixed(){
             ${building?`<span class="fix-bldg-tag bt-${bldgNum||20}" ondblclick="editFixBuilding(${s.id},${i},this.parentElement)" title="${esc(building)}">${hl(building.replace(/^\d+\./,''))}</span>`:`<span class="fix-bldg-add" onclick="editFixBuilding(${s.id},${i},this.parentElement)" title="클릭하여 건물 추가">+</span>`}
           </td>
           <td class="fix-task-td" ondblclick="if(typeof startEditing==='function')startEditing('fixed','${s.id}_${i}','고정일정','${s.day}일 ${i+1}번');_beginTaskEdit(this,${s.id},${i})" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"><span class="fix-task-txt${statusVal==='완료'?' done':''}">${_fixMonthPost(hl(_fixMonthPre(t)).replace(/\n/g,'<br>'))}</span></td>
-          <td class="fix-sp-td" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed','${s.id}_sp${i}','고정일정','${s.day}일 ${i+1}번 특이사항');_spEditActive={sId:${s.id},taskIdx:${i},el:this,origText:(this.textContent||'').trim()};beginEditOnDblClick(this)" oninput="_spEditPending={sId:${s.id},taskIdx:${i},el:this};_spLastText=this.textContent" onblur="saveSpInline(${s.id},${i},this);_spEditActive=null;if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정">${hl(spText)}</td>
+          <td class="fix-sp-td" ondblclick="event.stopPropagation();if(typeof startEditing==='function')startEditing('fixed','${s.id}_sp${i}','고정일정','${s.day}일 ${i+1}번 특이사항');_spEditActive={sId:${s.id},taskIdx:${i},el:this,origText:((this.innerText||this.textContent)||'').trim()};beginEditOnDblClick(this)" oninput="_spEditPending={sId:${s.id},taskIdx:${i},el:this};_spLastText=(this.innerText||this.textContent)" onblur="saveSpInline(${s.id},${i},this);_spEditActive=null;if(typeof stopEditing==='function')stopEditing()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정">${hl(spText)}</td>
           <td class="fix-assign-td" ondblclick="editFixAssign(${s.id},${i},this)" title="더블클릭하여 수정">${hl(assignee)}</td>
         </tr>`;
       });
@@ -13756,13 +13866,13 @@ function _beginTaskEdit(td,sId,taskIdx){
   if(actSpan) actSpan.style.display='none';
   // 기존 텍스트 추출 (번호 제외)
   var txtSpan=td.querySelector('.fix-task-txt');
-  var raw=txtSpan?txtSpan.textContent:'';
+  var raw=txtSpan?(txtSpan.innerText||txtSpan.textContent):'';
   var cleaned=raw.replace(/^\d+\.\s*/,'').trim();
   // td를 편집모드로
   td.innerHTML='';
   td.setAttribute('contenteditable','true');
   td.style.outline='2px solid #3b82f6';td.style.background='#fff';td.style.cursor='text';
-  td.textContent=cleaned;
+  td.innerHTML=cleaned.replace(/\n/g,'<br>');
   td.focus();
   try{var r=document.createRange();r.selectNodeContents(td);r.collapse(false);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);}catch(_){}
   function doSave(){
@@ -13771,7 +13881,7 @@ function _beginTaskEdit(td,sId,taskIdx){
     td.removeAttribute('contenteditable');
     td.style.outline='';td.style.background='';td.style.cursor='';
     td._editing=false;
-    var val=td.textContent.trim();
+    var val=(td.innerText||td.textContent||'').trim();
     // 직접 저장
     var s=DB.fixedSchedules.find(function(x){return x.id===sId;});
     if(s&&s.tasks){
@@ -14039,7 +14149,7 @@ function _flushSpEdit(){
     var p=_spEditPending; _spEditPending=null; _spEditActive=null;
     _spLastSaveTime=Date.now();
     // DOM 분리 전 텍스트를 읽어서 저장 (el이 분리되어도 _spLastText 사용)
-    var txt=(p.el && p.el.isConnected)? p.el.textContent : (_spLastText||'');
+    var txt=(p.el && p.el.isConnected)? (p.el.innerText||p.el.textContent) : (_spLastText||'');
     // ★ contentEditable 해제 (rdFixed 리렌더 스킵 방지)
     if(p.el && p.el.isConnected) p.el.contentEditable='false';
     _doSaveSpInline(p.sId,p.taskIdx,txt);
@@ -14048,7 +14158,7 @@ function _flushSpEdit(){
   // pending은 없지만 active(편집 중)이면 현재 내용 저장
   if(_spEditActive){
     var a=_spEditActive; _spEditActive=null;
-    var cur=(a.el && a.el.isConnected)?(a.el.textContent||'').trim():(_spLastText||'').trim();
+    var cur=(a.el && a.el.isConnected)?((a.el.innerText||a.el.textContent)||'').trim():(_spLastText||'').trim();
     // ★ contentEditable 해제 (rdFixed 리렌더 스킵 방지)
     if(a.el && a.el.isConnected) a.el.contentEditable='false';
     if(cur && cur!==a.origText){
@@ -14068,7 +14178,7 @@ function saveSpInline(sId,taskIdx,el){
   // el이 DOM 요소면 직접 읽기, 분리된 경우 _spLastText 사용, 문자열이면 그대로
   var val;
   if(typeof el==='string') val=el;
-  else if(el && el.isConnected) val=el.textContent||'';
+  else if(el && el.isConnected) val=(el.innerText||el.textContent)||'';
   else val=_spLastText||'';
   _spEditPending=null; // 저장 완료이므로 pending 해제
   _spEditActive=null;
@@ -14546,7 +14656,7 @@ function rdBMemo(){
         <button onclick="delBMemoCat(${mcIdx})" title="항목 삭제" style="border:none;background:transparent;cursor:pointer;padding:2px 4px;font-size:12px;color:var(--t3)">×</button>
       </div>
       ${mgrBlock}
-      ${c.key==='contact' ? renderBMemoContactList(v) : `<div class="bmemo-val" ondblclick="editBMemoValue('${esc(c.key)}')" style="cursor:text;font-size:13px;color:${hasVal?'var(--t1)':'var(--t4)'};white-space:pre-line;min-height:${hasVal?'auto':'22px'};line-height:1.5;padding:4px 2px;border-radius:4px;user-select:none" title="더블클릭하여 수정">${hasVal?esc(v).replace(/\n/g,'<br>'):'<span style="font-style:italic">더블클릭하여 입력</span>'}</div>`}
+      ${`<div class="bmemo-val" ondblclick="editBMemoValue('${esc(c.key)}')" style="cursor:text;font-size:13px;color:${hasVal?'var(--t1)':'var(--t4)'};white-space:pre-line;min-height:${hasVal?'auto':'22px'};line-height:1.5;padding:4px 2px;border-radius:4px;user-select:none" title="더블클릭하여 수정">${hasVal?esc(v).replace(/\n/g,'<br>'):'<span style="font-style:italic">더블클릭하여 입력</span>'}</div>`}
       <div class="bmemo-hist" data-hkey="${esc(c.key)}" style="display:none;margin-top:8px;padding:8px 10px;background:#fafafa;border:1px dashed var(--ln);border-radius:6px;font-size:11px;color:var(--t2)"></div>
     </div>`;
   }).join('');
@@ -18427,6 +18537,12 @@ function buildDemoDB(){
     ],
     fixedDone:{},
     fixedHistory:[],
+    accounts:[
+      {id:'ac1',bId:16,bank:'국민은행',acctNo:'123-456-789012',holder:'트러스트힐',note:'관리비 수납'},
+      {id:'ac2',bId:19,bank:'신한은행',acctNo:'110-234-567890',holder:'르포렘',note:'임대료'},
+      {id:'ac3',bId:24,bank:'하나은행',acctNo:'267-890-123456',holder:'H473',note:''},
+      {id:'ac4',bId:31,bank:'국민은행',acctNo:'456-789-012345',holder:'대치동914',note:'임대료+관리비'},
+    ],
     calEvents:[],
     memos:{},
     memoCats:{
@@ -18863,7 +18979,7 @@ async function doMigrateOverwrite(){
     // DB 덮어쓰기
     window.DB = j;
     // 기본 필드 보강
-    DB.buildings = DB.buildings||[]; DB.leases = DB.leases||[]; DB.expires = DB.expires||[]; DB.fixed = DB.fixed||[]; DB.memos = DB.memos||{}; DB.ui = DB.ui||{}; DB.handovers = DB.handovers||[]; DB.handovers = DB.handovers||[];
+    DB.buildings = DB.buildings||[]; DB.leases = DB.leases||[]; DB.expires = DB.expires||[]; DB.fixed = DB.fixed||[]; DB.memos = DB.memos||{}; DB.ui = DB.ui||{}; DB.handovers = DB.handovers||[]; DB.accounts = DB.accounts||[];
     await sv();
     if(st){st.textContent='완료! 새로고침합니다...';st.style.color='#16a34a';}
     setTimeout(()=>location.reload(),1200);
@@ -19532,6 +19648,155 @@ function rdDash(){
   var _wNow=Date.now(); if(!window._weatherLoadedAt || (_wNow - window._weatherLoadedAt) > 1800000){ window._weatherLoadedAt=_wNow; loadDashWeather(); }
   // 부동산 뉴스 (30분마다 갱신)
   if(!window._newsLoadedAt || (_wNow - window._newsLoadedAt) > 1800000){ window._newsLoadedAt=_wNow; loadDashNews(); }
+  // 빠른 계좌
+  rdDashAccounts();
+}
+// ── 은행 목록 (빠른계좌용) ──
+var _bankMap={
+  '국민은행':{color:'#776B5D',url:'https://www.kbstar.com'},
+  '신한은행':{color:'#0046FF',url:'https://www.shinhan.com'},
+  '하나은행':{color:'#009688',url:'https://www.kebhana.com'},
+  '우리은행':{color:'#0056A0',url:'https://www.wooribank.com'},
+  '기업은행':{color:'#005BAC',url:'https://www.ibk.co.kr'},
+  '농협은행':{color:'#00843D',url:'https://banking.nonghyup.com'},
+  '카카오뱅크':{color:'#FFCD00',url:'https://www.kakaobank.com'},
+  'SC제일은행':{color:'#0072CE',url:'https://www.standardchartered.co.kr'},
+  '토스뱅크':{color:'#0064FF',url:'https://www.tossbank.com'},
+  '케이뱅크':{color:'#FF6B35',url:'https://www.kbanknow.com'},
+  '대구은행':{color:'#0066B3',url:'https://www.dgb.co.kr'},
+  '부산은행':{color:'#E31937',url:'https://www.busanbank.co.kr'},
+  '수협은행':{color:'#005BAC',url:'https://www.suhyup-bank.com'},
+  '새마을금고':{color:'#00A651',url:'https://www.kfcc.co.kr'},
+};
+var _bankNames=Object.keys(_bankMap);
+// ── 빠른 계좌 렌더 ──
+function rdDashAccounts(){
+  var el=document.getElementById('dash-acct-content');if(!el)return;
+  DB.accounts=DB.accounts||[];
+  var team=window._dashAcctTeam||0;
+  var btnEl=document.getElementById('dash-acct-btns');
+  if(btnEl){
+    var _bs='font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid var(--ln);cursor:pointer;';
+    var _on='background:var(--bl);color:#fff;border-color:var(--bl);';
+    var _off='background:transparent;color:var(--t3);';
+    btnEl.innerHTML='<button onclick="window._dashAcctTeam=1;rdDashAccounts()" style="'+_bs+(team===1?_on:_off)+'">1팀</button>'
+      +'<button onclick="window._dashAcctTeam=2;rdDashAccounts()" style="'+_bs+(team===2?_on:_off)+'">2팀</button>';
+  }
+  var filterBids;
+  if(team===1||team===2){
+    filterBids=new Set((DB.buildings||[]).filter(function(b){return(b.team||2)===team;}).map(function(b){return b.id;}));
+  } else {
+    filterBids=new Set(_teamBuildings().map(function(b){return b.id;}));
+  }
+  var accts=DB.accounts.filter(function(a){return filterBids.has(a.bId);});
+  if(!accts.length){el.innerHTML='<div style="color:var(--t3);font-size:11px;padding:4px 0">등록된 계좌가 없습니다. <span style="cursor:pointer;color:var(--bl)" onclick="acctAddPopup()">+ 추가</span></div>';return;}
+  var rows=accts.map(function(a){
+    var b=DB.buildings.find(function(x){return x.id===a.bId;});
+    var bname=b?(b.name||'').replace(/^\d+\./,''):'건물'+a.bId;
+    var bi=_bankMap[a.bank]||{color:'#666',url:''};
+    var bankBadge='<span style="display:inline-block;background:'+bi.color+';color:#fff;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:600;min-width:48px;text-align:center">'+esc(a.bank||'미지정')+'</span>';
+    var acctDisplay='<span style="font-family:\'Courier New\',monospace;font-size:12px;letter-spacing:0.5px;font-weight:500">'+esc(a.acctNo||'')+'</span>';
+    var holderTxt=a.holder?'<span style="color:var(--t3);font-size:10px;margin-left:4px">('+esc(a.holder)+')</span>':'';
+    var noteTxt=a.note?'<span style="color:var(--t3);font-size:10px;margin-left:6px">'+esc(a.note)+'</span>':'';
+    var copyBtn='<button onclick="event.stopPropagation();_acctCopy(\''+esc(a.acctNo||'').replace(/'/g,"\\'")+'\')" style="font-size:9px;padding:1px 6px;border:1px solid var(--ln);border-radius:3px;cursor:pointer;background:transparent;color:var(--t3)" title="계좌번호 복사">📋</button>';
+    var bankBtn=bi.url?'<button onclick="event.stopPropagation();window.open(\''+bi.url+'\',\'_blank\')" style="font-size:9px;padding:1px 6px;border:1px solid var(--ln);border-radius:3px;cursor:pointer;background:transparent;color:var(--t3)" title="인터넷뱅킹 열기">🏦</button>':'';
+    var editBtn='<button onclick="event.stopPropagation();acctEditPopup(\''+a.id+'\')" style="font-size:9px;padding:1px 6px;border:1px solid var(--ln);border-radius:3px;cursor:pointer;background:transparent;color:var(--t3)" title="수정">✏️</button>';
+    return'<div style="display:flex;align-items:center;gap:6px;padding:4px 2px;border-bottom:1px solid var(--ln2)" ondblclick="acctEditPopup(\''+a.id+'\')">'
+      +'<span style="font-size:11px;font-weight:600;min-width:70px;color:var(--t1)">'+esc(bname)+'</span>'
+      +bankBadge+' '+acctDisplay+holderTxt+noteTxt
+      +'<span style="margin-left:auto;display:flex;gap:2px">'+copyBtn+bankBtn+editBtn+'</span>'
+      +'</div>';
+  }).join('');
+  el.innerHTML=rows;
+}
+// ── 계좌번호 복사 ──
+function _acctCopy(txt){
+  if(!txt)return;
+  var clean=txt.replace(/[-\s]/g,'');
+  if(navigator.clipboard){navigator.clipboard.writeText(clean).then(function(){showSaveStatus('📋 계좌번호 복사됨: '+txt,'#16a34a');});}
+  else{var ta=document.createElement('textarea');ta.value=clean;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showSaveStatus('📋 계좌번호 복사됨: '+txt,'#16a34a');}
+}
+// ── 계좌 추가 팝업 ──
+function acctAddPopup(){
+  var bOpts=_teamBuildings().map(function(b){return'<option value="'+b.id+'">'+esc((b.name||'').replace(/^\d+\./,''))+'</option>';}).join('');
+  var bankOpts=_bankNames.map(function(n){return'<option value="'+n+'">'+n+'</option>';}).join('');
+  var pop=document.createElement('div');
+  pop.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:9999;display:flex;align-items:center;justify-content:center';
+  pop.innerHTML='<div style="background:#fff;border-radius:12px;padding:20px;width:380px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.2)">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:12px">🏦 계좌 추가</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">건물</label><select id="_acct-bld" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px">'+bOpts+'</select></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">은행</label><select id="_acct-bank" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px">'+bankOpts+'</select></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">계좌번호</label><input id="_acct-no" placeholder="000-000-000000" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px"></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">예금주</label><input id="_acct-holder" placeholder="예금주명" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px"></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">메모</label><input id="_acct-note" placeholder="용도 (임대료, 관리비 등)" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'
+    +'<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="padding:6px 16px;border:1px solid #ddd;border-radius:6px;background:#f9fafb;cursor:pointer;font-size:12px">취소</button>'
+    +'<button id="_acct-ok" style="padding:6px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;font-size:12px;font-weight:600">추가</button>'
+    +'</div></div>';
+  document.body.appendChild(pop);
+  pop.querySelector('#_acct-ok').onclick=function(){
+    var bId=parseInt(pop.querySelector('#_acct-bld').value);
+    var bank=pop.querySelector('#_acct-bank').value;
+    var acctNo=pop.querySelector('#_acct-no').value.trim();
+    var holder=pop.querySelector('#_acct-holder').value.trim();
+    var note=pop.querySelector('#_acct-note').value.trim();
+    if(!acctNo){alert('계좌번호를 입력하세요.');return;}
+    DB.accounts=DB.accounts||[];
+    DB.accounts.push({id:nid(),bId:bId,bank:bank,acctNo:acctNo,holder:holder,note:note});
+    _logEdit('acct',bs(bId)+' 계좌 추가: '+bank+' '+acctNo);
+    sv();rdDashAccounts();pop.remove();
+  };
+  pop.querySelector('#_acct-no').focus();
+  pop.querySelector('#_acct-no').onkeydown=function(ev){if(ev.key==='Enter'){ev.preventDefault();pop.querySelector('#_acct-ok').click();}if(ev.key==='Escape')pop.remove();};
+}
+// ── 계좌 수정 팝업 ──
+function acctEditPopup(aid){
+  var a=DB.accounts.find(function(x){return x.id===aid;});if(!a)return;
+  var bOpts=_teamBuildings().map(function(b){return'<option value="'+b.id+'"'+(b.id===a.bId?' selected':'')+'>'+esc((b.name||'').replace(/^\d+\./,''))+'</option>';}).join('');
+  var bankOpts=_bankNames.map(function(n){return'<option value="'+n+'"'+(n===a.bank?' selected':'')+'>'+n+'</option>';}).join('');
+  var pop=document.createElement('div');
+  pop.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:9999;display:flex;align-items:center;justify-content:center';
+  pop.innerHTML='<div style="background:#fff;border-radius:12px;padding:20px;width:380px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.2)">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:12px">🏦 계좌 수정</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">건물</label><select id="_acct-bld" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px">'+bOpts+'</select></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">은행</label><select id="_acct-bank" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px">'+bankOpts+'</select></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">계좌번호</label><input id="_acct-no" value="'+esc(a.acctNo||'')+'" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px"></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">예금주</label><input id="_acct-holder" value="'+esc(a.holder||'')+'" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px"></div>'
+    +'<div style="display:flex;gap:6px"><label style="min-width:60px;font-size:12px;font-weight:600;line-height:28px">메모</label><input id="_acct-note" value="'+esc(a.note||'')+'" style="flex:1;padding:4px 8px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'
+    +'<button onclick="_acctDel(\''+aid+'\');this.closest(\'div[style*=fixed]\').remove()" style="padding:6px 16px;border:1px solid #fca5a5;border-radius:6px;background:#fef2f2;color:#dc2626;cursor:pointer;font-size:12px;margin-right:auto">삭제</button>'
+    +'<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="padding:6px 16px;border:1px solid #ddd;border-radius:6px;background:#f9fafb;cursor:pointer;font-size:12px">취소</button>'
+    +'<button id="_acct-ok" style="padding:6px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;font-size:12px;font-weight:600">저장</button>'
+    +'</div></div>';
+  document.body.appendChild(pop);
+  pop.querySelector('#_acct-ok').onclick=function(){
+    var bId=parseInt(pop.querySelector('#_acct-bld').value);
+    var bank=pop.querySelector('#_acct-bank').value;
+    var acctNo=pop.querySelector('#_acct-no').value.trim();
+    var holder=pop.querySelector('#_acct-holder').value.trim();
+    var note=pop.querySelector('#_acct-note').value.trim();
+    if(!acctNo){alert('계좌번호를 입력하세요.');return;}
+    var ch=[];
+    if(a.bank!==bank)ch.push('은행: '+a.bank+' → '+bank);
+    if(a.acctNo!==acctNo)ch.push('계좌: '+a.acctNo+' → '+acctNo);
+    if(a.holder!==holder)ch.push('예금주: '+(a.holder||'없음')+' → '+(holder||'삭제'));
+    a.bId=bId;a.bank=bank;a.acctNo=acctNo;a.holder=holder;a.note=note;
+    if(ch.length)_logEdit('acct',bs(bId)+' 계좌 수정: '+ch.join(', '),a.id);
+    sv();rdDashAccounts();pop.remove();
+  };
+  pop.querySelector('#_acct-no').onkeydown=function(ev){if(ev.key==='Enter'){ev.preventDefault();pop.querySelector('#_acct-ok').click();}if(ev.key==='Escape')pop.remove();};
+}
+// ── 계좌 삭제 ──
+function _acctDel(aid){
+  var a=DB.accounts.find(function(x){return x.id===aid;});
+  if(!a||!confirm('이 계좌를 삭제하시겠습니까?\n'+a.bank+' '+a.acctNo))return;
+  DB.accounts=DB.accounts.filter(function(x){return x.id!==aid;});
+  _logEdit('acct',bs(a.bId)+' 계좌 삭제: '+a.bank+' '+a.acctNo);
+  sv();rdDashAccounts();
 }
 // ── 만료 임박 (1팀/2팀 필터) ──
 function rdDashExpire(){
