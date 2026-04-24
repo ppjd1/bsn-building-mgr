@@ -219,12 +219,13 @@ html,body{height:100%;font-family:'Pretendard','Pretendard Variable',-apple-syst
 .lv-bldg-inline.all{color:#92400e;background:#fff8e1;border:1px solid #f59e0b}
 .lv-bldg-hd{font-size:12px;font-weight:600;color:var(--bl);padding:4px 10px 2px;display:flex;align-items:center;gap:4px;border-top:2px solid var(--bl2);margin-top:4px}
 .lv-bldg-hd::before{content:'';width:3px;height:14px;background:var(--bl);border-radius:2px}
-.lv-item{display:flex;align-items:flex-start;gap:7px;padding:8px 11px;border-bottom:1px solid var(--ln);background:var(--w)}
+.lv-item{display:flex;align-items:center;gap:7px;padding:6px 11px;border-bottom:1px solid var(--ln);background:var(--w)}
 .lv-item:last-child{border-bottom:none}
 .toggle-btn{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--ln2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;background:var(--w)}
 .toggle-btn.done{background:var(--gn);border-color:var(--gn)}
 .toggle-btn.done::after{content:'';width:5px;height:8px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);margin-top:-2px}
 .lv-title{font-size:13px;font-weight:400;flex:1;line-height:1.45;white-space:pre-wrap;word-break:break-word;min-width:0}.lv-title::first-line{font-weight:700}.lv-title.done{text-decoration:line-through;color:var(--t3)}
+.lv-title.has-note{cursor:pointer}.lv-title.has-note::after{content:' ▶';font-size:10px;color:#4A90D9;font-weight:700}.lv-title.note-open::after{content:' ▼'}
 
 /* ========= FIXED ========= */
 .fix-tbl{width:100%;border-collapse:collapse;table-layout:auto;background:#fff;border:1px solid #e0e0e0;box-sizing:border-box;zoom:1.1}
@@ -1498,13 +1499,13 @@ body.view-only .vo-tag{display:inline-block !important}
               <span id="inv-m-parking-info" style="font-weight:600"></span>
             </div>
             <div class="fr r3" style="grid-template-columns:1fr 1fr 1fr">
-              <div class="fg"><label>주차 대수</label><input type="number" id="inv-m-parking-cars" placeholder="대" style="font-size:13px" min="0" oninput="_meterCalcParking()"></div>
-              <div class="fg"><label>대당 단가(VAT포함)</label><input type="number" id="inv-m-parking-rate" placeholder="286000" style="font-size:13px" value="286000" oninput="_meterCalcParking()"></div>
+              <div class="fg"><label style="display:flex;align-items:center;gap:4px">주차 대수 <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동 체크시 직접 입력"><input type="checkbox" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-m-parking-cars');el.setAttribute('data-manual',this.checked?'1':'0');el.readOnly=!this.checked;if(!this.checked)_meterAutoFillParking()">수동</label></label><input type="number" id="inv-m-parking-cars" placeholder="대" style="font-size:13px;background:#ecfdf5" min="0" readonly oninput="_meterCalcParking()"></div>
+              <div class="fg"><label style="display:flex;align-items:center;gap:4px">단가(VAT포함) <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동 체크시 직접 입력"><input type="checkbox" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-m-parking-rate');el.setAttribute('data-manual',this.checked?'1':'0');el.readOnly=!this.checked;if(!this.checked)_meterAutoFillParking()">수동</label></label><input type="number" id="inv-m-parking-rate" placeholder="286000" style="font-size:13px;background:#ecfdf5" value="286000" readonly oninput="_meterCalcParking()"></div>
               <div class="fg"><label>주차관리비용</label><input type="number" id="inv-m-parking-mgmt" style="font-size:13px;font-weight:700;background:#ecfdf5" readonly></div>
             </div>
             <div id="inv-m-parking-calc" style="font-size:12px;color:#166534;font-weight:600;padding:3px 0"></div>
-            <div style="border-top:1px solid #bbf7d0;margin-top:8px;padding-top:8px">
-              <div style="font-size:12px;color:#166534;margin-bottom:4px">방문주차 (정산금액 직접 입력)</div>
+            <div style="border-top:1px solid #bbf7d0;margin-top:2px;padding-top:2px">
+              <div style="font-size:12px;color:#166534;margin-bottom:2px">방문주차 (정산금액 직접 입력)</div>
               <div style="font-size:11px;color:#6b7280;margin-bottom:4px">기본 1시간 3,000원 / 추가 10분당 500원</div>
               <div class="fg"><label>방문주차비용</label><input type="number" id="inv-m-parking-visit" placeholder="정산금액 입력" style="font-size:13px"></div>
             </div>
@@ -1513,8 +1514,8 @@ body.view-only .vo-tag{display:inline-block !important}
         </div>
       </div>
       <div style="border-top:1px solid var(--ln);padding-top:10px;margin-top:10px">
-        <div class="fg"><label>입금계좌</label><input id="inv-acct" placeholder="은행 계좌번호 예금주" style="font-size:13px"></div>
-        <div class="fg"><label>납부기한일</label><input type="number" id="inv-due" placeholder="10" style="font-size:13px" value="10"></div>
+        <div class="fg"><label>입금계좌</label><input id="inv-acct" placeholder="은행 계좌번호 예금주" style="font-size:13px" oninput="_invAutoPreview()"></div>
+        <div class="fg"><label>납부기한일</label><input type="number" id="inv-due" placeholder="10" style="font-size:13px" value="10" oninput="_invAutoPreview()"></div>
       </div>
       <div style="margin-top:12px;display:flex;gap:6px">
         <button class="btn" onclick="printInvoice()" style="flex:1;font-size:13px;padding:7px">인쇄</button>
@@ -1522,7 +1523,7 @@ body.view-only .vo-tag{display:inline-block !important}
     </div>
     <div id="inv-preview-wrap" style="width:520px;flex-shrink:0;overflow-y:auto;padding:10px;background:var(--bg);display:flex;justify-content:center;align-items:flex-start">
       <div id="inv-preview" style="background:var(--w);border:1px solid var(--ln);border-radius:var(--r2);padding:28px 24px;width:100%;min-height:700px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
-        <div class="empty">좌측에서 건물/층 선택 후 미리보기</div>
+        <div class="empty">좌측에서 건물/층을 선택하세요</div>
       </div>
     </div>
   </div>
@@ -2302,8 +2303,7 @@ function _initSupabase(){
   try{
     if(SB_URL && SB_KEY){
       if(typeof supabase === 'undefined' || !supabase.createClient){
-        console.warn('⚠️ Supabase SDK 로드 실패 (네트워크 차단/Tracking Prevention). 로컬 전용 모드로 실행.');
-        return false;
+        return false; // fetch 인라인 로드 대기 중 — 조용히 재시도
       }
       sbClient = supabase.createClient(SB_URL, SB_KEY, {
         auth: {
@@ -2996,7 +2996,7 @@ function _mergeDB(cloud, local){
 // ── 저장: Supabase 우선, 실패시 localStorage 폴백
 async function sv(){
   if(IS_DEMO){ showSaveStatus('🎭 데모 모드 · 저장 안 됨','#b45309'); return; }
-  if(CURRENT_USER_ROLE==='user'){ showSaveStatus('👁 보기 전용 · 수정 권한 없음','#64748b'); return; }
+  if(CURRENT_USER_ROLE==='user'){ if(window._loginDone) showSaveStatus('👁 보기 전용 · 수정 권한 없음','#64748b'); return; }
   window._lastSvTime=Date.now(); // ★ realtime 자기 이벤트 무시용
   _pushRollingBackup('pre-save');
   // IndexedDB에 이미지 포함 전체 저장 (50MB+) — 메인 저장소
@@ -3352,28 +3352,62 @@ _resetIdleTimer();
 
 var _presenceRetry=0;
 function setupPresence(){
+  // ★ closed/errored 채널이면 정리 후 재생성
+  if(_presenceChannel && (_presenceChannel.state==='closed'||_presenceChannel.state==='errored')){
+    console.warn('[Presence] 채널 상태 비정상('+_presenceChannel.state+'), 재연결');
+    try{_presenceChannel.unsubscribe();}catch(_){}
+    _presenceChannel=null;
+  }
   if(!sbClient || _presenceChannel || !CURRENT_USER_ID) return;
   if(_presenceRetry>=20){ console.warn('[Presence] 재시도 한도(20회) 초과 — 60초 후 다시 시도'); setTimeout(function(){_presenceRetry=0;setupPresence();},60000); return; }
   try{
     _presenceChannel=sbClient.channel('bm_presence',{config:{presence:{key:CURRENT_USER_ID}}});
     _presenceChannel
+      // ★★★ BROADCAST 수신 — 편집 상태를 직접 메시지로 전달 (Presence leave/join/sync 문제 완전 우회)
+      .on('broadcast',{event:'editing'},({payload})=>{
+        if(!payload || payload.userId===CURRENT_USER_ID) return;
+        var uid=payload.userId;
+        if(!_presenceState[uid]) _presenceState[uid]={name:payload.name||'익명',userId:uid,status:'online',_localAt:Date.now()};
+        _presenceState[uid].editing=payload.editing;
+        _presenceState[uid].name=payload.name||_presenceState[uid].name;
+        _presenceState[uid].typing=payload.typing||false;
+        _presenceState[uid].status=payload.editing?'editing':'online';
+        _presenceState[uid]._localAt=Date.now();
+        console.log('[Broadcast] 편집 수신:',payload.name,payload.editing?('→ '+payload.editing.type+'#'+payload.editing.id):'→ 편집 종료');
+        _renderPresence(); _renderEditIndicators();
+      })
       .on('presence',{event:'sync'},()=>{
         const st=_presenceChannel.presenceState();
-        _presenceState={};
-        const _now=Date.now();
-        Object.keys(st).forEach(k=>{ const arr=st[k]; if(arr&&arr.length){ var p=arr[arr.length-1]; p._localAt=_now; _presenceState[k]=p; }});
+        const _newState={}; const _now=Date.now();
+        Object.keys(st).forEach(k=>{ const arr=st[k]; if(arr&&arr.length){ var p=arr[arr.length-1]; p._localAt=_now; _newState[k]=p; }});
+        // ★ broadcast로 받은 editing 상태를 sync가 덮어쓰지 않도록 보존
+        Object.keys(_newState).forEach(k=>{
+          if(_presenceState[k]&&_presenceState[k].editing&&!_newState[k].editing){
+            _newState[k].editing=_presenceState[k].editing;
+            _newState[k].typing=_presenceState[k].typing;
+            _newState[k].status=_presenceState[k].status;
+          }
+          _presenceState[k]=_newState[k];
+        });
+        // 채널에서 완전히 사라진 사용자만 제거 (broadcast 전용은 유지)
+        Object.keys(_presenceState).forEach(k=>{ if(!_newState[k]){ var age=_now-(_presenceState[k]._localAt||0); if(age>30000) delete _presenceState[k]; }});
         console.log('[Presence] sync — 접속자:', Object.keys(_presenceState).length+'명');
-        _renderPresence();
-        _renderEditIndicators();
+        _renderPresence(); _renderEditIndicators();
       })
       .on('presence',{event:'join'},({key,newPresences})=>{
-        console.log('[Presence] join:',key);
-        if(newPresences&&newPresences.length){ var p=newPresences[newPresences.length-1]; p._localAt=Date.now(); _presenceState[key]=p; }
+        if(newPresences&&newPresences.length){
+          var p=newPresences[newPresences.length-1]; p._localAt=Date.now();
+          if(_presenceState[key]&&_presenceState[key].editing&&!p.editing){
+            p.editing=_presenceState[key].editing; p.typing=_presenceState[key].typing; p.status=_presenceState[key].status;
+          }
+          _presenceState[key]=p;
+        }
         _renderPresence(); _renderEditIndicators();
       })
       .on('presence',{event:'leave'},({key})=>{
         console.log('[Presence] leave:',key);
-        delete _presenceState[key];
+        // sync에서 최종 정리 — leave에서는 editing만 해제
+        if(_presenceState[key]){ _presenceState[key].editing=null; _presenceState[key].status='idle'; }
         _renderPresence(); _renderEditIndicators();
       })
       .subscribe(async(status)=>{
@@ -3384,12 +3418,12 @@ function setupPresence(){
           console.log('[Presence] ✅ 트래킹 시작 — id:',CURRENT_USER_ID,'name:',CURRENT_USER_NAME);
           _renderPresence();
         }
-        if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
+        if(status==='CHANNEL_ERROR' || status==='TIMED_OUT' || status==='CLOSED'){
           _presenceRetry++;
-          console.warn('[Presence] 채널 연결 실패:',status,'('+_presenceRetry+'/20)');
+          console.warn('[Presence] 채널 연결 실패/종료:',status,'('+_presenceRetry+'/20) — 재연결 예약');
           try{ _presenceChannel.unsubscribe(); }catch(_){}
           _presenceChannel=null;
-          var _delay=Math.min(5000*_presenceRetry,30000); // 5초~30초 점진적 증가
+          var _delay=Math.min(3000*_presenceRetry,20000); // 3초~20초 점진적 증가
           setTimeout(function(){ setupPresence(); },_delay);
         }
       });
@@ -3403,6 +3437,14 @@ async function _pushPresence(ctx){
   _renderPresence();
   _renderEditIndicators();
   if(_presenceChannel){
+    // ★ 채널이 closed/errored면 재연결
+    if(_presenceChannel.state==='closed'||_presenceChannel.state==='errored'){
+      console.warn('[Presence] pushPresence: 채널 비정상, 재연결');
+      try{_presenceChannel.unsubscribe();}catch(_){}
+      _presenceChannel=null;
+      setupPresence();
+      return;
+    }
     try{ await _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:ctx,status:_myStatus,typing:_isTyping,at:Date.now()}); }catch(_){}
   }
 }
@@ -3421,8 +3463,9 @@ window.stopEditing=function(){
   _isTyping=false; _myEditingCtx=null; _myStatus='online';
   _renderPresence(); _renderEditIndicators();
   if(_presenceChannel){
+    // ★ broadcast로 편집 종료 알림
+    try{ _presenceChannel.send({type:'broadcast',event:'editing',payload:{userId:CURRENT_USER_ID,name:CURRENT_USER_NAME||'나',editing:null,typing:false,at:Date.now()}}); }catch(_){}
     try{ _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:null,status:'online',typing:false,at:Date.now()}); }catch(_){}
-    setTimeout(function(){ try{ if(_presenceChannel) _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:null,status:'online',typing:false,at:Date.now()}); }catch(_){} },500);
   }
 };
 function _findConflict(type,id){
@@ -3504,10 +3547,14 @@ function _renderEditIndicators(){
     var p=_presenceState[k];
     if(p&&p.editing) editItems.push({uid:k,name:p.name||'익명',editing:p.editing,typing:p.typing,isSelf:false});
   });
+  // ★ DEBUG — 편집 항목 있을 때만 로그
+  if(editItems.length>0) console.log('[EditIndicator] items:', JSON.stringify(editItems.map(function(i){return{u:i.uid.substring(0,8),t:i.editing.type,id:i.editing.id,self:i.isSelf};})));
   editItems.forEach(function(item){
     var type=item.editing.type, id=item.editing.id;
     var targets=document.querySelectorAll('[data-presence-type="'+type+'"][data-presence-id="'+id+'"]');
     if(!targets.length) targets=document.querySelectorAll('[data-id="'+id+'"]');
+    // ★ DEBUG — DOM 매칭 결과
+    if(editItems.length>0 && !targets.length) console.warn('[EditIndicator] DOM 매칭 실패:', type, id, '(해당 요소가 현재 화면에 없음)');
     targets.forEach(function(target){
       var color=item.isSelf?'rgba(147,197,253,.55)':'#ef4444';
       var outlineColor=item.isSelf?'rgba(147,197,253,.5)':'#ef4444';
@@ -3576,9 +3623,16 @@ window.addEventListener('beforeunload',function(e){
 // ★ Presence heartbeat — 8초마다 상태 재전송 (채널 유지 + 상대방 sync 보장)
 setInterval(function(){
   if(_presenceChannel){
+    // ★ 채널이 closed/errored면 즉시 재연결
+    if(_presenceChannel.state==='closed'||_presenceChannel.state==='errored'){
+      console.warn('[Presence] heartbeat: 채널 상태 비정상('+_presenceChannel.state+'), 재연결');
+      try{_presenceChannel.unsubscribe();}catch(_){}
+      _presenceChannel=null;
+      setupPresence();
+      return;
+    }
     try{ _presenceChannel.track({name:CURRENT_USER_NAME||'나',userId:CURRENT_USER_ID,editing:_myEditingCtx,status:_myStatus,typing:_isTyping,at:Date.now()}); }catch(_){}
   } else if(sbClient && CURRENT_USER_ID && !_presenceChannel){
-    // 채널이 없으면 재연결 시도
     setupPresence();
   }
 },8000);
@@ -6686,7 +6740,7 @@ function _loadWaterDraft(){
   try{
     const raw=localStorage.getItem('bsn_water_draft'); if(!raw) return null;
     const d=JSON.parse(raw);
-    if(Date.now()-(d.ts||0) > 24*60*60*1000) return null; // 24h 이상은 무시
+    if(Date.now()-(d.ts||0) > 60*60*1000) return null; // 1시간 이상은 무시
     return d;
   }catch(e){ return null; }
 }
@@ -6738,8 +6792,19 @@ function _parseBldgWaterInfo(bId){
     }
     for(var li=0;li<lines.length;li++){
       var line=lines[li].trim();
-      if(/철거/.test(line)) continue;
       if(/따로 요금없음/.test(line)) continue;
+      // 철거된 고객번호가 포함된 줄은 해당 번호만 건너뜀 (인라인 철거 처리)
+      if(/철거/.test(line)){
+        // "일반용: 029132875(철거) / 가정용: 031112881" 같은 경우 철거 아닌 부분 추출
+        var _nonDel=line.replace(/[^\s\/]*철거[^\s\/]*/g,'').replace(/[\/,]\s*/g,'\n').trim();
+        if(!_nonDel) continue;
+        // 남은 부분에서 고객번호 추출
+        var _delM=_nonDel.match(/(일반용|가정용)[:\s]*(\d{6,12})/);
+        if(_delM){results.push({custNo:_delM[2],custName:_delM[1],note:_delM[1]});continue;}
+        var _delM2=_nonDel.match(/(\d{6,12})/);
+        if(_delM2){results.push({custNo:_delM2[1],custName:'',note:''});continue;}
+        continue;
+      }
       // 패턴1: "고객번호 : 029053766, 차상화" 또는 "고객번호 : 022176880, 이윤(일반용)"
       var m1=line.match(/고객번호[:\s]*(\d{6,12})[,\s]+([^\n]+)/);
       if(m1){
@@ -6807,7 +6872,8 @@ function _fetchWaterCollapsed(bId){
 function _autoFillWaterFromMemo(){
   if(!DB.waterBills) DB.waterBills=[];
   var added=0, updated=0;
-  _teamBuildings().forEach(function(b){
+  // 전체 건물 대상 (팀 무관)
+  (DB.buildings||[]).filter(function(b){return !b._deleted;}).forEach(function(b){
     var infos=_parseBldgWaterInfo(b.id);
     if(!infos||!infos.length) return;
     infos.forEach(function(info){
@@ -6824,7 +6890,7 @@ function _autoFillWaterFromMemo(){
         if(changed) updated++;
         return;
       }
-      // 같은 건물에 고객번호 없는 빈 항목이 있으면 채움
+      // 같은 건물+같은 bId에 고객번호 없는 빈 항목이 있으면 채움 (첫 번째만)
       var empty=(DB.waterBills||[]).find(function(w){ return w.bId===b.id && !w.custNo; });
       if(empty){
         empty.custNo=info.custNo;
@@ -6836,7 +6902,7 @@ function _autoFillWaterFromMemo(){
         updated++;
         return;
       }
-      // 신규 생성
+      // 같은 건물에 이미 항목이 있는데 고객번호가 다르면 → 신규 추가 (다중 고객)
       DB.waterBills.push({id:nid(), bId:b.id, custNo:info.custNo, custName:info.custName||'', billCycle:info.billCycle||'', meterCycle:info.meterCycle||'', meterDay:info.meterDay||0, note:info.note||''});
       added++;
     });
@@ -19067,7 +19133,7 @@ function rdCal(){
     } else {
       _blds=(DB.buildings||[]).filter(function(b){return !b._deleted&&(b.team||2)===_calCurTeam;});
     }
-    _blds.sort(function(a,b){return (a.id||0)-(b.id||0);});
+    _blds.sort(function(a,b){var ma=(a.name||'').match(/^(\d+)/),mb=(b.name||'').match(/^(\d+)/);if(ma&&mb)return parseInt(ma[1])-parseInt(mb[1]);return (a.name||'').localeCompare(b.name||'');});
     var _sbH='';
     _blds.forEach(function(b){
       var sel=(bf===b.id);
@@ -19273,18 +19339,21 @@ function rdCalL(y,m,evs){
         var stampLine=calStampLine(e);
         var canEd=canEditCalEv(e);
         html+='<div class="lv-item" data-presence-type="cal" data-presence-id="'+e.id+'">'
-          +'<span style="font-size:12px;color:#1e3a5f;font-weight:700;flex-shrink:0;min-width:36px;line-height:19px;height:19px;display:inline-flex;align-items:center">'+(e.user||'')+'</span>'
+          +'<span style="font-size:12px;color:#1e3a5f;font-weight:700;flex-shrink:0;min-width:36px">'+(e.user||'')+'</span>'
           +'<div class="toggle-btn'+(e.status==='done'?' done':'')+'"'+(canEd?' onclick="togEvDone('+e.id+')"':' title="본인만 체크 가능" style="cursor:not-allowed;opacity:.6"')+'></div>'
           +'<div style="flex:1;min-width:0;cursor:'+(canEd?'pointer':'default')+'"'+(canEd?' ondblclick="var t=this.querySelector(\'.lv-title\');if(t&&!t.isContentEditable)beginEditOnDblClick(t)"':'')+'>'
-          +'<div class="lv-title'+(e.status==='done'?' done':'')+'"'+(canEd?' ondblclick="event.stopPropagation();beginEditOnDblClick(this)" onblur="saveCalTitle('+e.id+',this.textContent)" onkeydown="if(event.key==\u0027Enter\u0027&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"':' title="작성자 본인만 수정할 수 있습니다" style="cursor:not-allowed"')+(e.note?' onclick="var w=this.parentElement.querySelector(\'.lv-note-wrap\');if(w){var nd=w.querySelector(\'.lv-note\');var tg=w.querySelector(\'.lv-note-tog\');nd.style.display=nd.style.display===\'none\'?\'\':\'none\';tg.textContent=nd.style.display===\'none\'?\'▶ 더보기\':\'▼ 접기\';}" style="cursor:pointer"':'')+'>'+esc(e.title||'')+(e.note?' <span style="font-size:9px;color:#4A90D9;font-weight:400">▶</span>':'')+'</div>'
-          +(e.note?'<div class="lv-note-wrap" style="margin-top:2px"><span class="lv-note-tog" onclick="event.stopPropagation();var nd=this.nextElementSibling;nd.style.display=nd.style.display===\'none\'?\'\':\'none\';this.textContent=nd.style.display===\'none\'?\'▶ 더보기\':\'▼ 접기\'" style="font-size:10px;color:#4A90D9;cursor:pointer;user-select:none">▶ 더보기</span><div class="lv-note" style="display:none;font-size:11px;color:var(--t2);white-space:pre-wrap;word-break:break-word;line-height:1.5;margin-top:3px;padding:6px 8px;background:#f7fafc;border-left:2px solid #4A90D9;border-radius:0">'+esc(e.note)+'</div></div>':'')
-          +(stampLine?'<div class="edit-stamp">'+stampLine+'</div>':'')
+          +'<div class="lv-title'+(e.status==='done'?' done':'')+'"'+(canEd?' ondblclick="event.stopPropagation();beginEditOnDblClick(this)" onblur="saveCalTitle('+e.id+',this.textContent)" onkeydown="if(event.key==\u0027Enter\u0027&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"':' title="작성자 본인만 수정할 수 있습니다" style="cursor:not-allowed"')+'>'+esc(e.title||'')+'</div>'
           +'</div>'
-          +'<div style="display:flex;gap:3px;flex-shrink:0;align-items:center;margin-left:auto">'
+          +'<div style="display:flex;flex-direction:column;flex-shrink:0;align-items:flex-end;margin-left:auto;gap:1px">'
+          +'<div style="display:flex;gap:3px;align-items:center">'
+          +(e.note?'<span class="lv-note-tog" onclick="event.stopPropagation();var w=this.closest(\'.lv-item\').nextElementSibling;if(w&&w.classList.contains(\'lv-note-row\')){w.style.display=w.style.display===\'none\'?\'\':\'none\';this.textContent=w.style.display===\'none\'?\'▶\':\'▼\'}" style="font-size:11px;color:#4A90D9;cursor:pointer;user-select:none;font-weight:700">▶</span>':'')
           +'<button class="btn sm" onclick="openCalDetail('+e.id+')" style="font-size:9px;'+(e.note?'background:#fff8e1;border-color:#f59e0b':'')+'" title="'+(e.note?'상세 내용 있음':'상세 보기/작성')+'">📝</button>'
           +(canEd?'<input type="date" class="cal-move-date" value="'+e.date+'" data-upgraded="1" data-cleaned="1" onchange="applyMoveDate('+e.id+',this.value)" title="날짜이동" style="font-size:11px;padding:2px 4px">':'')
           +(canEd?'<button class="btn sm del" onclick="delCalEv('+e.id+')" style="font-size:12px;padding:2px 6px;font-weight:700">×</button>':'')
-          +'</div></div>';
+          +'</div>'
+          +(stampLine?'<div class="edit-stamp" style="margin:0">'+stampLine+'</div>':'')
+          +'</div></div>'
+          +(e.note?'<div class="lv-note-row" style="display:none;padding:2px 11px 6px 62px;border-bottom:1px solid var(--ln);background:#f7fafc"><div class="lv-note" style="font-size:11px;color:var(--t2);white-space:pre-wrap;word-break:break-word;line-height:1.5;padding:4px 6px;border-left:2px solid #4A90D9">'+esc(e.note)+'</div></div>':'');
       });
       html+='</div>';
     });
@@ -19478,18 +19547,20 @@ function showDayDetail(ds,evs){
         const canEd=canEditCalEv(e);
         var hasNote=e.note&&e.note.trim();
         html+='<div class="lv-item" data-presence-type="cal" data-presence-id="'+e.id+'">'
-          +'<span style="font-size:12px;color:#1e3a5f;font-weight:700;flex-shrink:0;min-width:36px;line-height:19px;height:19px;display:inline-flex;align-items:center">'+(e.user||'')+'</span>'
+          +'<span style="font-size:12px;color:#1e3a5f;font-weight:700;flex-shrink:0;min-width:36px">'+(e.user||'')+'</span>'
           +'<div class="toggle-btn'+(e.status==='done'?' done':'')+'"'+(canEd?' onclick="togEvDone('+e.id+')"':' title="본인만 체크 가능" style="cursor:not-allowed;opacity:.6"')+'></div>'
           +'<div style="flex:1;min-width:0;cursor:'+(canEd?'pointer':'default')+'"'+(canEd?' ondblclick="var t=this.querySelector(\'.lv-title\');if(t&&!t.isContentEditable)beginEditOnDblClick(t)"':'')+'>'
-          +'<div class="lv-title'+(e.status==='done'?' done':'')+'"'+(canEd?' ondblclick="event.stopPropagation();beginEditOnDblClick(this)" onblur="saveCalTitle('+e.id+',this.textContent)" onkeydown="if(event.key==\u0027Enter\u0027&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"':' title="작성자 본인만 수정할 수 있습니다" style="cursor:not-allowed"')+(hasNote?' onclick="var w=this.parentElement.querySelector(\'.lv-note-wrap\');if(w){var nd=w.querySelector(\'.cal-note-inline\');var tg=w.querySelector(\'.lv-note-tog\');nd.style.display=nd.style.display===\'none\'?\'\':\'none\';tg.textContent=nd.style.display===\'none\'?\'▶ 더보기\':\'▼ 접기\';}" style="cursor:pointer"':'')+'>'+esc(e.title||'')+(hasNote?' <span style="font-size:9px;color:#4A90D9;font-weight:400">▶</span>':'')+'</div>'
-          +(hasNote?'<div class="lv-note-wrap" style="margin-top:2px"><span class="lv-note-tog" onclick="event.stopPropagation();var nd=this.nextElementSibling;nd.style.display=nd.style.display===\'none\'?\'\':\'none\';this.textContent=nd.style.display===\'none\'?\'▶ 더보기\':\'▼ 접기\'" style="font-size:10px;color:#4A90D9;cursor:pointer;user-select:none">▶ 더보기</span><div class="cal-note-inline" style="display:none;font-size:13px;color:var(--t2);white-space:pre-wrap;word-break:break-word;line-height:1.45;margin-top:2px;padding:4px 6px;background:#f7fafc;border-left:2px solid #4A90D9;border-radius:0;cursor:'+(canEd?'text':'default')+'"'+(canEd?' ondblclick="event.stopPropagation();beginNoteEdit(this,'+e.id+')" title="더블클릭하여 내용 수정"':'')+'>'+esc(e.note)+'</div></div>':'')
-          +(stampLine?'<div class="edit-stamp">'+stampLine+'</div>':'')
+          +'<div class="lv-title'+(e.status==='done'?' done':'')+'"'+(canEd?' ondblclick="event.stopPropagation();beginEditOnDblClick(this)" onblur="saveCalTitle('+e.id+',this.textContent)" onkeydown="if(event.key==\u0027Enter\u0027&&!event.shiftKey){event.preventDefault();this.blur();}" title="더블클릭하여 수정"':' title="작성자 본인만 수정할 수 있습니다" style="cursor:not-allowed"')+'>'+esc(e.title||'')+'</div>'
           +'</div>'
-          +'<div style="display:flex;gap:3px;flex-shrink:0;align-items:center;margin-left:auto">'
-          +(canEd?'<input type="date" class="cal-move-date" value="'+e.date+'" data-upgraded="1" data-cleaned="1" onchange="applyMoveDate('+e.id+',this.value)" title="날짜이동" style="font-size:11px;padding:2px 4px">':'')
-          +(canEd?'<button class="btn sm del" onclick="delCalEv('+e.id+')" style="font-size:12px;padding:2px 6px;font-weight:700">×</button>':'')
+          +'<div style="display:flex;flex-direction:column;flex-shrink:0;align-items:flex-end;margin-left:auto;gap:1px">'
+          +'<div style="display:flex;gap:3px;align-items:center">'
+          +(hasNote?'<span class="lv-note-tog" onclick="event.stopPropagation();var w=this.closest(\'.lv-item\').nextElementSibling;if(w&&w.classList.contains(\'lv-note-row\')){w.style.display=w.style.display===\'none\'?\'\':\'none\';this.textContent=w.style.display===\'none\'?\'▶\':\'▼\'}" style="font-size:11px;color:#4A90D9;cursor:pointer;user-select:none;font-weight:700">▶</span>':'')
+          +(canEd?'<span class="lv-ed-btns"><input type="date" class="cal-move-date" value="'+e.date+'" data-upgraded="1" data-cleaned="1" onchange="applyMoveDate('+e.id+',this.value)" title="날짜이동" style="font-size:11px;padding:2px 4px"><button class="btn sm del" onclick="delCalEv('+e.id+')" style="font-size:12px;padding:2px 6px;font-weight:700">×</button></span>':'')
           +'</div>'
-          +'</div>';
+          +(stampLine?'<div class="edit-stamp" style="margin:0">'+stampLine+'</div>':'')
+          +'</div>'
+          +'</div>'
+          +(hasNote?'<div class="lv-note-row" style="display:none;padding:2px 11px 6px 62px;border-bottom:1px solid var(--ln);background:#f7fafc"><div class="cal-note-inline" style="font-size:12px;color:var(--t2);white-space:pre-wrap;word-break:break-word;line-height:1.45;padding:4px 6px;border-left:2px solid #4A90D9;cursor:'+(canEd?'text':'default')+'"'+(canEd?' ondblclick="beginNoteEdit(this,'+e.id+')" title="더블클릭하여 내용 수정"':'')+'>'+esc(e.note)+'</div></div>':'');
       }
     });
     html+='</div>';
@@ -21920,6 +21991,49 @@ function _invSplitTab(tab){
   if(m)m.style.display=tab==='meter'?'':'none';
   if(tab==='meter')_meterRenderAll();
 }
+// 임대차 층명 → 개별 검침층 분리 (4,5층→[4층,5층], 6~7층→[6층,7층], 지하2층→[B2층])
+function _expandLeaseFloor(floorName){
+  var f=String(floorName||'').trim();
+  // 지하N층 → BN층
+  f=f.replace(/지하(\d+)층?/g,'B$1층');
+  // "지하1층,1층" 같은 합산 (이미 B 변환 후)
+  if(/[,]/.test(f)&&/층/.test(f)){
+    var parts=f.replace(/층/g,'').split(',');
+    return parts.map(function(p){return p.trim()+'층';});
+  }
+  // 4,5층 또는 4~5층 (범위)
+  var rangeM=f.match(/^(B?)(\d+)[,~](B?)(\d+)층?$/);
+  if(rangeM){
+    var pfx1=rangeM[1],n1=parseInt(rangeM[2]),pfx2=rangeM[3],n2=parseInt(rangeM[4]);
+    if(pfx1===pfx2){
+      var arr=[];for(var i=n1;i<=n2;i++) arr.push(pfx1+i+'층');
+      return arr;
+    }
+  }
+  if(!/층$/.test(f)&&/\d$/.test(f)) f+='층';
+  return [f];
+}
+// 기존 검침 레코드의 구형 층이름 변환
+function _meterFixOldFloorNames(d){
+  function _fix(arr){
+    var newArr=[];
+    arr.forEach(function(f){
+      var expanded=_expandLeaseFloor(f.floor);
+      if(expanded.length===1&&expanded[0]===f.floor){newArr.push(f);return;}
+      expanded.forEach(function(fn,idx){
+        if(!newArr.some(function(x){return x.floor===fn;})){
+          var copy={};for(var k in f)copy[k]=f[k];
+          copy.floor=fn;
+          if(idx>0){copy.indoor=0;copy.outdoor=0;copy.prevIndoor=0;copy.prevOutdoor=0;copy.current=0;copy.prev=0;}
+          newArr.push(copy);
+        }
+      });
+    });
+    return newArr;
+  }
+  if(d.floors) d.floors=_fix(d.floors);
+  if(d.waterFloors) d.waterFloors=_fix(d.waterFloors);
+}
 // 검침 데이터 구조: DB.meterReadings = [{id, bId, yearMonth, elecTotal, elecBase, floors:[{floor,indoor,outdoor,prevIndoor,prevOutdoor}], waterTotal, waterFloors:[{floor,current,prev}]}]
 function _meterGetData(){
   if(!DB.meterReadings) DB.meterReadings=[];
@@ -21927,15 +22041,48 @@ function _meterGetData(){
   var ym=$('inv-month').value;
   if(!bId||!ym)return null;
   var d=DB.meterReadings.find(function(r){return r.bId===bId&&r.yearMonth===ym;});
+  var _fo={'B2층':0,'B1층':1,'1층':2,'2층':3,'3층':4,'4층':5,'5층':6,'6층':7,'7층':8,'8층':9,'공용1':10};
+  function _fsort(a,b){var oa=_fo[a.floor],ob=_fo[b.floor];if(oa!==undefined&&ob!==undefined)return oa-ob;return(a.floor||'').localeCompare(b.floor||'');}
+  function _addFromLeases(d,bId){
+    var ls=DB.leases.filter(function(l){return l.bId===bId&&l.floor;});
+    ls.forEach(function(l){
+      var dr=l.tenant==='직영';
+      var expanded=_expandLeaseFloor(l.floor);
+      expanded.forEach(function(fn){
+        if(!d.floors.some(function(f){return f.floor===fn;}))
+          d.floors.push({floor:fn,indoor:0,outdoor:0,prevIndoor:0,prevOutdoor:0,directRun:dr});
+        if(!d.waterFloors.some(function(f){return f.floor===fn;}))
+          d.waterFloors.push({floor:fn,current:0,prev:0,directRun:dr});
+      });
+    });
+    // 트러스트힐: 임대차에 없는 고정층 보충
+    var _bObj=DB.buildings.find(function(x){return x.id===bId;});
+    if(_bObj&&_bObj.name&&_bObj.name.indexOf('트러스트힐')>=0){
+      // 전기: 1층(직영), 공용1
+      if(!d.floors.some(function(f){return f.floor==='1층';}))
+        d.floors.push({floor:'1층',indoor:0,outdoor:0,prevIndoor:0,prevOutdoor:0,directRun:true});
+      if(!d.floors.some(function(f){return f.floor==='공용1';}))
+        d.floors.push({floor:'공용1',indoor:0,outdoor:0,prevIndoor:0,prevOutdoor:0,directRun:false});
+      // 수도: 1층(직영), 메인(수전), 옥외
+      if(!d.waterFloors.some(function(f){return f.floor==='1층';}))
+        d.waterFloors.push({floor:'1층',current:0,prev:0,directRun:true});
+      if(!d.waterFloors.some(function(f){return f.floor==='메인';}))
+        d.waterFloors.push({floor:'메인',current:0,prev:0,directRun:true});
+      if(!d.waterFloors.some(function(f){return f.floor==='B1층 옥외(B2층설치)';}))
+        d.waterFloors.push({floor:'B1층 옥외(B2층설치)',current:0,prev:0,directRun:true});
+      if(!d.waterFloors.some(function(f){return f.floor==='1층 옥외(B1층설치)';}))
+        d.waterFloors.push({floor:'1층 옥외(B1층설치)',current:0,prev:0,directRun:true});
+    }
+    d.floors.sort(_fsort);
+    d.waterFloors.sort(_fsort);
+  }
   if(!d){
     d={id:nid(),bId:bId,yearMonth:ym,elecTotal:0,elecBase:0,floors:[],waterTotal:0,waterFloors:[]};
-    // 해당 건물의 층 목록으로 초기화
-    var ls=DB.leases.filter(function(l){return l.bId===bId&&l.tenant&&l.tenant!=='직영'&&l.tenant!=='공실';});
-    ls.forEach(function(l){
-      d.floors.push({floor:l.floor,indoor:0,outdoor:0,prevIndoor:0,prevOutdoor:0});
-      d.waterFloors.push({floor:l.floor,current:0,prev:0});
-    });
+    _addFromLeases(d,bId);
     DB.meterReadings.push(d);
+  } else {
+    _meterFixOldFloorNames(d);
+    _addFromLeases(d,bId);
   }
   return d;
 }
@@ -22048,6 +22195,21 @@ function _meterSetElec(idx,field,val){
   _meterRenderElecGrid();
   _meterCalcElec();
 }
+function _meterMatchFloor(floors,leaseFloor){
+  // 1) 정확 매칭
+  var ex=floors.find(function(f){return f.floor===leaseFloor;});
+  if(ex)return ex;
+  // 2) 임대층명에서 숫자 추출하여 매칭 (4~5층→4층 or 5층, B2층(인율)→B2층)
+  var nums=leaseFloor.match(/B?\d+/g);
+  if(nums){
+    for(var i=0;i<nums.length;i++){
+      var cand=nums[i]+'층';
+      var fd=floors.find(function(f){return f.floor===cand;});
+      if(fd)return fd;
+    }
+  }
+  return null;
+}
 function _meterCalcElec(){
   var d=_meterGetData();if(!d)return;
   var total=parseFloat($('inv-m-elec-total').value)||0;
@@ -22072,7 +22234,7 @@ function _meterCalcElec(){
   var lId=parseInt($('inv-tenant').value)||0;
   var lease=DB.leases.find(function(l){return l.id===lId;});
   if(!lease){el.textContent='kWh단가: '+Math.round(kwhPrice)+'원 / 기본요금 1/'+n+': '+fm(basePerFloor)+'원';return;}
-  var floorData=(d?d.floors:[]).find(function(f){return f.floor===lease.floor;});
+  var floorData=_meterMatchFloor(d?d.floors:[],lease.floor);
   if(!floorData){el.textContent='해당 층 검침 데이터 없음';return;}
   var floorUsage=((floorData.indoor||0)-(floorData.prevIndoor||0))+((floorData.outdoor||0)-(floorData.prevOutdoor||0));
   if(floorUsage<0)floorUsage=0;
@@ -22102,7 +22264,7 @@ function _meterApplyElec(){
   var lId=parseInt($('inv-tenant').value)||0;
   var lease=DB.leases.find(function(l){return l.id===lId;});
   if(!lease){alert('층을 선택하세요');return;}
-  var floorData=d.floors.find(function(f){return f.floor===lease.floor;});
+  var floorData=_meterMatchFloor(d.floors,lease.floor);
   if(!floorData){alert('해당 층 검침 데이터 없음');return;}
   var floorUsage=((floorData.indoor||0)-(floorData.prevIndoor||0))+((floorData.outdoor||0)-(floorData.prevOutdoor||0));
   if(floorUsage<0)floorUsage=0;
@@ -22168,7 +22330,7 @@ function _meterCalcWater(){
   var lId=parseInt($('inv-tenant').value)||0;
   var lease=DB.leases.find(function(l){return l.id===lId;});
   if(!lease){el.textContent='㎥당 단가: '+Math.round(unitPrice)+'원';return;}
-  var floorData=d.waterFloors.find(function(f){return f.floor===lease.floor;});
+  var floorData=_meterMatchFloor(d.waterFloors,lease.floor);
   if(!floorData){el.textContent='해당 층 검침 데이터 없음';return;}
   var floorUsage=(floorData.current||0)-(floorData.prev||0);
   if(floorUsage<0)floorUsage=0;
@@ -22190,7 +22352,7 @@ function _meterApplyWater(){
   var lId=parseInt($('inv-tenant').value)||0;
   var lease=DB.leases.find(function(l){return l.id===lId;});
   if(!lease){alert('층을 선택하세요');return;}
-  var floorData=d.waterFloors.find(function(f){return f.floor===lease.floor;});
+  var floorData=_meterMatchFloor(d.waterFloors,lease.floor);
   if(!floorData){alert('해당 층 검침 데이터 없음');return;}
   var floorUsage=(floorData.current||0)-(floorData.prev||0);
   if(floorUsage<0)floorUsage=0;
@@ -22279,14 +22441,22 @@ function _meterAutoFillParking(){
   if(!lease)return;
   var b=DB.buildings.find(function(x){return x.id===bId;});
   if(b&&b.name&&b.name.indexOf('트러스트힐')>=0){
-    var cars=_trusthillParkingCars[lease.floor]||0;
+    // 층명 매칭: 4,5층→4층, 6~7층→6층 등 첫번째 개별층으로 매칭
+    var expanded=_expandLeaseFloor(lease.floor);
+    var cars=0;
+    expanded.forEach(function(fn){cars+=(_trusthillParkingCars[fn]||0);});
     var carsEl=$('inv-m-parking-cars');
-    if(carsEl&&!carsEl.value)carsEl.value=cars;
+    var isManual=carsEl&&carsEl.getAttribute('data-manual')==='1';
+    if(carsEl&&!isManual)carsEl.value=cars;
     var rateEl=$('inv-m-parking-rate');
-    if(rateEl&&!rateEl.value)rateEl.value=286000;
+    var isRateManual=rateEl&&rateEl.getAttribute('data-manual')==='1';
+    if(rateEl&&!isRateManual)rateEl.value=286000;
     _meterCalcParking();
     var infoEl=$('inv-m-parking-info');
-    if(infoEl)infoEl.textContent=lease.floor+': '+cars+'대';
+    if(infoEl){
+      var detail=expanded.map(function(fn){var c=_trusthillParkingCars[fn];return c?fn+' '+c+'대':null;}).filter(Boolean).join(', ');
+      infoEl.textContent=detail||lease.floor;
+    }
   }
 }
 function _meterApplyParking(){
@@ -22479,48 +22649,19 @@ function _meterSeedTrusthill(){
         {floor:'8층', current:24, prev:24}
       ]
     },
-    // ── 26년 2월 ──
-    {ym:'2026-02', readingDate:'26.02.21', elecTotal:0, elecBase:0, waterTotal:0,
-      floors:[
-        {floor:'B2층', indoor:21497, outdoor:5648, prevIndoor:19576, prevOutdoor:4906},
-        {floor:'B1층', indoor:90316, outdoor:34664, prevIndoor:87369, prevOutdoor:32266, directRun:true},
-        {floor:'1층', indoor:68618, outdoor:44923, prevIndoor:65664, prevOutdoor:42340, directRun:true},
-        {floor:'2층', indoor:15549, outdoor:17799, prevIndoor:13978, prevOutdoor:16171},
-        {floor:'3층', indoor:13890, outdoor:9715, prevIndoor:12286, prevOutdoor:8065},
-        {floor:'4층', indoor:18269, outdoor:13052, prevIndoor:16175, prevOutdoor:11289},
-        {floor:'5층', indoor:12731, outdoor:6519, prevIndoor:11444, prevOutdoor:5526},
-        {floor:'6층', indoor:61237, outdoor:23241, prevIndoor:57381, prevOutdoor:21849},
-        {floor:'7층', indoor:93235, outdoor:22770, prevIndoor:87679, prevOutdoor:22574},
-        {floor:'8층', indoor:11048, outdoor:11322, prevIndoor:9951, prevOutdoor:10348}
-      ],
-      waterFloors:[
-        {floor:'B1층 옥외(B2층설치)', current:135, prev:135, directRun:true},
-        {floor:'1층 옥외(B1층설치)', current:125, prev:125, directRun:true},
-        {floor:'B2층', current:52, prev:52},
-        {floor:'B1층', current:965, prev:965, directRun:true},
-        {floor:'1층', current:1254, prev:1254, directRun:true},
-        {floor:'2층', current:44, prev:44},
-        {floor:'3층', current:25, prev:25},
-        {floor:'4층', current:25, prev:25},
-        {floor:'5층', current:11, prev:11},
-        {floor:'6층', current:556, prev:556},
-        {floor:'7층', current:1392, prev:1392},
-        {floor:'8층', current:24, prev:24}
-      ]
-    },
     // ── 26년 3월 ──
     {ym:'2026-03', readingDate:'26.03.23', elecTotal:0, elecBase:0, waterTotal:0,
       floors:[
-        {floor:'B2층', indoor:23313, outdoor:5971, prevIndoor:21497, prevOutdoor:5648},
-        {floor:'B1층', indoor:93571, outdoor:36020, prevIndoor:90316, prevOutdoor:34664, directRun:true},
-        {floor:'1층', indoor:71278, outdoor:46445, prevIndoor:68618, prevOutdoor:44923, directRun:true},
-        {floor:'2층', indoor:16533, outdoor:18683, prevIndoor:15549, prevOutdoor:17799},
-        {floor:'3층', indoor:15141, outdoor:10508, prevIndoor:13890, prevOutdoor:9715},
-        {floor:'4층', indoor:19878, outdoor:13944, prevIndoor:18269, prevOutdoor:13052},
-        {floor:'5층', indoor:13922, outdoor:6869, prevIndoor:12731, prevOutdoor:6519},
-        {floor:'6층', indoor:64484, outdoor:23653, prevIndoor:61237, prevOutdoor:23241},
-        {floor:'7층', indoor:98383, outdoor:22923, prevIndoor:93235, prevOutdoor:22770},
-        {floor:'8층', indoor:11518, outdoor:11604, prevIndoor:11048, prevOutdoor:11322}
+        {floor:'B2층', indoor:23313, outdoor:5971, prevIndoor:19576, prevOutdoor:4906},
+        {floor:'B1층', indoor:93571, outdoor:36020, prevIndoor:87369, prevOutdoor:32266, directRun:true},
+        {floor:'1층', indoor:71278, outdoor:46445, prevIndoor:65664, prevOutdoor:42340, directRun:true},
+        {floor:'2층', indoor:16533, outdoor:18683, prevIndoor:13978, prevOutdoor:16171},
+        {floor:'3층', indoor:15141, outdoor:10508, prevIndoor:12286, prevOutdoor:8065},
+        {floor:'4층', indoor:19878, outdoor:13944, prevIndoor:16175, prevOutdoor:11289},
+        {floor:'5층', indoor:13922, outdoor:6869, prevIndoor:11444, prevOutdoor:5526},
+        {floor:'6층', indoor:64484, outdoor:23653, prevIndoor:57381, prevOutdoor:21849},
+        {floor:'7층', indoor:98383, outdoor:22923, prevIndoor:87679, prevOutdoor:22574},
+        {floor:'8층', indoor:11518, outdoor:11604, prevIndoor:9951, prevOutdoor:10348}
       ],
       waterFloors:[
         {floor:'메인', current:6398, prev:0, directRun:true},
@@ -22607,7 +22748,7 @@ function _meterShowElecHistory(){
   records.forEach(function(r){r.floors.forEach(function(f){if(!_efSet[f.floor]){_efSet[f.floor]=true;_efArr.push(f.floor);}});});
   var floors=_filterOldFloors(_efArr);
   // 층 정렬 (건물 논리 순서)
-  var _floorOrder={'B2층':0,'B1층':1,'1층':2,'2층':3,'3층':4,'4층':5,'5층':6,'6층':7,'7층':8,'8층':9};
+  var _floorOrder={'B2층':0,'B1층':1,'1층':2,'2층':3,'3층':4,'4층':5,'5층':6,'6층':7,'7층':8,'8층':9,'공용1':10};
   floors.sort(function(a,b){
     var oa=_floorOrder[a],ob=_floorOrder[b];
     if(oa!==undefined&&ob!==undefined)return oa-ob;
@@ -22704,7 +22845,7 @@ function _meterShowWaterHistory(){
     var yr=(r.readingDate||r.yearMonth).substring(0,4);
     yearSet[yr]=true;
   });
-  var uniqueYears=Object.keys(yearSet).sort().reverse();
+  var uniqueYears=Object.keys(yearSet).sort();
 
   var h='<div style="font-weight:700;font-size:16px;margin-bottom:10px">'+esc(bName)+' 수도 검침이력</div>';
   h+='<div style="overflow-x:auto;zoom:1.2"><table style="border-collapse:collapse;font-size:12px;white-space:nowrap">';
@@ -22790,9 +22931,7 @@ function _showMeterHistoryPanel(contentHtml,panelId,totalRecords,pageSize,opts){
 
   // 기존 패널 있으면 업데이트, 없으면 새로 생성
   if(_mhPanels[panelId]){
-    var existing=_mhPanels[panelId].panel;
     _mhPanels[panelId].body.innerHTML=contentHtml;
-    existing.style.zIndex=_mhPanelZCounter++;
     _mhInitFold(_mhPanels[panelId].body,totalRecords,pageSize,opts);
     return;
   }
@@ -22811,11 +22950,31 @@ function _showMeterHistoryPanel(contentHtml,panelId,totalRecords,pageSize,opts){
   header.textContent=icon+' '+titleText;
   header.style.color='#1f2937';
 
+  var headerBtns=document.createElement('div');
+  headerBtns.style.cssText='margin-left:auto;display:flex;align-items:center;gap:4px';
+  var _isMax=false,_prevRect={};
+  var maxBtn=document.createElement('button');
+  maxBtn.textContent='⛶';
+  maxBtn.title='전체보기';
+  maxBtn.style.cssText='background:none;border:none;font-size:16px;cursor:pointer;color:#6b7280;padding:0 4px;line-height:1';
+  maxBtn.onclick=function(){
+    if(!_isMax){
+      _prevRect={l:panel.style.left,t:panel.style.top,w:panel.style.width,h:panel.style.height};
+      panel.style.left='0px';panel.style.top='0px';panel.style.width='100vw';panel.style.height='100vh';panel.style.borderRadius='0';
+      maxBtn.textContent='⧉';maxBtn.title='원래크기';
+    } else {
+      panel.style.left=_prevRect.l;panel.style.top=_prevRect.t;panel.style.width=_prevRect.w||'860px';panel.style.height=_prevRect.h||'520px';panel.style.borderRadius='8px';
+      maxBtn.textContent='⛶';maxBtn.title='전체보기';
+    }
+    _isMax=!_isMax;
+  };
   var closeBtn=document.createElement('button');
   closeBtn.textContent='✕';
-  closeBtn.style.cssText='margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;padding:0 4px;line-height:1';
+  closeBtn.style.cssText='background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;padding:0 4px;line-height:1';
   closeBtn.onclick=function(){_closeMeterPanel(panelId);};
-  header.appendChild(closeBtn);
+  headerBtns.appendChild(maxBtn);
+  headerBtns.appendChild(closeBtn);
+  header.appendChild(headerBtns);
 
   var body=document.createElement('div');
   body.style.cssText='flex:1;overflow:auto;padding:12px;background:#fff';
@@ -22826,6 +22985,9 @@ function _showMeterHistoryPanel(contentHtml,panelId,totalRecords,pageSize,opts){
   document.body.appendChild(panel);
 
   _mhPanels[panelId]={panel:panel,body:body};
+
+  // 패널 클릭 시 맨 앞으로
+  panel.addEventListener('mousedown',function(){panel.style.zIndex=_mhPanelZCounter++;});
 
   // 초기 위치 설정 (화면 중앙 근처)
   var x=100+Math.random()*40, y=100+Math.random()*40;
@@ -25478,6 +25640,8 @@ function initInvoice(){
   const now=new Date();$('inv-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   _meterSeedTrusthill(); _meterSeed4613(); _meterSeedLepolem(); // 초기 검침값 시드
   _meterCleanOldFloors(); // 구 층명 정리
+  // 모든 레코드에서 구형 층명 변환
+  (DB.meterReadings||[]).forEach(function(r){_meterFixOldFloorNames(r);});
   _meterDedup(); // 중복 제거
   _renderInvBldgSidebar();
   _renderInvFloorSidebar();
@@ -25572,6 +25736,9 @@ function _invSelectFloor(lId){
   _renderInvFloorSidebar();
   // 층별 특수항목 추가/제거 (4613 7층 주차비 등)
   _invApplyFloorItems(lId);
+  // 자동금액 갱신
+  invItems.forEach(function(it){if(!it._manual)it._autoFilled=false;});
+  rdInvItems();
   _invAutoPreview();
   // 검침탭이 열려있으면 계산 갱신
   var mt=$('inv-split-meter');
@@ -25625,13 +25792,43 @@ function invBldgChange(){
   const b=DB.buildings.find(b=>b.id===bId);
   if(b&&b.addr)$('inv-acct').placeholder=b.addr;
 }
+function _invAutoFillAmt(it){
+  var lId=parseInt($('inv-tenant').value)||0;
+  var ym=$('inv-month').value;
+  if(!lId||!ym)return null;
+  var l=DB.leases.find(function(x){return x.id===lId;});
+  if(!l)return null;
+  var p=ym.split('-'),yr=parseInt(p[0]),mo=parseInt(p[1]);
+  var rate=rateFor(l,yr,mo);
+  if(it.name==='임대료'){
+    if(isRentFreeMonth(l,yr,mo))return{amt:0,label:'렌트프리'};
+    return{amt:Math.round((rate.rent||0)*1.1),label:'자동'};
+  }
+  if(it.name==='관리비')return{amt:Math.round((rate.mgmt||0)*1.1),label:'자동'};
+  return null;
+}
 function rdInvItems(){
   $('inv-items').innerHTML=invItems.map((it,i)=>{
     const n=it.name||'';const a=it.amt||'';const nt=it.note||'';
+    var isAutoable=(n==='임대료'||n==='관리비');
+    var autoInfo=isAutoable?_invAutoFillAmt(it):null;
+    var isManual=!!it._manual;
+    // 자동채우기 가능항목이면 자동으로 금액 세팅
+    if(isAutoable&&autoInfo&&!isManual&&!it._autoFilled){
+      it.amt=autoInfo.amt;it._autoFilled=true;
+    }
+    var curAmt=isManual?a:(autoInfo?autoInfo.amt:a);
+    var autoTag='';
+    if(isAutoable&&autoInfo){
+      autoTag='<label style="display:flex;align-items:center;gap:2px;font-size:9px;color:'+(isManual?'#b45309':'#059669')+';white-space:nowrap;cursor:pointer" title="'+(isManual?'수동입력':'임대차 기준 자동입력')+'">'
+        +'<input type="checkbox" '+(isManual?'checked':'')+' onchange="invItems['+i+']._manual=this.checked;if(!this.checked){invItems['+i+']._autoFilled=false;}rdInvItems();_invAutoPreview()" style="width:11px;height:11px;margin:0">'
+        +'<span>'+(isManual?'수동':'자동반영')+'</span></label>';
+    }
     return '<div style="display:flex;gap:3px;margin-bottom:3px;align-items:center">'
-      +'<input value="'+n+'" placeholder="항목" style="width:60px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none" onchange="invItems['+i+'].name=this.value;_invAutoPreview()">'
-      +'<input value="'+a+'" placeholder="금액" type="number" style="width:70px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none" onchange="invItems['+i+'].amt=this.value;_invAutoPreview()">'
+      +'<input value="'+n+'" placeholder="항목" style="width:60px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none" onchange="invItems['+i+'].name=this.value;invItems['+i+']._autoFilled=false;rdInvItems();_invAutoPreview()">'
+      +'<input value="'+curAmt+'" placeholder="금액" type="number" style="width:70px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none'+(isAutoable&&!isManual?';background:#ecfdf5;color:#059669':'')+'" '+(isAutoable&&!isManual?'readonly ':'')+' onchange="invItems['+i+'].amt=this.value;_invAutoPreview()">'
       +'<input value="'+nt+'" placeholder="비고" style="width:40px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none" onchange="invItems['+i+'].note=this.value;_invAutoPreview()">'
+      +autoTag
       +'<button class="btn sm del" onclick="invItems.splice('+i+',1);rdInvItems();_invAutoPreview()" style="padding:1px 4px">×</button>'
       +'</div>';
   }).join('');
@@ -25656,14 +25853,14 @@ function genInvoice(){
     let amt=parseInt(it.amt)||0;
     let note=it.note||'';
     let _bump=false;
-    if(l){
+    if(l&&!it._manual){
       if(it.name==='임대료'){
         if(rentFree){ amt=0; note=note?note+' · 렌트프리':'렌트프리'; }
         else { amt=Math.round((rate.rent||0)*1.1); if(rate.rent!==l.rent){_bump=true;note=note?note+' · 인상반영':'인상반영';} }
       }
       if(it.name==='관리비'){ amt=Math.round((rate.mgmt||0)*1.1); if(rate.mgmt!==l.mgmt){_bump=true;note=note?note+' · 인상반영':'인상반영';} }
     }
-    return{name:it.name,amt,note,_rf:it.name==='임대료'&&rentFree,_bump};
+    return{name:it.name,amt,note,_rf:it.name==='임대료'&&rentFree&&!it._manual,_bump};
   }).filter(it=>it.name);
 
   const total=items.reduce((s,it)=>s+(it.amt||0),0);
@@ -25714,7 +25911,7 @@ function genInvoice(){
           var _mTU=0,_mN=0;md.floors.forEach(function(f){var u=((f.indoor||0)-(f.prevIndoor||0))+((f.outdoor||0)-(f.prevOutdoor||0));if(u<0)u=0;_mTU+=u;_mN++;});
           if(_mTU>0){
             var _kw=(_mET-_mEB)/_mTU;
-            var _fD=l?md.floors.find(function(f){return f.floor===(l.floor||'');}):null;
+            var _fD=l?_meterMatchFloor(md.floors,l.floor||''):null;
             if(_fD){var _fU=((_fD.indoor||0)-(_fD.prevIndoor||0))+((_fD.outdoor||0)-(_fD.prevOutdoor||0));if(_fU<0)_fU=0;s+='<div style="font-size:11px;color:var(--t2);margin-bottom:4px">*전기: '+fm(_fU)+'kWh×'+Math.round(_kw)+'원+기본'+fm(Math.round(_mEB/_mN))+'원='+fm(Math.round(_fU*_kw)+Math.round(_mEB/_mN))+'원</div>';}
           }
         }
@@ -25723,7 +25920,7 @@ function genInvoice(){
           var _wTU=0;md.waterFloors.forEach(function(f){var u=(f.current||0)-(f.prev||0);if(u<0)u=0;_wTU+=u;});
           if(_wTU>0){
             var _wUp=_mWT/_wTU;
-            var _wFD=l?md.waterFloors.find(function(f){return f.floor===(l.floor||'');}):null;
+            var _wFD=l?_meterMatchFloor(md.waterFloors,l.floor||''):null;
             if(_wFD){var _wFU=(_wFD.current||0)-(_wFD.prev||0);if(_wFU<0)_wFU=0;s+='<div style="font-size:11px;color:var(--t2);margin-bottom:4px">*수도: '+fm(_wFU)+'㎥×'+Math.round(_wUp)+'원='+fm(Math.round(_wFU*_wUp))+'원</div>';}
           }
         }
@@ -25746,7 +25943,7 @@ function genInvoice(){
   $('inv-preview').innerHTML=html;
 }
 function printInvoice(){
-  const content=$('inv-preview');if(!content||content.querySelector('.empty'))return alert('먼저 미리보기를 해주세요');
+  const content=$('inv-preview');if(!content||content.querySelector('.empty'))return alert('건물/층을 먼저 선택하세요');
   const w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>청구서</title>'
     +'<style>body{font-family:"Noto Sans KR",sans-serif;font-size:12px;margin:20px 30px}'
@@ -26073,6 +26270,7 @@ async function enterApp(){
   // 2) 승인됨 → 앱 진입
   // role 우선, 없으면 is_admin으로 폴백
   CURRENT_USER_ROLE = prof.role || (prof.is_admin ? 'admin' : 'user');
+  window._loginDone=true;
   IS_SUPER_ADMIN = (CURRENT_USER_ROLE === 'super_admin');
   IS_ADMIN = IS_SUPER_ADMIN || (CURRENT_USER_ROLE === 'admin') || !!prof.is_admin;
   // 일반사용자 뷰어 전용 모드
