@@ -3016,7 +3016,7 @@ function _migrateMemoCats(){
   });
   if(changed) console.log('[migrate] memoCats 누락 키 보충 완료');
   // V3 마이그레이션: defMemoCats에 더 긴(상세한) 데이터가 있으면 덮어쓰기 (수도 고객번호, CCTV, 승강기, 전기 등)
-  if(!DB._memoMigV3){
+  if(!DB._memoMigV5){
     var v3=false;
     Object.keys(defMemoCats).forEach(function(bId){
       var def=defMemoCats[bId];
@@ -3032,8 +3032,8 @@ function _migrateMemoCats(){
         }
       });
     });
-    DB._memoMigV3=true;
-    if(v3) console.log('[migrate] memoCats V3 수도고객번호/CCTV/승강기/전기 반영 완료');
+    DB._memoMigV5=true;
+    if(v3) console.log('[migrate] memoCats V5 성은빌딩라벨/이현메모 반영 완료');
     sv();
   }
   // V2 마이그레이션: 해지 건물 제거 (id 33-37)
@@ -3477,190 +3477,93 @@ function _onUserTyping(){
 document.addEventListener('input', _onUserTyping, {passive:true,capture:true});
 _resetIdleTimer();
 
-// ★★★ Supabase SDK 채널 기반 Presence + Broadcast ★★★
-var _setupLock = false;      // 재귀 방지 락
-var _lastTrackAt = 0;        // track 쓰로틀링
-var _TRACK_INTERVAL = 15000; // 최소 15초 간격 (rate limit 방지)
+// ★★★ Broadcast 전용 Presence (track 미사용 — rate limit 회피) ★★★
+var _setupLock = false;
+var _presenceRetryCount = 0;
 
 function setupPresence(){
-  if(!sbClient || !CURRENT_USER_ID){ return; }
-  // ★ 재귀 방지
-  if(_setupLock){ console.log('[Presence] setupPresence 재귀 차단'); return; }
+  if(!sbClient || !CURRENT_USER_ID) return;
+  if(_setupLock) return;
   _setupLock = true;
-  // 이미 joined/joining 이면 스킵
   if(_presenceChannel){
     var _st = _presenceChannel.state || '';
     if(_st === 'joined' || _st === 'joining'){ _setupLock = false; return; }
-    // 기존 채널 정리 (removeChannel 대신 unsubscribe만)
-    try{ _presenceChannel.unsubscribe(); }catch(_){}
     _presenceChannel = null;
   }
-  console.log('[Presence] 🔄 채널 생성...');
+  console.log('[Presence] 채널 생성 (Broadcast 전용)...');
   try{
-    var ch = sbClient.channel('bm_presence', {
-      config: { presence: { key: CURRENT_USER_ID }, broadcast: { self: false } }
+    var ch = sbClient.channel('bm_editing', {
+      config: { broadcast: { self: false } }
     });
-    // ── Presence sync ──
-    ch.on('presence', { event: 'sync' }, function(){
-      try{
-        var state = ch.presenceState();
-        var _now = Date.now(), seenKeys = {};
-        Object.keys(state).forEach(function(k){
-          seenKeys[k] = true;
-          var metas = state[k]; if(!metas || !metas.length) return;
-          var orig = metas[metas.length - 1];
-          var p = {}; Object.keys(orig).forEach(function(pk){ p[pk] = orig[pk]; });
-          p._localAt = _now;
-          _presenceState[k] = p;
-        });
-        // 이 sync에 없는 사용자 → offline 처리 (단, 본인 제외)
-        Object.keys(_presenceState).forEach(function(k){
-          if(!seenKeys[k] && k !== CURRENT_USER_ID){ _presenceState[k].editing = null; _presenceState[k].status = 'offline'; }
-        });
-        _renderPresence(); _renderEditIndicators();
-      }catch(e){ console.warn('[Presence-sync] 에러:', e.message); }
-    });
-    // ── Presence join ──
-    ch.on('presence', { event: 'join' }, function(ev){
-      try{
-        var key = ev.key, news = ev.newPresences || [];
-        if(!news.length || key === CURRENT_USER_ID) return; // 자기 자신 무시
-        var orig = news[news.length - 1];
-        var p = {}; Object.keys(orig).forEach(function(pk){ p[pk] = orig[pk]; });
-        p._localAt = Date.now();
-        _presenceState[key] = p;
-        console.log('[Presence] ✅ 다른사용자 join:', p.name || key);
-        _renderPresence(); _renderEditIndicators();
-      }catch(e){}
-    });
-    // ── Presence leave — 다른 사용자만 처리, 자기 자신 무시 ──
-    ch.on('presence', { event: 'leave' }, function(ev){
-      try{
-        var key = ev.key;
-        if(key === CURRENT_USER_ID) return; // ★ 자기 leave 무시 (track 갱신 때 발생하는 것)
-        // 진짜 떠난 건지 확인: presenceState에 아직 있으면 track 갱신일 뿐
-        var curState = ch.presenceState();
-        if(curState[key] && curState[key].length > 0) return; // 아직 있음 → 무시
-        if(_presenceState[key]){ _presenceState[key].editing = null; _presenceState[key].status = 'offline'; _presenceState[key]._localAt = Date.now(); }
-        console.log('[Presence] 👋 다른사용자 leave:', key);
-        _renderPresence(); _renderEditIndicators();
-      }catch(e){}
-    });
-    // ── Broadcast 수신 ──
     ch.on('broadcast', { event: 'editing' }, function(ev){
       try{
         var pl = ev.payload || ev;
         if(pl && pl.payload && pl.payload.userId) pl = pl.payload;
         if(!pl || !pl.userId || pl.userId === CURRENT_USER_ID) return;
         var uid = pl.userId;
-        if(!_presenceState[uid]) _presenceState[uid] = {name: pl.name || '익명', userId: uid, status: 'online', _localAt: Date.now()};
+        if(!_presenceState[uid]) _presenceState[uid] = {};
+        _presenceState[uid].name = pl.name || _presenceState[uid].name || '익명';
+        _presenceState[uid].userId = uid;
         _presenceState[uid].editing = pl.editing;
-        _presenceState[uid].name = pl.name || _presenceState[uid].name;
         _presenceState[uid].typing = pl.typing || false;
         _presenceState[uid].status = pl.editing ? 'editing' : 'online';
         _presenceState[uid]._localAt = Date.now();
-        console.log('[Broadcast] ✅ 수신:', pl.name, pl.editing ? ('→ ' + pl.editing.type + '#' + pl.editing.id) : '→ 편집종료');
+        console.log('[Broadcast] 수신:', pl.name, pl.editing ? ('→ '+pl.editing.type+'#'+pl.editing.id) : '→ 편집종료');
         _renderPresence(); _renderEditIndicators();
       }catch(e){}
     });
-    // ── 구독 ──
+    ch.on('broadcast', { event: 'heartbeat' }, function(ev){
+      try{
+        var pl = ev.payload || ev;
+        if(pl && pl.payload && pl.payload.userId) pl = pl.payload;
+        if(!pl || !pl.userId || pl.userId === CURRENT_USER_ID) return;
+        var uid = pl.userId;
+        if(!_presenceState[uid]) _presenceState[uid] = { name: pl.name||'익명', userId: uid, status: 'online' };
+        _presenceState[uid].name = pl.name || _presenceState[uid].name;
+        _presenceState[uid]._localAt = Date.now();
+        if(!_presenceState[uid].editing) _presenceState[uid].status = 'online';
+      }catch(e){}
+    });
     _presenceChannel = ch;
-    ch.subscribe(function(status, err){
-      console.log('[Presence] subscribe:', status, err ? err.message : '');
+    ch.subscribe(function(status){
+      console.log('[Presence] subscribe:', status);
       if(status === 'SUBSCRIBED'){
-        console.log('[Presence] ✅ 채널 구독 성공');
-        // 초기 track — 2초 지연 (rate limit 방지)
-        setTimeout(function(){
-          _lastTrackAt = 0; // 강제 허용
-          _sdkTrackPresence();
-          _renderPresence();
-        }, 2000);
+        console.log('[Presence] ✅ 채널 구독 성공 (Broadcast 전용)');
+        _presenceRetryCount = 0;
+        _setupLock = false;
+        setTimeout(function(){ _sendHeartbeat(); }, 1000);
       } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED'){
-        console.warn('[Presence] ❌ 구독 실패:', status);
+        _presenceRetryCount++;
+        var delay = Math.min(10000 * _presenceRetryCount, 60000);
+        console.warn('[Presence] 구독 실패:', status, '('+_presenceRetryCount+'회) —', (delay/1000)+'초 후');
         _presenceChannel = null;
-        // ★ removeChannel 호출 안 함 (무한 재귀 방지) — unsubscribe만
-        try{ ch.unsubscribe(); }catch(_){}
-        setTimeout(function(){ _setupLock = false; setupPresence(); }, 10000);
+        _setupLock = false;
+        if(_presenceRetryCount <= 10) setTimeout(function(){ setupPresence(); }, delay);
         return;
       }
-      _setupLock = false;
     });
   }catch(e){
-    console.warn('[Presence] 설정 실패:', e.message);
-    _presenceChannel = null;
-    _setupLock = false;
-    setTimeout(function(){ setupPresence(); }, 15000);
+    _presenceChannel = null; _setupLock = false;
   }
 }
-
-// ── track 전송 (쓰로틀링 적용) ──
-function _sdkTrackPresence(){
-  if(!_presenceChannel || _presenceChannel.state !== 'joined') return;
-  var now = Date.now();
-  if((now - _lastTrackAt) < _TRACK_INTERVAL){ return; } // 쓰로틀
-  _lastTrackAt = now;
-  try{
-    _presenceChannel.track({
-      name: CURRENT_USER_NAME || '나',
-      userId: CURRENT_USER_ID,
-      editing: _myEditingCtx,
-      status: _myStatus,
-      typing: _isTyping,
-      at: now
-    });
-  }catch(e){ console.warn('[Presence] track 에러:', e.message); }
-}
-
-// ── broadcast 전송 (편집 상태 즉시 전달 — rate limit 무관) ──
 function _sdkSendBroadcast(editCtx){
   if(!_presenceChannel || _presenceChannel.state !== 'joined') return;
-  try{
-    _presenceChannel.send({
-      type: 'broadcast',
-      event: 'editing',
-      payload: { userId: CURRENT_USER_ID, name: CURRENT_USER_NAME || '나', editing: editCtx, typing: _isTyping, at: Date.now() }
-    });
-  }catch(e){}
+  try{ _presenceChannel.send({ type:'broadcast', event:'editing', payload:{ userId:CURRENT_USER_ID, name:CURRENT_USER_NAME||'나', editing:editCtx, typing:_isTyping, at:Date.now() } }); }catch(e){}
 }
-
-// ── 진단 함수 ──
-window.presenceDiag=function(){
-  var d = {
-    channel: _presenceChannel ? _presenceChannel.state : 'null',
-    userId: CURRENT_USER_ID,
-    myEditing: _myEditingCtx,
-    presenceKeys: Object.keys(_presenceState),
-    details: {}
-  };
-  Object.keys(_presenceState).forEach(function(k){
-    var p = _presenceState[k];
-    d.details[k] = { name: p.name, status: p.status, editing: p.editing, age: p._localAt ? (Date.now()-p._localAt)+'ms' : '?' };
-  });
-  try{
-    if(_presenceChannel && _presenceChannel.presenceState){
-      d.serverKeys = Object.keys(_presenceChannel.presenceState());
-    }
-  }catch(_){}
-  console.log('[진단]', JSON.stringify(d, null, 2));
-  return d;
-};
-
+function _sendHeartbeat(){
+  if(!_presenceChannel || _presenceChannel.state !== 'joined') return;
+  try{ _presenceChannel.send({ type:'broadcast', event:'heartbeat', payload:{ userId:CURRENT_USER_ID, name:CURRENT_USER_NAME||'나', status:_myStatus, at:Date.now() } }); }catch(e){}
+}
+function _sdkTrackPresence(){}
 function _pushPresence(ctx){
   _myEditingCtx=ctx;
-  if(ctx) _myStatus='editing';
-  else if(_myStatus==='editing') _myStatus='online';
-  _renderPresence();
-  _renderEditIndicators();
-  _sdkSendBroadcast(ctx);     // broadcast는 즉시 (rate limit 별도)
-  _lastTrackAt = 0;            // ★ 편집 변경 시에는 track 쓰로틀 해제
-  _sdkTrackPresence();
+  if(ctx) _myStatus='editing'; else if(_myStatus==='editing') _myStatus='online';
+  _renderPresence(); _renderEditIndicators();
+  _sdkSendBroadcast(ctx);
 }
 window.startEditing=function(type,id,label,detail){
-  const conflict=_findConflict(type,id);
-  if(conflict){
-    alert('\u{1F512} "'+conflict.name+'"님이 현재 수정중입니다.\n\n['+(label||'')+' > '+(detail||'')+']'+(conflict.typing?'\n\n\u{2328} 입력중...':'')+'\n\n수정이 끝날 때까지 기다려주세요.');
-    return false;
-  }
+  var conflict=_findConflict(type,id);
+  if(conflict){ alert('\u{1F512} "'+conflict.name+'"님이 현재 수정중입니다.\n\n['+(label||'')+' > '+(detail||'')+']\n\n수정이 끝날 때까지 기다려주세요.'); return false; }
   _pushPresence({type:type,id:id,label:label||(type+'#'+id),detail:detail||null});
   return true;
 };
@@ -3668,61 +3571,36 @@ window.stopEditing=function(){
   _isTyping=false; _myEditingCtx=null; _myStatus='online';
   _renderPresence(); _renderEditIndicators();
   _sdkSendBroadcast(null);
-  _lastTrackAt = 0;
-  _sdkTrackPresence();
 };
 function _findConflict(type,id){
-  for(const uid in _presenceState){
-    if(uid===CURRENT_USER_ID) continue;
-    const p=_presenceState[uid];
-    if(p&&p.editing&&p.editing.type===type&&String(p.editing.id)===String(id)) return p;
-  }
+  for(var uid in _presenceState){ if(uid===CURRENT_USER_ID) continue; var p=_presenceState[uid]; if(p&&p.editing&&p.editing.type===type&&String(p.editing.id)===String(id)) return p; }
   return null;
 }
-function _statusClass(p){
-  if(!p) return 'offline';
-  if(p.status==='idle') return 'idle';
-  if(p.editing) return 'editing';
-  return 'online';
-}
-function _statusLabel(cls){
-  if(cls==='editing') return '편집중';
-  if(cls==='idle') return '자리비움';
-  if(cls==='offline') return '오프라인';
-  return '접속중';
-}
+function _statusClass(p){ if(!p) return 'offline'; if(p.status==='idle') return 'idle'; if(p.editing) return 'editing'; return 'online'; }
+function _statusLabel(cls){ if(cls==='editing') return '편집중'; if(cls==='idle') return '자리비움'; if(cls==='offline') return '오프라인'; return '접속중'; }
 function _renderSbUser(name){
   var el=$('sb-users'); if(!el) return;
   var myCls=_myStatus==='idle'?'idle':(_myEditingCtx?'editing':'online');
   var myEditLabel='', myEditDetail='';
-  if(_myEditingCtx){
-    myEditLabel=esc(_myEditingCtx.label||'');
-    if(_myEditingCtx.detail) myEditDetail=esc(_myEditingCtx.detail);
-  }
+  if(_myEditingCtx){ myEditLabel=esc(_myEditingCtx.label||''); if(_myEditingCtx.detail) myEditDetail=esc(_myEditingCtx.detail); }
   var html='<div style="padding:2px 6px">';
   html+='<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)"><span class="presence-dot '+myCls+'"></span><span id="sb-user-name">'+esc(name)+'</span>'+(_isViewOnly()?'<span class="vo-tag">\u{1F441} 뷰어</span>':'')+'</div>';
   if(myEditLabel) html+='<div style="font-size:9px;color:var(--t4);padding-left:4px;line-height:1.3">&gt; '+myEditLabel+(myEditDetail?' > '+myEditDetail:'')+'</div>';
   html+='</div>';
-  var others=Object.keys(_presenceState).filter(k=>k!==CURRENT_USER_ID).map(k=>_presenceState[k]).filter(Boolean);
+  var others=Object.keys(_presenceState).filter(function(k){return k!==CURRENT_USER_ID;}).map(function(k){return _presenceState[k];}).filter(Boolean);
   others.forEach(function(p){
-    var cls=_statusClass(p);
-    var statusTxt=_statusLabel(cls);
-    var typingCls=(p.typing&&p.editing)?' typing':'';
+    if(p.status==='offline') return;
+    var cls=_statusClass(p), statusTxt=_statusLabel(cls);
     var editLabel='', editDetail='';
-    if(p.editing){
-      editLabel=esc(p.editing.label||'');
-      if(p.editing.detail) editDetail=esc(p.editing.detail);
-    }
-    html+='<div style="padding:2px 6px" title="'+esc(p.name||'익명')+' — '+statusTxt+(p.typing?' (입력중)':'')+'">';
-    html+='<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t3)"><span class="presence-dot '+cls+typingCls+'"></span><span>'+esc(p.name||'익명')+'</span>'+(editLabel?' <span style="color:var(--t4);font-size:9px">'+editLabel+'</span>':'')+'</div>';
+    if(p.editing){ editLabel=esc(p.editing.label||''); if(p.editing.detail) editDetail=esc(p.editing.detail); }
+    html+='<div style="padding:2px 6px" title="'+esc(p.name||'익명')+' — '+statusTxt+'">';
+    html+='<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t3)"><span class="presence-dot '+cls+'"></span><span>'+esc(p.name||'익명')+'</span>'+(editLabel?' <span style="color:var(--t4);font-size:9px">'+editLabel+'</span>':'')+'</div>';
     if(editDetail) html+='<div style="font-size:9px;color:var(--t4);padding-left:4px;line-height:1.3">&gt; '+editDetail+'</div>';
     html+='</div>';
   });
   el.innerHTML=html;
 }
-function _renderPresence(){
-  _renderSbUser(CURRENT_USER_NAME||'나');
-}
+function _renderPresence(){ _renderSbUser(CURRENT_USER_NAME||'나'); }
 function _renderEditIndicators(){
   document.querySelectorAll('.presence-edit-indicator,.presence-edit-badge').forEach(function(el){el.remove();});
   document.querySelectorAll('[data-presence-editing]').forEach(function(el){
@@ -3731,12 +3609,9 @@ function _renderEditIndicators(){
     el.removeAttribute('data-presence-editing');
   });
   var editItems=[];
-  if(_myEditingCtx && CURRENT_USER_ID){
-    editItems.push({uid:CURRENT_USER_ID,name:CURRENT_USER_NAME||'나',editing:_myEditingCtx,typing:_isTyping,isSelf:true});
-  }
+  if(_myEditingCtx && CURRENT_USER_ID) editItems.push({uid:CURRENT_USER_ID,name:CURRENT_USER_NAME||'나',editing:_myEditingCtx,typing:_isTyping,isSelf:true});
   Object.keys(_presenceState).forEach(function(k){
-    if(k===CURRENT_USER_ID) return;
-    var p=_presenceState[k];
+    if(k===CURRENT_USER_ID) return; var p=_presenceState[k];
     if(p&&p.editing) editItems.push({uid:k,name:p.name||'익명',editing:p.editing,typing:p.typing,isSelf:false});
   });
   editItems.forEach(function(item){
@@ -3744,33 +3619,21 @@ function _renderEditIndicators(){
     var targets=document.querySelectorAll('[data-presence-type="'+type+'"][data-presence-id="'+id+'"]');
     if(!targets.length) targets=document.querySelectorAll('[data-id="'+id+'"]');
     targets.forEach(function(target){
-      var color=item.isSelf?'rgba(147,197,253,.55)':'#ef4444';
       var outlineColor=item.isSelf?'rgba(147,197,253,.5)':'#ef4444';
       var shadow=item.isSelf?'inset 0 0 0 1px rgba(147,197,253,.18)':'inset 0 0 0 2px rgba(239,68,68,.25)';
-      if(target.tagName==='TR'){
-        Array.from(target.cells||[]).forEach(function(td){
-          td.style.outline='2px solid '+outlineColor;
-          td.style.outlineOffset='-1px';
-          td.style.boxShadow=shadow;
-        });
-      } else {
-        target.style.outline='2px solid '+outlineColor;
-        target.style.outlineOffset='-1px';
-        target.style.boxShadow=shadow;
-      }
+      if(target.tagName==='TR'){ Array.from(target.cells||[]).forEach(function(td){ td.style.outline='2px solid '+outlineColor;td.style.outlineOffset='-1px';td.style.boxShadow=shadow; }); }
+      else { target.style.outline='2px solid '+outlineColor;target.style.outlineOffset='-1px';target.style.boxShadow=shadow; }
       target.setAttribute('data-presence-editing','1');
       var badgeParent=target.tagName==='TR'?(target.cells[0]||target):target;
       if(badgeParent.style.position!=='relative'&&badgeParent.style.position!=='absolute') badgeParent.style.position='relative';
-      var badge=document.createElement('div');
-      badge.className='presence-edit-badge';
-      badge.style.background=item.isSelf?'rgba(147,197,253,.7)':color;
+      var badge=document.createElement('div'); badge.className='presence-edit-badge';
+      badge.style.background=item.isSelf?'rgba(147,197,253,.7)':'#ef4444';
       badge.textContent=(item.isSelf?'나':item.name)+(item.typing?' \u{270F}':'');
       badgeParent.appendChild(badge);
     });
   });
 }
 window.addEventListener('beforeunload',function(e){
-  if(_presenceChannel) try{ _presenceChannel.untrack(); }catch(_){}
   // ★ 고정일정 특이사항 편집 중이면 강제 저장
   try{ if(_spEditPending || _spEditActive) _flushSpEdit(); }catch(_){}
   // 메모 미저장 → 즉시 localStorage에 긴급 백업 + 경고
@@ -3807,33 +3670,28 @@ window.addEventListener('beforeunload',function(e){
   }
 });
 
-// ★ Presence heartbeat — 30초마다 track 재전송
+// ★ Heartbeat broadcast — 20초마다 (track 대체)
 setInterval(function(){
   if(!sbClient || !CURRENT_USER_ID) return;
   if(_presenceChannel && _presenceChannel.state === 'joined'){
-    _sdkTrackPresence(); // 쓰로틀링 내장 (15초)
+    _sendHeartbeat();
     if(_myEditingCtx) _sdkSendBroadcast(_myEditingCtx);
   } else if(!_setupLock){
-    _setupLock = false;
     setupPresence();
   }
-},30000);
-// ★ stale 정리 — 30초마다 (20초 이상 수신 없으면 idle 처리)
+}, 20000);
+// ★ Stale 정리 — 30초마다
 setInterval(function(){
   try{
-    var now=Date.now();
+    var now = Date.now();
     Object.keys(_presenceState).forEach(function(k){
-      if(k===CURRENT_USER_ID) return;
-      var p=_presenceState[k];
-      var lastSeen=p._localAt||p.at||0;
-      if(lastSeen&&(now-lastSeen)>20000){
-        p.editing=null; p.status='idle';
-      }
+      if(k === CURRENT_USER_ID) return;
+      var p = _presenceState[k];
+      if(p._localAt && (now - p._localAt) > 25000){ p.editing = null; p.status = 'offline'; }
     });
-    var hasOthers=Object.keys(_presenceState).some(function(k){return k!==CURRENT_USER_ID&&_presenceState[k];});
-    if(_myEditingCtx || hasOthers){ _renderEditIndicators(); _renderPresence(); }
+    _renderPresence(); _renderEditIndicators();
   }catch(_){}
-},30000);
+}, 30000);
 
 
 // ── 초기 DB (localStorage에서 임시 로드, 로그인 후 Supabase/IndexedDB 데이터로 교체)
@@ -4341,10 +4199,10 @@ const defMemoCats={
   7:{password:'1층 공용부2개: 1 확인 5223 확인',fire:'소방안전관리자 박정도',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 7일\n고객번호: 042807600, (주)브렌트우드',tax:'공인인증서\n비번: my466489\$\$',contact:'임대인: 홍민용 대표님 010-4176-7219\n임대인: 유미경 고문님 010-5327-7217\n시공사(다산건설): 박동원 차장님 010-4159-9822\n주차기(동양파킹): 010-8985-3791',etc:'원격검침용 PC 비번: omniamsys',cctv:'cctv 원격 뷰어 방법(녹화기1,2)\n>블루CCTV 어플 설치\n>좌측 상단에 \'三\' 클릭→추가 클릭\n>TCP/IP 체크\n>장치 이름 : (원하는 이름으로 직접 입력)\n>접속 주소(호스트네임) : ja500a5.ddnscctv.com (녹화기1)\n>포트 : 7621\n>아이디(사용자) : admin\n>비밀번호 : a12345678!\n------------------\n>TCP/IP 체크\n>장치 이름 : (원하는 이름으로 직접 입력)\n>접속 주소(호스트네임) : ja500f1.ddnscctv.com (녹화기2)\n>포트 : 7623\n>아이디(사용자) : admin\n>비밀번호 : a12345678!',elevator:'승강기안전관리자 박정도'},
   8:{password:'1층 우편함내 카드키',fire:'소방안전관리자 임차인',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 022891658\n고객명: 라이드주식회사',tax:'건물주',contact:'임대인: 최원석 대표님 010-7522-9079\n시공사(도듬건설): 정신태 상무 010-3312-3903 / 최상운 이사 010-8872-3840\n소방(삼성소방): 김대운 팀장 010-9776-3119\n승강기(동성el): 유재성 본부장 010-3768-1806\n정화조(관악실업): 02-529-2212\nCCTV설치업체: 010-8980-4190',etc:'',cctv:'건물정보 폴더 안 이미지파일 확인',electric:'고객명 : 라이드주식회사\n공용 : 01-6059-0669\nB1층 : 01-6059-0678\n 1층 : 01-6059-0687\n 2층 : 01-6059-0696\n 3층 : 01-6059-0703\n 4층 : 01-6059-0712\n 5층 : 01-6059-0721\n 6층 : 01-6059-0730',elevator:'승강기안전관리자 박정도'},
   9:{password:'건물입구 자동문: 7 확인 7560 확인\n(기존 잠금장치 2216* 해제, 2216# 잠금)',fire:'소방안전관리자\n임차사 직원: 이신형',water:'수도청구서: 홀수월\n검침일: 홀수월 7일\n일반용: 029132875(철거) / 가정용: 031112881\n수용가명: 주식회사포도클럽',tax:'공인인증서 비번\n신사2지점: pace010914!',contact:'임대인: 문영주 010-2336-2729\n소방(하이119): 02-6471-3119\n시공사: 김만홍 소장님 010-7936-2216\n승강기(현대el): 02-547-6802\n정화조(한성): 02-546-7164\n포도회계담당: 심하빈 010-4630-1520',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요',cctv:'신사동560 (장비)\n영상본체 VRN10201\n맥주소 000322835248\n비번 Secom3112 \n(첫글자 S는 대문자입니다)\n<어플 ID, PW>\nID: yjmun8383\nPW: Secom560',elevator:'승강기안전관리자 박정도'},
-  10:{password:'1층 출입문: 7 확인 7936 확인\n>열림시간: 주7일 12시 ~ 22시20분(26.03.04)',fire:'소방안전관리자\n건물주 조용호',water:'가정용: 028373299(철거)\n일반용: 029056246\n수용가명: 프로젝트에이스주식회사\n검침일: 짝수월 25일\n고지서: 홀수월',tax:'공인인증서 비번\n신사1지점: pace010914!',contact:'임대인: 문영주 010-2336-2729\n소방(하이119): 02-6471-3119\n시공사(BSN건설): 홍부의 소장 010-3662-8035\n승강기(한승이엘): 010-4136-6391\n정화조기간연장(구청자원순환과): 02-3423-5993',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요',cctv:'장비 아이디 admin\n비번 Secom3112 \n\n<어플 ID, PW>\nID: yjmun8383\nPW: Secom560',electric:'고객명 : 프로젝트에이스 주식회사\n공용 : 01-6112-2361\nB1층 : 01-0147-5253\n 1층 : 01-6112-2370\n 2층 : 01-6112-2389\n 3층 : 01-6112-2398\n 4층 : 01-6112-2405\n 5층 : 01-6112-2414',elevator:'승강기안전관리자 박정도'},
+  10:{password:'1층 출입문: 7 확인 7936 확인\n>열림시간: 주7일 12시 ~ 22시20분(26.03.04)',fire:'소방안전관리자\n건물주 조용호',water:'[성은빌딩]\n가정용: 028373299(철거)\n일반용: 029056246\n수용가명: 프로젝트에이스주식회사\n검침일: 짝수월 25일\n고지서: 홀수월',tax:'공인인증서 비번\n신사1지점: pace010914!',contact:'임대인: 문영주 010-2336-2729\n소방(하이119): 02-6471-3119\n시공사(BSN건설): 홍부의 소장 010-3662-8035\n승강기(한승이엘): 010-4136-6391\n정화조기간연장(구청자원순환과): 02-3423-5993',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요',cctv:'장비 아이디 admin\n비번 Secom3112 \n\n<어플 ID, PW>\nID: yjmun8383\nPW: Secom560',electric:'고객명 : 프로젝트에이스 주식회사\n공용 : 01-6112-2361\nB1층 : 01-0147-5253\n 1층 : 01-6112-2370\n 2층 : 01-6112-2389\n 3층 : 01-6112-2398\n 4층 : 01-6112-2405\n 5층 : 01-6112-2414',elevator:'승강기안전관리자 박정도'},
   11:{password:'작심 카페 주출입구 비번\n1 > ok > 00000910 > ok\n(f1 또는 f2 누르고 외출/퇴실 선택)\nb2층 도어락 및 1층 주차기옆 도어락: 0910\nb1층 뒷문 도어락: 7788\n주차기: 2737\n5층: 6688*',fire:'소방안전관리자 건물주 직원',water:'청구서: 홀수월\n검침일: 홀수월 7일\n고객번호: 028634845\n수용가명: 이현경\n수도안분 없음(건물주가 다 납부함)',tax:'건물주 직원',contact:'임대인: 최규진 원장님 010-7124-2737\n임대인: 이현영 원장님 010-4048-2737\n직원JTS: 임수진(계산서발행) 010-7708-4161\n작심매니저: 남소라 010-9393-0831\n시공사: 김규남 소장 010-5487-3777\n승강기: 010-4002-8519 / 이사님 010-9174-2423\n소방: 010-6806-3477\n청소(청소의민족): 010-6418-2184\nCCTV: 010-5588-0707\n주차기(대우주차산업): 1899-5996 / 053-584-5816\n정화조(한성산업): 02-546-7164\n방역(세스캅): 010-6730-1945\n복사기: 010-8807-5095\n정수기: 010-8299-6620\n방충: 010-6730-1945\n자동문: 010-4116-2349',etc:'',cctv:'CCTV 어플 : Hik-Connect\n ID : 01091409398  \n PW : ing2013*\n=============\n추가 CCTV 어플 : 밝히는 CCTV\nTCP/P2P mode : TCP Mode\n도메인 : 346e11.jdrddns.com\n포트 : 8602\n아이디 : admin\n비밀번호 : cctv1234!',elevator:'승강기안전관리자 박정도',parking:'선임 / 점검결과 보고서 기입\n전원성'},
   12:{password:'비번: 6 > 확인 > 7904 > 확인\n(26.02.09 임차사 캡스로 변경됨)',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n수용가명: 아민코 주식회사\n공용: 029070196\nb1: 042716007\n101호: 042716016\n201호: 042716025\n301호: 042716034\n401호: 042716043\n501호: 042716052',tax:'건물주 직원이 발행',contact:'시공사: 권오철 현장소장님 010-4781-8057\n승강기(한승이엘): 010-4136-6391',etc:'건물 열쇠뭉치 전달함 (26.01.19)',cctv:'에스원\n계약번호 : N6152121 아민코\n맥주소 : 000322901942\n녹화기명 : VRN-10201\n아이디 : admin\n비번 : Cctv3112',electric:'고객번호 : 01-2024-0792\n고객명 : 없음',elevator:'승강기안전관리자 박정도'},
-  13:{password:'1층 현관: 5577*\n1층 화장실: 2880\nb1,1층 전용부 0710*(퇴거)\n3층: 1234*(퇴거)\n4층: 1234*(퇴거)',fire:'',water:'청구서: 홀수월\n검침일: 짝수월 22일\n고객번호: 029061055\n수용가명: 주식회사 이노매트리얼\n수도안분: 1/2/3/4층 안분',tax:'건물주 측에서 발행',contact:'',etc:'',elevator:'승강기 없음'},
+  13:{password:'1층 현관: 5577*\n1층 화장실: 2880\nb1,1층 전용부 0710*(퇴거)\n3층: 1234*(퇴거)\n4층: 1234*(퇴거)',fire:'',water:'청구서 : 홀수월\n검침일 : 짝수월 22일\n\n고객번호 : 029061055\n수용가번호 : 680-531-3-22-0210-10\n수용가명 : 주식회사 이노매트리얼\n\n수도안분 : 1/2/3/4층 안분',tax:'건물주 측에서 발행',contact:'',etc:'',elevator:'승강기 없음'},
   14:{password:'출입비번: 1 확인 6110 확인',fire:'',water:'수도요금 청구서: 짝수월\n수용가명: 프로젝트에이스주식회사\nb1호: 042734503\n101호: 042734512\n201호: 042734521\n301호: 042734530\n401호: 042734549\n501호: 042734558',tax:'',contact:'시공사(부경건설): 김평근 소장 010-2993-2551',etc:'',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 권한 받아야함)\n\ncctv장비 로그인\n(admin, N6139618!)',elevator:'승강기안전관리자 박정도'},
   15:{password:'1층 전용부, 공용부 자물쇠 : 1570\n1층 주차장 자물쇠 : 1570\n3.4층 1234 (임차인이 추후 변경)\n1층 화장실 2580\n메인출입구 3690\n주차장 : 1570',fire:'소방안전관리자 이상희\n(24.02.29 선임)',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 30일\n고객번호: 029053766, 차상화',tax:'보안카드\nID: daisybd / PW: disney77\$',contact:'임대인: 차연택 회장 010-5352-5004\n개인: 유백순 010-8888-7287\n세무(예종세무법인): 박가영 대리 02-6959-3060\n법무: 김형진 변호사 010-4746-1029\n강남구청: 02-3423-5967 / 02-3423-5965\n강남수도사업소: 02-3146-4700',etc:'위임계약시점 21.3.25(1년)\n매수시점 17.12.1',cctv:'통합 ID: cha7even@naver.com\n\n비번: bsn1570@',electric:'각층 임차인 개별 납부',elevator:'승강기 안전관리자 손성재'},
   16:{password:'B1층 : 7-확인-633633-확인\nB2층 펌프실 : 633633*',fire:'소방안전관리자 : 이정화님',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 7일\n고객명: (주)수정\n고객번호: 032856247',tax:'',contact:'임대인: 이재호 대표님 010-5745-0885\n청소: 이태균 실장님 010-2120-4763\n시공사(엔원종합건설): 정근호 소장 010-5392-1596',etc:'',cctv:'CNMS PLUS 설치\nID : ssje.building@gmail.com\nPW : asd123!@\n\n녹화기 비밀번호 : 1234567890a@\n(현장 모니터 세팅 시)',electric:'고객명 : ㈜수정\n공용 : 01-6125-5324\nB2층 : 01-6127-4535\nB1층 : 01-6127-4544\n  1층 : 01-6127-4553 \n  2층 : 01-6127-4562\n  3층 : 01-5039-5701\n  4층 : 01-5039-5710\n  5층 : 01-1009-2015',elevator:'승강기 안전관리자 손성재'},
@@ -4353,17 +4211,17 @@ const defMemoCats={
   19:{password:'',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 020330810\n주식회사화담',tax:'',contact:'임대인: 안혜정 대표 010-4943-5205',etc:''},
   20:{password:'에스원\n7 확인 7241 확인',fire:'',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 23일\n고객번호: 028533372\n티디에스주식회사',tax:'',contact:'분리수거(하남기업): 02-546-1911\n시공사(부경건설): 김평근 소장 010-2993-2551',etc:'새 임차인 들어오면 회계법인에 사업자등록증,이메일,임대차계약서 전달\n(세금계산서 발급)',cctv:'ID : Cctv3112\nMAC : 0003229199e8',elevator:'승강기 안전관리자 손성재'},
   21:{password:'',fire:'소방안전관리자 최미진 실장\n010-8953-0629',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n고객번호: 041978353, 박치열',tax:'공인인증서\nPW : FALL770028-',contact:'임대인1: 박치열 원장 010-9042-7728\n임대인2: 이정민 대표 010-2766-4221\n발렛(키퍼스): 심재열 실장 010-2309-8438\n저수조(명성종합환경): 윤일병 010-2014-2250',etc:'청소이모님 근무시간\n02~07시쯤, 토요일제외 주6일\n(분리수거함 열쇠 실장1,이모1)',elevator:'승강기 안전관리자 손성재\n\n승강기 고정점검일 셋째주 수요일 13시30분(격월 점검)\n주차기 고정점검일 셋째주 수요일 13시30분',parking:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재'},
-  22:{password:'<1층 출입통제>\n7 => 확인 => 1185 => 확인\n\n2,3층 도어락\n비밀번호 : 118118*\n5층 1185*',fire:'소방안전관리자 : 장승원',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 29일\n고객번호: 028460878, 이상훈',tax:'공인인증서\nPW : as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n소방(이화소방): 이보상 부장 010-2332-0119\n청소(크린하우스): 010-3202-1081',etc:'',cctv:'ID : Secom100\nMAC : 0003229196d8',electric:'임차인 직접 납부',elevator:'승강기 안전관리자 손성재'},
+  22:{password:'<1층 출입통제>\n7 => 확인 => 1185 => 확인\n\n2,3층 도어락\n비밀번호 : 118118*\n5층 1185*',fire:'소방안전관리자 : 장승원',water:'※임차인 직접 납부(통임대)\n\n수도요금 청구서 : 홀수월\n수도 검침일: 짝수월 29일\n\n고객번호 : 028460878, 이상훈',tax:'공인인증서\nPW : as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n소방(이화소방): 이보상 부장 010-2332-0119\n청소(크린하우스): 010-3202-1081',etc:'',cctv:'ID : Secom100\nMAC : 0003229196d8',electric:'임차인 직접 납부',elevator:'승강기 안전관리자 손성재'},
   23:{password:'현관 : 1912*',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 5일\n고객번호: 028618592, 이상훈',tax:'',contact:'임대인: 이상훈 대표 010-5650-7113\n청소(한양청소): 010-5470-3764',etc:'준공공 8년 의무기간이 2017년 8월31일~25년 8월31일까지.\n8년만 채우고 바로 매도후 신규 근생빌딩 매수예정',cctv:'렌트홈\n- 렌트홈 ID: odri707 PW: as252150!! \n- 공인인증서(개인용) :  odri707///',elevator:'없음'},
   24:{password:'1층 자물쇠 비밀번호 : 5822\n청담SS 에스원\n비밀번호 : 1 - 확인 - 5822 - 확인',fire:'소방안전관리자 건물주 이상훈',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 2일\n고객번호: 022242860\n주식회사와이에스테크인터내셔날',tax:'PW: as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n승강기(현대el): 정길섭 010-8003-9469\n소방(하이119): 조상현 부장 010-6251-4652',etc:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재',cctv:'ID : admin\nPW: Secom3112\n코드 : E4 30 22 5B 2c 49',elevator:'승강기 안전관리자 손성재',parking:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재'},
-  25:{password:'',fire:'소방안전관리자 : 손성재',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 2일\n고객명: 애나문주식회사\n고객번호: 022245536',tax:'세금계산서 발행 건물주 측 직원이함',contact:'임대인비서: 010-2087-1426\n경비원: 박용만님 010-2284-2484\n청소(크린하우스): 010-3202-1081',etc:'1. 프라다 임차인 직원(시설,점검등 일정은 이메일로 전달\n서혜원 : hyewon.seo@prada.com\n정재훈 : jay.chong@prada.com\n지점장 : Soonmi.Bae@prada.com\n2. 임대료 청구서 등 비용관련\n우여진 : yeojin.woo@prada.com',cctv:'비밀번호 : @caps037',elevator:'승강기 안전관리자 손성재'},
-  26:{password:'1층 뒷문 자물쇠 : 404\n옥상 : 3926#',fire:'소방안전관리자 건물주(남자)',water:'',tax:'<계산서 발행용>\nID: jaehor2\nPS: sapilos75%\n사업장선택 : 정생코퍼레이션\n\n<보험 청구용>\nPW : sapilos75!',contact:'임대인: 송재호 대표님 010-7472-7582\n임대인: 김선아 대표님 010-9370-2676\n시공사: 이경덕 소장 010-2636-6196\n승강기(현대el): 강인규 010-3171-3602',etc:'',cctv:'뷰가드4.0 (캡스)\n아이디 : 39263926\n비번 : js39263926+',elevator:'승강기 안전관리자 손성재'},
+  25:{password:'',fire:'소방안전관리자 : 손성재',water:'※임차인 직접 납부(통임대)\n\n수도요금 청구서 : 짝수월\n수도 검침일: 짝수월 2일\n고객명 : 애나문주식회사\n고객번호 : 022245536',tax:'세금계산서 발행 건물주 측 직원이함',contact:'임대인비서: 010-2087-1426\n경비원: 박용만님 010-2284-2484\n청소(크린하우스): 010-3202-1081',etc:'1. 프라다 임차인 직원(시설,점검등 일정은 이메일로 전달\n서혜원 : hyewon.seo@prada.com\n정재훈 : jay.chong@prada.com\n지점장 : Soonmi.Bae@prada.com\n2. 임대료 청구서 등 비용관련\n우여진 : yeojin.woo@prada.com',cctv:'비밀번호 : @caps037',elevator:'승강기 안전관리자 손성재'},
+  26:{password:'1층 뒷문 자물쇠 : 404\n옥상 : 3926#',fire:'소방안전관리자 건물주(남자)',water:'각층 개별 납부\n건물꺼(공용) 없음',tax:'<계산서 발행용>\nID: jaehor2\nPS: sapilos75%\n사업장선택 : 정생코퍼레이션\n\n<보험 청구용>\nPW : sapilos75!',contact:'임대인: 송재호 대표님 010-7472-7582\n임대인: 김선아 대표님 010-9370-2676\n시공사: 이경덕 소장 010-2636-6196\n승강기(현대el): 강인규 010-3171-3602',etc:'',cctv:'뷰가드4.0 (캡스)\n아이디 : 39263926\n비번 : js39263926+',elevator:'승강기 안전관리자 손성재'},
   27:{password:'1층 출입문 : 1234*\n1~4층 내부 도어락 : 1000*',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 5일\n건물 수도계량기(b1,1,4층 안분)\n041069834\n(주)와이에스테크인터내셔날\n2층 수도계량기(2층 전용)\n042417712\n3층 수도계량기(3층 전용)\n042417721',tax:'보안카드\nID : yooni707\nPW : as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n청소(그린프로청소): 010-9292-2502',etc:'',cctv:'cctv 비밀번호: Secom3112',elevator:'승강기 안전관리자 손성재'},
-  28:{password:'지층, 3층 현관 : 278278*\n101호 외부화장실 : 9799',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n1)501호 030045674 시투리츠주식회사(5층)\n2)401호 039643045 시투리츠주식회사(4층)\n3)근생호 039643054 시투리츠주식회사(건물측 나머지 층 비율로 안분)',tax:'건물주 직접 발행',contact:'임대인: 박형규 대표 010-5268-9197\n승강기(오티스): 임채원 010-6774-7162',etc:'',cctv:'2차 아이디(이현빌딩 기기)\nadmin\nSecom100',elevator:'승강기 안전관리자 손성재'},
+  28:{password:'지층, 3층 현관 : 278278*\n101호 외부화장실 : 9799',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n1)501호 030045674 시투리츠주식회사(5층)\n2)401호 039643045 시투리츠주식회사(4층)\n3)근생호 039643054 시투리츠주식회사(건물측 나머지 층 비율로 안분)\n4)주소만 있는건 따로 요금없음',tax:'건물주 직접 발행',contact:'임대인: 박형규 대표 010-5268-9197\n승강기(오티스): 임채원 010-6774-7162',etc:'',cctv:'2차 아이디(이현빌딩 기기)\nadmin\nSecom100',elevator:'승강기 안전관리자 손성재'},
   29:{password:'',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 22일\n고객번호: 020324845, 주식회사케이오앤',tax:'',contact:'임대인: 이윤 교수 010-5048-7133\n마포구청 환경지도팀: 02-3153-9264',etc:'임대법인 : oknam.bd@gmail.com',cctv:'어플 cmsecu view 다운\n아이디 : kon14746\n비번 : 케이오앤14746!@ (영어타자)',elevator:'없음'},
   30:{password:'',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 21일\n고객번호: 026538754, 주식회사바로스코퍼레이션',tax:'tax@lovebazaar.co.kr',contact:'임대인실장: 010-4909-6906\n마포구청 환경지도팀: 02-3153-9264\n승강기(현대el 강북지사): 010-4912-3935',etc:'',cctv:'에스원 모두 어플 설치\n아이디 : N5997143\n비밀번호: BSN38336@',electric:'고객번호 (주식회사바로스코퍼레이션)\n1층 : 01-5890-3497\n3층 : 01-6011-0704\n4층 : 01-6011-0713\n지1층 : 01-6011-0688\n공용: 01-6011-0679',elevator:'없음'},
-  31:{password:'현관 출입문 및 지하1층 창고 : 1112#\n지하 출입 : 7-확인-7885-확인',fire:'소방안전관리자 : 이기연(건물주)\n24.12.16 선임',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 1일\n고객번호: 026634331, 이기연\n고객번호: 041175505, 바인스튜디오(지층)\n고객번호: 041175523, 안짱(1층)\n고객번호: 041175532, 스튜디오에이콘(2층)\n고객번호: 041175578\n고객번호: 041175569\n고객번호: 041175550\n고객번호: 041175541',tax:'rheeky27@hanmail.net\n전자세금계산서용 비밀번호:\n2330easy!!',contact:'임대인: 이기연 대표님 010-4692-2076\n임대인 사모님: 010-7695-0007\n승강기(한승이엘): 010-4136-6391\n향기(허브메이트): 박진호 010-3228-0660',etc:'',electric:'공용전기 01-1646-0935',elevator:'승강기안전관리자 : 손성재'},
-  32:{password:'<1층 주출입구>\n자전거 자물쇠 : 8909\n에스원 : 7 -> 확인 -> 9006 -> 확인',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 25일\n고객명: 주식회사세움코퍼레이션\n메인 고객번호: 034865687\nB1층 고객번호: 042574309\n1층 고객번호: 042574318\n2층 고객번호: 042574327\n3층 고객번호: 042574336\n4층 고객번호: 042574345',tax:'dasol341\$341\$',contact:'임대인: 최민자 대표님 010-8782-9794\n시공사: 소장 010-9523-2000\n승강기(한승이엘): 010-4136-6391',etc:'',cctv:'id : admin\npw : mj87829794!\npc뷰어 : 스마트뷰어\n모바일뷰어 : 모두',electric:'고객명 : 주식회사세움코퍼레이션\n  공용 : 01-6073-7137\n지하층 : 01-6073-7191\n   1층 : 01-6073-7208\n   2층 : 01-6073-7217\n   3층 : 01-6073-7226\n   4층 : 01-6073-7235',elevator:'승강기 안전관리자 손성재'}
+  31:{password:'현관 출입문 및 지하1층 창고 : 1112#\n지하 출입 : 7-확인-7885-확인',fire:'소방안전관리자 : 이기연(건물주)\n24.12.16 선임',water:'수도요금 청구서 : 홀수월\n수도 검침일: 홀수월 1일\n\n전층 청구서 수용가명 \'이기연\' 입력 후 조회 가능\n\n고객번호 : 026634331, 이기연\n고객번호 : 041175505, 바인스튜디오(지층)\n고객번호 : 041175523, 안짱(1층)\n고객번호 : 041175532, 스튜디오에이콘(2층)\n고객번호 : 041175578, 요쿠스(3층)\n고객번호 : 041175569, 넥스트립(4층)\n고객번호 : 041175550, 베리쉐이크(5층)\n고객번호 : 041175541, 앤플러스(6층)',tax:'rheeky27@hanmail.net\n전자세금계산서용 비밀번호:\n2330easy!!',contact:'임대인: 이기연 대표님 010-4692-2076\n임대인 사모님: 010-7695-0007\n승강기(한승이엘): 010-4136-6391\n향기(허브메이트): 박진호 010-3228-0660',etc:'',electric:'공용전기 01-1646-0935',elevator:'승강기안전관리자 : 손성재'},
+  32:{password:'<1층 주출입구>\n자전거 자물쇠 : 8909\n에스원 : 7 -> 확인 -> 9006 -> 확인',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서 : 홀수월\n수도 검침일: 짝수월 25일\n청구서 홀수\n고객명 : 주식회사세움코퍼레이션\n메인 고객번호 : 034865687\n B1층 고객번호 : 042574309\n 1층 고객번호 : 042574318\n 2층 고객번호 : 042574327\n3층 고객번호 : 042574336\n 4층 고객번호 : 042574345',tax:'dasol341\$341\$',contact:'임대인: 최민자 대표님 010-8782-9794\n시공사: 소장 010-9523-2000\n승강기(한승이엘): 010-4136-6391',etc:'',cctv:'id : admin\npw : mj87829794!\npc뷰어 : 스마트뷰어\n모바일뷰어 : 모두',electric:'고객명 : 주식회사세움코퍼레이션\n  공용 : 01-6073-7137\n지하층 : 01-6073-7191\n   1층 : 01-6073-7208\n   2층 : 01-6073-7217\n   3층 : 01-6073-7226\n   4층 : 01-6073-7235',elevator:'승강기 안전관리자 손성재'}
 };
 return{
 buildings:bldgs,
@@ -23878,6 +23736,20 @@ function _meterCleanOldFloors(){
     }
   });
 }
+// ── 트러스트힐 12월/2월 가짜 수도 데이터 제거 ──
+function _meterCleanFakeWater(){
+  if(DB._meterFakeWaterCleaned)return;
+  DB._meterFakeWaterCleaned=true;
+  var bId=1; // Trusthill
+  (DB.meterReadings||[]).forEach(function(r){
+    if(r.bId!==bId)return;
+    var ym=r.yearMonth||'';
+    // 12월, 2월은 수도 검침 없는 달 (격월 홀수달만 유효: 9,11,1,3)
+    if(ym.endsWith('-12')||ym.endsWith('-02')){
+      r.waterFloors=[];
+    }
+  });
+}
 // ── 개인메모 ──────────────────────────────────────────────────────
 /* ── 개인메모 멀티탭 시스템 ── */
 let _pmemoViewUid=null; // 현재 보고 있는 유저 uid (null=내 메모)
@@ -26256,6 +26128,7 @@ function initInvoice(){
   const now=new Date();$('inv-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   _meterSeedTrusthill(); _meterSeed4613(); _meterSeedLepolem(); // 초기 검침값 시드
   _meterCleanOldFloors(); // 구 층명 정리
+  _meterCleanFakeWater(); // 트러스트힐 12월/2월 가짜 수도 제거
   // 모든 레코드에서 구형 층명 변환
   (DB.meterReadings||[]).forEach(function(r){_meterFixOldFloorNames(r);});
   _meterDedup(); // 중복 제거
@@ -32349,15 +32222,4 @@ function _odRenderFavs(){
     var side=$('od-fav-side');if(!side)return;
     var w=startW+(e.clientX-startX);
     if(w<80)w=80;if(w>300)w=300;
-    side.style.width=w+'px';
-  });
-  document.addEventListener('mouseup',function(){
-    if(!dragging)return;
-    dragging=false;
-    handle.style.background='#e2e8f0';
-  });
-})();
-</script>
-
-</body>
-</html>
+    side.style
