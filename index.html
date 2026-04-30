@@ -1451,7 +1451,7 @@ body.view-only .vo-tag{display:inline-block !important}
               <div class="sl" style="font-size:13px;margin:0;color:#92400e">전기 검침</div>
               <div style="display:flex;gap:4px">
                 <button class="btn sm" onclick="_meterShowElecHistory()" style="font-size:11px;padding:3px 8px;background:#fef3c7;border-color:#fbbf24;color:#92400e" title="전기 검침이력 보기">이력보기</button>
-                <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer;border:1px solid #d1d5db;border-radius:4px;padding:2px 6px" title="체크하면 전월값 수동입력"><input type="checkbox" id="inv-m-elec-prev-manual" style="width:10px;height:10px;margin:0" onchange="if(this.checked){this.nextElementSibling.textContent='전월수동';this.nextElementSibling.style.color='#dc2626'}else{this.nextElementSibling.textContent='전월자동';this.nextElementSibling.style.color='#059669';_meterAutoLoadPrev(\'elec\');_meterRenderElecGrid();_meterCalcElec()}"><span style="color:#059669">전월자동</span></label>
+                <label style="font-size:9px;display:flex;align-items:center;gap:2px;cursor:pointer;border:1px solid #d1d5db;border-radius:4px;padding:2px 6px" title="전월값 수동/자동 전환"><input type="checkbox" id="inv-m-elec-prev-manual" style="width:10px;height:10px;margin:0" onchange="if(this.checked){this.nextElementSibling.textContent='자동 변경';this.nextElementSibling.style.color='#dc2626';this.parentElement.style.background='#fef2f2'}else{this.nextElementSibling.textContent='수동 변경';this.nextElementSibling.style.color='#059669';this.parentElement.style.background='';_meterAutoLoadPrev(\'elec\');_meterRenderElecGrid();_meterCalcElec()}"><span style="color:#059669">수동 변경</span></label>
               </div>
             </div>
             <div class="fr r2" style="margin-bottom:6px">
@@ -1478,13 +1478,14 @@ body.view-only .vo-tag{display:inline-block !important}
               <div style="display:flex;gap:4px">
                 <button class="btn sm" onclick="_meterShowWaterHistory()" style="font-size:11px;padding:3px 8px;background:#dbeafe;border-color:#60a5fa;color:#1e40af" title="수도 검침이력 보기">이력보기</button>
                 <button class="btn sm" onclick="_leakOpenPanel()" style="font-size:11px;padding:3px 8px;background:#fef3c7;border-color:#f59e0b;color:#92400e" title="누수체크용 검침값 기록 (청구서 없이)">누수체크</button>
-                <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer;border:1px solid #d1d5db;border-radius:4px;padding:2px 6px" title="체크하면 전월값 수동입력"><input type="checkbox" id="inv-m-water-prev-manual" style="width:10px;height:10px;margin:0" onchange="if(this.checked){this.nextElementSibling.textContent='전월수동';this.nextElementSibling.style.color='#dc2626'}else{this.nextElementSibling.textContent='전월자동';this.nextElementSibling.style.color='#059669';_meterAutoLoadPrev(\'water\');_meterRenderWaterGrid();_meterCalcWater()}"><span style="color:#059669">전월자동</span></label>
+                <label style="font-size:9px;display:flex;align-items:center;gap:2px;cursor:pointer;border:1px solid #d1d5db;border-radius:4px;padding:2px 6px" title="전월값 수동/자동 전환"><input type="checkbox" id="inv-m-water-prev-manual" style="width:10px;height:10px;margin:0" onchange="if(this.checked){this.nextElementSibling.textContent='자동 변경';this.nextElementSibling.style.color='#dc2626';this.parentElement.style.background='#fef2f2'}else{this.nextElementSibling.textContent='수동 변경';this.nextElementSibling.style.color='#059669';this.parentElement.style.background='';_meterAutoLoadPrev(\'water\');_meterRenderWaterGrid();_meterCalcWater()}"><span style="color:#059669">수동 변경</span></label>
               </div>
             </div>
             <div class="fr r2" style="margin-bottom:6px">
               <div class="fg"><label>수도요금 총액</label><input type="number" id="inv-m-water-total" placeholder="작성하세요" style="font-size:13px;background:#fffde7;border:1px solid #fbbf24" oninput="_meterCalcWater();_meterAutoSave()"></div>
               <div class="fg"><label style="display:flex;align-items:center;gap:4px">총 사용량 (㎥) <span style="font-size:9px;color:#6b7280">(수도청구서)</span></label><input type="number" id="inv-m-water-usage-total" placeholder="작성하세요" style="font-size:13px;background:#fffde7;border:1px solid #fbbf24" oninput="_meterCalcWater();_meterAutoSave()"></div>
             </div>
+            <div style="margin-bottom:6px"><button class="btn sm" onclick="_meterLoadWaterBill()" style="font-size:11px;padding:3px 10px;background:#dbeafe;border-color:#60a5fa;color:#1e40af;width:100%">청구서 불러오기 (수도요금/사용량 자동채우기)</button></div>
             <div id="inv-m-water-grid" style="max-height:220px;overflow-y:auto"></div>
             <div id="inv-m-water-summary" style="font-size:12px;color:#1e40af;font-weight:600;padding:4px 0"></div>
           </div>
@@ -1496,8 +1497,8 @@ body.view-only .vo-tag{display:inline-block !important}
               <span id="inv-m-parking-info" style="font-weight:600"></span>
             </div>
             <div class="fr r3" style="grid-template-columns:1fr 1fr 1fr">
-              <div class="fg"><label style="display:flex;align-items:center;gap:4px">주차 대수 <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동 체크시 직접 입력"><input type="checkbox" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-m-parking-cars');el.setAttribute('data-manual',this.checked?'1':'0');el.readOnly=!this.checked;if(!this.checked)_meterAutoFillParking()">수동</label></label><input type="number" id="inv-m-parking-cars" placeholder="대" style="font-size:13px;background:#ecfdf5" min="0" readonly oninput="_meterCalcParking()"><div id="inv-m-parking-calc" style="font-size:11px;color:#166534;font-weight:600;padding:2px 0;white-space:nowrap"></div></div>
-              <div class="fg"><label style="display:flex;align-items:center;gap:4px">단가(VAT포함) <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동 체크시 직접 입력"><input type="checkbox" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-m-parking-rate');el.setAttribute('data-manual',this.checked?'1':'0');el.readOnly=!this.checked;if(!this.checked)_meterAutoFillParking()">수동</label></label><input type="number" id="inv-m-parking-rate" placeholder="286000" style="font-size:13px;background:#ecfdf5" value="286000" readonly oninput="_meterCalcParking()"></div>
+              <div class="fg"><label style="display:flex;align-items:center;gap:4px">주차 대수 <label style="font-size:9px;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동/자동 전환"><input type="checkbox" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-m-parking-cars');el.setAttribute('data-manual',this.checked?'1':'0');el.readOnly=!this.checked;var sp=this.nextElementSibling;if(this.checked){sp.textContent='자동 변경';sp.style.color='#dc2626';this.parentElement.style.background='#fef2f2';el.style.background='#fef2f2';el.style.color='var(--t)'}else{sp.textContent='수동 변경';sp.style.color='#059669';this.parentElement.style.background='';el.style.background='#ecfdf5';el.style.color='#059669';_meterAutoFillParking()}"><span style="color:#059669">수동 변경</span></label></label><input type="number" id="inv-m-parking-cars" placeholder="대" style="font-size:13px;background:#ecfdf5;color:#059669" min="0" readonly oninput="_meterCalcParking()"><div id="inv-m-parking-calc" style="font-size:11px;color:#166534;font-weight:600;padding:2px 0;white-space:nowrap"></div></div>
+              <div class="fg"><label style="display:flex;align-items:center;gap:4px">단가(VAT포함) <label style="font-size:9px;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동/자동 전환"><input type="checkbox" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-m-parking-rate');el.setAttribute('data-manual',this.checked?'1':'0');el.readOnly=!this.checked;var sp=this.nextElementSibling;if(this.checked){sp.textContent='자동 변경';sp.style.color='#dc2626';this.parentElement.style.background='#fef2f2';el.style.background='#fef2f2';el.style.color='var(--t)'}else{sp.textContent='수동 변경';sp.style.color='#059669';this.parentElement.style.background='';el.style.background='#ecfdf5';el.style.color='#059669';_meterAutoFillParking()}"><span style="color:#059669">수동 변경</span></label></label><input type="number" id="inv-m-parking-rate" placeholder="286000" style="font-size:13px;background:#ecfdf5;color:#059669" value="286000" readonly oninput="_meterCalcParking()"></div>
               <div class="fg"><label>주차관리비용</label><input type="number" id="inv-m-parking-mgmt" style="font-size:13px;font-weight:700;background:#ecfdf5" readonly></div>
             </div>
             <div style="border-top:1px solid #bbf7d0;margin-top:3px;padding-top:3px">
@@ -1510,8 +1511,8 @@ body.view-only .vo-tag{display:inline-block !important}
         </div>
       </div>
       <div style="border-top:1px solid var(--ln);padding-top:10px;margin-top:10px">
-        <div class="fg"><label style="display:flex;align-items:center;gap:4px">입금계좌 <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동 체크시 직접 입력"><input type="checkbox" id="inv-acct-manual" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-acct');var lb=$('inv-acct-label');el.readOnly=!this.checked;if(this.checked){lb.textContent='수동';lb.style.color='#dc2626';el.style.background='#fef2f2';el.style.color='var(--t)'}else{lb.textContent='자동';lb.style.color='#059669';el.style.background='#ecfdf5';el.style.color='#059669';_invAutoFillAcct()}"><span id="inv-acct-label" style="color:#059669">자동</span></label></label><input id="inv-acct" placeholder="은행 계좌번호 예금주" style="font-size:13px;background:#ecfdf5;color:#059669" readonly oninput="_invAutoPreview()"></div>
-        <div class="fg"><label style="display:flex;align-items:center;gap:4px">납부기한일 <label style="font-size:9px;color:#059669;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동 체크시 직접 입력"><input type="checkbox" id="inv-due-manual" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-due');var lb=$('inv-due-label');el.readOnly=!this.checked;if(this.checked){lb.textContent='수동';lb.style.color='#dc2626';el.style.background='#fef2f2';el.style.color='var(--t)'}else{lb.textContent='자동';lb.style.color='#059669';el.style.background='#ecfdf5';el.style.color='#059669';_invAutoFillDue()}"><span id="inv-due-label" style="color:#059669">자동</span></label></label><input type="number" id="inv-due" placeholder="10" style="font-size:13px;background:#ecfdf5;color:#059669" value="10" readonly oninput="_invAutoPreview()"></div>
+        <div class="fg"><label style="display:flex;align-items:center;gap:4px">입금계좌 <label style="font-size:9px;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동/자동 전환"><input type="checkbox" id="inv-acct-manual" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-acct');var lb=$('inv-acct-label');el.readOnly=!this.checked;if(this.checked){lb.textContent='자동 변경';lb.style.color='#dc2626';el.style.background='#fef2f2';el.style.color='var(--t)'}else{lb.textContent='수동 변경';lb.style.color='#059669';el.style.background='#ecfdf5';el.style.color='#059669';_invAutoFillAcct()}"><span id="inv-acct-label" style="color:#059669">수동 변경</span></label></label><input id="inv-acct" placeholder="은행 계좌번호 예금주" style="font-size:13px;background:#ecfdf5;color:#059669" readonly oninput="_invAutoPreview()"></div>
+        <div class="fg"><label style="display:flex;align-items:center;gap:4px">납부기한일 <label style="font-size:9px;display:flex;align-items:center;gap:2px;cursor:pointer" title="수동/자동 전환"><input type="checkbox" id="inv-due-manual" style="width:10px;height:10px;margin:0" onchange="var el=$('inv-due');var lb=$('inv-due-label');el.readOnly=!this.checked;if(this.checked){lb.textContent='자동 변경';lb.style.color='#dc2626';el.style.background='#fef2f2';el.style.color='var(--t)'}else{lb.textContent='수동 변경';lb.style.color='#059669';el.style.background='#ecfdf5';el.style.color='#059669';_invAutoFillDue()}"><span id="inv-due-label" style="color:#059669">수동 변경</span></label></label><input type="number" id="inv-due" placeholder="10" style="font-size:13px;background:#ecfdf5;color:#059669" value="10" readonly oninput="_invAutoPreview()"></div>
       </div>
       <div style="margin-top:12px;display:flex;gap:6px">
         <button class="btn" onclick="printInvoice()" style="flex:1;font-size:13px;padding:7px">인쇄</button>
@@ -2881,6 +2882,21 @@ function _stripBillImages(db){
       if(f.storage){ delete f.data; }
       else if(f.data && f.data.length>1000) f.data='__IMG_IN_LOCAL__';
     });
+    // ★ personalMemos: 클라우드 저장 시 텍스트만 유지 (todos 제외)
+    if(c.personalMemos){
+      Object.keys(c.personalMemos).forEach(function(uid){
+        var m=c.personalMemos[uid];
+        if(m && m.pages){
+          m.pages.forEach(function(pg){
+            if(pg.todos && pg.todos.length > 50) pg.todos = pg.todos.slice(-50);
+          });
+        }
+      });
+    }
+    // ★ editHistory: 최근 200건만 유지 (클라우드 저장용)
+    if(c.editHistory && c.editHistory.length > 200){
+      c.editHistory = c.editHistory.slice(-200);
+    }
     return c;
   }catch(e){ return db; }
 }
@@ -3016,7 +3032,7 @@ function _migrateMemoCats(){
   });
   if(changed) console.log('[migrate] memoCats 누락 키 보충 완료');
   // V3 마이그레이션: defMemoCats에 더 긴(상세한) 데이터가 있으면 덮어쓰기 (수도 고객번호, CCTV, 승강기, 전기 등)
-  if(!DB._memoMigV5){
+  if(!DB._memoMigV6){
     var v3=false;
     Object.keys(defMemoCats).forEach(function(bId){
       var def=defMemoCats[bId];
@@ -3032,8 +3048,8 @@ function _migrateMemoCats(){
         }
       });
     });
-    DB._memoMigV5=true;
-    if(v3) console.log('[migrate] memoCats V5 성은빌딩라벨/이현메모 반영 완료');
+    DB._memoMigV6=true;
+    if(v3) console.log('[migrate] memoCats V6 계좌/주차기/전자소송포털/정화조 반영 완료');
     sv();
   }
   // V2 마이그레이션: 해지 건물 제거 (id 33-37)
@@ -3164,15 +3180,25 @@ async function sv(){
   try{
     const {data:{session}}=await sbClient.auth.getSession();
     if(!session){ showSaveStatus('⚠️ 로그인 필요','var(--am)'); return; }
-    // ★ Supabase에는 이미지 제거한 가벼운 데이터만 저장 (500 에러 방지)
+    // ★ Supabase에는 이미지 제거한 가벼운 데이터만 저장
     const lightDB=_stripBillImages(DB);
-    const {error}=await _withTimeout(sbClient.from('bm_data').upsert({
-      id:1,
-      data: lightDB,
-      updated_at: new Date().toISOString(),
-      updated_by: session.user.id
-    }),8000);
-    if(error) throw error;
+    // 재시도 2회, 타임아웃 12초
+    var _svOk=false;
+    for(var _svTry=0; _svTry<2 && !_svOk; _svTry++){
+      try{
+        const {error}=await _withTimeout(sbClient.from('bm_data').upsert({
+          id:1,
+          data: lightDB,
+          updated_at: new Date().toISOString(),
+          updated_by: session.user.id
+        }),12000);
+        if(error) throw error;
+        _svOk=true;
+      }catch(_svErr){
+        if(_svTry===0){ console.warn('[sv] 1차 시도 실패, 재시도...', _svErr.message); await new Promise(r=>setTimeout(r,1000)); }
+        else throw _svErr;
+      }
+    }
     showSaveStatus('☁️ 저장됨');
   }catch(e){
     console.warn('Supabase 저장 실패, 로컬에만 저장:', e.message);
@@ -4190,17 +4216,17 @@ const bldgs=[
 ];
 const defMemoCats={
   // ★ 엑셀 원본 데이터 기반 (password/fire/tax) + 연락처 보존 — 제조된 cctv/elevator/electric/account 필드 제거
-  1:{password:'1층 정문, 승강기옆문(07시~22시 개방)\n>리더기3개 경비기능 꺼둠\n정문: 카드키,지문 필요(주차기 조작반에 카드키 있음)\n옆문 비번: 1552 > 확인 > 1552 > 확인',fire:'소방안전관리자 건물주 구태정',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',tax:'양부장님',contact:'임대인: 구태정 대표 010-9096-4065\n임대인: 한기흥 대표 010-7787-4739\n임대인직원: 양정신 부장 010-3996-9512\n시공사(장학건설): 김인환 소장 010-3784-8359\n청소(이로카페): 010-2322-5435\n승강기(현대el): 최재운 기사 010-8002-5327\n소방(하이119): 02-6471-3119\n전기안전관리자(한빛티이씨): 권학철 이사 010-5218-2686\n주차기(엡스): 010-7676-0401\n저수조(명성종합환경): 윤일병 010-2014-2250\n정화조(성덕실업): 02-3473-0400 / 02-3474-4551\n보안(에스원): 1588-3112\n분리수거(하나자원): 대표님 010-8507-9286',etc:'에스원\n트러스트카페\n(박정도, 비상연락망 등록함, b1,1층 경비 가능)\n트러스트빌딩은 출입통제 장비가 없어서 비상연락망 등록안됨',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 \n건물주에 권한 받아야함)\n\ncctv장비 로그인\n(admin, Secom100)',elevator:'승강기 안전관리자 박정도',parking:'선임 / 점검결과 보고서 기입\n전원성'},
+  1:{password:'1층 정문, 승강기옆문(07시~22시 개방)\n>리더기3개 경비기능 꺼둠\n정문: 카드키,지문 필요(주차기 조작반에 카드키 있음)\n옆문 비번: 1552 > 확인 > 1552 > 확인',fire:'소방안전관리자 건물주 구태정',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 23일\n고객번호: 022741141, 웨이굿주식회사',tax:'양부장님',contact:'임대인: 구태정 대표 010-9096-4065\n임대인: 한기흥 대표 010-7787-4739\n임대인직원: 양정신 부장 010-3996-9512\n시공사(장학건설): 김인환 소장 010-3784-8359\n청소(이로카페): 010-2322-5435 / 010-9977-9144(청소 사장, 공용부)\n승강기(현대el): 최재운 기사 010-8002-5327\n소방(하이119): 02-6471-3119\n전기안전관리자(한빛티이씨): 권학철 이사 010-5218-2686 / 010-4094-1515\n주차기(엡스): 010-7676-0401\n저수조(명성종합환경): 윤일병 010-2014-2250\n정화조(성덕실업): 02-3473-0400 / 02-3474-4551 / 서초구청 02-2155-6736\n보안(에스원): 1588-3112\n분리수거(하나자원): 대표님 010-8507-9286 (주2회 화,금)\n주차관리(형통인그룹): 상무님 010-5571-7472 / 큰소장 010-6358-4795 / 신규소장 010-2179-6223',etc:'에스원\n트러스트카페\n(박정도, 비상연락망 등록함, b1,1층 경비 가능)\n트러스트빌딩은 출입통제 장비가 없어서 비상연락망 등록안됨',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 \n건물주에 권한 받아야함)\n\ncctv장비 로그인\n(admin, Secom100)',elevator:'승강기 안전관리자 박정도',parking:'선임 / 점검결과 보고서 기입\n전원성\n\n[고정주차]\n■ 5대 | 6~8층 | 바디움\n포르쉐 파나메라 349주5064 불가 (26.02.20 자주식1대)\n쏘렌토 65도9370 가능\n제네시스 gv80 234더5740 중량확인필요 (26.04.03)\nBMW X7 143모9502 불가 (26.04.03)\n포르쉐 카이엔 229주5942 불가 (26.04.03)\n\n■ 4대 | 4~5층 | 세무법인DLG\ns450 숏바디 389러5855 불가 (26.02.20 자주식1대)\ns500 롱바디 151고8688 불가\n마세라티 362고7014 불가\n올뉴모닝 21루8592 가능\n\n■ 1대 | 3층 | 세무법인 펜타곤\n차량 변경 불가 (26.02.20 1대 제외, 총1대)\n\n■ 1대 | 2층 | 법무법인 인율\nK5 35나6438 가능\n\n■ 2대 | B2층 | 클레시카서울\n포르쉐 박스터 112어5777 불가 (26.02.20 자주식1대만)\n아이오닉5 14오0483 불가\n기아 소울 15머2666 가능\n\n[외부차량]\n1. 싼타페 363도9528\n2. BMW530e 183모1528\n3. g80 256조6691 (중량 1,830kg 확인완료)\n4. Bmw 320i 138주2647 (26.04.16 환불)\n5. g80 199누1934'},
   2:{password:'1층 출입문: 1번 -> 확인 -> 8284 -> 확인\nb1층: 0007#\n3층: 2580#\n5층: 0923#(26.04.15 참고용)\n{기존 비번 전체삭제} 12341234 > # > 7 > #\n{비번 등록} 12341234 > # > 2 > # > 비번4자리 > # > *\n{잠금,열림} 비번 입력 #\n{주차장 자물쇠} 8284\n{주차 차단기} 2880\n{3~2층 화장실} 남자: 3333, 여자: 2222',fire:'소방안전관리자 건물주 김희수',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 24일\n고객번호: 032757520, 주식회사 히프나틱',tax:'건물주',contact:'임대인: 김희수 대표 010-4005-2358\n시공사: 차장 010-9556-2002\n청소: 청소의민족\n승강기(한승이엘): 010-4136-6391\n소방(하이119): 010-6251-4652\n정화조(정익산업): 02-518-8590\n보안(에스원): 1588-3112\n집수정 청소: 02-546-0433 (010-9105-1709)',etc:'간이정화조는 집수정 청소 업체에 신청\n집수정 청소 > 02-546-0433 (010-9105-1709)',cctv:'에스원\nadmin\n비번 Secom100',electric:'사용자명 : ㈜히프나틱\n공용 : 01-1336-2156\n지하 : 01-6067-3348\n1층 :01-6067-3240\n2층 : 01-6067-3302\n3층 : 01-6067-3311\n4층 : 01-6067-3320\n5층 : 01-6067-3339',elevator:'승강기 안전관리자 박정도'},
   3:{password:'{건물 입구} 1 -> 확인 -> 43733 -> 확인\n{p층 유수검지장치실, b2층 기계실, b2층 창고} 4613*\n{8층} 25318\n{각층 자동문} 1층: 4613(에스원: 7 확인 4613 확인)\n2880# : 열림 / 2880* : 잠김\n{지하 2층 창고} 4613* (보양제 보관중)',fire:'소방안전관리자 윤상수(건물주)',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 29일\n고객번호: 029071835, 윤상수',tax:'공인인증서\n비번: ch4613!!bsn',contact:'임대인: 윤상수 대표 010-2902-7791\n임대인: 이수현 사모님 010-2911-2499\n승강기(티케이엘리베이터): 02-2610-7777\n시공사(빌텍종합건설): 송기철 전무 010-6433-5657\n저수조(강남수도사업소): 02-3146-4848\n보안(에스원): 010-7146-1935',etc:'(26.01.16 재접수)\np층 공용: 잠김상태 유지\n1층 공용: 평일 08시~20시, 주말 잠금\n2층 공용: 평일 08시~20시, 주말 잠금\n\n7층:주차리모컨, 열쇠O\n4층:주차리모컨, 열쇠X',cctv:'에스원 장비\n아이디 : admin\n비번 : Secom3112',elevator:'승강기 안전관리자 박정도'},
-  4:{password:'1층 정문: 1210\n1층 승강기앞: 1210\nb1층: 0800*\n5층: 1997*',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 22일\n고객번호: 022818134, (주)엠케이컨텐츠\n(1/n 안분)',tax:'공인인증서\nPW: @duckling11',contact:'임대인직원: 강현진 관리팀장 010-9405-6601\n청소(깔끄미클리닝): 010-9292-2502\n승강기(오티스): 010-4651-0957\n정화조(성덕실업): 02-3473-0400 / 02-3474-4551',etc:'',elevator:'승강기 안전관리자 박정도'},
+  4:{password:'1층 정문: 1210\n1층 승강기앞: 1210\nb1층: 0800*\n5층: 1997*',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 22일\n고객번호: 022818134, (주)엠케이컨텐츠\n(1/n 안분)',tax:'공인인증서\nPW: @duckling11',contact:'임대인직원: 강현진 관리팀장 010-9405-6601\n청소(깔끄미클리닝): 010-9292-2502\n승강기(오티스): 010-4651-0957\n정화조(성덕실업): 02-3473-0400 / 02-3474-4551',etc:'',elevator:'승강기 안전관리자 박정도',account:'신한은행 간편조회\nID: mkcontents1\nPW: mk2580^^\n계좌 비번: 2580'},
   5:{password:'2층 화장실: 3939*(마스터키2880)\n(카드키4개 조선미 팀장이 보관)\n옥상 출입문: 3738*',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n고객번호: 000444839, 수앤준\n(건물주 납부)',tax:'',contact:'임대인측관리인: 김재현 이사 010-5123-2662\n청소(클리니어): 1833-7470\n시설관리(솔솔디자인): 정창수 소장 010-4198-0520\n정화조(세방정화): 02-464-2231',etc:'케어팀 서랍에 1층 임직원용 화장실 출입 키 있음',cctv:'캡스 \nID : giftingbsn\nPW: NEP_qrt3pek5cuz3uvb',electric:'공용전기 없음',elevator:'없음'},
   6:{password:'출입구: 1 > 확인 > 2880 > 확인\n주차장 자물쇠: 1628',fire:'소방안전관리자 임차인',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 8일\n고객번호: 033893045, 황순부',tax:'공인인증서\n>비번: *h4735530*',contact:'임대인: 010-3167-8236\n설계(TPL): 김해주 매니저 010-4784-2740\n시공사(예지인종합건설): 전문태 대표 010-7525-0090 / 문제성 소장 010-5320-8617\n보안(에스원): 010-8309-8211\n소방(하이119): 02-6471-3119\n승강기(현대el): 이충민 대리 010-8003-4964\n건설공제조합: 황정미 차장 02-3449-2161\n정화조(정익산업): 02-518-8590\n자동문(미래자동문): 02-802-5141 / 031-346-3442\n신축현장(제로투엔): 장한 대리 010-3153-9204',etc:'공용부 출입카드: 1층 임차인 보관(외등 점등시 출입용)\n1층 출입카드: 케어팀 서랍에 보관(공용분전함 및 소방수신기 확인시 출입용)',cctv:'에스원 장비 로그인\n(개인 아이디 로그인 후 건물 로그인용)\nID: admin\nPW: Cctv1588 \n\n내부만 보는 계정\n>ID : user\n>PW : Admin473',elevator:'승강기안전관리자 박정도'},
-  7:{password:'1층 공용부2개: 1 확인 5223 확인',fire:'소방안전관리자 박정도',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 7일\n고객번호: 042807600, (주)브렌트우드',tax:'공인인증서\n비번: my466489\$\$',contact:'임대인: 홍민용 대표님 010-4176-7219\n임대인: 유미경 고문님 010-5327-7217\n시공사(다산건설): 박동원 차장님 010-4159-9822\n주차기(동양파킹): 010-8985-3791',etc:'원격검침용 PC 비번: omniamsys',cctv:'cctv 원격 뷰어 방법(녹화기1,2)\n>블루CCTV 어플 설치\n>좌측 상단에 \'三\' 클릭→추가 클릭\n>TCP/IP 체크\n>장치 이름 : (원하는 이름으로 직접 입력)\n>접속 주소(호스트네임) : ja500a5.ddnscctv.com (녹화기1)\n>포트 : 7621\n>아이디(사용자) : admin\n>비밀번호 : a12345678!\n------------------\n>TCP/IP 체크\n>장치 이름 : (원하는 이름으로 직접 입력)\n>접속 주소(호스트네임) : ja500f1.ddnscctv.com (녹화기2)\n>포트 : 7623\n>아이디(사용자) : admin\n>비밀번호 : a12345678!',elevator:'승강기안전관리자 박정도'},
+  7:{password:'1층 공용부2개: 1 확인 5223 확인',fire:'소방안전관리자 박정도',water:'수도요금 청구서: 홀수월\n수도 검침일: 홀수월 7일\n고객번호: 042807600, (주)브렌트우드',tax:'공인인증서\n비번: my466489\$\$',contact:'임대인: 홍민용 대표님 010-4176-7219\n임대인: 유미경 고문님 010-5327-7217\n시공사(다산건설): 박동원 차장님 010-4159-9822\n주차기(동양파킹): 010-8985-3791',etc:'원격검침용 PC 비번: omniamsys',cctv:'cctv 원격 뷰어 방법(녹화기1,2)\n>블루CCTV 어플 설치\n>좌측 상단에 \'三\' 클릭→추가 클릭\n>TCP/IP 체크\n>장치 이름 : (원하는 이름으로 직접 입력)\n>접속 주소(호스트네임) : ja500a5.ddnscctv.com (녹화기1)\n>포트 : 7621\n>아이디(사용자) : admin\n>비밀번호 : a12345678!\n------------------\n>TCP/IP 체크\n>장치 이름 : (원하는 이름으로 직접 입력)\n>접속 주소(호스트네임) : ja500f1.ddnscctv.com (녹화기2)\n>포트 : 7623\n>아이디(사용자) : admin\n>비밀번호 : a12345678!',elevator:'승강기안전관리자 박정도',account:'하나은행 빠른조회\n계좌번호 210-910050-88104\n비번 0508\n사업자 뒷5자리 02595'},
   8:{password:'1층 우편함내 카드키',fire:'소방안전관리자 임차인',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 022891658\n고객명: 라이드주식회사',tax:'건물주',contact:'임대인: 최원석 대표님 010-7522-9079\n시공사(도듬건설): 정신태 상무 010-3312-3903 / 최상운 이사 010-8872-3840\n소방(삼성소방): 김대운 팀장 010-9776-3119\n승강기(동성el): 유재성 본부장 010-3768-1806\n정화조(관악실업): 02-529-2212\nCCTV설치업체: 010-8980-4190',etc:'',cctv:'건물정보 폴더 안 이미지파일 확인',electric:'고객명 : 라이드주식회사\n공용 : 01-6059-0669\nB1층 : 01-6059-0678\n 1층 : 01-6059-0687\n 2층 : 01-6059-0696\n 3층 : 01-6059-0703\n 4층 : 01-6059-0712\n 5층 : 01-6059-0721\n 6층 : 01-6059-0730',elevator:'승강기안전관리자 박정도'},
-  9:{password:'건물입구 자동문: 7 확인 7560 확인\n(기존 잠금장치 2216* 해제, 2216# 잠금)',fire:'소방안전관리자\n임차사 직원: 이신형',water:'수도청구서: 홀수월\n검침일: 홀수월 7일\n일반용: 029132875(철거) / 가정용: 031112881\n수용가명: 주식회사포도클럽',tax:'공인인증서 비번\n신사2지점: pace010914!',contact:'임대인: 문영주 010-2336-2729\n소방(하이119): 02-6471-3119\n시공사: 김만홍 소장님 010-7936-2216\n승강기(현대el): 02-547-6802\n정화조(한성): 02-546-7164\n포도회계담당: 심하빈 010-4630-1520',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요',cctv:'신사동560 (장비)\n영상본체 VRN10201\n맥주소 000322835248\n비번 Secom3112 \n(첫글자 S는 대문자입니다)\n<어플 ID, PW>\nID: yjmun8383\nPW: Secom560',elevator:'승강기안전관리자 박정도'},
+  9:{password:'건물입구 자동문: 7 확인 7560 확인\n(기존 잠금장치 2216* 해제, 2216# 잠금)',fire:'소방안전관리자\n임차사 직원: 이신형',water:'수도청구서: 홀수월\n검침일: 홀수월 7일\n일반용: 029132875(철거) / 가정용: 031112881\n수용가명: 주식회사포도클럽',tax:'공인인증서 비번\n신사2지점: pace010914!',contact:'임대인: 문영주 010-2336-2729\n소방(하이119): 02-6471-3119\n시공사: 김만홍 소장님 010-7936-2216\n승강기(현대el): 02-547-6802\n정화조(한성): 02-546-7164\n포도회계담당: 심하빈 010-4630-1520',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요',cctv:'신사동560 (장비)\n영상본체 VRN10201\n맥주소 000322835248\n비번 Secom3112 \n(첫글자 S는 대문자입니다)\n<어플 ID, PW>\nID: yjmun8383\nPW: Secom560',elevator:'승강기안전관리자 박정도',account:'신한은행 간편조회\nid/pw: pace12 / ace140901!\n비번4자리: 4673\n140-014-204152 계좌'},
   10:{password:'1층 출입문: 7 확인 7936 확인\n>열림시간: 주7일 12시 ~ 22시20분(26.03.04)',fire:'소방안전관리자\n건물주 조용호',water:'[성은빌딩]\n가정용: 028373299(철거)\n일반용: 029056246\n수용가명: 프로젝트에이스주식회사\n검침일: 짝수월 25일\n고지서: 홀수월',tax:'공인인증서 비번\n신사1지점: pace010914!',contact:'임대인: 문영주 010-2336-2729\n소방(하이119): 02-6471-3119\n시공사(BSN건설): 홍부의 소장 010-3662-8035\n승강기(한승이엘): 010-4136-6391\n정화조기간연장(구청자원순환과): 02-3423-5993',etc:'외부 회계감사법인이라 점검내용/서류 있으면 건물주에 바로 안내 필요',cctv:'장비 아이디 admin\n비번 Secom3112 \n\n<어플 ID, PW>\nID: yjmun8383\nPW: Secom560',electric:'고객명 : 프로젝트에이스 주식회사\n공용 : 01-6112-2361\nB1층 : 01-0147-5253\n 1층 : 01-6112-2370\n 2층 : 01-6112-2389\n 3층 : 01-6112-2398\n 4층 : 01-6112-2405\n 5층 : 01-6112-2414',elevator:'승강기안전관리자 박정도'},
-  11:{password:'작심 카페 주출입구 비번\n1 > ok > 00000910 > ok\n(f1 또는 f2 누르고 외출/퇴실 선택)\nb2층 도어락 및 1층 주차기옆 도어락: 0910\nb1층 뒷문 도어락: 7788\n주차기: 2737\n5층: 6688*',fire:'소방안전관리자 건물주 직원',water:'청구서: 홀수월\n검침일: 홀수월 7일\n고객번호: 028634845\n수용가명: 이현경\n수도안분 없음(건물주가 다 납부함)',tax:'건물주 직원',contact:'임대인: 최규진 원장님 010-7124-2737\n임대인: 이현영 원장님 010-4048-2737\n직원JTS: 임수진(계산서발행) 010-7708-4161\n작심매니저: 남소라 010-9393-0831\n시공사: 김규남 소장 010-5487-3777\n승강기: 010-4002-8519 / 이사님 010-9174-2423\n소방: 010-6806-3477\n청소(청소의민족): 010-6418-2184\nCCTV: 010-5588-0707\n주차기(대우주차산업): 1899-5996 / 053-584-5816\n정화조(한성산업): 02-546-7164\n방역(세스캅): 010-6730-1945\n복사기: 010-8807-5095\n정수기: 010-8299-6620\n방충: 010-6730-1945\n자동문: 010-4116-2349',etc:'',cctv:'CCTV 어플 : Hik-Connect\n ID : 01091409398  \n PW : ing2013*\n=============\n추가 CCTV 어플 : 밝히는 CCTV\nTCP/P2P mode : TCP Mode\n도메인 : 346e11.jdrddns.com\n포트 : 8602\n아이디 : admin\n비밀번호 : cctv1234!',elevator:'승강기안전관리자 박정도',parking:'선임 / 점검결과 보고서 기입\n전원성'},
+  11:{password:'작심 카페 주출입구 비번\n1 > ok > 00000910 > ok\n(f1 또는 f2 누르고 외출/퇴실 선택)\nb2층 도어락 및 1층 주차기옆 도어락: 0910\nb1층 뒷문 도어락: 7788\n주차기: 2737\n5층: 6688*',fire:'소방안전관리자 건물주 직원',water:'청구서: 홀수월\n검침일: 홀수월 7일\n고객번호: 028634845\n수용가명: 이현경\n수도안분 없음(건물주가 다 납부함)',tax:'건물주 직원',contact:'임대인: 최규진 원장님 010-7124-2737\n임대인: 이현영 원장님 010-4048-2737\n직원JTS: 임수진(계산서발행) 010-7708-4161\n작심매니저: 남소라 010-9393-0831\n시공사: 김규남 소장 010-5487-3777\n승강기: 010-4002-8519 / 이사님 010-9174-2423\n소방: 010-6806-3477\n청소(청소의민족): 010-6418-2184\nCCTV: 010-5588-0707\n주차기(대우주차산업): 1899-5996 / 053-584-5816\n정화조(한성산업): 02-546-7164\n방역(세스캅): 010-6730-1945\n복사기: 010-8807-5095\n정수기: 010-8299-6620\n방충: 010-6730-1945\n자동문: 010-4116-2349',etc:'',cctv:'CCTV 어플 : Hik-Connect\n ID : 01091409398  \n PW : ing2013*\n=============\n추가 CCTV 어플 : 밝히는 CCTV\nTCP/P2P mode : TCP Mode\n도메인 : 346e11.jdrddns.com\n포트 : 8602\n아이디 : admin\n비밀번호 : cctv1234!',elevator:'승강기안전관리자 박정도',parking:'선임 / 점검결과 보고서 기입\n전원성',account:'하나은행 빠른조회\n계좌번호 13991003215604\n비밀번호 9460\n사업자번호 02915'},
   12:{password:'비번: 6 > 확인 > 7904 > 확인\n(26.02.09 임차사 캡스로 변경됨)',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n수용가명: 아민코 주식회사\n공용: 029070196\nb1: 042716007\n101호: 042716016\n201호: 042716025\n301호: 042716034\n401호: 042716043\n501호: 042716052',tax:'건물주 직원이 발행',contact:'시공사: 권오철 현장소장님 010-4781-8057\n승강기(한승이엘): 010-4136-6391',etc:'건물 열쇠뭉치 전달함 (26.01.19)',cctv:'에스원\n계약번호 : N6152121 아민코\n맥주소 : 000322901942\n녹화기명 : VRN-10201\n아이디 : admin\n비번 : Cctv3112',electric:'고객번호 : 01-2024-0792\n고객명 : 없음',elevator:'승강기안전관리자 박정도'},
   13:{password:'1층 현관: 5577*\n1층 화장실: 2880\nb1,1층 전용부 0710*(퇴거)\n3층: 1234*(퇴거)\n4층: 1234*(퇴거)',fire:'',water:'청구서 : 홀수월\n검침일 : 짝수월 22일\n\n고객번호 : 029061055\n수용가번호 : 680-531-3-22-0210-10\n수용가명 : 주식회사 이노매트리얼\n\n수도안분 : 1/2/3/4층 안분',tax:'건물주 측에서 발행',contact:'',etc:'',elevator:'승강기 없음'},
   14:{password:'출입비번: 1 확인 6110 확인',fire:'',water:'수도요금 청구서: 짝수월\n수용가명: 프로젝트에이스주식회사\nb1호: 042734503\n101호: 042734512\n201호: 042734521\n301호: 042734530\n401호: 042734549\n501호: 042734558',tax:'',contact:'시공사(부경건설): 김평근 소장 010-2993-2551',etc:'',cctv:'에스원 모두 어플 로그인\n(개인 아이디 로그인 후 권한 받아야함)\n\ncctv장비 로그인\n(admin, N6139618!)',elevator:'승강기안전관리자 박정도'},
@@ -4209,18 +4235,18 @@ const defMemoCats={
   17:{password:'<현관 비밀번호>\n사용자 ID -> 6 -> 확인 -> 1242 -> 확인\n\n<볼라드 비밀번호>\n1241\n\n지하1층 : 12424',fire:'소방안전관리자 이지연 대표님(건물주)\n(24.04.11)',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 022176880, 이윤(일반용)\n고객번호: 022176871, 이윤(가정용)',tax:'',contact:'임대인: 이윤 교수 010-5048-7133\n승강기(한승이엘): 010-4136-6391\n소방(홍익소방): 010-9782-1993\n청소(크린하우스): 010-3202-1081',etc:'위임계약시점 21.10.20(1년)\n건물 화재보험 제외 나머지 임차인이함\n경동하우징 리모델링\n24.07.12까지 하자보수기간',elevator:'승강기 안전관리자 손성재'},
   18:{password:'1층 출입통제\n7 => 확인 => 1771 => 확인',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 04일\n고객번호: 022142877\n주식회사사과먹는공룡',tax:'',contact:'임대인: 정필교 대표 010-7111-1117\n시공사(응력씨앤디): 김응복 대표 010-5349-7856\n승강기(업다운엘레베이터): 박성용 사장 010-3977-2590\n청소(크린하우스): 010-3202-1081',etc:'',electric:'고객명 : 주식회사사과먹는공룡\n  공용 : 01-0477-2168\n  지하 : 01-6052-1654\n   1층 : 01-6052-1633\n   2층 : 01-6052-1672\n   3층 : 01-6052-1681\n   4층 : 01-6052-1690'},
   19:{password:'',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 21일\n고객번호: 020330810\n주식회사화담',tax:'',contact:'임대인: 안혜정 대표 010-4943-5205',etc:''},
-  20:{password:'에스원\n7 확인 7241 확인',fire:'',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 23일\n고객번호: 028533372\n티디에스주식회사',tax:'',contact:'분리수거(하남기업): 02-546-1911\n시공사(부경건설): 김평근 소장 010-2993-2551',etc:'새 임차인 들어오면 회계법인에 사업자등록증,이메일,임대차계약서 전달\n(세금계산서 발급)',cctv:'ID : Cctv3112\nMAC : 0003229199e8',elevator:'승강기 안전관리자 손성재'},
-  21:{password:'',fire:'소방안전관리자 최미진 실장\n010-8953-0629',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n고객번호: 041978353, 박치열',tax:'공인인증서\nPW : FALL770028-',contact:'임대인1: 박치열 원장 010-9042-7728\n임대인2: 이정민 대표 010-2766-4221\n발렛(키퍼스): 심재열 실장 010-2309-8438\n저수조(명성종합환경): 윤일병 010-2014-2250',etc:'청소이모님 근무시간\n02~07시쯤, 토요일제외 주6일\n(분리수거함 열쇠 실장1,이모1)',elevator:'승강기 안전관리자 손성재\n\n승강기 고정점검일 셋째주 수요일 13시30분(격월 점검)\n주차기 고정점검일 셋째주 수요일 13시30분',parking:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재'},
+  20:{password:'에스원\n7 확인 7241 확인',fire:'',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 23일\n고객번호: 028533372\n티디에스주식회사',tax:'',contact:'분리수거(하남기업): 02-546-1911\n시공사(부경건설): 김평근 소장 010-2993-2551',etc:'새 임차인 들어오면 회계법인에 사업자등록증,이메일,임대차계약서 전달\n(세금계산서 발급)',cctv:'ID : Cctv3112\nMAC : 0003229199e8',electric:'106호',elevator:'승강기 안전관리자 손성재'},
+  21:{password:'',fire:'소방안전관리자 최미진 실장\n010-8953-0629',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n고객번호: 041978353, 박치열',tax:'공인인증서\nPW : FALL770028-',contact:'임대인1: 박치열 원장 010-9042-7728\n임대인2: 이정민 대표 010-2766-4221\n발렛(키퍼스): 심재열 실장 010-2309-8438\n저수조(명성종합환경): 윤일병 010-2014-2250',etc:'청소이모님 근무시간\n02~07시쯤, 토요일제외 주6일\n(분리수거함 열쇠 실장1,이모1)\n\n주차기(안전관리자)\n주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재',elevator:'승강기 안전관리자 손성재\n\n승강기 고정점검일 셋째주 수요일 13시30분(격월 점검)\n주차기 고정점검일 셋째주 수요일 13시30분',parking:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재'},
   22:{password:'<1층 출입통제>\n7 => 확인 => 1185 => 확인\n\n2,3층 도어락\n비밀번호 : 118118*\n5층 1185*',fire:'소방안전관리자 : 장승원',water:'※임차인 직접 납부(통임대)\n\n수도요금 청구서 : 홀수월\n수도 검침일: 짝수월 29일\n\n고객번호 : 028460878, 이상훈',tax:'공인인증서\nPW : as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n소방(이화소방): 이보상 부장 010-2332-0119\n청소(크린하우스): 010-3202-1081',etc:'',cctv:'ID : Secom100\nMAC : 0003229196d8',electric:'임차인 직접 납부',elevator:'승강기 안전관리자 손성재'},
   23:{password:'현관 : 1912*',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 5일\n고객번호: 028618592, 이상훈',tax:'',contact:'임대인: 이상훈 대표 010-5650-7113\n청소(한양청소): 010-5470-3764',etc:'준공공 8년 의무기간이 2017년 8월31일~25년 8월31일까지.\n8년만 채우고 바로 매도후 신규 근생빌딩 매수예정',cctv:'렌트홈\n- 렌트홈 ID: odri707 PW: as252150!! \n- 공인인증서(개인용) :  odri707///',elevator:'없음'},
-  24:{password:'1층 자물쇠 비밀번호 : 5822\n청담SS 에스원\n비밀번호 : 1 - 확인 - 5822 - 확인',fire:'소방안전관리자 건물주 이상훈',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 2일\n고객번호: 022242860\n주식회사와이에스테크인터내셔날',tax:'PW: as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n승강기(현대el): 정길섭 010-8003-9469\n소방(하이119): 조상현 부장 010-6251-4652',etc:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재',cctv:'ID : admin\nPW: Secom3112\n코드 : E4 30 22 5B 2c 49',elevator:'승강기 안전관리자 손성재',parking:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재'},
+  24:{password:'1층 자물쇠 비밀번호 : 5822\n청담SS 에스원\n비밀번호 : 1 - 확인 - 5822 - 확인\n\n주차기(안전관리자)\n주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재',fire:'소방안전관리자 건물주 이상훈',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 2일\n고객번호: 022242860\n주식회사와이에스테크인터내셔날',tax:'PW: as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n승강기(현대el): 정길섭 010-8003-9469\n소방(하이119): 조상현 부장 010-6251-4652',etc:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재',cctv:'ID : admin\nPW: Secom3112\n코드 : E4 30 22 5B 2c 49',elevator:'승강기 안전관리자 손성재',parking:'주차기 안전관리자 손성재\n주차기 점검결과 보고자 손성재'},
   25:{password:'',fire:'소방안전관리자 : 손성재',water:'※임차인 직접 납부(통임대)\n\n수도요금 청구서 : 짝수월\n수도 검침일: 짝수월 2일\n고객명 : 애나문주식회사\n고객번호 : 022245536',tax:'세금계산서 발행 건물주 측 직원이함',contact:'임대인비서: 010-2087-1426\n경비원: 박용만님 010-2284-2484\n청소(크린하우스): 010-3202-1081',etc:'1. 프라다 임차인 직원(시설,점검등 일정은 이메일로 전달\n서혜원 : hyewon.seo@prada.com\n정재훈 : jay.chong@prada.com\n지점장 : Soonmi.Bae@prada.com\n2. 임대료 청구서 등 비용관련\n우여진 : yeojin.woo@prada.com',cctv:'비밀번호 : @caps037',elevator:'승강기 안전관리자 손성재'},
   26:{password:'1층 뒷문 자물쇠 : 404\n옥상 : 3926#',fire:'소방안전관리자 건물주(남자)',water:'각층 개별 납부\n건물꺼(공용) 없음',tax:'<계산서 발행용>\nID: jaehor2\nPS: sapilos75%\n사업장선택 : 정생코퍼레이션\n\n<보험 청구용>\nPW : sapilos75!',contact:'임대인: 송재호 대표님 010-7472-7582\n임대인: 김선아 대표님 010-9370-2676\n시공사: 이경덕 소장 010-2636-6196\n승강기(현대el): 강인규 010-3171-3602',etc:'',cctv:'뷰가드4.0 (캡스)\n아이디 : 39263926\n비번 : js39263926+',elevator:'승강기 안전관리자 손성재'},
-  27:{password:'1층 출입문 : 1234*\n1~4층 내부 도어락 : 1000*',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 5일\n건물 수도계량기(b1,1,4층 안분)\n041069834\n(주)와이에스테크인터내셔날\n2층 수도계량기(2층 전용)\n042417712\n3층 수도계량기(3층 전용)\n042417721',tax:'보안카드\nID : yooni707\nPW : as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n청소(그린프로청소): 010-9292-2502',etc:'',cctv:'cctv 비밀번호: Secom3112',elevator:'승강기 안전관리자 손성재'},
+  27:{password:'1층 출입문 : 1234*\n1~4층 내부 도어락 : 1000*',fire:'',water:'수도요금 청구서: 짝수월\n수도 검침일: 짝수월 5일\n건물 수도계량기(b1,1,4층 안분)\n041069834\n(주)와이에스테크인터내셔날\n2층 수도계량기(2층 전용)\n042417712\n3층 수도계량기(3층 전용)\n042417721',tax:'보안카드\nID : yooni707\nPW : as252150!!',contact:'임대인: 이상훈 대표 010-5650-7113\n청소(그린프로청소): 010-9292-2502',etc:'<전자소송포털>\nID : bsncare13\nPW : rjsanfrhksfl13! (건물관리13!)',cctv:'cctv 비밀번호: Secom3112',elevator:'승강기 안전관리자 손성재'},
   28:{password:'지층, 3층 현관 : 278278*\n101호 외부화장실 : 9799',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 28일\n1)501호 030045674 시투리츠주식회사(5층)\n2)401호 039643045 시투리츠주식회사(4층)\n3)근생호 039643054 시투리츠주식회사(건물측 나머지 층 비율로 안분)\n4)주소만 있는건 따로 요금없음',tax:'건물주 직접 발행',contact:'임대인: 박형규 대표 010-5268-9197\n승강기(오티스): 임채원 010-6774-7162',etc:'',cctv:'2차 아이디(이현빌딩 기기)\nadmin\nSecom100',elevator:'승강기 안전관리자 손성재'},
   29:{password:'',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 짝수월\n수도 검침일: 홀수월 22일\n고객번호: 020324845, 주식회사케이오앤',tax:'',contact:'임대인: 이윤 교수 010-5048-7133\n마포구청 환경지도팀: 02-3153-9264',etc:'임대법인 : oknam.bd@gmail.com',cctv:'어플 cmsecu view 다운\n아이디 : kon14746\n비번 : 케이오앤14746!@ (영어타자)',elevator:'없음'},
   30:{password:'',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서: 홀수월\n수도 검침일: 짝수월 21일\n고객번호: 026538754, 주식회사바로스코퍼레이션',tax:'tax@lovebazaar.co.kr',contact:'임대인실장: 010-4909-6906\n마포구청 환경지도팀: 02-3153-9264\n승강기(현대el 강북지사): 010-4912-3935',etc:'',cctv:'에스원 모두 어플 설치\n아이디 : N5997143\n비밀번호: BSN38336@',electric:'고객번호 (주식회사바로스코퍼레이션)\n1층 : 01-5890-3497\n3층 : 01-6011-0704\n4층 : 01-6011-0713\n지1층 : 01-6011-0688\n공용: 01-6011-0679',elevator:'없음'},
-  31:{password:'현관 출입문 및 지하1층 창고 : 1112#\n지하 출입 : 7-확인-7885-확인',fire:'소방안전관리자 : 이기연(건물주)\n24.12.16 선임',water:'수도요금 청구서 : 홀수월\n수도 검침일: 홀수월 1일\n\n전층 청구서 수용가명 \'이기연\' 입력 후 조회 가능\n\n고객번호 : 026634331, 이기연\n고객번호 : 041175505, 바인스튜디오(지층)\n고객번호 : 041175523, 안짱(1층)\n고객번호 : 041175532, 스튜디오에이콘(2층)\n고객번호 : 041175578, 요쿠스(3층)\n고객번호 : 041175569, 넥스트립(4층)\n고객번호 : 041175550, 베리쉐이크(5층)\n고객번호 : 041175541, 앤플러스(6층)',tax:'rheeky27@hanmail.net\n전자세금계산서용 비밀번호:\n2330easy!!',contact:'임대인: 이기연 대표님 010-4692-2076\n임대인 사모님: 010-7695-0007\n승강기(한승이엘): 010-4136-6391\n향기(허브메이트): 박진호 010-3228-0660',etc:'',electric:'공용전기 01-1646-0935',elevator:'승강기안전관리자 : 손성재'},
+  31:{password:'현관 출입문 및 지하1층 창고 : 1112#\n지하 출입 : 7-확인-7885-확인',fire:'소방안전관리자 : 이기연(건물주)\n24.12.16 선임',water:'수도요금 청구서 : 홀수월\n수도 검침일: 홀수월 1일\n\n전층 청구서 수용가명 \'이기연\' 입력 후 조회 가능\n\n고객번호 : 026634331, 이기연\n고객번호 : 041175505, 바인스튜디오(지층)\n고객번호 : 041175523, 안짱(1층)\n고객번호 : 041175532, 스튜디오에이콘(2층)\n고객번호 : 041175578, 요쿠스(3층)\n고객번호 : 041175569, 넥스트립(4층)\n고객번호 : 041175550, 베리쉐이크(5층)\n고객번호 : 041175541, 앤플러스(6층)',tax:'rheeky27@hanmail.net\n전자세금계산서용 비밀번호:\n2330easy!!',contact:'임대인: 이기연 대표님 010-4692-2076\n임대인 사모님: 010-7695-0007\n승강기(한승이엘): 010-4136-6391\n향기(허브메이트): 박진호 010-3228-0660',etc:'정화조 청소진행시 하루전에 문열어 두어야함.',electric:'공용전기 01-1646-0935',elevator:'승강기안전관리자 : 손성재'},
   32:{password:'<1층 주출입구>\n자전거 자물쇠 : 8909\n에스원 : 7 -> 확인 -> 9006 -> 확인',fire:'소방안전관리자 필요 없음',water:'수도요금 청구서 : 홀수월\n수도 검침일: 짝수월 25일\n청구서 홀수\n고객명 : 주식회사세움코퍼레이션\n메인 고객번호 : 034865687\n B1층 고객번호 : 042574309\n 1층 고객번호 : 042574318\n 2층 고객번호 : 042574327\n3층 고객번호 : 042574336\n 4층 고객번호 : 042574345',tax:'dasol341\$341\$',contact:'임대인: 최민자 대표님 010-8782-9794\n시공사: 소장 010-9523-2000\n승강기(한승이엘): 010-4136-6391',etc:'',cctv:'id : admin\npw : mj87829794!\npc뷰어 : 스마트뷰어\n모바일뷰어 : 모두',electric:'고객명 : 주식회사세움코퍼레이션\n  공용 : 01-6073-7137\n지하층 : 01-6073-7191\n   1층 : 01-6073-7208\n   2층 : 01-6073-7217\n   3층 : 01-6073-7226\n   4층 : 01-6073-7235',elevator:'승강기 안전관리자 손성재'}
 };
 return{
@@ -22396,6 +22422,31 @@ function _meterAutoFillWaterBill(bId, ym){
   // 값이 채워졌으면 재계산
   if(totalAmt || totalUsage) _meterCalcWater();
 }
+// 청구서 불러오기 버튼 — 기존 값 덮어쓰고 결과 알림
+function _meterLoadWaterBill(){
+  var bId=parseInt($('inv-bldg').value)||0;
+  var ym=$('inv-month').value;
+  if(!bId||!ym){alert('건물과 년월을 선택하세요');return;}
+  var wbs=(DB.waterBills||[]).filter(function(w){return w.bId===bId;});
+  if(!wbs.length){alert('해당 건물의 수도 청구서 데이터가 없습니다.\n수도요금 탭에서 먼저 조회하세요.');return;}
+  var totalAmt=0, totalUsage=0, found=false;
+  wbs.forEach(function(w){
+    if(!w.bills) return;
+    var bill=w.bills.find(function(b){return b.period===ym;});
+    if(bill){
+      if(bill.amount) totalAmt+=parseInt(bill.amount)||0;
+      if(bill.usage) totalUsage+=parseFloat(bill.usage)||0;
+      found=true;
+    }
+  });
+  if(!found){alert(ym+' 청구서 데이터가 없습니다.\n수도요금 탭에서 해당 월을 먼저 조회하세요.');return;}
+  var wtEl=$('inv-m-water-total');
+  var wuEl=$('inv-m-water-usage-total');
+  if(wtEl) wtEl.value=totalAmt||'';
+  if(wuEl) wuEl.value=totalUsage||'';
+  _meterCalcWater();
+  alert('불러오기 완료\n수도요금: '+fm(totalAmt)+'원\n총 사용량: '+totalUsage+'㎥');
+}
 function _meterRenderElecGrid(){
   var g=$('inv-m-elec-grid');if(!g)return;
   var d=_meterGetData();
@@ -22417,17 +22468,17 @@ function _meterRenderElecGrid(){
     if(usage<0)usage=0;
     var isDR=!!f.directRun;
     if(!isDR) totalUsage+=usage;
-    var rowBg=isDR?'background:#e5e7eb;':'';
     var drLabel=isDR?' <span style="font-size:9px;color:#6b7280;font-weight:400">(직영)</span>':'';
-    var curBg=isDR?'background:#e5e7eb':'background:#fffde7;border:1px solid #fbbf24';
-    var prevBg=isDR?'background:#e5e7eb':'background:#fef9ee';
-    h+='<tr style="'+rowBg+'">';
+    var curBg='background:#fffde7;border:1px solid #fbbf24';
+    h+='<tr>';
     h+='<td style="border:1px solid #fde68a;padding:3px 5px;font-weight:600;white-space:nowrap;font-size:11px" title="'+esc(f.floor)+'">'+esc(f.floor)+drLabel+'</td>';
     h+='<td style="border:1px solid #fde68a;padding:1px"><input type="number" value="'+(f.indoor||'')+'" onchange="_meterSetElec('+i+',\'indoor\',this.value)" style="width:100%;min-width:64px;border:none;padding:3px 4px;font-size:12px;text-align:right;'+curBg+';outline:none;box-sizing:border-box" placeholder="작성하세요"></td>';
     h+='<td style="border:1px solid #fde68a;padding:1px"><input type="number" value="'+(f.outdoor||'')+'" onchange="_meterSetElec('+i+',\'outdoor\',this.value)" style="width:100%;min-width:64px;border:none;padding:3px 4px;font-size:12px;text-align:right;'+curBg+';outline:none;box-sizing:border-box" placeholder="작성하세요"></td>';
-    h+='<td style="border:1px solid #fde68a;padding:1px"><input type="number" value="'+(f.prevIndoor||'')+'" onchange="_meterSetElec('+i+',\'prevIndoor\',this.value)" style="width:100%;min-width:64px;border:none;padding:3px 4px;font-size:12px;text-align:right;'+prevBg+';outline:none;box-sizing:border-box" placeholder="자동"></td>';
-    h+='<td style="border:1px solid #fde68a;padding:1px"><input type="number" value="'+(f.prevOutdoor||'')+'" onchange="_meterSetElec('+i+',\'prevOutdoor\',this.value)" style="width:100%;min-width:64px;border:none;padding:3px 4px;font-size:12px;text-align:right;'+prevBg+';outline:none;box-sizing:border-box" placeholder="자동"></td>';
-    h+='<td style="border:1px solid #fde68a;padding:3px 5px;text-align:right;font-weight:700;font-family:\'Pretendard\',sans-serif;color:'+(isDR?'#6b7280':'#92400e')+';white-space:nowrap">'+fm(usage)+'</td>';
+    var _epManual=$('inv-m-elec-prev-manual')&&$('inv-m-elec-prev-manual').checked;
+    var _epBg=_epManual?'background:#fef2f2':'background:#e8f0fe';
+    h+='<td style="border:1px solid #fde68a;padding:1px"><input type="number" value="'+(f.prevIndoor||'')+'" '+(_epManual?'onchange="_meterSetElec('+i+',\'prevIndoor\',this.value)"':'readonly')+' style="width:100%;min-width:64px;border:none;padding:3px 4px;font-size:12px;text-align:right;'+_epBg+';outline:none;box-sizing:border-box;color:'+(_epManual?'var(--t)':'#6b7280')+'" placeholder="자동"></td>';
+    h+='<td style="border:1px solid #fde68a;padding:1px"><input type="number" value="'+(f.prevOutdoor||'')+'" '+(_epManual?'onchange="_meterSetElec('+i+',\'prevOutdoor\',this.value)"':'readonly')+' style="width:100%;min-width:64px;border:none;padding:3px 4px;font-size:12px;text-align:right;'+_epBg+';outline:none;box-sizing:border-box;color:'+(_epManual?'var(--t)':'#6b7280')+'" placeholder="자동"></td>';
+    h+='<td style="border:1px solid #fde68a;padding:3px 5px;text-align:right;font-weight:700;font-family:\'Pretendard\',sans-serif;color:#92400e;white-space:nowrap">'+fm(usage)+'</td>';
     h+='</tr>';
   });
   h+='<tr style="background:#fef3c7;font-weight:700"><td style="border:1px solid #fbbf24;padding:4px 5px">합계</td>';
@@ -22525,13 +22576,25 @@ function _meterRenderWaterGrid(){
   var g=$('inv-m-water-grid');if(!g)return;
   var d=_meterGetData();
   if(!d||!d.waterFloors.length){g.innerHTML='<div style="font-size:12px;color:var(--t3);padding:10px;text-align:center">건물/년월을 선택하세요</div>';return;}
+  var _wTotal=parseFloat($('inv-m-water-total').value)||0;
+  var _wUsageInput=parseFloat($('inv-m-water-usage-total').value)||0;
   var h='<table style="width:100%;border-collapse:collapse;font-size:12px">';
   h+='<thead><tr style="background:#dbeafe"><th style="border:1px solid #60a5fa;padding:4px 6px;text-align:left;width:70px">층</th>';
-  h+='<th style="border:1px solid #60a5fa;padding:4px 6px;text-align:center">당월 검침(㎥)</th>';
-  h+='<th style="border:1px solid #60a5fa;padding:4px 6px;text-align:center">전월 검침(㎥)</th>';
+  h+='<th style="border:1px solid #60a5fa;padding:4px 6px;text-align:center">당월(㎥)</th>';
+  h+='<th style="border:1px solid #60a5fa;padding:4px 6px;text-align:center">전월(㎥)</th>';
   h+='<th style="border:1px solid #60a5fa;padding:4px 6px;text-align:center;font-weight:700">사용량</th>';
+  h+='<th style="border:1px solid #60a5fa;padding:4px 6px;text-align:center;font-weight:700">금액</th>';
   h+='</tr></thead><tbody>';
+  // 1차: 사용량 합계 먼저 계산
   var totalUsage=0;
+  d.waterFloors.forEach(function(f){
+    var u=(f.current||0)-(f.prev||0);if(u<0)u=0;
+    var isG=!!f.directRun||f.floor.indexOf('옥외')>=0||f.floor==='메인';
+    if(!isG)totalUsage+=u;
+  });
+  var _wUsageFinal=_wUsageInput>0?_wUsageInput:totalUsage;
+  var _wUnitPrice=(_wTotal&&_wUsageFinal>0)?(_wTotal/_wUsageFinal):0;
+  var totalCalcAmt=0;
   d.waterFloors.forEach(function(f,i){
     var usage=(f.current||0)-(f.prev||0);
     if(usage<0)usage=0;
@@ -22539,21 +22602,24 @@ function _meterRenderWaterGrid(){
     var isOk=f.floor.indexOf('옥외')>=0;
     var isMain=f.floor==='메인';
     var isGray=isDR||isOk||isMain;
-    if(!isGray) totalUsage+=usage;
-    var rowBg=isGray?'background:#e5e7eb;':'';
+    var floorAmt=(!isGray&&_wUnitPrice>0)?Math.round(usage*_wUnitPrice):0;
+    if(!isGray)totalCalcAmt+=floorAmt;
     var drLabel='';
     if(isDR&&!isMain&&!isOk) drLabel=' <span style="font-size:9px;color:#6b7280;font-weight:400">(직영)</span>';
-    h+='<tr style="'+rowBg+'">';
+    h+='<tr>';
     h+='<td style="border:1px solid #93c5fd;padding:3px 6px;font-weight:600;white-space:nowrap" title="'+esc(f.floor)+'">'+esc(f.floor)+drLabel+'</td>';
-    var inputBg=isGray?'background:#e5e7eb':'background:#fffde7;border:1px solid #fbbf24';
+    var inputBg='background:#fffde7;border:1px solid #fbbf24';
     h+='<td style="border:1px solid #93c5fd;padding:1px"><input type="number" value="'+(f.current||'')+'" onchange="_meterSetWater('+i+',\'current\',this.value)" style="width:100%;border:none;padding:3px 5px;font-size:12px;text-align:right;'+inputBg+';outline:none" placeholder="작성하세요"></td>';
-    h+='<td style="border:1px solid #93c5fd;padding:1px"><input type="number" value="'+(f.prev||'')+'" onchange="_meterSetWater('+i+',\'prev\',this.value)" style="width:100%;border:none;padding:3px 5px;font-size:12px;text-align:right;background:#f0f4ff;outline:none" placeholder="자동"></td>';
-    h+='<td style="border:1px solid #93c5fd;padding:3px 6px;text-align:right;font-weight:700;font-family:\'Pretendard\',sans-serif;color:'+(isGray?'#6b7280':'#1e40af')+'">'+fm(usage)+'</td>';
+    var _wpManual=$('inv-m-water-prev-manual')&&$('inv-m-water-prev-manual').checked;
+    h+='<td style="border:1px solid #93c5fd;padding:1px"><input type="number" value="'+(f.prev||'')+'" '+(_wpManual?'onchange="_meterSetWater('+i+',\'prev\',this.value)"':'readonly')+' style="width:100%;border:none;padding:3px 5px;font-size:12px;text-align:right;background:'+(_wpManual?'#fef2f2':'#e8f0fe')+';outline:none;color:'+(_wpManual?'var(--t)':'#6b7280')+'" placeholder="자동"></td>';
+    h+='<td style="border:1px solid #93c5fd;padding:3px 6px;text-align:right;font-weight:700;font-family:\'Pretendard\',sans-serif;color:#1e40af">'+fm(usage)+'</td>';
+    h+='<td style="border:1px solid #93c5fd;padding:3px 6px;text-align:right;font-family:\'Pretendard\',sans-serif;font-size:11px;color:'+(floorAmt?'#1e40af':'#9ca3af')+'">'+(!isGray&&floorAmt?fm(floorAmt)+'원':'-')+'</td>';
     h+='</tr>';
   });
   h+='<tr style="background:#dbeafe;font-weight:700"><td style="border:1px solid #60a5fa;padding:4px 6px">합계</td>';
   h+='<td colspan="2" style="border:1px solid #60a5fa;padding:4px 6px;font-size:10px;color:#1e40af;text-align:right">* 직영/옥외 제외</td>';
   h+='<td style="border:1px solid #60a5fa;padding:4px 6px;text-align:right;color:#1e40af;font-family:\'Pretendard\',sans-serif">'+fm(totalUsage)+' ㎥</td>';
+  h+='<td style="border:1px solid #60a5fa;padding:4px 6px;text-align:right;color:#1e40af;font-family:\'Pretendard\',sans-serif">'+(totalCalcAmt?fm(totalCalcAmt)+'원':'-')+'</td>';
   h+='</tr></tbody></table>';
   g.innerHTML=h;
   // 층별 합계를 참고용으로 표시 (총사용량 필드는 수도청구서에서 직접 입력)
@@ -26125,6 +26191,8 @@ function _taxSelBldgWithPreview(bId){
 }
 
 function initInvoice(){
+  // number input 마우스휠 오작동 방지
+  document.getElementById('pg-invoice').addEventListener('wheel',function(e){if(e.target.type==='number'){e.preventDefault();e.target.blur();}},{passive:false});
   const now=new Date();$('inv-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   _meterSeedTrusthill(); _meterSeed4613(); _meterSeedLepolem(); // 초기 검침값 시드
   _meterCleanOldFloors(); // 구 층명 정리
@@ -26401,13 +26469,13 @@ function rdInvItems(){
     var curAmt=isManual?a:(autoInfo?autoInfo.amt:a);
     var autoTag='';
     if(isAutoable&&autoInfo){
-      autoTag='<label style="display:flex;align-items:center;gap:2px;font-size:9px;color:'+(isManual?'#b45309':'#059669')+';white-space:nowrap;cursor:pointer" title="'+(isManual?'수동입력':'임대차 기준 자동입력')+'">'
+      autoTag='<label style="display:flex;align-items:center;gap:2px;font-size:9px;color:'+(isManual?'#dc2626':'#059669')+';white-space:nowrap;cursor:pointer;border-radius:3px;padding:1px 4px;background:'+(isManual?'#fef2f2':'')+'" title="'+(isManual?'자동으로 전환':'수동으로 전환')+'">'
         +'<input type="checkbox" '+(isManual?'checked':'')+' onchange="invItems['+i+']._manual=this.checked;if(!this.checked){invItems['+i+']._autoFilled=false;}rdInvItems();_invAutoPreview()" style="width:11px;height:11px;margin:0">'
-        +'<span>'+(isManual?'수동':'자동반영')+'</span></label>';
+        +'<span>'+(isManual?'자동 변경':'수동 변경')+'</span></label>';
     }
     return '<div style="display:flex;gap:3px;margin-bottom:3px;align-items:center">'
-      +'<input value="'+n+'" placeholder="항목" style="width:60px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none" onchange="invItems['+i+'].name=this.value;invItems['+i+']._autoFilled=false;rdInvItems();_invAutoPreview()">'
-      +'<input value="'+curAmt+'" placeholder="금액" type="number" style="width:70px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none'+(isAutoable&&!isManual?';background:#ecfdf5;color:#059669':'')+'" '+(isAutoable&&!isManual?'readonly ':'')+' onchange="invItems['+i+'].amt=this.value;_invAutoPreview()">'
+      +'<input value="'+n+'" placeholder="항목" style="width:90px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none;text-align:center" onchange="invItems['+i+'].name=this.value;invItems['+i+']._autoFilled=false;rdInvItems();_invAutoPreview()">'
+      +'<input value="'+curAmt+'" placeholder="금액" type="number" style="width:80px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none;text-align:center'+(isAutoable?(!isManual?';background:#ecfdf5;color:#059669':';background:#fef2f2;color:var(--t)'):'')+'" onfocus="if(!invItems['+i+']._manual&&'+isAutoable+'){invItems['+i+']._manual=true;rdInvItems()}" onchange="invItems['+i+'].amt=this.value;_invAutoPreview()">'
       +'<input value="'+nt+'" placeholder="비고" style="width:40px;padding:3px 5px;border:1px solid var(--ln);border-radius:var(--r);font-size:10px;outline:none" onchange="invItems['+i+'].note=this.value;_invAutoPreview()">'
       +autoTag
       +'<button class="btn sm del" onclick="invItems.splice('+i+',1);rdInvItems();_invAutoPreview()" style="padding:1px 4px">×</button>'
@@ -32103,123 +32171,4 @@ async function _odHandleFolderDrop(collected){
       +'<div style="margin-top:14px;font-size:12px;color:#334155"><b>\ud30c\uc77c \uc62c\ub9ac\uae30</b> \ubc84\ud2bc \ub610\ub294 <b>\ub4dc\ub798\uadf8&\ub4dc\ub86d</b>\uc744 \uc774\uc6a9\ud574 \uc8fc\uc138\uc694.</div>'
       +'<button onclick="this.parentNode.parentNode.remove()" style="margin-top:16px;padding:8px 28px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">\ud655\uc778</button></div>';
     document.body.appendChild(_pOv);
-    _pOv.addEventListener('click',function(ev2){if(ev2.target===_pOv)_pOv.remove();});
-  });
-})();
-
-// ── 즐겨찾기 기능 (윈도우 빠른 액세스 방식) ──
-function _odGetFavs(){
-  try{return JSON.parse(localStorage.getItem('od_favs')||'[]');}catch(e){return [];}
-}
-function _odSaveFavs(arr){localStorage.setItem('od_favs',JSON.stringify(arr));}
-
-function _odIsFavPinned(folderId,driveId){
-  var favs=_odGetFavs();
-  for(var i=0;i<favs.length;i++){if(favs[i].id===folderId&&favs[i].driveId===(driveId||'')) return true;}
-  return false;
-}
-
-function _odPinFav(folderId,name,driveId){
-  var favs=_odGetFavs();
-  for(var i=0;i<favs.length;i++){if(favs[i].id===folderId&&favs[i].driveId===(driveId||'')) return;} // 중복 방지
-  favs.push({id:folderId,name:name,driveId:driveId||''});
-  _odSaveFavs(favs);
-  _odRenderFavs();
-}
-
-function _odUnpinFav(folderId,driveId){
-  var favs=_odGetFavs();
-  favs=favs.filter(function(f){return !(f.id===folderId&&f.driveId===(driveId||''));});
-  _odSaveFavs(favs);
-  _odRenderFavs();
-}
-
-// 현재 폴더 추가 (하단 버튼용)
-function _odAddFav(){
-  if(!_odFolderId) return;
-  var name=_odNavStack.length>0?_odNavStack[_odNavStack.length-1].name:'폴더';
-  _odPinFav(_odFolderId,name,_odDriveId||'');
-}
-
-function _odRemoveFav(idx){
-  var favs=_odGetFavs();
-  if(idx>=0&&idx<favs.length){favs.splice(idx,1);_odSaveFavs(favs);_odRenderFavs();}
-}
-
-function _odNavToFav(idx){
-  if(window._odCtxJustClosed) return;
-  var favs=_odGetFavs();if(idx<0||idx>=favs.length) return;
-  // 뷰어 강제 닫기
-  if(typeof _odCloseImageViewerForce==='function') _odCloseImageViewerForce();
-  var vp=document.getElementById('od-video-player');if(vp){vp.remove();if(window._odVideoKeyHandler){document.removeEventListener('keydown',window._odVideoKeyHandler,true);window._odVideoKeyHandler=null;}}
-  var fav=favs[idx];
-  _odDriveId=fav.driveId||null;_odFolderId=fav.id;
-  // 루트 → 즐겨찾기 폴더 순서로 네비게이션 스택 구성 (뒤로가기 가능)
-  var rootId=_odBsnFolderId||"root";
-  if(fav.id===rootId){
-    _odNavStack=[{id:rootId,name:"BSN케어팀"}];
-  } else {
-    _odNavStack=[{id:rootId,name:"BSN케어팀"},{id:fav.id,name:fav.name}];
-  }
-  _odFwdStack=[];_odViewMode='list';
-  _odRenderFiles();
-}
-
-// 즐겨찾기 사이드바 우클릭 메뉴
-function _odFavCtx(ev,idx){
-  ev.preventDefault();ev.stopPropagation();
-  _odHideCtx();
-  var menu=document.createElement('div');
-  menu.id='od-ctx-menu';
-  menu.style.cssText='position:fixed;left:'+ev.clientX+'px;top:'+ev.clientY+'px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:4px 0;z-index:9999;min-width:140px;font-size:11px';
-  var items=[
-    {label:'📂 열기',fn:function(){_odHideCtx();_odNavToFav(idx);}},
-    {label:'---'},
-    {label:'⭐ 즐겨찾기 해제',fn:function(){_odHideCtx();_odRemoveFav(idx);}}
-  ];
-  items.forEach(function(m){
-    if(m.label==='---'){
-      var hr=document.createElement('div');hr.style.cssText='height:1px;background:#e2e8f0;margin:4px 0';menu.appendChild(hr);
-    } else {
-      var btn=document.createElement('div');btn.textContent=m.label;
-      btn.style.cssText='padding:6px 14px;cursor:pointer;white-space:nowrap;color:#334155';
-      btn.onmouseover=function(){this.style.background='#f0f9ff';};
-      btn.onmouseout=function(){this.style.background='';};
-      btn.onclick=m.fn;menu.appendChild(btn);
-    }
-  });
-  document.body.appendChild(menu);
-}
-
-function _odRenderFavs(){
-  var list$=$('od-fav-list');
-  if(!list$) return;
-  var favs=_odGetFavs();
-  if(favs.length===0){list$.innerHTML='<div style="color:#94a3b8;font-size:9px;padding:4px 0">즐겨찾기가 없습니다</div>';return;}
-  list$.innerHTML=favs.map(function(f,i){
-    var active=(_odFolderId===f.id&&(_odDriveId||'')===f.driveId);
-    return '<div data-fav-idx="'+i+'" data-fav-id="'+f.id+'" data-fav-drive="'+(f.driveId||'')+'" oncontextmenu="_odFavCtx(event,'+i+')" style="display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:10px;transition:.1s;'
-      +(active?'background:#eff6ff;color:#2563eb;font-weight:600':'color:#475569')
-      +'" onclick="_odNavToFav('+i+')" title="'+f.name+'">'
-      +'<span style="font-size:11px">📁</span>'
-      +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+f.name+'</span>'
-      +'</div>';
-  }).join('');
-}
-// ── 드라이브 사이드바 드래그 리사이즈 ──
-(function(){
-  var handle=$('od-side-handle');
-  if(!handle) return;
-  var dragging=false,startX=0,startW=0;
-  handle.addEventListener('mousedown',function(e){
-    var side=$('od-fav-side');if(!side)return;
-    dragging=true;startX=e.clientX;startW=side.offsetWidth;
-    e.preventDefault();
-    handle.style.background='#3b82f6';
-  });
-  document.addEventListener('mousemove',function(e){
-    if(!dragging)return;
-    var side=$('od-fav-side');if(!side)return;
-    var w=startW+(e.clientX-startX);
-    if(w<80)w=80;if(w>300)w=300;
-    side.style
+    _pOv.addEventListener('click',function(ev2)
